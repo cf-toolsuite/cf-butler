@@ -1,0 +1,33 @@
+### Gradle ###
+.gradle
+bin/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+logs/
+
+### Visual Studio Code ###
+.vscode
+
+### User config
+config/
+src/main/resources/application-*.yml

@@ -1,0 +1,70 @@
+# (Re)set the values for cf.apiHost, cf.username, and cf.password
+# or set these as environment variables or command-line arguments. E.g.,
+#
+# as Environment variables
+#
+# CF_API_HOST=api.run.pivotal.io
+# CF_USERNAME=me@host.io
+# CF_PASSWORD=xXxXxX
+#
+# as Command-line arguments
+#
+# -Dcf.apiHost=api.run.pivotal.io
+# -Dcf.username=me@host.io
+# -Dcf.password=xXxXxX
+#
+cf:
+  apiHost: api.run.pivotal.io
+  username: replace_me
+  password: replace_me
+
+logging:
+  level:
+    org.springframework: INFO
+    org.cloudfoundry.reactor: DEBUG
+
+# Set schedule for this task to adhere to
+# @see https://crontab.guru for help, first parameter is seconds
+cron: "0 0 8 * * 1"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: info,health,metrics,scheduledtasks,loggers
+
+---
+spring:
+  profiles: jdbc
+
+  autoconfigure:
+    exclude:
+    - org.springframework.boot.autoconfigure.mongo.embedded.EmbeddedMongoAutoConfiguration
+    - org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration
+    - org.springframework.boot.autoconfigure.mongo.MongoReactiveAutoConfiguration
+    - org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration
+    - org.springframework.boot.autoconfigure.data.mongo.MongoReactiveDataAutoConfiguration
+
+  datasource:
+    driver-class-name: org.hsqldb.jdbc.JDBCDriver
+    url: jdbc:hsqldb:mem:cf-butler
+    username: sa
+    password: 
+
+---
+## Assumes naming convention for secrets service
+## Name of credhub service instance must be cf-app-inventory-report-secrets
+spring:
+  profiles: secrets
+  profiles.include: 
+  - jdbc
+
+  credhub:
+    url: https://credhub.service.cf.internal:8844
+
+cf:
+  apiHost: ${vcap.services.cf-app-inventory-report-secrets.credentials.CF_API-HOST:api.run.pcfone.io}
+  username: ${vcap.services.cf-app-inventory-report-secrets.credentials.CF_USERNAME}
+  password: ${vcap.services.cf-app-inventory-report-secrets.credentials.CF_PASSWORD}
+
+cron: ${vcap.services.cf-app-inventory-report-secrets.credentials.CRON:0 0 8 * * 1}

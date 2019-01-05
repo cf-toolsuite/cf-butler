@@ -1,0 +1,55 @@
+buildscript {
+    ext { 
+        springBootVersion = '2.1.1.RELEASE' 
+    }
+    repositories { 
+        mavenCentral() 
+    }
+    dependencies { 
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}") 
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+
+group = 'io.pivotal'
+version = '0.1-SNAPSHOT'
+sourceCompatibility = 1.8
+
+repositories { 
+    mavenCentral() 
+}
+
+bootRun {
+  // support passing -Dsystem.property=value to bootRun task
+  systemProperties = System.properties
+}
+
+dependencyManagement {
+     dependencies {
+          dependency('ch.qos.logback:logback-core:1.2.3')
+     }
+}
+
+dependencies {
+    compileOnly('org.projectlombok:lombok:1.18.4')
+    compileOnly('org.springframework.boot:spring-boot-configuration-processor')
+    compile('org.apache.commons:commons-lang3:3.7')
+    compile('com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.8')
+    compile('org.springframework.credhub:spring-credhub-cloud-connector:1.0.1.RELEASE')
+    compile('org.springframework.boot:spring-boot-starter-actuator')
+    compile('org.springframework.boot:spring-boot-starter-webflux')
+    compile('com.github.davidmoten:rxjava2-jdbc:0.1-RC42')
+    compile('org.springframework:spring-jdbc')
+    compile('com.zaxxer:HikariCP:3.2.0')
+    runtime('org.hsqldb:hsqldb:2.4.1')
+    compile('org.cloudfoundry:cloudfoundry-client-reactor:3.14.0.RELEASE')
+    compile('org.cloudfoundry:cloudfoundry-operations:3.14.0.RELEASE')
+    compile('io.projectreactor:reactor-core:3.2.3.RELEASE')
+    compile('io.projectreactor.ipc:reactor-netty:0.7.12.RELEASE')
+    testCompile('org.springframework.boot:spring-boot-starter-test')
+    testCompile('io.projectreactor:reactor-test')
+}
