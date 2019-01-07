@@ -29,5 +29,5 @@ logs/
 .vscode
 
 ### User config
-config/
+config/secrets*.json
 src/main/resources/application-*.yml
