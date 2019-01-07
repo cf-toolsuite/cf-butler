@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 import io.pivotal.cfapp.domain.ServiceDetail;
+import io.pivotal.cfapp.domain.ServiceInstancePolicy;
 import io.pivotal.cfapp.repository.JdbcServiceInfoRepository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -32,6 +33,11 @@ public class JdbcServiceInfoService implements ServiceInfoService {
 	@Override
 	public Mono<Void> deleteAll() {
 		return repo.deleteAll();
+	}
+
+	@Override
+	public Flux<ServiceDetail> findByServiceInstancePolicy(ServiceInstancePolicy policy) {
+		return repo.findByServiceInstancePolicy(policy);
 	}
 
 }

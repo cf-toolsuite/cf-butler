@@ -3,8 +3,11 @@ package io.pivotal.cfapp.repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import org.davidmoten.rx.jdbc.Database;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +15,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 import io.pivotal.cfapp.domain.ServiceDetail;
+import io.pivotal.cfapp.domain.ServiceInstancePolicy;
 import io.reactivex.Flowable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -71,6 +75,31 @@ public class JdbcServiceInfoRepository {
 			.update(deleteAll)
 			.counts();
 		return Flux.from(result).then();
+	}
+	
+	public Flux<ServiceDetail> findByServiceInstancePolicy(ServiceInstancePolicy policy) {
+		String select = "select id, organization, space, service_id, name, service, description, plan, type, bound_applications, last_operation, last_updated, dashboard_url, requested_state from service_detail";
+		String from = "from service_detail";
+		StringBuilder where = new StringBuilder();
+		List<Object> paramValues = new ArrayList<>();
+		where.append("where bound_applications is null "); // orphans only
+		if (policy.getFromDateTime() != null) {
+			where.append("and last_event_time <= ? ");
+			paramValues.add(Timestamp.valueOf(policy.getFromDateTime()));
+		}
+		if (policy.getFromDuration() != null) {
+			where.append("and last_event_time <= ?");
+			LocalDateTime eventTime = LocalDateTime.now().minus(policy.getFromDuration());
+			paramValues.add(Timestamp.valueOf(eventTime));
+		}
+		String orderBy = "order by organization, space, app_name";
+		String sql = String.join(" ", select, from, where, orderBy);
+		Flowable<ServiceDetail> result = 
+			database
+				.select(sql)
+				.parameters(paramValues)
+				.get(rs -> fromResultSet(rs));
+		return Flux.from(result);
 	}
 	
 	private ServiceDetail fromResultSet(ResultSet rs) throws SQLException {

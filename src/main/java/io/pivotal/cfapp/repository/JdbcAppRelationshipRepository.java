@@ -51,6 +51,15 @@ public class JdbcAppRelationshipRepository {
 			.get(rs -> fromResultSet(rs));
 		return Flux.from(result);
 	}
+	
+	public Flux<AppRelationship> findByApplicationId(String applicationId) {
+		String select = "select organization, space, app_id, app_name, service_id, service_name, service_plan, service_type from app_relationship where app_id = ? order by organization, space, service_name";
+		Flowable<AppRelationship> result = database
+				.select(select)
+				.parameter(applicationId)
+				.get(rs -> fromResultSet(rs));
+			return Flux.from(result);
+	}
 
 	public Mono<Void> deleteAll() {
 		String deleteAll = "delete from app_relationship";

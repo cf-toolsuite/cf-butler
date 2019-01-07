@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 import io.pivotal.cfapp.domain.AppDetail;
+import io.pivotal.cfapp.domain.ApplicationPolicy;
 import io.pivotal.cfapp.repository.JdbcAppInfoRepository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -33,6 +34,11 @@ public class JdbcAppInfoService implements AppInfoService {
 	@Override
 	public Flux<AppDetail> findAll() {
 		return repo.findAll();
+	}
+
+	@Override
+	public Flux<AppDetail> findByApplicationPolicy(ApplicationPolicy policy) {
+		return repo.findByApplicationPolicy(policy);
 	}
 
 }

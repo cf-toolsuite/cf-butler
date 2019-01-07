@@ -35,4 +35,9 @@ public class JdbcAppRelationshipService implements AppRelationshipService {
 		return repo.findAll();
 	}
 
+	@Override
+	public Flux<AppRelationship> findByApplicationId(String applicationId) {
+		return repo.findByApplicationId(applicationId);
+	}
+
 }
