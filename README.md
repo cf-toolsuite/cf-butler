@@ -64,8 +64,6 @@ Based on choice the authorization token provider
 
 * `cf.passcode` - a temporary one-time passcode
 
-> Note: SSO is not yet implemented
-
 ### General configuration notes
 
 If you copied and appended a suffix to the original `application.yml` then you would set `spring.profiles.active` to be that suffix 
@@ -148,8 +146,6 @@ Make a note of the passcode because you will need to use it in your `config/secr
   "CF_PASSCODE": "xxxxx",
 }
 ```
-
-> Note: this procedure is not yet functioning as desired because SSO capability is not fully implemented
 
 Deploy the app (w/ a user-provided service instance vending secrets)
 
