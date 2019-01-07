@@ -80,8 +80,19 @@ E.g., if you had a configuration named `application-pws.yml`
 
 ### To set the operations schedule
 
-Update the value of the `cron` properties in `application.yml`.  Consult this [article](https://www.baeldung.com/spring-scheduled-tasks) and the [Javadoc](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/scheduling/annotation/Scheduled.html#cron--) to understand how to tune it for your purposes.
+Update the value of the `cron` properties in `application.yml`.  Consult this [article](https://www.baeldung.com/spring-scheduled-tasks) and the [Javadoc](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/scheduling/annotation/Scheduled.html#cron--) to understand how to tune it for your purposes.  
 
+> `cron` has two sub-properties: `collection` and `execution`.  Make sure `execution` is scheduled to trigger after `collection`.
+
+### Troubleshooting
+
+To have access to a database management [console](http://hsqldb.org/doc/guide/running-chapt.html#rgc_access_tools) which would allow you to execute queries against the in-memory database, you will need to set an additional JVM argument.  
+
+```
+-Djava.awt.headless=false
+```
+
+> Note: this is not an available option when deploying to a PAS foundation.
 
 ## How to Build
 
