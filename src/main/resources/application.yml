@@ -25,7 +25,8 @@ logging:
 
 # Set schedule for this task to adhere to
 # @see https://crontab.guru for help, first parameter is seconds
-cron: "0 0 8 * * 1"
+cron:
+  collection: "0 0 8 * * 1"
 
 management:
   endpoints:

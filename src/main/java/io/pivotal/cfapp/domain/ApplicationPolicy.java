@@ -52,7 +52,8 @@ public class ApplicationPolicy {
 	
 	@JsonIgnore
 	public boolean isInvalid() {
-		return Optional.fromNullable(fromDateTime).isPresent() 
+		return !Optional.fromNullable(state).isPresent() ||
+				Optional.fromNullable(fromDateTime).isPresent() 
 				&& Optional.fromNullable(fromDuration).isPresent();
 	}
 	

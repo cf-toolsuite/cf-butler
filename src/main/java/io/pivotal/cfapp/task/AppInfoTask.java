@@ -45,7 +45,7 @@ public class AppInfoTask implements ApplicationRunner {
         runTask();
     }
 
-    @Scheduled(cron = "${cron}")
+    @Scheduled(cron = "${cron.collection}")
     protected void runTask() {
         Hooks.onOperatorDebug();
         service
@@ -112,6 +112,7 @@ public class AppInfoTask implements ApplicationRunner {
                                 .builder()
                                     .organization(request.getOrganization())
                                     .space(request.getSpace())
+                                    .appId(request.getId())
                                     .appName(request.getAppName())
                                     .buildpack(Buildpack.is(a.getBuildpack()))
                                     .image(request.getImage())
@@ -151,6 +152,7 @@ public class AppInfoTask implements ApplicationRunner {
                                AppDetail.from(detail)
                                            .lastEvent(e.getName())
                                            .lastEventActor(e.getActor())
+                                           .lastEventTime(e.getTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime())
                                            .build()
                            )
                        .switchIfEmpty(Mono.just(detail));

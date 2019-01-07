@@ -30,8 +30,8 @@ public class JdbcPoliciesRepository {
 	}
 	
 	public Mono<Policies> save(Policies entity) {
-		String createAppPolicy = "insert into application_policies (description, state, from_datetime, from_duration, unbind_services, delete_services) values (?, ?, ?, ?, ?, ?)";
-		String createServiceInstancePolicy = "insert into service_instance_policies (description, from_datetime, from_duration) values (?, ?, ?)";
+		String createAppPolicy = "insert into application_policy (description, state, from_datetime, from_duration, unbind_services, delete_services) values (?, ?, ?, ?, ?, ?)";
+		String createServiceInstancePolicy = "insert into service_instance_policy (description, from_datetime, from_duration) values (?, ?, ?)";
 		List<ApplicationPolicy> applicationPolicies = entity.getApplicationPolicies()
 				.stream()
 				.filter(ap -> !ap.isInvalid())
@@ -71,8 +71,8 @@ public class JdbcPoliciesRepository {
 	}
 
 	public Mono<Policies> findAll() {
-		String selectAllApplicationPolicies = "select description, state, from_datetime, from_duration, unbind_services, delete_services from application_policies";
-		String selectAllServiceInstancePolicies = "select description, from_datetime, from_duration from service_instance_policies";
+		String selectAllApplicationPolicies = "select description, state, from_datetime, from_duration, unbind_services, delete_services from application_policy";
+		String selectAllServiceInstancePolicies = "select description, from_datetime, from_duration from service_instance_policy";
 		
 		Flowable<ApplicationPolicy> selectAllApplicationPoliciesResult = database
 				.select(selectAllApplicationPolicies)
@@ -107,8 +107,8 @@ public class JdbcPoliciesRepository {
 	}
 
 	public Mono<Void> deleteAll() {
-		String deleteAllApplicationPolicies = "delete from application_policies";
-		String deleteAllServiceInstancePolicies = "delete from service_instance_policies";
+		String deleteAllApplicationPolicies = "delete from application_policy";
+		String deleteAllServiceInstancePolicies = "delete from service_instance_policy";
 		Flux.from(database
 					.update(deleteAllApplicationPolicies)
 					.counts())

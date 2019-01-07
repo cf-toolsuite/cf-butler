@@ -1,9 +1,5 @@
 package io.pivotal.cfapp.task;
 
-import java.time.Instant;
-import java.time.ZoneId;
-
-import org.apache.commons.lang3.StringUtils;
 import org.cloudfoundry.client.v2.servicebindings.ListServiceBindingsRequest;
 import org.cloudfoundry.client.v3.applications.GetApplicationRequest;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
@@ -16,25 +12,25 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import io.pivotal.cfapp.domain.ServiceDetail;
-import io.pivotal.cfapp.domain.ServiceRequest;
-import io.pivotal.cfapp.service.ServiceInfoService;
+import io.pivotal.cfapp.domain.AppRelationship;
+import io.pivotal.cfapp.domain.AppRelationshipRequest;
+import io.pivotal.cfapp.service.AppRelationshipService;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Component
-public class ServiceInstanceInfoTask implements ApplicationRunner {
+public class AppRelationshipTask implements ApplicationRunner {
 
     private DefaultCloudFoundryOperations opsClient;
     private ReactorCloudFoundryClient cloudFoundryClient;
-    private ServiceInfoService service;
+    private AppRelationshipService service;
     private ApplicationEventPublisher publisher;
 
     @Autowired
-    public ServiceInstanceInfoTask(
+    public AppRelationshipTask(
     		DefaultCloudFoundryOperations opsClient,
     		ReactorCloudFoundryClient cloudFoundryClient,
-    		ServiceInfoService service,
+    		AppRelationshipService service,
     		ApplicationEventPublisher publisher
     		) {
         this.opsClient = opsClient;
@@ -57,36 +53,36 @@ public class ServiceInstanceInfoTask implements ApplicationRunner {
             .flatMap(serviceSummaryRequest -> getServiceSummary(serviceSummaryRequest))
             .flatMap(serviceBoundAppIdsRequest -> getServiceBoundApplicationIds(serviceBoundAppIdsRequest))
             .flatMap(serviceBoundAppNamesRequest -> getServiceBoundApplicationNames(serviceBoundAppNamesRequest))
-            .flatMap(serviceDetailRequest -> getServiceDetail(serviceDetailRequest))
+            .flatMap(appRelationshipRequest -> getAppRelationship(appRelationshipRequest))
             .flatMap(service::save)
             .collectList()
             .subscribe(
                 r -> publisher.publishEvent(
-                    new ServiceInfoRetrievedEvent(this)
-                        .detail(r)
+                    new AppRelationshipRetrievedEvent(this)
+                        .relations(r)
             ));
     }
 
-    protected Flux<ServiceRequest> getOrganizations() {
+	protected Flux<AppRelationshipRequest> getOrganizations() {
         return DefaultCloudFoundryOperations.builder()
             .from(opsClient)
             .build()
                 .organizations()
                     .list()
-                    .map(os -> ServiceRequest.builder().organization(os.getName()).build());
+                    .map(os -> AppRelationshipRequest.builder().organization(os.getName()).build());
     }
 
-    protected Flux<ServiceRequest> getSpaces(ServiceRequest request) {
+    protected Flux<AppRelationshipRequest> getSpaces(AppRelationshipRequest request) {
         return DefaultCloudFoundryOperations.builder()
             .from(opsClient)
             .organization(request.getOrganization())
             .build()
                 .spaces()
                     .list()
-                    .map(s -> ServiceRequest.from(request).space(s.getName()).build());
+                    .map(s -> AppRelationshipRequest.from(request).space(s.getName()).build());
     }
 
-    protected Flux<ServiceRequest> getServiceSummary(ServiceRequest request) {
+    protected Flux<AppRelationshipRequest> getServiceSummary(AppRelationshipRequest request) {
         return DefaultCloudFoundryOperations.builder()
             .from(opsClient)
             .organization(request.getOrganization())
@@ -94,13 +90,13 @@ public class ServiceInstanceInfoTask implements ApplicationRunner {
             .build()
                 .services()
                     .listInstances()
-                    .map(ss -> ServiceRequest.from(request)
-                    							.id(ss.getId())
+                    .map(ss -> AppRelationshipRequest.from(request)
+                    							.serviceId(ss.getId())
                     							.serviceName(ss.getName() != null ? ss.getName(): "user_provided_service")
                     							.build());
     }
 
-    protected Mono<ServiceDetail> getServiceDetail(ServiceRequest request) {
+    protected Mono<AppRelationship> getAppRelationship(AppRelationshipRequest request) {
         return DefaultCloudFoundryOperations.builder()
         	.from(opsClient)
         	.organization(request.getOrganization())
@@ -109,48 +105,36 @@ public class ServiceInstanceInfoTask implements ApplicationRunner {
                .services()
                    .getInstance(GetServiceInstanceRequest.builder().name(request.getServiceName()).build())
                    .onErrorResume(e -> Mono.empty())
-                   .map(sd -> ServiceDetail
+                   .map(sd -> AppRelationship
                                .builder()
                                    .organization(request.getOrganization())
                                    .space(request.getSpace())
-                                   .serviceId(request.getId())
-                                   .name(request.getServiceName())
-                                   .service(sd.getService())
-                                   .plan(sd.getPlan())
-                                   .description(sd.getDescription())
-                                   .type(sd.getType() != null ? sd.getType().getValue(): "")
-                                   .applications(request.getApplicationNames())
-                                   .lastOperation(sd.getLastOperation())
-                                   .lastUpdated(StringUtils.isNotBlank(sd.getUpdatedAt()) ? Instant.parse(sd.getUpdatedAt())
-                                               .atZone(ZoneId.systemDefault())
-                                               .toLocalDateTime() : null)
-                                   .dashboardUrl(sd.getDashboardUrl())
-                                   .requestedState(StringUtils.isNotBlank(sd.getUpdatedAt()) ? sd.getStatus().toLowerCase(): "")
+                                   .appId(request.getApplicationId())
+                                   .appName(request.getApplicationName())
+                                   .serviceId(request.getServiceId())
+                                   .serviceName(request.getServiceName())
+                                   .servicePlan(sd.getPlan())
+                                   .serviceType(sd.getType() != null ? sd.getType().getValue(): "")
                                    .build());
     }
 
-    protected Mono<ServiceRequest> getServiceBoundApplicationIds(ServiceRequest request) {
+    protected Flux<AppRelationshipRequest> getServiceBoundApplicationIds(AppRelationshipRequest request) {
     	return cloudFoundryClient
 			.serviceBindingsV2()
-			.list(ListServiceBindingsRequest.builder().serviceInstanceId(request.getId()).build())
+			.list(ListServiceBindingsRequest.builder().serviceInstanceId(request.getServiceId()).build())
 			.flux()
 			.flatMap(serviceBindingResponse -> Flux.fromIterable(serviceBindingResponse.getResources()))
 			.map(resource -> resource.getEntity())
-			.map(entity -> entity.getApplicationId())
-    		.collectList()
-    		.map(i -> ServiceRequest.from(request).applicationIds(i).build());
+    		.map(i -> AppRelationshipRequest.from(request).applicationId(i.getApplicationId()).build());
     }
-
-    protected Mono<ServiceRequest> getServiceBoundApplicationNames(ServiceRequest request) {
-    	return Flux
-    		.fromIterable(request.getApplicationIds())
+    
+    protected Mono<AppRelationshipRequest> getServiceBoundApplicationNames(AppRelationshipRequest request) {
+    	return Mono.just(request.getApplicationId())
     		.flatMap(appId ->
     			cloudFoundryClient
     				.applicationsV3()
     					.get(GetApplicationRequest.builder().applicationId(appId).build())
-    					.map(response -> response.getName()))
-    					.collectList()
-    					.map(n -> ServiceRequest.from(request).applicationNames(n).build());
+    					.map(response -> AppRelationshipRequest.from(request).applicationName(response.getName()).build()));
     }
 
 }
