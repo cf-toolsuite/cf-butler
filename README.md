@@ -147,6 +147,8 @@ Make a note of the passcode because you will need to use it in your `config/secr
 }
 ```
 
+### using scripts
+
 Deploy the app (w/ a user-provided service instance vending secrets)
 
 ```
