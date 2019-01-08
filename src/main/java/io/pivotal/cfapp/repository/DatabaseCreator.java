@@ -60,7 +60,12 @@ public class DatabaseCreator implements ApplicationRunner {
 	
 	protected void createAppRelationshipTable(Connection c) throws SQLException {
 		c.prepareStatement("create table app_relationship ( organization varchar(100), space varchar(100), app_id varchar(50), app_name varchar(100), service_id varchar(50), service_name varchar(100), service_plan varchar(50), service_type varchar(30) )")
-		.execute();
+			.execute();
+	}
+	
+	protected void createHistoricalRecordTable(Connection c) throws SQLException {
+		c.prepareStatement("create table historical_record ( dateTimeRemoved timestamp, organization varchar(100), space varchar(100), id varchar(50), type varchar(20), name varchar(250), status varchar(50), error_details varchar(500) )")
+			.execute();
 	}
 	
 }
