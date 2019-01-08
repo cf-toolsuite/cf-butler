@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import io.pivotal.cfapp.domain.HistoricalRecord;
 import io.pivotal.cfapp.repository.JdbcHistoricalRecordRepository;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Profile("jdbc")
@@ -22,6 +23,11 @@ public class JdbcHistoricalRecordService implements HistoricalRecordService {
 	@Override
 	public Mono<HistoricalRecord> save(HistoricalRecord entity) {
 		return repo.save(entity);
+	}
+
+	@Override
+	public Flux<HistoricalRecord> findAll() {
+		return repo.findAll();
 	}
 
 }

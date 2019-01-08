@@ -1,11 +1,16 @@
 package io.pivotal.cfapp.repository;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+
 import org.davidmoten.rx.jdbc.Database;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 import io.pivotal.cfapp.domain.HistoricalRecord;
+import io.reactivex.Flowable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -21,11 +26,11 @@ public class JdbcHistoricalRecordRepository {
 	}
 
 	public Mono<HistoricalRecord> save(HistoricalRecord entity) {
-		String createOne = "insert into historical_record (dateTimeRemoved, organization, space, id, type, name, status, error_details) values (?, ?, ?, ?, ?, ?, ?, ?)";
+		String createOne = "insert into historical_record (datetime_removed, organization, space, id, type, name, status, error_details) values (?, ?, ?, ?, ?, ?, ?, ?)";
 		Flux.from(database
 					.update(createOne)
 					.parameters(
-						entity.getDateTimeRemoved(),
+						entity.getDateTimeRemoved() != null ? Timestamp.valueOf(entity.getDateTimeRemoved()): null,
 						entity.getOrganization(),
 						entity.getSpace(),
 						entity.getId(),
@@ -38,5 +43,27 @@ public class JdbcHistoricalRecordRepository {
 			.subscribe();
 
 		return Mono.just(entity);
+	}
+
+	public Flux<HistoricalRecord> findAll() {
+		String selectAll = "select datetime_removed, organization, space, id, type, name, status, error_details from historical_record order by datetime_removed desc";
+		Flowable<HistoricalRecord> result = database
+			.select(selectAll)
+			.get(rs -> fromResultSet(rs));
+		return Flux.from(result);
+	}
+
+	private HistoricalRecord fromResultSet(ResultSet rs) throws SQLException {
+		return HistoricalRecord
+				.builder()
+					.dateTimeRemoved(rs.getTimestamp(1) != null ? rs.getTimestamp(1).toLocalDateTime(): null)
+					.organization(rs.getString(2))
+					.space(rs.getString(3))
+					.id(rs.getString(4))
+					.type(rs.getString(5))
+					.name(rs.getString(6))
+					.status(rs.getString(7))
+					.errorDetails(rs.getString(8))
+					.build();
 	}
 }

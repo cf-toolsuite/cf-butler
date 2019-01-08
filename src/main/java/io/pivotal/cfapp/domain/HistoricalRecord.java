@@ -2,6 +2,8 @@ package io.pivotal.cfapp.domain;
 
 import java.time.LocalDateTime;
 
+import org.apache.commons.lang3.StringUtils;
+
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,4 +27,20 @@ public class HistoricalRecord {
 	private String status;
 	private String errorDetails;
 	
+	public static String headers() {
+        return String.join(",", "date/time removed", "organization", "space",
+                "id", "type", "name", "status", "error details (if any)");
+    }
+	
+	public String toCsv() {
+        return String
+                .join(",", wrap(getDateTimeRemoved() != null ? getDateTimeRemoved().toString(): ""), 
+                		wrap(getOrganization()), wrap(getSpace()), wrap(getId()),
+                        wrap(getType()), wrap(getName()), wrap(getStatus()),
+                        wrap(getErrorDetails()));
+    }
+    
+    private String wrap(String value) {
+        return value != null ? StringUtils.wrap(value, '"') : StringUtils.wrap("", '"');
+    }
 }

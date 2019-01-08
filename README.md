@@ -2,9 +2,16 @@
 
 > This project is in alpha state. Work is on-going.
  
-[![Build Status](https://travis-ci.org/pacphi/cf-butler.svg?branch=app-deploy)](https://travis-ci.org/pacphi/cf-butler) [![Known Vulnerabilities](https://snyk.io/test/github/pacphi/cf-butler/badge.svg)](https://snyk.io/test/github/pacphi/cf-butler)
+[![Build Status](https://travis-ci.org/pacphi/cf-butler.svg?branch=master)](https://travis-ci.org/pacphi/cf-butler) [![Known Vulnerabilities](https://snyk.io/test/github/pacphi/cf-butler/badge.svg)](https://snyk.io/test/github/pacphi/cf-butler)
 
-// TODO add this application's reason for existence here
+You are a platform operator working for a Fortune 500 enterprise.  You've witnessed first-hand how the product development teams your support are super productive; happily invoking `cf push`, `cf cs` and `cf bs` many times per day to deploy applications, create services and bind them to those applications.  
+
+This is great, except that over time, on your non-production foundations, you have noticed in your [cf-app-inventory-report](https://github.com/pacphi/cf-app-inventory-report) and [cf-service-inventory-report](https://github.com/pacphi/cf-service-inventory-report) results a large number of stopped application instances and orphaned services (i.e., those not bound to any applications).
+
+Reaching out to each development team to tell them to clean-up has become a chore.  Why not implement some automation that allows you to define and enforce some house-keeping policies for your non-production foundations where appliations and services are perhaps more volatile?
+
+This is where `cf-butler` has your back.
+ 
 
 ## Prerequisites
 
