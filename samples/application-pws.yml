@@ -2,6 +2,8 @@ cf:
   apiHost: api.run.pivotal.io
   username: you@mail.me
   password: xxxxxx
+  organizationBlackList:
+    - system
 
 spring:
   profiles.include: jdbc

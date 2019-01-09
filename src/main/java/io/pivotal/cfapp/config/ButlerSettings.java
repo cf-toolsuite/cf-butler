@@ -1,5 +1,7 @@
 package io.pivotal.cfapp.config;
 
+import java.util.List;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,5 +16,6 @@ public class ButlerSettings {
     private String username;
     private String password;
     private String passcode;
+    private List<String> organizationBlackList;
 
 }

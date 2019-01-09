@@ -10,6 +10,7 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import io.pivotal.cfapp.config.ButlerSettings;
 import io.pivotal.cfapp.domain.HistoricalRecord;
 import io.pivotal.cfapp.domain.ServiceDetail;
 import io.pivotal.cfapp.service.HistoricalRecordService;
@@ -21,6 +22,7 @@ import reactor.core.publisher.Mono;
 @Component
 public class ServiceInstancePolicyExecutorTask implements ApplicationRunner {
 
+	private ButlerSettings settings;
 	private DefaultCloudFoundryOperations opsClient;
     private ServiceInfoService serviceInfoService;
     private PoliciesService policiesService;
@@ -28,11 +30,13 @@ public class ServiceInstancePolicyExecutorTask implements ApplicationRunner {
 
     @Autowired
     public ServiceInstancePolicyExecutorTask(
+    		ButlerSettings settings,
     		DefaultCloudFoundryOperations opsClient,
     		ServiceInfoService serviceInfoService,
     		PoliciesService policiesService,
     		HistoricalRecordService historicalRecordService
     		) {
+    	this.settings = settings;
         this.opsClient = opsClient;
         this.serviceInfoService = serviceInfoService;
         this.policiesService = policiesService;
@@ -51,6 +55,7 @@ public class ServiceInstancePolicyExecutorTask implements ApplicationRunner {
             .flux()
             .flatMap(p -> Flux.fromIterable(p.getServiceInstancePolicies()))
         	.flatMap(sp -> serviceInfoService.findByServiceInstancePolicy(sp))
+        	.filter(bl -> !settings.getOrganizationBlackList().contains(bl.getOrganization()))
         	.flatMap(sd -> deleteServiceInstance(sd))
             .flatMap(historicalRecordService::save)
             .subscribe();

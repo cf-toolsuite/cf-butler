@@ -13,6 +13,7 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import io.pivotal.cfapp.config.ButlerSettings;
 import io.pivotal.cfapp.domain.AppDetail;
 import io.pivotal.cfapp.domain.AppRelationship;
 import io.pivotal.cfapp.domain.AppRequest;
@@ -27,6 +28,7 @@ import reactor.core.publisher.Mono;
 @Component
 public class AppPolicyExecutorTask implements ApplicationRunner {
 
+	private ButlerSettings settings;
 	private DefaultCloudFoundryOperations opsClient;
     private AppInfoService appInfoService;
     private AppRelationshipService appRelationshipService;
@@ -35,12 +37,14 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
 
     @Autowired
     public AppPolicyExecutorTask(
+    		ButlerSettings settings,
     		DefaultCloudFoundryOperations opsClient,
     		AppInfoService appInfoService,
     		AppRelationshipService appRelationshipService,
     		PoliciesService policiesService,
     		HistoricalRecordService historicalRecordService
     		) {
+    	this.settings = settings;
         this.opsClient = opsClient;
         this.appInfoService = appInfoService;
         this.appRelationshipService = appRelationshipService;
@@ -68,6 +72,7 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
             .flux()
             .flatMap(p -> Flux.fromIterable(p.getApplicationPolicies()))
         	.flatMap(ap -> appInfoService.findByApplicationPolicy(ap))
+        	.filter(bl -> !settings.getOrganizationBlackList().contains(bl.getOrganization()))
         	.filter(c -> appRelationshipService.findByApplicationId(c.getAppId()) == null)
         	.flatMap(ad -> deleteApplication(ad))
             .flatMap(historicalRecordService::save)
@@ -84,6 +89,7 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
 	        .flatMap(p -> Flux.fromIterable(p.getApplicationPolicies()))
 			.filter(f -> f.isDeleteServices() == false)
 			.flatMap(ap -> appInfoService.findByApplicationPolicy(ap))
+			.filter(bl -> !settings.getOrganizationBlackList().contains(bl.getOrganization()))
 			.flatMap(ar -> appRelationshipService.findByApplicationId(ar.getAppId()))
 			.flatMap(ur -> unbindServiceInstance(ur))
 			.distinct()
@@ -104,6 +110,7 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
 	        .flatMap(p -> Flux.fromIterable(p.getApplicationPolicies()))
 			.filter(f -> f.isDeleteServices() == true)
 			.flatMap(ap -> appInfoService.findByApplicationPolicy(ap))
+			.filter(bl -> !settings.getOrganizationBlackList().contains(bl.getOrganization()))
 			.flatMap(ar -> appRelationshipService.findByApplicationId(ar.getAppId()));
 		
 		appRelationships

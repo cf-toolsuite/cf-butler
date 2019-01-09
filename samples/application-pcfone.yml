@@ -1,6 +1,8 @@
 cf:
   apiHost: api.run.pcfone.io
   passcode: xxxxxx
+  organizationBlackList:
+    - system
 
 token:
   provider: sso

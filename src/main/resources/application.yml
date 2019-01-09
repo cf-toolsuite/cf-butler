@@ -17,6 +17,8 @@ cf:
   apiHost: api.run.pivotal.io
   username: replace_me
   password: replace_me
+  organizationBlackList:
+    - system
 
 logging:
   level:
@@ -69,6 +71,7 @@ cf:
   username: ${vcap.services.cf-butler-secrets.credentials.CF_USERNAME}
   password: ${vcap.services.cf-butler-secrets.credentials.CF_PASSWORD}
   passcode: ${vcap.services.cf-butler-secrets.credentials.CF_PASSCODE}
+  organizationBlackList: ${vcap.services.cf-butler-secrets.credentials.CF_ORGANIZATION-BLACK-LIST}
 
 token:
   provider: ${vcap.services.cf-butler-secrets.credentials.TOKEN_PROVIDER}
