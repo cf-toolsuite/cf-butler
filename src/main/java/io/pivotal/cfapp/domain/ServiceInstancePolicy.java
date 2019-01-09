@@ -37,8 +37,10 @@ public class ServiceInstancePolicy {
 	
 	@JsonIgnore
 	public boolean isInvalid() {
-		return Optional.fromNullable(fromDateTime).isPresent() 
-				&& Optional.fromNullable(fromDuration).isPresent();
+		return (Optional.fromNullable(fromDateTime).isPresent() 
+				&& Optional.fromNullable(fromDuration).isPresent()) || 
+				(!Optional.fromNullable(fromDateTime).isPresent() 
+						&& !Optional.fromNullable(fromDuration).isPresent());
 	}
 	
 }

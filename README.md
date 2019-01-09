@@ -196,14 +196,12 @@ POST /policies
       "description": "Remove stopped applications retroactively as of an explicit date",
       "state": "stopped",
       "from-datetime": "2018-12-01T08:00:00",
-      "unbind-services": "false",
       "delete-services": "false"
     },
     {
       "description": "Remove stopped applications that are older than some duration from now",
       "state": "stopped",
       "from-duration": "P1D",
-      "unbind-services": "true",
       "delete-services": "true"
     }
   ],

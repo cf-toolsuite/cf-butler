@@ -13,7 +13,7 @@ import com.github.davidmoten.guavamini.Optional;
 import lombok.Getter;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({ "description", "state", "from-datetime", "from-duration", "unbind-services", "delete-services" })
+@JsonPropertyOrder({ "description", "state", "from-datetime", "from-duration", "delete-services" })
 @Getter
 public class ApplicationPolicy {
 	
@@ -29,9 +29,6 @@ public class ApplicationPolicy {
 	@JsonProperty("from-duration")
 	private Duration fromDuration;
 	
-	@JsonProperty("unbind-services")
-	private boolean unbindServices;
-	
 	@JsonProperty("delete-services")
 	private boolean deleteServices;
 
@@ -40,21 +37,21 @@ public class ApplicationPolicy {
 			@JsonProperty("state") String state, 
 			@JsonProperty("from-datetime") LocalDateTime fromDateTime, 
 			@JsonProperty("from-duration") Duration fromDuration,
-			@JsonProperty("unbind-services") boolean unbindServices,
 			@JsonProperty("delete-services") boolean deleteServices) {
 		this.description = description;
 		this.state = state;
 		this.fromDateTime = fromDateTime;
 		this.fromDuration = fromDuration;
-		this.unbindServices = unbindServices;
 		this.deleteServices = deleteServices;
 	}
 	
 	@JsonIgnore
 	public boolean isInvalid() {
 		return !Optional.fromNullable(state).isPresent() ||
-				Optional.fromNullable(fromDateTime).isPresent() 
-				&& Optional.fromNullable(fromDuration).isPresent();
+				(Optional.fromNullable(fromDateTime).isPresent() 
+				&& Optional.fromNullable(fromDuration).isPresent()) ||
+				(!Optional.fromNullable(fromDateTime).isPresent() 
+						&& !Optional.fromNullable(fromDuration).isPresent());
 	}
 	
 }
