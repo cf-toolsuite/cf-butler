@@ -8,7 +8,7 @@ You are a platform operator working for a Fortune 500 enterprise.  You've witnes
 
 This is great, except that over time, on your non-production foundations, you have noticed in your [cf-app-inventory-report](https://github.com/pacphi/cf-app-inventory-report) and [cf-service-inventory-report](https://github.com/pacphi/cf-service-inventory-report) results a large number of stopped application instances and orphaned services (i.e., those not bound to any applications).
 
-Reaching out to each development team to tell them to clean-up has become a chore.  Why not implement some automation that allows you to define and enforce some house-keeping policies for your non-production foundations where appliations and services are perhaps more volatile?
+Reaching out to each development team to tell them to clean-up has become a chore.  Why not implement some automation that allows you to define and enforce some house-keeping policies for your non-production foundations where applications and services are perhaps more volatile?
 
 This is where `cf-butler` has your back.
  
