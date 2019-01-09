@@ -48,7 +48,7 @@ public class DatabaseCreator implements ApplicationRunner {
 	}
 
 	protected void createApplicationPolicyTable(Connection c) throws SQLException {
-		c.prepareStatement("create table application_policy ( description varchar(1000), state varchar(25), from_datetime timestamp, from_duration varchar(25), unbind_services boolean, delete_services boolean )")
+		c.prepareStatement("create table application_policy ( description varchar(1000), state varchar(25), from_datetime timestamp, from_duration varchar(25), delete_services boolean )")
 			.execute();
 		
 	}

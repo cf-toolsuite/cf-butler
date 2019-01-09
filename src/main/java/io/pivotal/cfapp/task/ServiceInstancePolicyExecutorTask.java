@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
 import io.pivotal.cfapp.domain.HistoricalRecord;
 import io.pivotal.cfapp.domain.ServiceDetail;
@@ -17,6 +18,7 @@ import io.pivotal.cfapp.service.ServiceInfoService;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+@Component
 public class ServiceInstancePolicyExecutorTask implements ApplicationRunner {
 
 	private DefaultCloudFoundryOperations opsClient;
