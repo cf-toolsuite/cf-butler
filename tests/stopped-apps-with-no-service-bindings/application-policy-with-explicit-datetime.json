@@ -1,0 +1,10 @@
+{
+    "application-policies": [
+        {
+            "description": "Remove stopped applications retroactively as of an explicit date",
+            "state": "stopped",
+            "from-datetime": "2018-01-09T16:10:00",
+            "delete-services": false
+        }
+    ]
+}

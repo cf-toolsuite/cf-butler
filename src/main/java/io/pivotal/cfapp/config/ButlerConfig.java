@@ -25,6 +25,7 @@ public class ButlerConfig {
     DefaultConnectionContext connectionContext(ButlerSettings settings) {
         return DefaultConnectionContext.builder()
             .apiHost(settings.getApiHost())
+            .skipSslValidation(settings.isSslValidationSkipped())
             .build();
     }
 

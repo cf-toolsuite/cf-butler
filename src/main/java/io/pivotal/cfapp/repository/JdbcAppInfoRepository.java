@@ -77,12 +77,18 @@ public class JdbcAppInfoRepository {
 		return Flux.from(result).then();
 	}
 	
-	public Flux<AppDetail> findByApplicationPolicy(ApplicationPolicy policy) {
+	public Flux<AppDetail> findByApplicationPolicy(ApplicationPolicy policy, boolean mayHaveServiceBindings) {
+		return mayHaveServiceBindings == true 
+				? findAppicationsThatMayHaveServiceBindings(policy)
+						: findAppicationsThatDoNotHaveServiceBindings(policy);
+	}
+	
+	private Flux<AppDetail> findAppicationsThatMayHaveServiceBindings(ApplicationPolicy policy) {
 		String select = "select id, organization, space, app_id, app_name, buildpack, image, stack, running_instances, total_instances, urls, last_pushed, last_event, last_event_actor, last_event_time, requested_state";
 		String from = "from app_detail";
 		StringBuilder where = new StringBuilder();
 		List<Object> paramValues = new ArrayList<>();
-		where.append("where requested_stated = ? ");
+		where.append("where requested_state = ? ");
 		paramValues.add(policy.getState());
 		if (policy.getFromDateTime() != null) {
 			where.append("and last_event_time <= ? ");
@@ -95,6 +101,36 @@ public class JdbcAppInfoRepository {
 		}
 		String orderBy = "order by organization, space, app_name";
 		String sql = String.join(" ", select, from, where, orderBy);
+		Flowable<AppDetail> result = 
+			database
+				.select(sql)
+				.parameters(paramValues)
+				.get(rs -> fromResultSet(rs));
+		return Flux.from(result);
+	}
+	
+	private Flux<AppDetail> findAppicationsThatDoNotHaveServiceBindings(ApplicationPolicy policy) {
+		String select = 
+				"select ad.id, ad.organization, ad.space, ad.app_id, ad.app_name, ad.buildpack, ad.image, " + 
+				"ad.stack, ad.running_instances, ad.total_instances, ad.urls, ad.last_pushed, ad.last_event, " + 
+				"ad.last_event_actor, ad.last_event_time, ad.requested_state";
+		String from = "from app_detail ad";
+		String leftJoin = "left join app_relationship ar on ad.app_id = ar.app_id";
+		StringBuilder where = new StringBuilder();
+		List<Object> paramValues = new ArrayList<>();
+		where.append("where ar.service_id is null and requested_state = ? ");
+		paramValues.add(policy.getState());
+		if (policy.getFromDateTime() != null) {
+			where.append("and last_event_time <= ? ");
+			paramValues.add(Timestamp.valueOf(policy.getFromDateTime()));
+		}
+		if (policy.getFromDuration() != null) {
+			where.append("and last_event_time <= ?");
+			LocalDateTime eventTime = LocalDateTime.now().minus(policy.getFromDuration());
+			paramValues.add(Timestamp.valueOf(eventTime));
+		}
+		String orderBy = "order by organization, space, app_name";
+		String sql = String.join(" ", select, from, leftJoin, where, orderBy);
 		Flowable<AppDetail> result = 
 			database
 				.select(sql)

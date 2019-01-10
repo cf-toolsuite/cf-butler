@@ -12,7 +12,7 @@ public interface AppInfoService {
 	Mono<AppDetail> save(AppDetail entity);
 
 	Flux<AppDetail> findAll();
-	
-	Flux<AppDetail> findByApplicationPolicy(ApplicationPolicy policy);
+		
+	Flux<AppDetail> findByApplicationPolicy(ApplicationPolicy policy, boolean mayHaveServiceBindings);
 
 }
