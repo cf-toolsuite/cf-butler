@@ -37,8 +37,8 @@ public class JdbcAppInfoService implements AppInfoService {
 	}
 
 	@Override
-	public Flux<AppDetail> findByApplicationPolicy(ApplicationPolicy policy) {
-		return repo.findByApplicationPolicy(policy);
+	public Flux<AppDetail> findByApplicationPolicy(ApplicationPolicy policy, boolean mayHaveServiceBindings) {
+		return repo.findByApplicationPolicy(policy, mayHaveServiceBindings);
 	}
 
 }

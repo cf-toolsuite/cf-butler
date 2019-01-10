@@ -47,18 +47,22 @@ public class ServiceInstancePolicyExecutorTask implements ApplicationRunner {
     public void run(ApplicationArguments args) throws Exception {
     	// do nothing at startup
     }
+    
+    public void execute() {
+    	policiesService
+	        .findAll()
+	        .flux()
+	        .flatMap(p -> Flux.fromIterable(p.getServiceInstancePolicies()))
+	    	.flatMap(sp -> serviceInfoService.findByServiceInstancePolicy(sp))
+	    	.filter(bl -> !settings.getOrganizationBlackList().contains(bl.getOrganization()))
+	    	.flatMap(sd -> deleteServiceInstance(sd))
+	        .flatMap(historicalRecordService::save)
+	        .subscribe();
+    }
 
     @Scheduled(cron = "${cron.execution}")
     protected void runTask() {
-        policiesService
-            .findAll()
-            .flux()
-            .flatMap(p -> Flux.fromIterable(p.getServiceInstancePolicies()))
-        	.flatMap(sp -> serviceInfoService.findByServiceInstancePolicy(sp))
-        	.filter(bl -> !settings.getOrganizationBlackList().contains(bl.getOrganization()))
-        	.flatMap(sd -> deleteServiceInstance(sd))
-            .flatMap(historicalRecordService::save)
-            .subscribe();
+        execute();
     }
     
     protected Mono<HistoricalRecord> deleteServiceInstance(ServiceDetail sd) {

@@ -13,6 +13,7 @@ import lombok.Data;
 public class ButlerSettings {
 
     private String apiHost;
+    private boolean sslValidationSkipped;
     private String username;
     private String password;
     private String passcode;

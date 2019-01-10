@@ -32,6 +32,7 @@ public class DatabaseCreator implements ApplicationRunner {
 			createApplicationPolicyTable(c);
 			createServiceInstancePolicyTable(c);
 			createAppRelationshipTable(c);
+			createHistoricalRecordTable(c);
         } catch (SQLException e) {
             throw new SQLRuntimeException(e);
         }

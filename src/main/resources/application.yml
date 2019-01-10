@@ -17,6 +17,7 @@ cf:
   apiHost: api.run.pivotal.io
   username: replace_me
   password: replace_me
+  sslValidationSkipped: false
   organizationBlackList:
     - system
 

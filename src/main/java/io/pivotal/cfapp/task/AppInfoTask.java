@@ -42,12 +42,11 @@ public class AppInfoTask implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        runTask();
+        collect();
     }
-
-    @Scheduled(cron = "${cron.collection}")
-    protected void runTask() {
-        Hooks.onOperatorDebug();
+    
+    public void collect() {
+    	Hooks.onOperatorDebug();
         service
             .deleteAll()
             .thenMany(getOrganizations())
@@ -64,6 +63,11 @@ public class AppInfoTask implements ApplicationRunner {
                         .detail(r)
                 )
             );
+    }
+
+    @Scheduled(cron = "${cron.collection}")
+    protected void runTask() {
+        collect();
     }
 
     protected Flux<AppRequest> getOrganizations() {

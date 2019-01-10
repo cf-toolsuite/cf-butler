@@ -56,12 +56,16 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
     public void run(ApplicationArguments args) throws Exception {
     	// do nothing at startup
     }
-
-    @Scheduled(cron = "${cron.execution}")
-    protected void runTask() {
+    
+    public void execute() {
     	deleteApplicationsWithNoServiceBindings();
     	deleteApplicationsWithServiceBindingsButDoNotDeleteBoundServiceInstances();
     	deleteApplicationsWithServiceBindingsAndDeleteBoundServiceInstances();
+    }
+
+    @Scheduled(cron = "${cron.execution}")
+    protected void runTask() {
+    	execute();
     }
 
 	protected void deleteApplicationsWithNoServiceBindings() {
@@ -71,9 +75,8 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
             .findAll()
             .flux()
             .flatMap(p -> Flux.fromIterable(p.getApplicationPolicies()))
-        	.flatMap(ap -> appInfoService.findByApplicationPolicy(ap))
+        	.flatMap(ap -> appInfoService.findByApplicationPolicy(ap, false))
         	.filter(bl -> !settings.getOrganizationBlackList().contains(bl.getOrganization()))
-        	.filter(c -> appRelationshipService.findByApplicationId(c.getAppId()) == null)
         	.flatMap(ad -> deleteApplication(ad))
             .flatMap(historicalRecordService::save)
             .subscribe();
@@ -88,7 +91,7 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
 	        .flux()
 	        .flatMap(p -> Flux.fromIterable(p.getApplicationPolicies()))
 			.filter(f -> f.isDeleteServices() == false)
-			.flatMap(ap -> appInfoService.findByApplicationPolicy(ap))
+			.flatMap(ap -> appInfoService.findByApplicationPolicy(ap, true))
 			.filter(bl -> !settings.getOrganizationBlackList().contains(bl.getOrganization()))
 			.flatMap(ar -> appRelationshipService.findByApplicationId(ar.getAppId()))
 			.flatMap(ur -> unbindServiceInstance(ur))
@@ -109,7 +112,7 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
 	        .flux()
 	        .flatMap(p -> Flux.fromIterable(p.getApplicationPolicies()))
 			.filter(f -> f.isDeleteServices() == true)
-			.flatMap(ap -> appInfoService.findByApplicationPolicy(ap))
+			.flatMap(ap -> appInfoService.findByApplicationPolicy(ap, true))
 			.filter(bl -> !settings.getOrganizationBlackList().contains(bl.getOrganization()))
 			.flatMap(ar -> appRelationshipService.findByApplicationId(ar.getAppId()));
 		
@@ -121,7 +124,7 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
 			.subscribe();
 		
 		appRelationships
-			.flatMap(dr -> deleteServiceInstance(dr))
+			.flatMap(s -> deleteServiceInstance(s))
 			.flatMap(historicalRecordService::save)
 			.subscribe();
 	}

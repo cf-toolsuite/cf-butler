@@ -45,26 +45,30 @@ public class ServiceInstanceInfoTask implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-    	runTask();
+    	collect();
+    }
+    
+    public void collect() {
+    	service
+        .deleteAll()
+        .thenMany(getOrganizations())
+        .flatMap(spaceRequest -> getSpaces(spaceRequest))
+        .flatMap(serviceSummaryRequest -> getServiceSummary(serviceSummaryRequest))
+        .flatMap(serviceBoundAppIdsRequest -> getServiceBoundApplicationIds(serviceBoundAppIdsRequest))
+        .flatMap(serviceBoundAppNamesRequest -> getServiceBoundApplicationNames(serviceBoundAppNamesRequest))
+        .flatMap(serviceDetailRequest -> getServiceDetail(serviceDetailRequest))
+        .flatMap(service::save)
+        .collectList()
+        .subscribe(
+            r -> publisher.publishEvent(
+                new ServiceInfoRetrievedEvent(this)
+                    .detail(r)
+        ));
     }
 
     @Scheduled(cron = "${cron.collection}")
     protected void runTask() {
-        service
-            .deleteAll()
-            .thenMany(getOrganizations())
-            .flatMap(spaceRequest -> getSpaces(spaceRequest))
-            .flatMap(serviceSummaryRequest -> getServiceSummary(serviceSummaryRequest))
-            .flatMap(serviceBoundAppIdsRequest -> getServiceBoundApplicationIds(serviceBoundAppIdsRequest))
-            .flatMap(serviceBoundAppNamesRequest -> getServiceBoundApplicationNames(serviceBoundAppNamesRequest))
-            .flatMap(serviceDetailRequest -> getServiceDetail(serviceDetailRequest))
-            .flatMap(service::save)
-            .collectList()
-            .subscribe(
-                r -> publisher.publishEvent(
-                    new ServiceInfoRetrievedEvent(this)
-                        .detail(r)
-            ));
+        collect();
     }
 
     protected Flux<ServiceRequest> getOrganizations() {
