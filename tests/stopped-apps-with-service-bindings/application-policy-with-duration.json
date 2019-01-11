@@ -1,0 +1,10 @@
+{
+    "application-policies": [
+        {
+            "description": "Remove stopped applications that are older than some duration from now",
+            "state": "stopped",
+            "from-duration": "PT30S",
+            "delete-services": true
+        }
+    ]
+}

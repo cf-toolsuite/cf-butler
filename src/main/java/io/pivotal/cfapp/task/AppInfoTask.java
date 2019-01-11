@@ -55,7 +55,6 @@ public class AppInfoTask implements ApplicationRunner {
             .flatMap(appDetailRequest -> getApplicationDetail(appDetailRequest))
             .flatMap(withLastEventRequest -> enrichWithAppEvent(withLastEventRequest))
             .flatMap(service::save)
-            .log()
             .collectList()
             .subscribe(r -> 
                 publisher.publishEvent(

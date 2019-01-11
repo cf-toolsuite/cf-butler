@@ -1,7 +1,8 @@
 package io.pivotal.cfapp.task;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.cloudfoundry.client.v2.services.DeleteServiceRequest;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
@@ -107,23 +108,25 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
 		// in this case the application policy has been configured with delete-services = true
 		// so we:  a) unbind one or more service instances from each application, b) delete each application, 
 		// and c) delete each formerly bound service instance
-		Flux<AppRelationship> appRelationships = policiesService
+		List<AppRelationship> appRelationships = new ArrayList<>();
+		policiesService
 	        .findAll()
 	        .flux()
 	        .flatMap(p -> Flux.fromIterable(p.getApplicationPolicies()))
 			.filter(f -> f.isDeleteServices() == true)
 			.flatMap(ap -> appInfoService.findByApplicationPolicy(ap, true))
 			.filter(bl -> !settings.getOrganizationBlackList().contains(bl.getOrganization()))
-			.flatMap(ar -> appRelationshipService.findByApplicationId(ar.getAppId()));
-		
-		appRelationships
+			.flatMap(ar -> appRelationshipService.findByApplicationId(ar.getAppId()))
+			.subscribe(appRelationships::add);
+			
+		Flux.fromIterable(appRelationships)
 			.flatMap(ur -> unbindServiceInstance(ur))
 			.distinct()
 			.flatMap(a -> deleteApplication(a))
 			.flatMap(historicalRecordService::save)
 			.subscribe();
 		
-		appRelationships
+		Flux.fromIterable(appRelationships)
 			.flatMap(s -> deleteServiceInstance(s))
 			.flatMap(historicalRecordService::save)
 			.subscribe();
@@ -140,7 +143,6 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
 	            				UnbindServiceInstanceRequest
 	            					.builder()
 	            						.applicationName(relationship.getAppName())
-	            						.completionTimeout(Duration.ofMinutes(5L))
 	            						.serviceInstanceName(relationship.getServiceName())
 	            						.build())
 	            		.subscribe();
