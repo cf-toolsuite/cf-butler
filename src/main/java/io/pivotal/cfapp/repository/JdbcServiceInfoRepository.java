@@ -78,21 +78,21 @@ public class JdbcServiceInfoRepository {
 	}
 	
 	public Flux<ServiceDetail> findByServiceInstancePolicy(ServiceInstancePolicy policy) {
-		String select = "select id, organization, space, service_id, name, service, description, plan, type, bound_applications, last_operation, last_updated, dashboard_url, requested_state from service_detail";
+		String select = "select id, organization, space, service_id, name, service, description, plan, type, bound_applications, last_operation, last_updated, dashboard_url, requested_state";
 		String from = "from service_detail";
 		StringBuilder where = new StringBuilder();
 		List<Object> paramValues = new ArrayList<>();
 		where.append("where bound_applications is null "); // orphans only
 		if (policy.getFromDateTime() != null) {
-			where.append("and last_event_time <= ? ");
+			where.append("and last_updated <= ? ");
 			paramValues.add(Timestamp.valueOf(policy.getFromDateTime()));
 		}
 		if (policy.getFromDuration() != null) {
-			where.append("and last_event_time <= ?");
+			where.append("and last_updated <= ?");
 			LocalDateTime eventTime = LocalDateTime.now().minus(policy.getFromDuration());
 			paramValues.add(Timestamp.valueOf(eventTime));
 		}
-		String orderBy = "order by organization, space, app_name";
+		String orderBy = "order by organization, space, name";
 		String sql = String.join(" ", select, from, where, orderBy);
 		Flowable<ServiceDetail> result = 
 			database
