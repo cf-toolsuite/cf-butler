@@ -2,7 +2,6 @@ package io.pivotal.cfapp.task;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.cloudfoundry.client.v2.services.DeleteServiceRequest;
@@ -125,11 +124,11 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
 			.distinct()
 			.flatMap(a -> deleteApplication(a))
 			.flatMap(historicalRecordService::save)
-			.subscribe();
-		
-		Flux.fromIterable(new ArrayList<>(appRelationships))
-			.flatMap(s -> deleteServiceInstance(s))
-			.flatMap(historicalRecordService::save)
+			.thenMany(
+				Flux.fromIterable(new ArrayList<>(appRelationships))
+					.flatMap(s -> deleteServiceInstance(s))
+					.flatMap(historicalRecordService::save)
+			)
 			.subscribe();
 	}
     
@@ -147,6 +146,7 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
 	            						.serviceInstanceName(relationship.getServiceName())
 	            						.build())
 	            		.subscribe();
+		
 	     return Mono.just(AppRequest
 	    		 			.builder()
 	    		 				.id(relationship.getAppId())
@@ -157,14 +157,21 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
 	}
 	
     protected Mono<HistoricalRecord> deleteApplication(AppDetail detail) {
-    	return DefaultCloudFoundryOperations.builder()
+    	DefaultCloudFoundryOperations.builder()
                 .from(opsClient)
                 .organization(detail.getOrganization())
                 .space(detail.getSpace())
                 .build()
 				.applications()
-					.delete(DeleteApplicationRequest.builder().name(detail.getAppName()).deleteRoutes(true).build())
-					.map(r -> HistoricalRecord
+					.delete(
+							DeleteApplicationRequest
+								.builder()
+									.name(detail.getAppName())
+									.deleteRoutes(true)
+									.build())
+					.subscribe();
+    	
+		return Mono.just(HistoricalRecord
 								.builder()
 									.dateTimeRemoved(LocalDateTime.now())
 									.organization(detail.getOrganization())
@@ -176,14 +183,21 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
     }
     
     protected Mono<HistoricalRecord> deleteApplication(AppRequest request) {
-    	return DefaultCloudFoundryOperations.builder()
+    	DefaultCloudFoundryOperations.builder()
                 .from(opsClient)
                 .organization(request.getOrganization())
                 .space(request.getSpace())
                 .build()
 				.applications()
-					.delete(DeleteApplicationRequest.builder().name(request.getAppName()).deleteRoutes(true).build())
-					.map(r -> HistoricalRecord
+					.delete(
+							DeleteApplicationRequest
+								.builder()
+									.name(request.getAppName())
+									.deleteRoutes(true)
+									.build())
+					.subscribe();
+    	
+		return Mono.just(HistoricalRecord
 								.builder()
 									.dateTimeRemoved(LocalDateTime.now())
 									.organization(request.getOrganization())
