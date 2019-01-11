@@ -118,18 +118,18 @@ public class JdbcAppInfoRepository {
 		String leftJoin = "left join app_relationship ar on ad.app_id = ar.app_id";
 		StringBuilder where = new StringBuilder();
 		List<Object> paramValues = new ArrayList<>();
-		where.append("where ar.service_id is null and requested_state = ? ");
+		where.append("where ar.service_id is null and ad.requested_state = ? ");
 		paramValues.add(policy.getState());
 		if (policy.getFromDateTime() != null) {
-			where.append("and last_event_time <= ? ");
+			where.append("and ad.last_event_time <= ?");
 			paramValues.add(Timestamp.valueOf(policy.getFromDateTime()));
 		}
 		if (policy.getFromDuration() != null) {
-			where.append("and last_event_time <= ?");
+			where.append("and ad.last_event_time <= ?");
 			LocalDateTime eventTime = LocalDateTime.now().minus(policy.getFromDuration());
 			paramValues.add(Timestamp.valueOf(eventTime));
 		}
-		String orderBy = "order by organization, space, app_name";
+		String orderBy = "order by ad.organization, ad.space, ad.app_name";
 		String sql = String.join(" ", select, from, leftJoin, where, orderBy);
 		Flowable<AppDetail> result = 
 			database
