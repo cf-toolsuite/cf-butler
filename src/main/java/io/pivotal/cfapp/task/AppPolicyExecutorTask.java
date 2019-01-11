@@ -2,6 +2,7 @@ package io.pivotal.cfapp.task;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.cloudfoundry.client.v2.services.DeleteServiceRequest;
@@ -119,14 +120,14 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
 			.flatMap(ar -> appRelationshipService.findByApplicationId(ar.getAppId()))
 			.subscribe(appRelationships::add);
 			
-		Flux.fromIterable(appRelationships)
+		Flux.fromIterable(new ArrayList<>(appRelationships))
 			.flatMap(ur -> unbindServiceInstance(ur))
 			.distinct()
 			.flatMap(a -> deleteApplication(a))
 			.flatMap(historicalRecordService::save)
 			.subscribe();
 		
-		Flux.fromIterable(appRelationships)
+		Flux.fromIterable(new ArrayList<>(appRelationships))
 			.flatMap(s -> deleteServiceInstance(s))
 			.flatMap(historicalRecordService::save)
 			.subscribe();
