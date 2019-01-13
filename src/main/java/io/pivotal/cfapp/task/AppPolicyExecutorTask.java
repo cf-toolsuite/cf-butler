@@ -2,7 +2,6 @@ package io.pivotal.cfapp.task;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.List;
 
 import org.cloudfoundry.client.v2.services.DeleteServiceRequest;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
@@ -59,9 +58,10 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
     }
     
     public void execute() {
-    	deleteApplicationsWithNoServiceBindings();
-    	deleteApplicationsWithServiceBindingsButDoNotDeleteBoundServiceInstances();
-    	deleteApplicationsWithServiceBindingsAndDeleteBoundServiceInstances();
+    	deleteApplicationsWithNoServiceBindings()
+	    	.then(deleteApplicationsWithServiceBindingsButDoNotDeleteBoundServiceInstances())
+	    	.then(deleteApplicationsWithServiceBindingsAndDeleteBoundServiceInstances())
+	    	.subscribe();
     }
 
     @Scheduled(cron = "${cron.execution}")
@@ -69,71 +69,89 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
     	execute();
     }
 
-	protected void deleteApplicationsWithNoServiceBindings() {
+	protected Mono<Void> deleteApplicationsWithNoServiceBindings() {
     	// these are the applications with no service bindings
     	// we can delete each one without having to first unbind it from one or more service instances
-    	policiesService
-            .findAll()
-            .flux()
-            .flatMap(p -> Flux.fromIterable(p.getApplicationPolicies()))
-        	.flatMap(ap -> appInfoService.findByApplicationPolicy(ap, false))
-        	.filter(bl -> !settings.getOrganizationBlackList().contains(bl.getOrganization()))
-        	.flatMap(ad -> deleteApplication(ad))
-            .flatMap(historicalRecordService::save)
-            .subscribe();
+    	return policiesService
+		            .findAll()
+			            .flux()
+			            .flatMap(p -> Flux.fromIterable(p.getApplicationPolicies()))
+			        	.flatMap(ap -> appInfoService.findByApplicationPolicy(ap, false))
+			        	.filter(bl -> !settings.getOrganizationBlackList().contains(bl.getOrganization()))
+			        	.flatMap(ad -> deleteApplication(ad))
+			            .flatMap(historicalRecordService::save)
+			            .then();
     }
 	
-	protected void deleteApplicationsWithServiceBindingsButDoNotDeleteBoundServiceInstances() {
+	protected Mono<Void> deleteApplicationsWithServiceBindingsButDoNotDeleteBoundServiceInstances() {
 		// these are the applications with service bindings
 		// in this case the application policy has been configured with delete-services = false
 		// so we:  a) unbind one or more service instances from each application, b) delete each application
-		policiesService
-	        .findAll()
-	        .flux()
-	        .flatMap(p -> Flux.fromIterable(p.getApplicationPolicies()))
-			.filter(f -> f.isDeleteServices() == false)
-			.flatMap(ap -> appInfoService.findByApplicationPolicy(ap, true))
-			.filter(bl -> !settings.getOrganizationBlackList().contains(bl.getOrganization()))
-			.flatMap(ar -> appRelationshipService.findByApplicationId(ar.getAppId()))
-			.flatMap(ur -> unbindServiceInstance(ur))
-			.distinct()
-			.flatMap(a -> deleteApplication(a))
-			.flatMap(historicalRecordService::save)
-			.subscribe();
-		
+		return policiesService
+			        .findAll()
+				        .flux()
+				        .flatMap(p -> Flux.fromIterable(p.getApplicationPolicies()))
+						.filter(f -> f.isDeleteServices() == false)
+						.flatMap(ap -> appInfoService.findByApplicationPolicy(ap, true))
+						.filter(bl -> !settings.getOrganizationBlackList().contains(bl.getOrganization()))
+						.flatMap(ar -> appRelationshipService.findByApplicationId(ar.getAppId()))
+						.flatMap(this::unbindServiceInstance)
+						.distinct()
+						.flatMap(this::deleteApplication)
+						.flatMap(historicalRecordService::save)
+						.then();
 	}
 
-	protected void deleteApplicationsWithServiceBindingsAndDeleteBoundServiceInstances() {
+	protected Mono<Void> deleteApplicationsWithServiceBindingsAndDeleteBoundServiceInstances() {
 		// these are the applications with service bindings
 		// in this case the application policy has been configured with delete-services = true
 		// so we:  a) unbind one or more service instances from each application, b) delete each application, 
 		// and c) delete each formerly bound service instance
-		List<AppRelationship> appRelationships = new ArrayList<>();
-		policiesService
-	        .findAll()
-	        .flux()
-	        .flatMap(p -> Flux.fromIterable(p.getApplicationPolicies()))
-			.filter(f -> f.isDeleteServices() == true)
-			.flatMap(ap -> appInfoService.findByApplicationPolicy(ap, true))
-			.filter(bl -> !settings.getOrganizationBlackList().contains(bl.getOrganization()))
-			.flatMap(ar -> appRelationshipService.findByApplicationId(ar.getAppId()))
-			.subscribe(appRelationships::add);
-			
-		Flux.fromIterable(new ArrayList<>(appRelationships))
-			.flatMap(ur -> unbindServiceInstance(ur))
-			.distinct()
-			.flatMap(a -> deleteApplication(a))
-			.flatMap(historicalRecordService::save)
-			.thenMany(
-				Flux.fromIterable(new ArrayList<>(appRelationships))
-					.flatMap(s -> deleteServiceInstance(s))
-					.flatMap(historicalRecordService::save)
-			)
-			.subscribe();
+		/*return policiesService
+			        .findAll()
+				        .flux()
+				        .flatMap(p -> Flux.fromIterable(p.getApplicationPolicies()))
+						.filter(f -> f.isDeleteServices() == true)
+						.flatMap(ap -> appInfoService.findByApplicationPolicy(ap, true))
+						.filter(bl -> !settings.getOrganizationBlackList().contains(bl.getOrganization()))
+						.flatMap(ar -> appRelationshipService.findByApplicationId(ar.getAppId()))
+						.collectList()
+						.flatMap(ar ->
+							Flux.fromIterable(new ArrayList<>(ar))
+								.flatMap(ur -> unbindServiceInstance(ur))
+								.distinct()
+								.flatMap(a -> deleteApplication(a))
+								.flatMap(historicalRecordService::save)
+								.thenMany(
+									Flux.fromIterable(new ArrayList<>(ar))
+										.flatMap(s -> deleteServiceInstance(s))
+										.flatMap(historicalRecordService::save)
+								))
+						.then();*/
+		return policiesService
+                .findAll()
+                .flux()
+                .flatMap(p -> Flux.fromIterable(p.getApplicationPolicies()))
+                .filter(f -> f.isDeleteServices() == true)
+                .flatMap(ap -> appInfoService.findByApplicationPolicy(ap, true))
+                .filter(bl -> !settings.getOrganizationBlackList().contains(bl.getOrganization()))
+                .flatMap(ar -> appRelationshipService.findByApplicationId(ar.getAppId()))
+                .collectList()
+                .flatMap(appRelationships -> 
+                	Flux.fromIterable(new ArrayList<>(appRelationships))
+	                         .flatMap(this::unbindServiceInstance)
+	                         .distinct()
+	                         .flatMap(this::deleteApplication)
+	                         .flatMap(historicalRecordService::save)
+	                         .thenMany(Flux.fromIterable(new ArrayList<>(appRelationships))
+	                                   .flatMap(this::deleteServiceInstance)
+	                                   .flatMap(historicalRecordService::save)
+	                         )
+	                         .then());
 	}
     
 	protected Mono<AppRequest> unbindServiceInstance(AppRelationship relationship) {
-		DefaultCloudFoundryOperations.builder()
+		return DefaultCloudFoundryOperations.builder()
 	            .from(opsClient)
 	            .organization(relationship.getOrganization())
 	            .space(relationship.getSpace())
@@ -145,19 +163,18 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
 	            						.applicationName(relationship.getAppName())
 	            						.serviceInstanceName(relationship.getServiceName())
 	            						.build())
-	            		.subscribe();
-		
-	     return Mono.just(AppRequest
-	    		 			.builder()
-	    		 				.id(relationship.getAppId())
-	    		 				.organization(relationship.getOrganization())
-	    		 				.space(relationship.getSpace())
-	    		 				.appName(relationship.getAppName())
-	    		 				.build());      
+	            		.then(
+	            				Mono.just(AppRequest
+			    		 			.builder()
+			    		 				.id(relationship.getAppId())
+			    		 				.organization(relationship.getOrganization())
+			    		 				.space(relationship.getSpace())
+			    		 				.appName(relationship.getAppName())
+			    		 				.build()));      
 	}
 	
     protected Mono<HistoricalRecord> deleteApplication(AppDetail detail) {
-    	DefaultCloudFoundryOperations.builder()
+    	return DefaultCloudFoundryOperations.builder()
                 .from(opsClient)
                 .organization(detail.getOrganization())
                 .space(detail.getSpace())
@@ -169,21 +186,20 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
 									.name(detail.getAppName())
 									.deleteRoutes(true)
 									.build())
-					.subscribe();
-    	
-		return Mono.just(HistoricalRecord
-								.builder()
-									.dateTimeRemoved(LocalDateTime.now())
-									.organization(detail.getOrganization())
-									.space(detail.getSpace())
-									.id(detail.getAppId())
-									.type("application")
-									.name(detail.getAppName())
-									.build());			
+					.then(
+							Mono.just(HistoricalRecord
+										.builder()
+											.dateTimeRemoved(LocalDateTime.now())
+											.organization(detail.getOrganization())
+											.space(detail.getSpace())
+											.id(detail.getAppId())
+											.type("application")
+											.name(detail.getAppName())
+											.build()));
     }
     
     protected Mono<HistoricalRecord> deleteApplication(AppRequest request) {
-    	DefaultCloudFoundryOperations.builder()
+    	return DefaultCloudFoundryOperations.builder()
                 .from(opsClient)
                 .organization(request.getOrganization())
                 .space(request.getSpace())
@@ -195,34 +211,33 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
 									.name(request.getAppName())
 									.deleteRoutes(true)
 									.build())
-					.subscribe();
-    	
-		return Mono.just(HistoricalRecord
-								.builder()
-									.dateTimeRemoved(LocalDateTime.now())
-									.organization(request.getOrganization())
-									.space(request.getSpace())
-									.id(request.getId())
-									.type("application")
-									.name(request.getAppName())
-									.build());			
+					.then(
+							Mono.just(HistoricalRecord
+										.builder()
+											.dateTimeRemoved(LocalDateTime.now())
+											.organization(request.getOrganization())
+											.space(request.getSpace())
+											.id(request.getId())
+											.type("application")
+											.name(request.getAppName())
+											.build()));
     }
     
     protected Mono<HistoricalRecord> deleteServiceInstance(AppRelationship relationship) {
     	return opsClient
-			.getCloudFoundryClient()
-				.services()
-					.delete(DeleteServiceRequest.builder().serviceId(relationship.getServiceId()).purge(true).build())
-					.map(r -> HistoricalRecord
-								.builder()
-									.dateTimeRemoved(LocalDateTime.now())
-									.organization(relationship.getOrganization())
-									.space(relationship.getSpace())
-									.id(relationship.getServiceId())
-									.type("service-instance")
-									.name(String.join("::", relationship.getAppName(), relationship.getServiceType(), relationship.getServicePlan()))
-									.status(r.getEntity().getStatus())
-									.errorDetails(r.getEntity().getErrorDetails() != null ? r.getEntity().getErrorDetails().toString(): null)
-									.build());			
+				.getCloudFoundryClient()
+					.services()
+						.delete(DeleteServiceRequest.builder().serviceId(relationship.getServiceId()).purge(true).build())
+						.map(r -> HistoricalRecord
+									.builder()
+										.dateTimeRemoved(LocalDateTime.now())
+										.organization(relationship.getOrganization())
+										.space(relationship.getSpace())
+										.id(relationship.getServiceId())
+										.type("service-instance")
+										.name(String.join("::", relationship.getAppName(), relationship.getServiceType(), relationship.getServicePlan()))
+										.status(r.getEntity().getStatus())
+										.errorDetails(r.getEntity().getErrorDetails() != null ? r.getEntity().getErrorDetails().toString(): null)
+										.build());			
     }
 }

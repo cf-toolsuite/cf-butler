@@ -14,7 +14,6 @@ import org.springframework.stereotype.Repository;
 import io.pivotal.cfapp.domain.ApplicationPolicy;
 import io.pivotal.cfapp.domain.Policies;
 import io.pivotal.cfapp.domain.ServiceInstancePolicy;
-import io.reactivex.Flowable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -37,7 +36,12 @@ public class JdbcPoliciesRepository {
 				.filter(ap -> !ap.isInvalid())
 				.collect(Collectors.toList());
 		
-		Flux.fromIterable(applicationPolicies)
+		List<ServiceInstancePolicy> serviceInstancePolicies = entity.getServiceInstancePolicies()
+				.stream()
+				.filter(sip -> !sip.isInvalid())
+				.collect(Collectors.toList());
+		
+		return Flux.fromIterable(applicationPolicies)
 				.flatMap(ap -> database
 									.update(createAppPolicy)
 									.parameters(
@@ -48,73 +52,63 @@ public class JdbcPoliciesRepository {
 										ap.isDeleteServices()
 									)
 									.counts())
-				.subscribe();
-				
-		List<ServiceInstancePolicy> serviceInstancePolicies = entity.getServiceInstancePolicies()
-				.stream()
-				.filter(sip -> !sip.isInvalid())
-				.collect(Collectors.toList());
-		
-		Flux.fromIterable(serviceInstancePolicies)
-				.flatMap(sip -> database
-									.update(createServiceInstancePolicy)
-									.parameters(
+				.thenMany(
+						Flux.fromIterable(serviceInstancePolicies)
+							.flatMap(sip -> database
+								.update(createServiceInstancePolicy)
+								.parameters(
 										sip.getDescription(),
 										sip.getFromDateTime() != null ? Timestamp.valueOf(sip.getFromDateTime()): null,
-										sip.getFromDuration() != null ? sip.getFromDuration().toString(): null
-									)
-									.counts())
-				.subscribe();
-		
-		return Mono.just(new Policies(applicationPolicies, serviceInstancePolicies));
+												sip.getFromDuration() != null ? sip.getFromDuration().toString(): null
+										)
+								.counts()))
+				.then(Mono.just(new Policies(applicationPolicies, serviceInstancePolicies)));
 	}
 
 	public Mono<Policies> findAll() {
 		String selectAllApplicationPolicies = "select description, state, from_datetime, from_duration, delete_services from application_policy";
 		String selectAllServiceInstancePolicies = "select description, from_datetime, from_duration from service_instance_policy";
-		
-		Flowable<ApplicationPolicy> selectAllApplicationPoliciesResult = database
-				.select(selectAllApplicationPolicies)
-				.get(rs -> new ApplicationPolicy(
-						rs.getString(1),
-						rs.getString(2),
-						rs.getTimestamp(3) != null ? rs.getTimestamp(3).toLocalDateTime(): null,
-						rs.getString(4) != null ? Duration.parse(rs.getString(4)): null,
-						rs.getBoolean(5)
-				));
-		
-		Flowable<ServiceInstancePolicy> selectAllServiceInstancePoliciesResult = database
-				.select(selectAllServiceInstancePolicies)
-				.get(rs -> new ServiceInstancePolicy(
-						rs.getString(1),
-						rs.getTimestamp(2) != null ? rs.getTimestamp(2).toLocalDateTime(): null,
-						rs.getString(3) != null ? Duration.parse(rs.getString(3)): null
-				));
-		
 		List<ApplicationPolicy> applicationPolicies = new ArrayList<>();
-				Flux.from(selectAllApplicationPoliciesResult)
-							.map(r -> applicationPolicies.add(r))
-							.subscribe();
-				
 		List<ServiceInstancePolicy> serviceInstancePolicies = new ArrayList<>();
-				Flux.from(selectAllServiceInstancePoliciesResult)
-							.map(r -> serviceInstancePolicies.add(r))
-							.subscribe();
 		
-		return Mono.just(new Policies(applicationPolicies, serviceInstancePolicies));
+		return 
+				Flux
+					.from(database
+							.select(selectAllApplicationPolicies)
+							.get(rs -> new ApplicationPolicy(
+									rs.getString(1),
+									rs.getString(2),
+									rs.getTimestamp(3) != null ? rs.getTimestamp(3).toLocalDateTime(): null,
+									rs.getString(4) != null ? Duration.parse(rs.getString(4)): null,
+									rs.getBoolean(5)
+							))
+					.map(ap -> applicationPolicies.add(ap)))
+					.thenMany(
+						Flux
+							.from(database
+									.select(selectAllServiceInstancePolicies)
+									.get(rs -> new ServiceInstancePolicy(
+											rs.getString(1),
+											rs.getTimestamp(2) != null ? rs.getTimestamp(2).toLocalDateTime(): null,
+											rs.getString(3) != null ? Duration.parse(rs.getString(3)): null
+									))
+							.map(sp -> serviceInstancePolicies.add(sp))))
+					.then(Mono.just(new Policies(applicationPolicies, serviceInstancePolicies)));
 	}
 
 	public Mono<Void> deleteAll() {
 		String deleteAllApplicationPolicies = "delete from application_policy";
 		String deleteAllServiceInstancePolicies = "delete from service_instance_policy";
-		Flux.from(database
+		return 
+			Flux
+				.from(database
 					.update(deleteAllApplicationPolicies)
 					.counts())
-			.subscribe();
-		Flux.from(database
-					.update(deleteAllServiceInstancePolicies)
-					.counts())
-			.subscribe();
-		return Mono.empty();
+				.thenMany(
+					Flux
+						.from(database
+							.update(deleteAllServiceInstancePolicies)
+							.counts()))
+				.then();
 	}
 }

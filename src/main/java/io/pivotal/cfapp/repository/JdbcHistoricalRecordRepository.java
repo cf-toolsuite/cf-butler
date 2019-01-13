@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 import io.pivotal.cfapp.domain.HistoricalRecord;
-import io.reactivex.Flowable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -27,30 +26,27 @@ public class JdbcHistoricalRecordRepository {
 
 	public Mono<HistoricalRecord> save(HistoricalRecord entity) {
 		String createOne = "insert into historical_record (datetime_removed, organization, space, id, type, name, status, error_details) values (?, ?, ?, ?, ?, ?, ?, ?)";
-		Flux.from(database
-					.update(createOne)
-					.parameters(
-						entity.getDateTimeRemoved() != null ? Timestamp.valueOf(entity.getDateTimeRemoved()): null,
-						entity.getOrganization(),
-						entity.getSpace(),
-						entity.getId(),
-						entity.getType(),
-						entity.getName(),
-						entity.getStatus(),
-						entity.getErrorDetails()
-					)
-					.counts())
-			.subscribe();
-
-		return Mono.just(entity);
+		return Flux.from(database
+							.update(createOne)
+							.parameters(
+								entity.getDateTimeRemoved() != null ? Timestamp.valueOf(entity.getDateTimeRemoved()): null,
+								entity.getOrganization(),
+								entity.getSpace(),
+								entity.getId(),
+								entity.getType(),
+								entity.getName(),
+								entity.getStatus(),
+								entity.getErrorDetails()
+							)
+							.counts())
+							.then(Mono.just(entity));
 	}
 
 	public Flux<HistoricalRecord> findAll() {
 		String selectAll = "select datetime_removed, organization, space, id, type, name, status, error_details from historical_record order by datetime_removed desc";
-		Flowable<HistoricalRecord> result = database
-			.select(selectAll)
-			.get(rs -> fromResultSet(rs));
-		return Flux.from(result);
+		return Flux.from(database
+							.select(selectAll)
+							.get(rs -> fromResultSet(rs)));
 	}
 
 	private HistoricalRecord fromResultSet(ResultSet rs) throws SQLException {
