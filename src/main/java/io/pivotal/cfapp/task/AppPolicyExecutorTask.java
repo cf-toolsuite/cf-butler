@@ -3,9 +3,9 @@ package io.pivotal.cfapp.task;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
-import org.cloudfoundry.client.v2.services.DeleteServiceRequest;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.operations.applications.DeleteApplicationRequest;
+import org.cloudfoundry.operations.services.DeleteServiceInstanceRequest;
 import org.cloudfoundry.operations.services.UnbindServiceInstanceRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -80,7 +80,7 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
 			            .flatMap(p -> Flux.fromIterable(p.getApplicationPolicies()))
 			        	.flatMap(ap -> appInfoService.findByApplicationPolicy(ap, false))
 			        	.filter(bl -> !settings.getOrganizationBlackList().contains(bl.getOrganization()))
-			        	.flatMap(ad -> deleteApplication(ad))
+			        	.flatMap(this::deleteApplication)
 			            .flatMap(historicalRecordService::save)
 			            .then();
     }
@@ -124,11 +124,11 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
 	                         .distinct()
 	                         .flatMap(this::deleteApplication)
 	                         .flatMap(historicalRecordService::save)
-	                         .thenMany(Flux.fromIterable(new ArrayList<>(appRelationships))
+	                         .then(Flux.fromIterable(new ArrayList<>(appRelationships))
 	                                   .flatMap(this::deleteServiceInstance)
 	                                   .flatMap(historicalRecordService::save)
-	                         )
-	                         .then());
+	                                   .then()
+	                         ));
 	}
     
 	protected Mono<AppRequest> unbindServiceInstance(AppRelationship relationship) {
@@ -205,10 +205,13 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
     }
     
     protected Mono<HistoricalRecord> deleteServiceInstance(AppRelationship relationship) {
-    	return opsClient
-				.getCloudFoundryClient()
+    	return DefaultCloudFoundryOperations.builder()
+                .from(opsClient)
+                .organization(relationship.getOrganization())
+                .space(relationship.getSpace())
+                .build()
 					.services()
-						.delete(DeleteServiceRequest.builder().serviceId(relationship.getServiceId()).purge(true).build())
+						.deleteInstance(DeleteServiceInstanceRequest.builder().name(relationship.getServiceName()).build())
 						.map(r -> HistoricalRecord
 									.builder()
 										.dateTimeRemoved(LocalDateTime.now())
@@ -216,9 +219,7 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
 										.space(relationship.getSpace())
 										.id(relationship.getServiceId())
 										.type("service-instance")
-										.name(String.join("::", relationship.getAppName(), relationship.getServiceType(), relationship.getServicePlan()))
-										.status(r.getEntity().getStatus())
-										.errorDetails(r.getEntity().getErrorDetails() != null ? r.getEntity().getErrorDetails().toString(): null)
+										.name(String.join("::", relationship.getServiceName(), relationship.getServiceType(), relationship.getServicePlan()))
 										.build());			
     }
 }

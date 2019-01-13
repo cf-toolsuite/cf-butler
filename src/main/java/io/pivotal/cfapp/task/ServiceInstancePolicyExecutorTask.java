@@ -2,8 +2,8 @@ package io.pivotal.cfapp.task;
 
 import java.time.LocalDateTime;
 
-import org.cloudfoundry.client.v2.services.DeleteServiceRequest;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
+import org.cloudfoundry.operations.services.DeleteServiceInstanceRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -68,20 +68,21 @@ public class ServiceInstancePolicyExecutorTask implements ApplicationRunner {
     }
     
     protected Mono<HistoricalRecord> deleteServiceInstance(ServiceDetail sd) {
-    	return opsClient
-			.getCloudFoundryClient()
-				.services()
-					.delete(DeleteServiceRequest.builder().serviceId(sd.getServiceId()).purge(true).build())
-					.map(r -> HistoricalRecord
-								.builder()
-									.dateTimeRemoved(LocalDateTime.now())
-									.organization(sd.getOrganization())
-									.space(sd.getSpace())
-									.id(sd.getServiceId())
-									.type("service-instance")
-									.name(String.join("::", sd.getName(), sd.getType(), sd.getPlan()))
-									.status(r.getEntity().getStatus())
-									.errorDetails(r.getEntity().getErrorDetails() != null ? r.getEntity().getErrorDetails().toString(): null)
-									.build());			
+    	return DefaultCloudFoundryOperations.builder()
+                .from(opsClient)
+                .organization(sd.getOrganization())
+                .space(sd.getSpace())
+                .build()
+					.services()
+						.deleteInstance(DeleteServiceInstanceRequest.builder().name(sd.getName()).build())
+						.map(r -> HistoricalRecord
+									.builder()
+										.dateTimeRemoved(LocalDateTime.now())
+										.organization(sd.getOrganization())
+										.space(sd.getSpace())
+										.id(sd.getServiceId())
+										.type("service-instance")
+										.name(String.join("::", sd.getName(), sd.getType(), sd.getPlan()))
+										.build());			
     }
 }
