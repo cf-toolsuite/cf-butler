@@ -105,20 +105,20 @@ public class JdbcServiceInfoRepository {
 	private ServiceDetail fromResultSet(ResultSet rs) throws SQLException {
 		return ServiceDetail
 				.builder()
-				.id(String.valueOf(rs.getInt(1)))
-				.organization(rs.getString(2))
-				.space(rs.getString(3))
-				.serviceId(rs.getString(4))
-				.name(rs.getString(5))
-				.service(rs.getString(6))
-				.description(rs.getString(7))
-				.plan(rs.getString(8))
-				.type(rs.getString(9))
-				.applications(rs.getString(10) != null ? Arrays.asList(rs.getString(10).split("\\s*,\\s*")): Collections.emptyList())
-				.lastOperation(rs.getString(11))
-				.lastUpdated(rs.getTimestamp(12) != null ? rs.getTimestamp(12).toLocalDateTime(): null)
-				.dashboardUrl(rs.getString(13))
-				.requestedState(rs.getString(14))
-				.build();
+					.id(String.valueOf(rs.getInt(1)))
+					.organization(rs.getString(2))
+					.space(rs.getString(3))
+					.serviceId(rs.getString(4))
+					.name(rs.getString(5))
+					.service(rs.getString(6))
+					.description(rs.getString(7))
+					.plan(rs.getString(8))
+					.type(rs.getString(9))
+					.applications(rs.getString(10) != null ? Arrays.asList(rs.getString(10).split("\\s*,\\s*")): Collections.emptyList())
+					.lastOperation(rs.getString(11))
+					.lastUpdated(rs.getTimestamp(12) != null ? rs.getTimestamp(12).toLocalDateTime(): null)
+					.dashboardUrl(rs.getString(13))
+					.requestedState(rs.getString(14))
+					.build();
 	}
 }

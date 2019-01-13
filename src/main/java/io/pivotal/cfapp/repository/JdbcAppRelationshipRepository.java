@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 import io.pivotal.cfapp.domain.AppRelationship;
-import io.reactivex.Flowable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -26,47 +25,43 @@ public class JdbcAppRelationshipRepository {
 
 	public Mono<AppRelationship> save(AppRelationship entity) {
 		String createOne = "insert into app_relationship (organization, space, app_id, app_name, service_id, service_name, service_plan, service_type) values (?, ?, ?, ?, ?, ?, ?, ?)";
-		Flux.from(database
-					.update(createOne)
-					.parameters(
-						entity.getOrganization(),
-						entity.getSpace(),
-						entity.getAppId(),
-						entity.getAppName(),
-						entity.getServiceId(),
-						entity.getServiceName(),
-						entity.getServicePlan(),
-						entity.getServiceType()
-					)
-					.counts())
-			.subscribe();
-
-		return Mono.just(entity);
+		return Flux.from(database
+							.update(createOne)
+							.parameters(
+								entity.getOrganization(),
+								entity.getSpace(),
+								entity.getAppId(),
+								entity.getAppName(),
+								entity.getServiceId(),
+								entity.getServiceName(),
+								entity.getServicePlan(),
+								entity.getServiceType()
+							)
+							.counts())
+							.then(Mono.just(entity));
 	}
 
 	public Flux<AppRelationship> findAll() {
 		String selectAll = "select organization, space, app_id, app_name, service_id, service_name, service_plan, service_type from app_relationship order by organization, space, app_name";
-		Flowable<AppRelationship> result = database
-			.select(selectAll)
-			.get(rs -> fromResultSet(rs));
-		return Flux.from(result);
+		return Flux.from(database
+							.select(selectAll)
+							.get(rs -> fromResultSet(rs)));
 	}
 	
 	public Flux<AppRelationship> findByApplicationId(String applicationId) {
 		String select = "select organization, space, app_id, app_name, service_id, service_name, service_plan, service_type from app_relationship where app_id = ? order by organization, space, service_name";
-		Flowable<AppRelationship> result = database
-				.select(select)
-				.parameter(applicationId)
-				.get(rs -> fromResultSet(rs));
-			return Flux.from(result);
+		return Flux.from(database
+							.select(select)
+							.parameter(applicationId)
+							.get(rs -> fromResultSet(rs)));
 	}
 
 	public Mono<Void> deleteAll() {
 		String deleteAll = "delete from app_relationship";
-		Flowable<Integer> result = database
-			.update(deleteAll)
-			.counts();
-		return Flux.from(result).then();
+		return Flux.from(database
+							.update(deleteAll)
+							.counts())
+							.then();
 	}
 	
 	private AppRelationship fromResultSet(ResultSet rs) throws SQLException {
