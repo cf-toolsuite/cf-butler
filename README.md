@@ -142,7 +142,7 @@ Visit the link in the password prompt to retrieve a temporary passcode (e.g., ht
 
 > Complete the login process
 
-Visit https://login.run.pcfone.io/passcode again
+Visit the passcode [link](https://login.run.pcfone.io/passcode) again
 
 Make a note of the passcode because you will need to use it in your `config/secrets.json` which at a minimum should contain
 
@@ -236,4 +236,4 @@ DELETE /policies
 
 ## Credits
 
-// TODO
+* [Peter Royal](https://github.com/osi) for [assistance](https://gitter.im/reactor/reactor?at=5c38c24966f3433023afceb2) troubleshooting some method implementation in [ApplicationPolicyExecutorTask](https://github.com/pacphi/cf-butler/blob/master/src/main/java/io/pivotal/cfapp/task/AppPolicyExecutorTask.java)
