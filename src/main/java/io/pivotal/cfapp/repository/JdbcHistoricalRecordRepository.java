@@ -25,7 +25,7 @@ public class JdbcHistoricalRecordRepository {
 	}
 
 	public Mono<HistoricalRecord> save(HistoricalRecord entity) {
-		String createOne = "insert into historical_record (datetime_removed, organization, space, id, type, name, status, error_details) values (?, ?, ?, ?, ?, ?, ?, ?)";
+		String createOne = "insert into historical_record (datetime_removed, organization, space, id, type, name) values (?, ?, ?, ?, ?, ?)";
 		return Flux.from(database
 							.update(createOne)
 							.parameters(
@@ -34,16 +34,14 @@ public class JdbcHistoricalRecordRepository {
 								entity.getSpace(),
 								entity.getId(),
 								entity.getType(),
-								entity.getName(),
-								entity.getStatus(),
-								entity.getErrorDetails()
+								entity.getName()
 							)
 							.counts())
 							.then(Mono.just(entity));
 	}
 
 	public Flux<HistoricalRecord> findAll() {
-		String selectAll = "select datetime_removed, organization, space, id, type, name, status, error_details from historical_record order by datetime_removed desc";
+		String selectAll = "select datetime_removed, organization, space, id, type, name from historical_record order by datetime_removed desc";
 		return Flux.from(database
 							.select(selectAll)
 							.get(rs -> fromResultSet(rs)));
@@ -58,8 +56,6 @@ public class JdbcHistoricalRecordRepository {
 					.id(rs.getString(4))
 					.type(rs.getString(5))
 					.name(rs.getString(6))
-					.status(rs.getString(7))
-					.errorDetails(rs.getString(8))
 					.build();
 	}
 }

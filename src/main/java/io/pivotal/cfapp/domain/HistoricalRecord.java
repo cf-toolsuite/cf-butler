@@ -24,20 +24,17 @@ public class HistoricalRecord {
 	private String id;
 	private String type;
 	private String name;
-	private String status;
-	private String errorDetails;
 	
 	public static String headers() {
         return String.join(",", "date/time removed", "organization", "space",
-                "id", "type", "name", "status", "error details (if any)");
+                "id", "type", "name");
     }
 	
 	public String toCsv() {
         return String
                 .join(",", wrap(getDateTimeRemoved() != null ? getDateTimeRemoved().toString(): ""), 
                 		wrap(getOrganization()), wrap(getSpace()), wrap(getId()),
-                        wrap(getType()), wrap(getName()), wrap(getStatus()),
-                        wrap(getErrorDetails()));
+                        wrap(getType()), wrap(getName()));
     }
     
     private String wrap(String value) {
