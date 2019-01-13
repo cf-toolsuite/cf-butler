@@ -23,6 +23,7 @@ import io.pivotal.cfapp.service.AppRelationshipService;
 import io.pivotal.cfapp.service.HistoricalRecordService;
 import io.pivotal.cfapp.service.PoliciesService;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
 
 @Component
@@ -58,6 +59,7 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
     }
     
     public void execute() {
+    	Hooks.onOperatorDebug();
     	deleteApplicationsWithNoServiceBindings()
 	    	.then(deleteApplicationsWithServiceBindingsButDoNotDeleteBoundServiceInstances())
 	    	.then(deleteApplicationsWithServiceBindingsAndDeleteBoundServiceInstances())
@@ -107,27 +109,6 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
 		// in this case the application policy has been configured with delete-services = true
 		// so we:  a) unbind one or more service instances from each application, b) delete each application, 
 		// and c) delete each formerly bound service instance
-		/*return policiesService
-			        .findAll()
-				        .flux()
-				        .flatMap(p -> Flux.fromIterable(p.getApplicationPolicies()))
-						.filter(f -> f.isDeleteServices() == true)
-						.flatMap(ap -> appInfoService.findByApplicationPolicy(ap, true))
-						.filter(bl -> !settings.getOrganizationBlackList().contains(bl.getOrganization()))
-						.flatMap(ar -> appRelationshipService.findByApplicationId(ar.getAppId()))
-						.collectList()
-						.flatMap(ar ->
-							Flux.fromIterable(new ArrayList<>(ar))
-								.flatMap(ur -> unbindServiceInstance(ur))
-								.distinct()
-								.flatMap(a -> deleteApplication(a))
-								.flatMap(historicalRecordService::save)
-								.thenMany(
-									Flux.fromIterable(new ArrayList<>(ar))
-										.flatMap(s -> deleteServiceInstance(s))
-										.flatMap(historicalRecordService::save)
-								))
-						.then();*/
 		return policiesService
                 .findAll()
                 .flux()

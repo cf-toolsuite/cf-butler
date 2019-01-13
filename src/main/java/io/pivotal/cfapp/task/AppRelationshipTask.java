@@ -16,6 +16,7 @@ import io.pivotal.cfapp.domain.AppRelationship;
 import io.pivotal.cfapp.domain.AppRelationshipRequest;
 import io.pivotal.cfapp.service.AppRelationshipService;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
 
 @Component
@@ -41,26 +42,31 @@ public class AppRelationshipTask implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-    	runTask();
+    	collect();
+    }
+    
+    public void collect() {
+    	Hooks.onOperatorDebug();
+    	service
+	        .deleteAll()
+	        .thenMany(getOrganizations())
+	        .flatMap(spaceRequest -> getSpaces(spaceRequest))
+	        .flatMap(serviceSummaryRequest -> getServiceSummary(serviceSummaryRequest))
+	        .flatMap(serviceBoundAppIdsRequest -> getServiceBoundApplicationIds(serviceBoundAppIdsRequest))
+	        .flatMap(serviceBoundAppNamesRequest -> getServiceBoundApplicationNames(serviceBoundAppNamesRequest))
+	        .flatMap(appRelationshipRequest -> getAppRelationship(appRelationshipRequest))
+	        .flatMap(service::save)
+	        .collectList()
+	        .subscribe(
+	            r -> publisher.publishEvent(
+	                new AppRelationshipRetrievedEvent(this)
+	                    .relations(r)
+	        ));
     }
 
     @Scheduled(cron = "${cron.collection}")
     protected void runTask() {
-        service
-            .deleteAll()
-            .thenMany(getOrganizations())
-            .flatMap(spaceRequest -> getSpaces(spaceRequest))
-            .flatMap(serviceSummaryRequest -> getServiceSummary(serviceSummaryRequest))
-            .flatMap(serviceBoundAppIdsRequest -> getServiceBoundApplicationIds(serviceBoundAppIdsRequest))
-            .flatMap(serviceBoundAppNamesRequest -> getServiceBoundApplicationNames(serviceBoundAppNamesRequest))
-            .flatMap(appRelationshipRequest -> getAppRelationship(appRelationshipRequest))
-            .flatMap(service::save)
-            .collectList()
-            .subscribe(
-                r -> publisher.publishEvent(
-                    new AppRelationshipRetrievedEvent(this)
-                        .relations(r)
-            ));
+        collect();
     }
 
 	protected Flux<AppRelationshipRequest> getOrganizations() {
