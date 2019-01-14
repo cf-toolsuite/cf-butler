@@ -104,7 +104,7 @@ At a minimum a sub-folder should contain the following files
 * `delete-space.sh`
 * `setup.sh`
 * `teardown.sh`
-* one or more application policy variant json files
+* one or more policy variant json files
 
 
 

@@ -16,26 +16,26 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import io.pivotal.cfapp.domain.ServiceDetail;
+import io.pivotal.cfapp.domain.ServiceInstanceDetail;
 import io.pivotal.cfapp.domain.ServiceRequest;
-import io.pivotal.cfapp.service.ServiceInfoService;
+import io.pivotal.cfapp.service.ServiceInstanceDetailService;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
 
 @Component
-public class ServiceInstanceInfoTask implements ApplicationRunner {
+public class ServiceInstanceDetailTask implements ApplicationRunner {
 
     private DefaultCloudFoundryOperations opsClient;
     private ReactorCloudFoundryClient cloudFoundryClient;
-    private ServiceInfoService service;
+    private ServiceInstanceDetailService service;
     private ApplicationEventPublisher publisher;
 
     @Autowired
-    public ServiceInstanceInfoTask(
+    public ServiceInstanceDetailTask(
     		DefaultCloudFoundryOperations opsClient,
     		ReactorCloudFoundryClient cloudFoundryClient,
-    		ServiceInfoService service,
+    		ServiceInstanceDetailService service,
     		ApplicationEventPublisher publisher
     		) {
         this.opsClient = opsClient;
@@ -63,7 +63,7 @@ public class ServiceInstanceInfoTask implements ApplicationRunner {
 	        .collectList()
 	        .subscribe(
 	            r -> publisher.publishEvent(
-	                new ServiceInfoRetrievedEvent(this)
+	                new ServiceInstanceDetailRetrievedEvent(this)
 	                    .detail(r)
         ));
     }
@@ -106,7 +106,7 @@ public class ServiceInstanceInfoTask implements ApplicationRunner {
                     							.build());
     }
 
-    protected Mono<ServiceDetail> getServiceDetail(ServiceRequest request) {
+    protected Mono<ServiceInstanceDetail> getServiceDetail(ServiceRequest request) {
         return DefaultCloudFoundryOperations.builder()
         	.from(opsClient)
         	.organization(request.getOrganization())
@@ -115,7 +115,7 @@ public class ServiceInstanceInfoTask implements ApplicationRunner {
                .services()
                    .getInstance(GetServiceInstanceRequest.builder().name(request.getServiceName()).build())
                    .onErrorResume(e -> Mono.empty())
-                   .map(sd -> ServiceDetail
+                   .map(sd -> ServiceInstanceDetail
                                .builder()
                                    .organization(request.getOrganization())
                                    .space(request.getSpace())

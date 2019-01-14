@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
-import io.pivotal.cfapp.domain.ServiceDetail;
+import io.pivotal.cfapp.domain.ServiceInstanceDetail;
 import io.pivotal.cfapp.domain.ServiceInstancePolicy;
 import io.reactivex.Flowable;
 import reactor.core.publisher.Flux;
@@ -22,16 +22,16 @@ import reactor.core.publisher.Mono;
 
 @Profile("jdbc")
 @Repository
-public class JdbcServiceInfoRepository {
+public class JdbcServiceInstanceDetailRepository {
 
 	private Database database;
 
 	@Autowired
-	public JdbcServiceInfoRepository(Database database) {
+	public JdbcServiceInstanceDetailRepository(Database database) {
 		this.database = database;
 	}
 
-	public Mono<ServiceDetail> save(ServiceDetail entity) {
+	public Mono<ServiceInstanceDetail> save(ServiceInstanceDetail entity) {
 		String createOne = "insert into service_detail (organization, space, service_id, name, service, description, plan, type, bound_applications, last_operation, last_updated, dashboard_url, requested_state) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		Flowable<Integer> insert = database
 			.update(createOne)
@@ -54,16 +54,16 @@ public class JdbcServiceInfoRepository {
 			.getAs(Integer.class);
 
 		String selectOne = "select id, organization, space, service_id, name, service, description, plan, type, bound_applications, last_operation, last_updated, dashboard_url, requested_state from service_detail where id = ?";
-		Flowable<ServiceDetail> result = database
+		Flowable<ServiceInstanceDetail> result = database
 			.select(selectOne)
 			.parameterStream(insert)
 			.get(rs -> fromResultSet(rs));
 		return Mono.from(result);
 	}
 
-	public Flux<ServiceDetail> findAll() {
+	public Flux<ServiceInstanceDetail> findAll() {
 		String selectAll = "select id, organization, space, service_id, name, service, description, plan, type, bound_applications, last_operation, last_updated, dashboard_url, requested_state from service_detail order by organization, space, service, name";
-		Flowable<ServiceDetail> result = database
+		Flowable<ServiceInstanceDetail> result = database
 			.select(selectAll)
 			.get(rs -> fromResultSet(rs));
 		return Flux.from(result);
@@ -77,7 +77,7 @@ public class JdbcServiceInfoRepository {
 		return Flux.from(result).then();
 	}
 	
-	public Flux<ServiceDetail> findByServiceInstancePolicy(ServiceInstancePolicy policy) {
+	public Flux<ServiceInstanceDetail> findByServiceInstancePolicy(ServiceInstancePolicy policy) {
 		String select = "select id, organization, space, service_id, name, service, description, plan, type, bound_applications, last_operation, last_updated, dashboard_url, requested_state";
 		String from = "from service_detail";
 		StringBuilder where = new StringBuilder();
@@ -94,7 +94,7 @@ public class JdbcServiceInfoRepository {
 		}
 		String orderBy = "order by organization, space, name";
 		String sql = String.join(" ", select, from, where, orderBy);
-		Flowable<ServiceDetail> result = 
+		Flowable<ServiceInstanceDetail> result = 
 			database
 				.select(sql)
 				.parameters(paramValues)
@@ -102,8 +102,8 @@ public class JdbcServiceInfoRepository {
 		return Flux.from(result);
 	}
 	
-	private ServiceDetail fromResultSet(ResultSet rs) throws SQLException {
-		return ServiceDetail
+	private ServiceInstanceDetail fromResultSet(ResultSet rs) throws SQLException {
+		return ServiceInstanceDetail
 				.builder()
 					.id(String.valueOf(rs.getInt(1)))
 					.organization(rs.getString(2))

@@ -3,6 +3,8 @@ package io.pivotal.cfapp.repository;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,8 +31,8 @@ public class JdbcPoliciesRepository {
 	}
 	
 	public Mono<Policies> save(Policies entity) {
-		String createAppPolicy = "insert into application_policy (description, state, from_datetime, from_duration, delete_services) values (?, ?, ?, ?, ?)";
-		String createServiceInstancePolicy = "insert into service_instance_policy (description, from_datetime, from_duration) values (?, ?, ?)";
+		String createAppPolicy = "insert into application_policy (description, state, from_datetime, from_duration, delete_services, organization_whitelist) values (?, ?, ?, ?, ?, ?)";
+		String createServiceInstancePolicy = "insert into service_instance_policy (description, from_datetime, from_duration, organization_whitelist) values (?, ?, ?, ?)";
 		List<ApplicationPolicy> applicationPolicies = entity.getApplicationPolicies()
 				.stream()
 				.filter(ap -> !ap.isInvalid())
@@ -49,7 +51,8 @@ public class JdbcPoliciesRepository {
 										ap.getState(),
 										ap.getFromDateTime() != null ? Timestamp.valueOf(ap.getFromDateTime()): null,
 										ap.getFromDuration() != null ? ap.getFromDuration().toString(): null,
-										ap.isDeleteServices()
+										ap.isDeleteServices(),
+										String.join(",", ap.getOrganizationWhiteList())
 									)
 									.counts())
 				.thenMany(
@@ -59,7 +62,8 @@ public class JdbcPoliciesRepository {
 								.parameters(
 										sip.getDescription(),
 										sip.getFromDateTime() != null ? Timestamp.valueOf(sip.getFromDateTime()): null,
-												sip.getFromDuration() != null ? sip.getFromDuration().toString(): null
+										sip.getFromDuration() != null ? sip.getFromDuration().toString(): null,
+										String.join(",", sip.getOrganizationWhiteList())
 										)
 								.counts()))
 				.then(Mono.just(new Policies(applicationPolicies, serviceInstancePolicies)));
@@ -80,7 +84,8 @@ public class JdbcPoliciesRepository {
 									rs.getString(2),
 									rs.getTimestamp(3) != null ? rs.getTimestamp(3).toLocalDateTime(): null,
 									rs.getString(4) != null ? Duration.parse(rs.getString(4)): null,
-									rs.getBoolean(5)
+									rs.getBoolean(5),
+									rs.getString(6) != null ? Arrays.asList(rs.getString(6).split("\\s*,\\s*")): Collections.emptyList()
 							))
 					.map(ap -> applicationPolicies.add(ap)))
 					.thenMany(
@@ -90,7 +95,8 @@ public class JdbcPoliciesRepository {
 									.get(rs -> new ServiceInstancePolicy(
 											rs.getString(1),
 											rs.getTimestamp(2) != null ? rs.getTimestamp(2).toLocalDateTime(): null,
-											rs.getString(3) != null ? Duration.parse(rs.getString(3)): null
+											rs.getString(3) != null ? Duration.parse(rs.getString(3)): null,
+											rs.getString(4) != null ? Arrays.asList(rs.getString(4).split("\\s*,\\s*")): Collections.emptyList()		
 									))
 							.map(sp -> serviceInstancePolicies.add(sp))))
 					.then(Mono.just(new Policies(applicationPolicies, serviceInstancePolicies)));

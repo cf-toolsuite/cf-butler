@@ -5,23 +5,23 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 import io.pivotal.cfapp.config.ButlerSettings;
-import io.pivotal.cfapp.report.AppInfoCsvReport;
-import io.pivotal.cfapp.task.AppInfoRetrievedEvent;
+import io.pivotal.cfapp.report.AppDetailCsvReport;
+import io.pivotal.cfapp.task.AppDetailRetrievedEvent;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
-public class AppInfoConsoleNotifier implements ApplicationListener<AppInfoRetrievedEvent> {
+public class AppDetailConsoleNotifier implements ApplicationListener<AppDetailRetrievedEvent> {
 
-	private final AppInfoCsvReport report;
+	private final AppDetailCsvReport report;
 	
     @Autowired
-    public AppInfoConsoleNotifier(ButlerSettings appSettings) {
-        this.report = new AppInfoCsvReport(appSettings);
+    public AppDetailConsoleNotifier(ButlerSettings appSettings) {
+        this.report = new AppDetailCsvReport(appSettings);
     }
 
 	@Override
-	public void onApplicationEvent(AppInfoRetrievedEvent event) {
+	public void onApplicationEvent(AppDetailRetrievedEvent event) {
 		log.info(String.join("\n\n", report.generatePreamble(), report.generateDetail(event)));
 	}
 

@@ -18,7 +18,7 @@ import io.pivotal.cfapp.domain.AppDetail;
 import io.pivotal.cfapp.domain.AppRelationship;
 import io.pivotal.cfapp.domain.AppRequest;
 import io.pivotal.cfapp.domain.HistoricalRecord;
-import io.pivotal.cfapp.service.AppInfoService;
+import io.pivotal.cfapp.service.AppDetailService;
 import io.pivotal.cfapp.service.AppRelationshipService;
 import io.pivotal.cfapp.service.HistoricalRecordService;
 import io.pivotal.cfapp.service.PoliciesService;
@@ -31,7 +31,7 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
 
 	private ButlerSettings settings;
 	private DefaultCloudFoundryOperations opsClient;
-    private AppInfoService appInfoService;
+    private AppDetailService appInfoService;
     private AppRelationshipService appRelationshipService;
     private PoliciesService policiesService;
     private HistoricalRecordService historicalRecordService;
@@ -40,7 +40,7 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
     public AppPolicyExecutorTask(
     		ButlerSettings settings,
     		DefaultCloudFoundryOperations opsClient,
-    		AppInfoService appInfoService,
+    		AppDetailService appInfoService,
     		AppRelationshipService appRelationshipService,
     		PoliciesService policiesService,
     		HistoricalRecordService historicalRecordService
@@ -59,6 +59,7 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
     }
     
     public void execute() {
+    	// TODO implement filter based on each policy's organization-whitelist
     	Hooks.onOperatorDebug();
     	deleteApplicationsWithNoServiceBindings()
 	    	.then(deleteApplicationsWithServiceBindingsButDoNotDeleteBoundServiceInstances())

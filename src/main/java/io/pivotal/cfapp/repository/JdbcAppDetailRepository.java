@@ -20,12 +20,12 @@ import reactor.core.publisher.Mono;
 
 @Profile("jdbc")
 @Repository
-public class JdbcAppInfoRepository {
+public class JdbcAppDetailRepository {
 
 	private Database database;
 
 	@Autowired
-	public JdbcAppInfoRepository(Database database) {
+	public JdbcAppDetailRepository(Database database) {
 		this.database = database;
 	}
 

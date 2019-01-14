@@ -17,7 +17,7 @@ import lombok.ToString;
 @AllArgsConstructor(access=AccessLevel.PACKAGE)
 @NoArgsConstructor(access=AccessLevel.PACKAGE)
 @ToString
-public class ServiceDetail {
+public class ServiceInstanceDetail {
     
     private String id;
     private String organization;
@@ -39,8 +39,8 @@ public class ServiceDetail {
                 "name", "service", "description", "plan", "type", "bound applications", "last operation", "last updated", "dashboard url", "requested state");
     }
     
-    public static ServiceDetailBuilder from(ServiceDetail detail) {
-        return ServiceDetail.builder()
+    public static ServiceInstanceDetailBuilder from(ServiceInstanceDetail detail) {
+        return ServiceInstanceDetail.builder()
                             .id(detail.getId())
                             .organization(detail.getOrganization())
                             .space(detail.getSpace())

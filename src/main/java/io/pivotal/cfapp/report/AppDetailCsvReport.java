@@ -4,13 +4,13 @@ import java.time.LocalDateTime;
 
 import io.pivotal.cfapp.config.ButlerSettings;
 import io.pivotal.cfapp.domain.AppDetail;
-import io.pivotal.cfapp.task.AppInfoRetrievedEvent;
+import io.pivotal.cfapp.task.AppDetailRetrievedEvent;
 
-public class AppInfoCsvReport  {
+public class AppDetailCsvReport  {
     
 	private ButlerSettings appSettings;
 	
-	public AppInfoCsvReport(ButlerSettings appSettings) {
+	public AppDetailCsvReport(ButlerSettings appSettings) {
 		this.appSettings = appSettings;
 	}
 
@@ -24,7 +24,7 @@ public class AppInfoCsvReport  {
         return preamble.toString();
     }
     
-    public String generateDetail(AppInfoRetrievedEvent event) {
+    public String generateDetail(AppDetailRetrievedEvent event) {
         StringBuffer details = new StringBuffer();
         details.append("\n");
         details.append(AppDetail.headers());
