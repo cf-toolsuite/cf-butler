@@ -37,7 +37,7 @@ POST /collect
 ### Create a policy
 
 ```
-POST /polciies
+POST /policies
 ```
 
 > See sample policies in each test sub-folder
