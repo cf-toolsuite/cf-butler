@@ -2,6 +2,7 @@ package io.pivotal.cfapp.domain;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -53,6 +54,10 @@ public class ServiceInstancePolicy {
 	@JsonIgnore
 	public boolean whiteListExists() {
 		return !Collections.isEmpty(organizationWhiteList);
+	}
+	
+	public List<String> getOrganizationWhiteList() {
+		return organizationWhiteList != null ? organizationWhiteList: new ArrayList<>();
 	}
 	
 }
