@@ -75,7 +75,7 @@ Based on choice the authorization token provider
 
 If you copied and appended a suffix to the original `application.yml` then you would set `spring.profiles.active` to be that suffix 
 
-E.g., if you had a configuration named `application-pws.yml`
+E.g., if you had a configuration file named `application-pws.yml`
 
 ```
 ./gradlew bootRun -Dspring.profiles.active=pws
@@ -88,6 +88,10 @@ E.g., if you had a configuration named `application-pws.yml`
 Update the value of the `cron` properties in `application.yml`.  Consult this [article](https://www.baeldung.com/spring-scheduled-tasks) and the [Javadoc](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/scheduling/annotation/Scheduled.html#cron--) to understand how to tune it for your purposes.  
 
 > `cron` has two sub-properties: `collection` and `execution`.  Make sure `execution` is scheduled to trigger after `collection`.
+
+### To exclude organizations
+
+Set `cf.organizationBlackList`.  The `system` organization is excluded by default.
 
 ### Troubleshooting
 
@@ -121,6 +125,7 @@ where `{target_foundation_profile}` is something like `pws` or `pcfone`
 The following instructions explain how to get started when `token.provider` is set to `userpass`
 
 Authenticate to a foundation using the API endpoint.
+
 > E.g., login to [Pivotal Web Services](https://login.run.pivotal.io)
 
 ```
@@ -132,15 +137,16 @@ cf login -a https://api.run.pivotal.io
 The following instructions explain how to get started when `token.provider` is set to `sso`
 
 Authenticate to a foundation using the API endpoint
-> E.g., login to [Pivotal Web Services](https://login.run.pcfone.io)
+
+> E.g., login to [PCF One](https://login.run.pcfone.io)
 
 ```
 cf login -a https://api.run.pcfone.io -sso
 ```
 
-Visit the link in the password prompt to retrieve a temporary passcode (e.g., https://login.run.pcfone.io/passcode)
+Visit the link in the password prompt to retrieve a temporary passcode, then complete the login process
 
-> Complete the login process
+> E.g., `https://login.run.pcfone.io/passcode`)
 
 Visit the passcode [link](https://login.run.pcfone.io/passcode) again
 
