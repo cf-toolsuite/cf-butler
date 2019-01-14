@@ -1,6 +1,6 @@
 # Tests for cf-butler
 
-In order to test definition and execution of application and service instance policies we've set up some scripts to orchestrate [cf-cli](http://cli.cloudfoundry.org/en-US/cf/) calls to [push](https://cli.cloudfoundry.org/en-US/cf/push.html), [cs](https://cli.cloudfoundry.org/en-US/cf/create-service.html), [bs](https://cli.cloudfoundry.org/en-US/cf/bind-service.html), [stop](https://cli.cloudfoundry.org/en-US/cf/stop.html].  We've also implemented some test endpoints to trigger on-demand collection and policy execution.  
+In order to test definition and execution of application and service instance policies we've set up some scripts to orchestrate [cf-cli](http://cli.cloudfoundry.org/en-US/cf/) calls to [push](https://cli.cloudfoundry.org/en-US/cf/push.html), [cs](https://cli.cloudfoundry.org/en-US/cf/create-service.html), [bs](https://cli.cloudfoundry.org/en-US/cf/bind-service.html), [stop](https://cli.cloudfoundry.org/en-US/cf/stop.html).  We've also implemented some test endpoints to trigger on-demand collection and policy execution.  
 
 ## How to Run Tests
 
