@@ -6,17 +6,17 @@ import org.springframework.context.ApplicationEvent;
 
 import io.pivotal.cfapp.domain.AppDetail;
 
-public class AppInfoRetrievedEvent extends ApplicationEvent {
+public class AppDetailRetrievedEvent extends ApplicationEvent {
 
     private static final long serialVersionUID = 1L;
 
     private List<AppDetail> detail;
 
-    public AppInfoRetrievedEvent(Object source) {
+    public AppDetailRetrievedEvent(Object source) {
         super(source);
     }
 
-    public AppInfoRetrievedEvent detail(List<AppDetail> detail) {
+    public AppDetailRetrievedEvent detail(List<AppDetail> detail) {
         this.detail = detail;
         return this;
     }

@@ -12,10 +12,10 @@ import org.springframework.stereotype.Component;
 
 import io.pivotal.cfapp.config.ButlerSettings;
 import io.pivotal.cfapp.domain.HistoricalRecord;
-import io.pivotal.cfapp.domain.ServiceDetail;
+import io.pivotal.cfapp.domain.ServiceInstanceDetail;
 import io.pivotal.cfapp.service.HistoricalRecordService;
 import io.pivotal.cfapp.service.PoliciesService;
-import io.pivotal.cfapp.service.ServiceInfoService;
+import io.pivotal.cfapp.service.ServiceInstanceDetailService;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
@@ -25,7 +25,7 @@ public class ServiceInstancePolicyExecutorTask implements ApplicationRunner {
 
 	private ButlerSettings settings;
 	private DefaultCloudFoundryOperations opsClient;
-    private ServiceInfoService serviceInfoService;
+    private ServiceInstanceDetailService serviceInfoService;
     private PoliciesService policiesService;
     private HistoricalRecordService historicalRecordService;
 
@@ -33,7 +33,7 @@ public class ServiceInstancePolicyExecutorTask implements ApplicationRunner {
     public ServiceInstancePolicyExecutorTask(
     		ButlerSettings settings,
     		DefaultCloudFoundryOperations opsClient,
-    		ServiceInfoService serviceInfoService,
+    		ServiceInstanceDetailService serviceInfoService,
     		PoliciesService policiesService,
     		HistoricalRecordService historicalRecordService
     		) {
@@ -67,7 +67,7 @@ public class ServiceInstancePolicyExecutorTask implements ApplicationRunner {
         execute();
     }
     
-    protected Mono<HistoricalRecord> deleteServiceInstance(ServiceDetail sd) {
+    protected Mono<HistoricalRecord> deleteServiceInstance(ServiceInstanceDetail sd) {
     	return DefaultCloudFoundryOperations.builder()
                 .from(opsClient)
                 .organization(sd.getOrganization())

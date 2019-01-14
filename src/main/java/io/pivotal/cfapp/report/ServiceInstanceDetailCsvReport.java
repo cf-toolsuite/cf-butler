@@ -3,14 +3,14 @@ package io.pivotal.cfapp.report;
 import java.time.LocalDateTime;
 
 import io.pivotal.cfapp.config.ButlerSettings;
-import io.pivotal.cfapp.domain.ServiceDetail;
-import io.pivotal.cfapp.task.ServiceInfoRetrievedEvent;
+import io.pivotal.cfapp.domain.ServiceInstanceDetail;
+import io.pivotal.cfapp.task.ServiceInstanceDetailRetrievedEvent;
 
-public class ServiceInstanceInfoCsvReport {
+public class ServiceInstanceDetailCsvReport {
 
 	private ButlerSettings settings;
 
-	public ServiceInstanceInfoCsvReport(ButlerSettings settings) {
+	public ServiceInstanceDetailCsvReport(ButlerSettings settings) {
 		this.settings = settings;
 	}
 
@@ -24,10 +24,10 @@ public class ServiceInstanceInfoCsvReport {
         return preamble.toString();
     }
 
-    public String generateDetail(ServiceInfoRetrievedEvent event) {
+    public String generateDetail(ServiceInstanceDetailRetrievedEvent event) {
     	StringBuffer detail = new StringBuffer();
         detail.append("\n");
-        detail.append(ServiceDetail.headers());
+        detail.append(ServiceInstanceDetail.headers());
         detail.append("\n");
         event.getDetail()
                 .forEach(a -> { 

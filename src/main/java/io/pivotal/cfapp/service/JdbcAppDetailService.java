@@ -6,18 +6,18 @@ import org.springframework.stereotype.Service;
 
 import io.pivotal.cfapp.domain.AppDetail;
 import io.pivotal.cfapp.domain.ApplicationPolicy;
-import io.pivotal.cfapp.repository.JdbcAppInfoRepository;
+import io.pivotal.cfapp.repository.JdbcAppDetailRepository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Profile("jdbc")
 @Service
-public class JdbcAppInfoService implements AppInfoService {
+public class JdbcAppDetailService implements AppDetailService {
 
-	private JdbcAppInfoRepository repo;
+	private JdbcAppDetailRepository repo;
 
 	@Autowired
-	public JdbcAppInfoService(JdbcAppInfoRepository repo) {
+	public JdbcAppDetailService(JdbcAppDetailRepository repo) {
 		this.repo = repo;
 	}
 

@@ -49,13 +49,13 @@ public class DatabaseCreator implements ApplicationRunner {
 	}
 
 	protected void createApplicationPolicyTable(Connection c) throws SQLException {
-		c.prepareStatement("create table application_policy ( description varchar(1000), state varchar(25), from_datetime timestamp, from_duration varchar(25), delete_services boolean )")
+		c.prepareStatement("create table application_policy ( description varchar(1000), state varchar(25), from_datetime timestamp, from_duration varchar(25), delete_services boolean, organization_whitelist clob(20M) )")
 			.execute();
 		
 	}
 	
 	protected void createServiceInstancePolicyTable(Connection c) throws SQLException {
-		c.prepareStatement("create table service_instance_policy ( description varchar(1000), from_datetime timestamp, from_duration varchar(25) )")
+		c.prepareStatement("create table service_instance_policy ( description varchar(1000), from_datetime timestamp, from_duration varchar(25), organization_whitelist clob(20M) )")
 			.execute();
 	}
 	
