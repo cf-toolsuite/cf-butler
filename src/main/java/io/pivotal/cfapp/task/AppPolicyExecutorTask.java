@@ -80,6 +80,10 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
 			            .flux()
 			            .flatMap(p -> Flux.fromIterable(p.getApplicationPolicies()))
 			        	.flatMap(ap -> appInfoService.findByApplicationPolicy(ap, false))
+						.filter(
+								wl -> wl.getT2().whiteListExists() && 
+									wl.getT2().getOrganizationWhiteList().contains(wl.getT1().getOrganization()))
+						.map(ad -> ad.getT1())
 			        	.filter(bl -> !settings.getOrganizationBlackList().contains(bl.getOrganization()))
 			        	.flatMap(this::deleteApplication)
 			            .flatMap(historicalRecordService::save)
@@ -96,6 +100,10 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
 				        .flatMap(p -> Flux.fromIterable(p.getApplicationPolicies()))
 						.filter(f -> f.isDeleteServices() == false)
 						.flatMap(ap -> appInfoService.findByApplicationPolicy(ap, true))
+						.filter(
+								wl -> wl.getT2().whiteListExists() && 
+									wl.getT2().getOrganizationWhiteList().contains(wl.getT1().getOrganization()))
+						.map(ad -> ad.getT1())
 						.filter(bl -> !settings.getOrganizationBlackList().contains(bl.getOrganization()))
 						.flatMap(ar -> appRelationshipService.findByApplicationId(ar.getAppId()))
 						.flatMap(this::unbindServiceInstance)
@@ -116,6 +124,10 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
                 .flatMap(p -> Flux.fromIterable(p.getApplicationPolicies()))
                 .filter(f -> f.isDeleteServices() == true)
                 .flatMap(ap -> appInfoService.findByApplicationPolicy(ap, true))
+                .filter(
+						wl -> wl.getT2().whiteListExists() && 
+							wl.getT2().getOrganizationWhiteList().contains(wl.getT1().getOrganization()))
+				.map(ad -> ad.getT1())
                 .filter(bl -> !settings.getOrganizationBlackList().contains(bl.getOrganization()))
                 .flatMap(ar -> appRelationshipService.findByApplicationId(ar.getAppId()))
                 .collectList()

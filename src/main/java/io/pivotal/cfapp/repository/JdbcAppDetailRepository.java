@@ -17,6 +17,8 @@ import io.pivotal.cfapp.domain.ApplicationPolicy;
 import io.reactivex.Flowable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
+import reactor.util.function.Tuples;
 
 @Profile("jdbc")
 @Repository
@@ -77,13 +79,13 @@ public class JdbcAppDetailRepository {
 		return Flux.from(result).then();
 	}
 	
-	public Flux<AppDetail> findByApplicationPolicy(ApplicationPolicy policy, boolean mayHaveServiceBindings) {
+	public Flux<Tuple2<AppDetail, ApplicationPolicy>> findByApplicationPolicy(ApplicationPolicy policy, boolean mayHaveServiceBindings) {
 		return mayHaveServiceBindings == true 
 				? findAppicationsThatMayHaveServiceBindings(policy)
 						: findAppicationsThatDoNotHaveServiceBindings(policy);
 	}
 	
-	private Flux<AppDetail> findAppicationsThatMayHaveServiceBindings(ApplicationPolicy policy) {
+	private Flux<Tuple2<AppDetail, ApplicationPolicy>> findAppicationsThatMayHaveServiceBindings(ApplicationPolicy policy) {
 		String select = "select id, organization, space, app_id, app_name, buildpack, image, stack, running_instances, total_instances, urls, last_pushed, last_event, last_event_actor, last_event_time, requested_state";
 		String from = "from app_detail";
 		StringBuilder where = new StringBuilder();
@@ -101,15 +103,15 @@ public class JdbcAppDetailRepository {
 		}
 		String orderBy = "order by organization, space, app_name";
 		String sql = String.join(" ", select, from, where, orderBy);
-		Flowable<AppDetail> result = 
+		Flowable<Tuple2<AppDetail, ApplicationPolicy>> result = 
 			database
 				.select(sql)
 				.parameters(paramValues)
-				.get(rs -> fromResultSet(rs));
+				.get(rs -> toTuple(fromResultSet(rs), policy));
 		return Flux.from(result);
 	}
 	
-	private Flux<AppDetail> findAppicationsThatDoNotHaveServiceBindings(ApplicationPolicy policy) {
+	private Flux<Tuple2<AppDetail, ApplicationPolicy>> findAppicationsThatDoNotHaveServiceBindings(ApplicationPolicy policy) {
 		String select = 
 				"select ad.id, ad.organization, ad.space, ad.app_id, ad.app_name, ad.buildpack, ad.image, " + 
 				"ad.stack, ad.running_instances, ad.total_instances, ad.urls, ad.last_pushed, ad.last_event, " + 
@@ -131,11 +133,11 @@ public class JdbcAppDetailRepository {
 		}
 		String orderBy = "order by ad.organization, ad.space, ad.app_name";
 		String sql = String.join(" ", select, from, leftJoin, where, orderBy);
-		Flowable<AppDetail> result = 
+		Flowable<Tuple2<AppDetail, ApplicationPolicy>> result = 
 			database
 				.select(sql)
 				.parameters(paramValues)
-				.get(rs -> fromResultSet(rs));
+				.get(rs -> toTuple(fromResultSet(rs), policy));
 		return Flux.from(result);
 	}
 	
@@ -159,5 +161,9 @@ public class JdbcAppDetailRepository {
 					.lastEventTime(rs.getTimestamp(15) != null ? rs.getTimestamp(15).toLocalDateTime(): null)
 					.requestedState(rs.getString(16))
 					.build();
+	}
+	
+	private Tuple2<AppDetail, ApplicationPolicy> toTuple(AppDetail detail, ApplicationPolicy policy) {
+		return Tuples.of(detail, policy);
 	}
 }

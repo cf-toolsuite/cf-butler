@@ -70,8 +70,8 @@ public class JdbcPoliciesRepository {
 	}
 
 	public Mono<Policies> findAll() {
-		String selectAllApplicationPolicies = "select description, state, from_datetime, from_duration, delete_services from application_policy";
-		String selectAllServiceInstancePolicies = "select description, from_datetime, from_duration from service_instance_policy";
+		String selectAllApplicationPolicies = "select description, state, from_datetime, from_duration, delete_services, organization_whitelist from application_policy";
+		String selectAllServiceInstancePolicies = "select description, from_datetime, from_duration, organization_whitelist from service_instance_policy";
 		List<ApplicationPolicy> applicationPolicies = new ArrayList<>();
 		List<ServiceInstancePolicy> serviceInstancePolicies = new ArrayList<>();
 		

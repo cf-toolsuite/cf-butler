@@ -19,6 +19,8 @@ import io.pivotal.cfapp.domain.ServiceInstancePolicy;
 import io.reactivex.Flowable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
+import reactor.util.function.Tuples;
 
 @Profile("jdbc")
 @Repository
@@ -77,7 +79,7 @@ public class JdbcServiceInstanceDetailRepository {
 		return Flux.from(result).then();
 	}
 	
-	public Flux<ServiceInstanceDetail> findByServiceInstancePolicy(ServiceInstancePolicy policy) {
+	public Flux<Tuple2<ServiceInstanceDetail, ServiceInstancePolicy>> findByServiceInstancePolicy(ServiceInstancePolicy policy) {
 		String select = "select id, organization, space, service_id, name, service, description, plan, type, bound_applications, last_operation, last_updated, dashboard_url, requested_state";
 		String from = "from service_detail";
 		StringBuilder where = new StringBuilder();
@@ -94,14 +96,18 @@ public class JdbcServiceInstanceDetailRepository {
 		}
 		String orderBy = "order by organization, space, name";
 		String sql = String.join(" ", select, from, where, orderBy);
-		Flowable<ServiceInstanceDetail> result = 
+		Flowable<Tuple2<ServiceInstanceDetail, ServiceInstancePolicy>> result = 
 			database
 				.select(sql)
 				.parameters(paramValues)
-				.get(rs -> fromResultSet(rs));
+				.get(rs -> toTuple(fromResultSet(rs), policy));
 		return Flux.from(result);
 	}
 	
+	private Tuple2<ServiceInstanceDetail, ServiceInstancePolicy> toTuple(ServiceInstanceDetail detail, ServiceInstancePolicy policy) {
+		return Tuples.of(detail, policy);
+	}
+
 	private ServiceInstanceDetail fromResultSet(ResultSet rs) throws SQLException {
 		return ServiceInstanceDetail
 				.builder()

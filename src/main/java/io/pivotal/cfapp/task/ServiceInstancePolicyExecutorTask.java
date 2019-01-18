@@ -56,8 +56,12 @@ public class ServiceInstancePolicyExecutorTask implements ApplicationRunner {
 	        .flux()
 	        .flatMap(p -> Flux.fromIterable(p.getServiceInstancePolicies()))
 	    	.flatMap(sp -> serviceInfoService.findByServiceInstancePolicy(sp))
+	    	.filter(
+					wl -> wl.getT2().whiteListExists() && 
+						wl.getT2().getOrganizationWhiteList().contains(wl.getT1().getOrganization()))
+			.map(sid -> sid.getT1())
 	    	.filter(bl -> !settings.getOrganizationBlackList().contains(bl.getOrganization()))
-	    	.flatMap(sd -> deleteServiceInstance(sd))
+	    	.flatMap(ds -> deleteServiceInstance(ds))
 	        .flatMap(historicalRecordService::save)
 	        .subscribe();
     }
