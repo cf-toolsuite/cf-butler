@@ -1,9 +1,11 @@
 package io.pivotal.cfapp.config;
 
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.CollectionUtils;
 
 import lombok.Data;
 
@@ -12,11 +14,33 @@ import lombok.Data;
 @ConfigurationProperties(prefix = "cf")
 public class ButlerSettings {
 
+	private static final String SYSTEM_ORG = "system";
+	private static final Set<String> DEFAULT_BLACKLIST;
+	
+	static {
+		DEFAULT_BLACKLIST = new HashSet<>();
+		DEFAULT_BLACKLIST.add(SYSTEM_ORG);
+	}
+	
     private String apiHost;
     private boolean sslValidationSkipped;
     private String username;
     private String password;
     private String passcode;
-    private List<String> organizationBlackList;
+    private Set<String> organizationBlackList;
 
+    public Set<String> getOrganizationBlackList() {
+    	return CollectionUtils.isEmpty(organizationBlackList) ? 
+    			DEFAULT_BLACKLIST: 
+    				organizationBlackList.contains(SYSTEM_ORG) ? 
+    						organizationBlackList : merge(organizationBlackList);
+    }
+    
+    private Set<String> merge(Set<String> orgBlackList) {
+    	Set<String> result = new HashSet<>();
+    	result.addAll(orgBlackList);
+    	result.addAll(DEFAULT_BLACKLIST);
+    	return result;
+    }
+    
 }

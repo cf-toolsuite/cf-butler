@@ -2,6 +2,7 @@ package io.pivotal.cfapp.task;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.function.Predicate;
 
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.operations.applications.DeleteApplicationRequest;
@@ -17,6 +18,7 @@ import io.pivotal.cfapp.config.ButlerSettings;
 import io.pivotal.cfapp.domain.AppDetail;
 import io.pivotal.cfapp.domain.AppRelationship;
 import io.pivotal.cfapp.domain.AppRequest;
+import io.pivotal.cfapp.domain.ApplicationPolicy;
 import io.pivotal.cfapp.domain.HistoricalRecord;
 import io.pivotal.cfapp.service.AppDetailService;
 import io.pivotal.cfapp.service.AppRelationshipService;
@@ -25,6 +27,7 @@ import io.pivotal.cfapp.service.PoliciesService;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
 
 @Component
 public class AppPolicyExecutorTask implements ApplicationRunner {
@@ -80,11 +83,9 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
 			            .flux()
 			            .flatMap(p -> Flux.fromIterable(p.getApplicationPolicies()))
 			        	.flatMap(ap -> appInfoService.findByApplicationPolicy(ap, false))
-						.filter(
-								wl -> wl.getT2().whiteListExists() && 
-									wl.getT2().getOrganizationWhiteList().contains(wl.getT1().getOrganization()))
+						.filter(isWhitelisted())
 						.map(ad -> ad.getT1())
-			        	.filter(bl -> !settings.getOrganizationBlackList().contains(bl.getOrganization()))
+			        	.filter(isBlacklisted())
 			        	.flatMap(this::deleteApplication)
 			            .flatMap(historicalRecordService::save)
 			            .then();
@@ -100,11 +101,9 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
 				        .flatMap(p -> Flux.fromIterable(p.getApplicationPolicies()))
 						.filter(f -> f.isDeleteServices() == false)
 						.flatMap(ap -> appInfoService.findByApplicationPolicy(ap, true))
-						.filter(
-								wl -> wl.getT2().whiteListExists() && 
-									wl.getT2().getOrganizationWhiteList().contains(wl.getT1().getOrganization()))
+						.filter(isWhitelisted())
 						.map(ad -> ad.getT1())
-						.filter(bl -> !settings.getOrganizationBlackList().contains(bl.getOrganization()))
+						.filter(isBlacklisted())
 						.flatMap(ar -> appRelationshipService.findByApplicationId(ar.getAppId()))
 						.flatMap(this::unbindServiceInstance)
 						.distinct()
@@ -124,11 +123,9 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
                 .flatMap(p -> Flux.fromIterable(p.getApplicationPolicies()))
                 .filter(f -> f.isDeleteServices() == true)
                 .flatMap(ap -> appInfoService.findByApplicationPolicy(ap, true))
-                .filter(
-						wl -> wl.getT2().whiteListExists() && 
-							wl.getT2().getOrganizationWhiteList().contains(wl.getT1().getOrganization()))
+                .filter(isWhitelisted())
 				.map(ad -> ad.getT1())
-                .filter(bl -> !settings.getOrganizationBlackList().contains(bl.getOrganization()))
+                .filter(isBlacklisted())
                 .flatMap(ar -> appRelationshipService.findByApplicationId(ar.getAppId()))
                 .collectList()
                 .flatMap(appRelationships -> 
@@ -235,4 +232,13 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
 										.name(String.join("::", relationship.getServiceName(), relationship.getServiceType(), relationship.getServicePlan()))
 										.build());			
     }
+    
+    private Predicate<? super AppDetail> isBlacklisted() {
+		return bl -> !settings.getOrganizationBlackList().contains(bl.getOrganization());
+	}
+    
+    private Predicate<? super Tuple2<AppDetail, ApplicationPolicy>> isWhitelisted() {
+		return wl -> wl.getT2().whiteListExists() ? 
+			wl.getT2().getOrganizationWhiteList().contains(wl.getT1().getOrganization()): true;
+	}
 }
