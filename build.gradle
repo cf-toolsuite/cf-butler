@@ -35,8 +35,9 @@ dependencyManagement {
 }
 
 dependencies {
-    compileOnly('org.projectlombok:lombok:1.18.4')
-    compileOnly('org.springframework.boot:spring-boot-configuration-processor')
+	annotationProcessor('org.projectlombok:lombok:1.18.4')
+    implementation('org.projectlombok:lombok:1.18.4')
+    implementation('org.springframework.boot:spring-boot-configuration-processor')
     implementation('org.apache.commons:commons-lang3:3.7')
     implementation('com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.8')
     implementation('org.springframework.credhub:spring-credhub-cloud-connector:2.0.0.RELEASE')
