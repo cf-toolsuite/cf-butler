@@ -2,7 +2,7 @@ package io.pivotal.cfapp.domain;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.springframework.util.CollectionUtils;
@@ -52,13 +52,9 @@ public class ServiceInstancePolicy {
 						&& !Optional.fromNullable(fromDuration).isPresent());
 	}
 	
-	@JsonIgnore
-	public boolean whiteListExists() {
-		return !CollectionUtils.isEmpty(organizationWhiteList);
-	}
-	
 	public Set<String> getOrganizationWhiteList() {
-		return organizationWhiteList != null ? organizationWhiteList: Collections.emptySet();
+		return CollectionUtils.isEmpty(organizationWhiteList) ? 
+				new HashSet<>(): organizationWhiteList;
 	}
 	
 }

@@ -4,7 +4,6 @@ import java.sql.Timestamp;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -86,7 +85,7 @@ public class JdbcPoliciesRepository {
 									rs.getTimestamp(3) != null ? rs.getTimestamp(3).toLocalDateTime(): null,
 									rs.getString(4) != null ? Duration.parse(rs.getString(4)): null,
 									rs.getBoolean(5),
-									rs.getString(6) != null ? new HashSet<String>(Arrays.asList(rs.getString(6).split("\\s*,\\s*"))): Collections.emptySet()
+									rs.getString(6) != null ? new HashSet<String>(Arrays.asList(rs.getString(6).split("\\s*,\\s*"))): new HashSet<>()
 							))
 					.map(ap -> applicationPolicies.add(ap)))
 					.thenMany(
@@ -97,7 +96,7 @@ public class JdbcPoliciesRepository {
 											rs.getString(1),
 											rs.getTimestamp(2) != null ? rs.getTimestamp(2).toLocalDateTime(): null,
 											rs.getString(3) != null ? Duration.parse(rs.getString(3)): null,
-											rs.getString(4) != null ? new HashSet<String>(Arrays.asList(rs.getString(4).split("\\s*,\\s*"))): Collections.emptySet()		
+											rs.getString(4) != null ? new HashSet<String>(Arrays.asList(rs.getString(4).split("\\s*,\\s*"))): new HashSet<>()		
 									))
 							.map(sp -> serviceInstancePolicies.add(sp))))
 					.then(Mono.just(new Policies(applicationPolicies, serviceInstancePolicies)));

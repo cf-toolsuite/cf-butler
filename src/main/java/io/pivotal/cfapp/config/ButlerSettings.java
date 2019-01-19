@@ -15,12 +15,7 @@ import lombok.Data;
 public class ButlerSettings {
 
 	private static final String SYSTEM_ORG = "system";
-	private static final Set<String> DEFAULT_BLACKLIST;
-	
-	static {
-		DEFAULT_BLACKLIST = new HashSet<>();
-		DEFAULT_BLACKLIST.add(SYSTEM_ORG);
-	}
+	private static final Set<String> DEFAULT_BLACKLIST = Set.of(SYSTEM_ORG);
 	
     private String apiHost;
     private boolean sslValidationSkipped;
@@ -30,11 +25,11 @@ public class ButlerSettings {
     private Set<String> organizationBlackList;
 
     public Set<String> getOrganizationBlackList() {
-    	return CollectionUtils.isEmpty(organizationBlackList) ? 
-    			DEFAULT_BLACKLIST: 
-    				organizationBlackList.contains(SYSTEM_ORG) ? 
-    						organizationBlackList : merge(organizationBlackList);
-    }
+    	while (organizationBlackList.remove(""));
+    	Set<String> nonEmptyBlacklist = CollectionUtils.isEmpty(organizationBlackList) ? 
+    			DEFAULT_BLACKLIST: organizationBlackList;
+    	return merge(nonEmptyBlacklist);
+    } 
     
     private Set<String> merge(Set<String> orgBlackList) {
     	Set<String> result = new HashSet<>();

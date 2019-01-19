@@ -1,7 +1,8 @@
 package io.pivotal.cfapp.task;
 
 import java.time.LocalDateTime;
-import java.util.function.Predicate;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.operations.services.DeleteServiceInstanceRequest;
@@ -10,6 +11,7 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import io.pivotal.cfapp.config.ButlerSettings;
 import io.pivotal.cfapp.domain.HistoricalRecord;
@@ -21,7 +23,6 @@ import io.pivotal.cfapp.service.ServiceInstanceDetailService;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
-import reactor.util.function.Tuple2;
 
 @Component
 public class ServiceInstancePolicyExecutorTask implements ApplicationRunner {
@@ -59,10 +60,9 @@ public class ServiceInstancePolicyExecutorTask implements ApplicationRunner {
 	        .flux()
 	        .flatMap(p -> Flux.fromIterable(p.getServiceInstancePolicies()))
 	    	.flatMap(sp -> serviceInfoService.findByServiceInstancePolicy(sp))
-	    	.filter(isWhitelisted())
-			.map(sid -> sid.getT1())
-	    	.filter(isBlacklisted())
-	    	.flatMap(ds -> deleteServiceInstance(ds))
+	    	.filter(wl -> isWhitelisted(wl.getT2(), wl.getT1().getOrganization()))
+        	.filter(bl -> isBlacklisted(bl.getT1().getOrganization()))
+	    	.flatMap(ds -> deleteServiceInstance(ds.getT1()))
 	        .flatMap(historicalRecordService::save)
 	        .subscribe();
     }
@@ -91,12 +91,17 @@ public class ServiceInstancePolicyExecutorTask implements ApplicationRunner {
 										.build());			
     }
     
-    private Predicate<? super ServiceInstanceDetail> isBlacklisted() {
-		return bl -> !settings.getOrganizationBlackList().contains(bl.getOrganization());
+    private boolean isBlacklisted(String  organization) {
+		return !settings.getOrganizationBlackList().contains(organization);
 	}
     
-    private Predicate<? super Tuple2<ServiceInstanceDetail, ServiceInstancePolicy>> isWhitelisted() {
-		return wl -> wl.getT2().whiteListExists() ? 
-			wl.getT2().getOrganizationWhiteList().contains(wl.getT1().getOrganization()): true;
+    private boolean isWhitelisted(ServiceInstancePolicy policy, String organization) {
+    	Set<String> prunedSet = new HashSet<>(policy.getOrganizationWhiteList());
+    	while (prunedSet.remove(""));
+    	Set<String> whitelist = 
+    			CollectionUtils.isEmpty(prunedSet) ? 
+    					prunedSet: policy.getOrganizationWhiteList();
+    	return 
+			whitelist.isEmpty() ? true: policy.getOrganizationWhiteList().contains(organization);
 	}
 }
