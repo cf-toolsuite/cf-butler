@@ -25,23 +25,25 @@ public class JdbcHistoricalRecordRepository {
 	}
 
 	public Mono<HistoricalRecord> save(HistoricalRecord entity) {
-		String createOne = "insert into historical_record (datetime_removed, organization, space, id, type, name) values (?, ?, ?, ?, ?, ?)";
-		return Flux.from(database
+		String createOne = "insert into historical_record (transaction_datetime, action_taken, organization, space, app_id, service_id, type, name) values (?, ?, ?, ?, ?, ?, ?, ?)";
+		return Mono.from(database
 							.update(createOne)
 							.parameters(
-								entity.getDateTimeRemoved() != null ? Timestamp.valueOf(entity.getDateTimeRemoved()): null,
+								entity.getTransactionDateTime() != null ? Timestamp.valueOf(entity.getTransactionDateTime()): null,
+								entity.getActionTaken(),
 								entity.getOrganization(),
 								entity.getSpace(),
-								entity.getId(),
+								entity.getAppId(),
+								entity.getServiceId(),
 								entity.getType(),
 								entity.getName()
 							)
-							.counts())
-							.then(Mono.just(entity));
+							.counts()
+							.map(r -> entity));
 	}
 
 	public Flux<HistoricalRecord> findAll() {
-		String selectAll = "select datetime_removed, organization, space, id, type, name from historical_record order by datetime_removed desc";
+		String selectAll = "select transaction_datetime, action_taken, organization, space, app_id, service_id, type, name from historical_record order by transaction_datetime desc";
 		return Flux.from(database
 							.select(selectAll)
 							.get(rs -> fromResultSet(rs)));
@@ -50,12 +52,14 @@ public class JdbcHistoricalRecordRepository {
 	private HistoricalRecord fromResultSet(ResultSet rs) throws SQLException {
 		return HistoricalRecord
 				.builder()
-					.dateTimeRemoved(rs.getTimestamp(1) != null ? rs.getTimestamp(1).toLocalDateTime(): null)
-					.organization(rs.getString(2))
-					.space(rs.getString(3))
-					.id(rs.getString(4))
-					.type(rs.getString(5))
-					.name(rs.getString(6))
+					.transactionDateTime(rs.getTimestamp(1) != null ? rs.getTimestamp(1).toLocalDateTime(): null)
+					.actionTaken(rs.getString(2))
+					.organization(rs.getString(3))
+					.space(rs.getString(4))
+					.appId(rs.getString(5))
+					.serviceId(rs.getString(6))
+					.type(rs.getString(7))
+					.name(rs.getString(8))
 					.build();
 	}
 }

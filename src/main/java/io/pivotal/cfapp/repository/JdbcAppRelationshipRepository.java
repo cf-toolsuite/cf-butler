@@ -25,7 +25,7 @@ public class JdbcAppRelationshipRepository {
 
 	public Mono<AppRelationship> save(AppRelationship entity) {
 		String createOne = "insert into app_relationship (organization, space, app_id, app_name, service_id, service_name, service_plan, service_type) values (?, ?, ?, ?, ?, ?, ?, ?)";
-		return Flux.from(database
+		return Mono.from(database
 							.update(createOne)
 							.parameters(
 								entity.getOrganization(),
@@ -37,8 +37,8 @@ public class JdbcAppRelationshipRepository {
 								entity.getServicePlan(),
 								entity.getServiceType()
 							)
-							.counts())
-							.then(Mono.just(entity));
+							.counts()
+							.map(r -> entity));
 	}
 
 	public Flux<AppRelationship> findAll() {

@@ -2,8 +2,10 @@ package io.pivotal.cfapp.domain;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -12,7 +14,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.github.davidmoten.guavamini.Optional;
 
-import io.jsonwebtoken.lang.Collections;
 import lombok.Getter;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -30,13 +31,13 @@ public class ServiceInstancePolicy {
 	private Duration fromDuration;
 	
 	@JsonProperty("organization-whitelist")
-	private List<String> organizationWhiteList;
+	private Set<String> organizationWhiteList;
 
 	@JsonCreator
 	public ServiceInstancePolicy(@JsonProperty("description") String description, 
 			@JsonProperty("from-datetime") LocalDateTime fromDateTime, 
 			@JsonProperty("from-duration") Duration fromDuration,
-			@JsonProperty("organization-whitelist") List<String> organizationWhiteList) {
+			@JsonProperty("organization-whitelist") Set<String> organizationWhiteList) {
 		this.description = description;
 		this.fromDateTime = fromDateTime;
 		this.fromDuration = fromDuration;
@@ -51,13 +52,9 @@ public class ServiceInstancePolicy {
 						&& !Optional.fromNullable(fromDuration).isPresent());
 	}
 	
-	@JsonIgnore
-	public boolean whiteListExists() {
-		return !Collections.isEmpty(organizationWhiteList);
-	}
-	
-	public List<String> getOrganizationWhiteList() {
-		return organizationWhiteList != null ? organizationWhiteList: new ArrayList<>();
+	public Set<String> getOrganizationWhiteList() {
+		return CollectionUtils.isEmpty(organizationWhiteList) ? 
+				new HashSet<>(): organizationWhiteList;
 	}
 	
 }

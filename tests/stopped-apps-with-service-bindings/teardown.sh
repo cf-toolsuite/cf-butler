@@ -2,7 +2,4 @@
 
 set -e
 
-export TODAY=`date +%Y-%m-%d`
-
-rm -Rf tmp/$TODAY
-
+rm -Rf tmp

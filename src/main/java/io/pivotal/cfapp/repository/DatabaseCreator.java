@@ -65,7 +65,7 @@ public class DatabaseCreator implements ApplicationRunner {
 	}
 	
 	protected void createHistoricalRecordTable(Connection c) throws SQLException {
-		c.prepareStatement("create table historical_record ( datetime_removed timestamp, organization varchar(100), space varchar(100), id varchar(50), type varchar(20), name varchar(500) )")
+		c.prepareStatement("create table historical_record ( transaction_datetime timestamp, action_taken varchar(20), organization varchar(100), space varchar(100), app_id varchar(50), service_id varchar(50), type varchar(20), name varchar(300) )")
 			.execute();
 	}
 	

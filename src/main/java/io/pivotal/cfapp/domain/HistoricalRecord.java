@@ -18,23 +18,26 @@ import lombok.ToString;
 @ToString
 public class HistoricalRecord {
 
-	private LocalDateTime dateTimeRemoved;
+
+	private LocalDateTime transactionDateTime;
+	private String actionTaken;
 	private String organization;
 	private String space;
-	private String id;
+	private String appId;
+	private String serviceId;
 	private String type;
 	private String name;
 	
 	public static String headers() {
-        return String.join(",", "date/time removed", "organization", "space",
-                "id", "type", "name");
+        return String.join(",", "transaction date/time", "action taken", "organization", "space",
+                "application id", "service id", "type", "name");
     }
 	
 	public String toCsv() {
         return String
-                .join(",", wrap(getDateTimeRemoved() != null ? getDateTimeRemoved().toString(): ""), 
-                		wrap(getOrganization()), wrap(getSpace()), wrap(getId()),
-                        wrap(getType()), wrap(getName()));
+                .join(",", wrap(getTransactionDateTime() != null ? getTransactionDateTime().toString(): ""),
+                		wrap(getActionTaken()), wrap(getOrganization()), wrap(getSpace()), wrap(getAppId()),
+                        wrap(getServiceId()), wrap(getType()), wrap(getName()));
     }
     
     private String wrap(String value) {

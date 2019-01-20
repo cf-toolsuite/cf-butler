@@ -4,7 +4,7 @@ set -e
 
 export ORG=lighthouse
 export SPACE=qa
-export TODAY=`date +%Y-%m-%d`
+export TODAY=`date +%Y-%m-%d`-$(uuidgen)
 
 mkdir -p tmp/$TODAY
 cd tmp/$TODAY

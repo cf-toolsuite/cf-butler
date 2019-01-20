@@ -8,6 +8,7 @@ import io.pivotal.cfapp.domain.ServiceInstancePolicy;
 import io.pivotal.cfapp.repository.JdbcServiceInstanceDetailRepository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
 
 @Profile("jdbc")
 @Service
@@ -36,7 +37,7 @@ public class JdbcServiceInstanceDetailService implements ServiceInstanceDetailSe
 	}
 
 	@Override
-	public Flux<ServiceInstanceDetail> findByServiceInstancePolicy(ServiceInstancePolicy policy) {
+	public Flux<Tuple2<ServiceInstanceDetail, ServiceInstancePolicy>> findByServiceInstancePolicy(ServiceInstancePolicy policy) {
 		return repo.findByServiceInstancePolicy(policy);
 	}
 
