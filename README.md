@@ -1,6 +1,6 @@
 # Pivotal Application Service > Butler
 
-> This project is in alpha state. Work is on-going.
+> Incubating.
  
 [![Build Status](https://travis-ci.org/pacphi/cf-butler.svg?branch=master)](https://travis-ci.org/pacphi/cf-butler) [![Known Vulnerabilities](https://snyk.io/test/github/pacphi/cf-butler/badge.svg)](https://snyk.io/test/github/pacphi/cf-butler)
 
