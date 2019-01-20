@@ -12,6 +12,8 @@ public interface AppDetailService {
 
 	Mono<AppDetail> save(AppDetail entity);
 
+	Mono<AppDetail> findByAppId(String appId);
+	
 	Flux<AppDetail> findAll();
 		
 	Flux<Tuple2<AppDetail, ApplicationPolicy>> findByApplicationPolicy(ApplicationPolicy policy, boolean mayHaveServiceBindings);

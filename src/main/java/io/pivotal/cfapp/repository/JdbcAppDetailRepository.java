@@ -79,6 +79,14 @@ public class JdbcAppDetailRepository {
 		return Flux.from(result).then();
 	}
 	
+	public Mono<AppDetail> findByAppId(String appId) {
+		String selectOne = "select id, organization, space, app_id, app_name, buildpack, image, stack, running_instances, total_instances, urls, last_pushed, last_event, last_event_actor, last_event_time, requested_state from app_detail where app_id = ?";
+		return Mono.from(database
+			.select(selectOne)
+			.parameter(appId)
+			.get(rs -> fromResultSet(rs)));
+	}
+	
 	public Flux<Tuple2<AppDetail, ApplicationPolicy>> findByApplicationPolicy(ApplicationPolicy policy, boolean mayHaveServiceBindings) {
 		return mayHaveServiceBindings == true 
 				? findAppicationsThatMayHaveServiceBindings(policy)
@@ -166,4 +174,5 @@ public class JdbcAppDetailRepository {
 	private Tuple2<AppDetail, ApplicationPolicy> toTuple(AppDetail detail, ApplicationPolicy policy) {
 		return Tuples.of(detail, policy);
 	}
+
 }

@@ -31,6 +31,11 @@ public class JdbcAppDetailService implements AppDetailService {
 	public Mono<AppDetail> save(AppDetail entity) {
 		return repo.save(entity);
 	}
+	
+	@Override
+	public Mono<AppDetail> findByAppId(String appId) {
+		return repo.findByAppId(appId);
+	}
 
 	@Override
 	public Flux<AppDetail> findAll() {

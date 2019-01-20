@@ -80,15 +80,16 @@ public class ServiceInstancePolicyExecutorTask implements ApplicationRunner {
                 .build()
 					.services()
 						.deleteInstance(DeleteServiceInstanceRequest.builder().name(sd.getName()).build())
-						.map(r -> HistoricalRecord
+						.then(Mono.just(HistoricalRecord
 									.builder()
-										.dateTimeRemoved(LocalDateTime.now())
+										.transactionDateTime(LocalDateTime.now())
+										.actionTaken("delete")
 										.organization(sd.getOrganization())
 										.space(sd.getSpace())
-										.id(sd.getServiceId())
+										.serviceId(sd.getServiceId())
 										.type("service-instance")
-										.name(String.join("::", sd.getName(), sd.getType(), sd.getPlan()))
-										.build());			
+										.name(String.join("____", sd.getName(), sd.getType(), sd.getPlan()))
+										.build()));			
     }
     
     private boolean isBlacklisted(String  organization) {
