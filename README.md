@@ -89,9 +89,33 @@ Update the value of the `cron` properties in `application.yml`.  Consult this [a
 
 > `cron` has two sub-properties: `collection` and `execution`.  Make sure `execution` is scheduled to trigger after `collection`.
 
-### To exclude organizations
+### Filtering organizations
+
+#### Blacklist
 
 Set `cf.organizationBlackList`.  The `system` organization is excluded by default.
+
+Edit `application.yml` and add
+
+```
+cf:
+  organizationBlackList:
+    - system
+```
+
+or
+
+Add an entry in your `config/secrets.json` like
+
+```
+  "CF_ORGANIZATION-BLACK-LIST": [ "system" ]
+```
+
+#### Whitelist
+
+Within each [ApplicationPolicy](https://github.com/pacphi/cf-butler/blob/master/src/main/java/io/pivotal/cfapp/domain/ApplicationPolicy.java) or [ServiceInstanceDetail](https://github.com/pacphi/cf-butler/blob/master/src/main/java/io/pivotal/cfapp/domain/ServiceInstancePolicy.java) you may optionally specify a list of organizations that will be whitelisted.  Policy execution will be restricted to just these organizations in the whitelist.
+
+> If the organization whitelist is not specified in a policy then that policy's execution applies to all organizations on the foundation (except for those in the organization blacklist).
 
 ### Troubleshooting
 
@@ -205,10 +229,11 @@ POST /policies
       "delete-services": "false"
     },
     {
-      "description": "Remove stopped applications that are older than some duration from now",
+      "description": "Remove stopped applications that are older than some duration from now and restricted to whitelisted organizations",
       "state": "stopped",
       "from-duration": "P1D",
-      "delete-services": "true"
+      "delete-services": "true",
+      "organization-whitelist": [ "zoo-labs" ]
     }
   ],
   "service-instance-policies": [
@@ -217,8 +242,9 @@ POST /policies
       "from-datetime": "2018-12-01T08:00:00"
     },
     {
-      "description": "Remove orphaned services that are older than some duration from now",
-      "from-duration": "P1D"
+      "description": "Remove orphaned services that are older than some duration from now and restricted to whitelisted organizations",
+      "from-duration": "P1D",
+      "organization-whitelist": [ "zoo-labs" ]
     }
   ]
 }

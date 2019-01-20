@@ -9,6 +9,7 @@ import io.pivotal.cfapp.domain.ApplicationPolicy;
 import io.pivotal.cfapp.repository.JdbcAppDetailRepository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
 
 @Profile("jdbc")
 @Service
@@ -30,6 +31,11 @@ public class JdbcAppDetailService implements AppDetailService {
 	public Mono<AppDetail> save(AppDetail entity) {
 		return repo.save(entity);
 	}
+	
+	@Override
+	public Mono<AppDetail> findByAppId(String appId) {
+		return repo.findByAppId(appId);
+	}
 
 	@Override
 	public Flux<AppDetail> findAll() {
@@ -37,7 +43,7 @@ public class JdbcAppDetailService implements AppDetailService {
 	}
 
 	@Override
-	public Flux<AppDetail> findByApplicationPolicy(ApplicationPolicy policy, boolean mayHaveServiceBindings) {
+	public Flux<Tuple2<AppDetail, ApplicationPolicy>> findByApplicationPolicy(ApplicationPolicy policy, boolean mayHaveServiceBindings) {
 		return repo.findByApplicationPolicy(policy, mayHaveServiceBindings);
 	}
 

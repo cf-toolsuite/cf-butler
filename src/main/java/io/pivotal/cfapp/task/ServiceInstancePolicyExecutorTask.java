@@ -1,6 +1,8 @@
 package io.pivotal.cfapp.task;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.operations.services.DeleteServiceInstanceRequest;
@@ -9,10 +11,12 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import io.pivotal.cfapp.config.ButlerSettings;
 import io.pivotal.cfapp.domain.HistoricalRecord;
 import io.pivotal.cfapp.domain.ServiceInstanceDetail;
+import io.pivotal.cfapp.domain.ServiceInstancePolicy;
 import io.pivotal.cfapp.service.HistoricalRecordService;
 import io.pivotal.cfapp.service.PoliciesService;
 import io.pivotal.cfapp.service.ServiceInstanceDetailService;
@@ -56,8 +60,9 @@ public class ServiceInstancePolicyExecutorTask implements ApplicationRunner {
 	        .flux()
 	        .flatMap(p -> Flux.fromIterable(p.getServiceInstancePolicies()))
 	    	.flatMap(sp -> serviceInfoService.findByServiceInstancePolicy(sp))
-	    	.filter(bl -> !settings.getOrganizationBlackList().contains(bl.getOrganization()))
-	    	.flatMap(sd -> deleteServiceInstance(sd))
+	    	.filter(wl -> isWhitelisted(wl.getT2(), wl.getT1().getOrganization()))
+        	.filter(bl -> isBlacklisted(bl.getT1().getOrganization()))
+	    	.flatMap(ds -> deleteServiceInstance(ds.getT1()))
 	        .flatMap(historicalRecordService::save)
 	        .subscribe();
     }
@@ -75,14 +80,29 @@ public class ServiceInstancePolicyExecutorTask implements ApplicationRunner {
                 .build()
 					.services()
 						.deleteInstance(DeleteServiceInstanceRequest.builder().name(sd.getName()).build())
-						.map(r -> HistoricalRecord
+						.then(Mono.just(HistoricalRecord
 									.builder()
-										.dateTimeRemoved(LocalDateTime.now())
+										.transactionDateTime(LocalDateTime.now())
+										.actionTaken("delete")
 										.organization(sd.getOrganization())
 										.space(sd.getSpace())
-										.id(sd.getServiceId())
+										.serviceId(sd.getServiceId())
 										.type("service-instance")
-										.name(String.join("::", sd.getName(), sd.getType(), sd.getPlan()))
-										.build());			
+										.name(String.join("____", sd.getName(), sd.getType(), sd.getPlan()))
+										.build()));			
     }
+    
+    private boolean isBlacklisted(String  organization) {
+		return !settings.getOrganizationBlackList().contains(organization);
+	}
+    
+    private boolean isWhitelisted(ServiceInstancePolicy policy, String organization) {
+    	Set<String> prunedSet = new HashSet<>(policy.getOrganizationWhiteList());
+    	while (prunedSet.remove(""));
+    	Set<String> whitelist = 
+    			CollectionUtils.isEmpty(prunedSet) ? 
+    					prunedSet: policy.getOrganizationWhiteList();
+    	return 
+			whitelist.isEmpty() ? true: policy.getOrganizationWhiteList().contains(organization);
+	}
 }
