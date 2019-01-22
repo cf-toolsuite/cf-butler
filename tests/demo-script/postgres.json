@@ -1,0 +1,6 @@
+{
+	"db_name": "postgres_fun",
+	"db_username": "user",
+	"owner_name": "pivotal",
+	"owner_email": "support@pivotal.io"
+}
