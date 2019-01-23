@@ -1,14 +1,18 @@
 #!/usr/bin/env bash
 
 ## Create environment on PCF One consisting of one org and 2 spaces
-## Deploys a collection of apps and services then deploys cf-butler
+## Deploys a collection of Java apps and services then deploys cf-butler
 ## Meant to work within 10G quota restriction
+
+## Pre-requisites 
+## - cf cli 6.42.0
+## - Tiles: p.mysql, p.redis, credhub
 
 set -e
 
 # Change me
 export ORGS=( pivot-cphillipson )
-export TODAY=2019-01-22-74FEC3B0-8C74-41F3-91EE-1B137CE91BBB
+export TODAY=`date +%Y-%m-%d`
 export DELAY=600
 
 cd ../../../
@@ -67,6 +71,7 @@ do
       do
          cd $p/labs/solutions/03/cloud-native-spring
          cf push $p-$s -b java_buildpack_offline -s cflinuxfs3 -m 1G -i 1 --no-start
+         cf set-env $p-$s JBP_CONFIG_OPEN_JDK_JRE '{ jre: { version: 11.+ } }'
          cf create-service p.mysql db-small mysql-$s
          sleep $DELAY
          cf bind-service $p-$s mysql-$s
@@ -88,7 +93,8 @@ done
 cf target -o pivot-cphillipson -s system
 cd cf-butler
 cf push --no-start
-cf create-service credhub default cf-butler-secrets -c config/secrets.pcfone.json
+cf set-env cf-butler SPRING_PROFILES_ACTIVE=test,cloud,secrets
+cf create-service credhub default cf-butler-secrets -c ../../cf-butler/tests/demo-script/secrets.json
 cf bind-service cf-butler cf-butler-secrets
 cf start cf-butler
 cd ..

@@ -2,17 +2,20 @@
 
 ## Clones and builds projects for demo purposes
 
+## Pre-requisites
+## - Git 2.20.1
+## - Open JDK 11
+## - Gradle 5.1.1
+
 set -e
 
 # Change me
-export ORGS=( pivot-cphillipson )
-export TODAY=`date +%Y-%m-%d`-$(uuidgen)
+export TODAY=`date +%Y-%m-%d`
 
 cd ../../../
 mkdir -p cf-butler-demo-$TODAY
 cd cf-butler-demo-$TODAY
 
-export SPACES=( dev test stage )
 export REPOS1=( devops-workshop )
 export REPOS2=( track-shipments )
 export REPOS3=( jdbc-demo reactive-jdbc-demo )
