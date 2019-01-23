@@ -1,6 +1,7 @@
 {
-	"db_name": "postgres_fun",
-	"db_username": "user",
-	"owner_name": "pivotal",
-	"owner_email": "support@pivotal.io"
+	"PGHOSTADDR": "postgres-instance.cbx4kltssai4.us-west-2.rds.amazonaws.com",
+	"PGPORT": 5432,
+	"PGDATABASE": "postgres",
+	"PGUSER": "adm1n",
+	"PGPASSWORD": "chemFox321"
 }
