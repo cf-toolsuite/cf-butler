@@ -8,7 +8,7 @@ set -e
 
 # Change me
 export ORGS=( pivot-cphillipson )
-export TODAY=2019-01-22-32379563-CA6D-4D89-9749-E46DCC6A727B
+export TODAY=2019-01-22-74FEC3B0-8C74-41F3-91EE-1B137CE91BBB
 export DELAY=10m
 
 cd ../../../
@@ -55,7 +55,7 @@ do
       do
          cd $q
          cf push $q-$s -b java_buildpack_offline -p build/libs/reactive-jdbc-demo-0.0.1-SNAPSHOT.jar -s cflinuxfs3 -m 1G -i 1 --no-start
-         cf cups create-user-provided-service postgres-$s-secrets -p ../../cf-butler/tests/demo-script/postgres.json
+         cf create-user-provided-service postgres-$s-secrets -p ../../cf-butler/tests/demo-script/postgres.json
          cf bind-service $q-$s postgres-$s-secrets
          cf start $q-$s
          cf stop $q-$s
