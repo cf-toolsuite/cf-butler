@@ -9,7 +9,7 @@ set -e
 # Change me
 export ORGS=( pivot-cphillipson )
 export TODAY=2019-01-22-74FEC3B0-8C74-41F3-91EE-1B137CE91BBB
-export DELAY=10m
+export DELAY=600
 
 cd ../../../
 mkdir -p cf-butler-demo-$TODAY
