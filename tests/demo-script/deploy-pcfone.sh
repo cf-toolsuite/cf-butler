@@ -54,10 +54,9 @@ do
       for q in "${REPOS3[@]}"
       do
          cd $q
-         cf push $q-$s -b java_buildpack_offline -s cflinuxfs3 -m 1G -i 1 --no-start
-         cf create-service postgresql-10-odb standalone postgres-$s -c ../../cf-butler/tests/demo-script/postgres.json
-         sleep $DELAY
-         cf bind-service $q-$s postgres-$s
+         cf push $q-$s -b java_buildpack_offline -p build/libs/reactive-jdbc-demo-0.0.1-SNAPSHOT.jar -s cflinuxfs3 -m 1G -i 1 --no-start
+         cf cups create-user-provided-service postgres-$s-secrets -p ../../cf-butler/tests/demo-script/postgres.json
+         cf bind-service $q-$s postgres-$s-secrets
          cf start $q-$s
          cf stop $q-$s
          cd ..
