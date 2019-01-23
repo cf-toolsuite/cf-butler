@@ -70,7 +70,7 @@ do
          cf create-service p.mysql db-small mysql-$s
          sleep $DELAY
          cf bind-service $p-$s mysql-$s
-         cf start cloud-native-spring
+         cf start $p-$s
          cd ../../../../..
       done
 
