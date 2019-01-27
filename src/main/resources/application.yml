@@ -24,7 +24,8 @@ cf:
 logging:
   level:
     org.springframework: INFO
-    org.cloudfoundry.reactor: DEBUG
+    reactor: DEBUG
+    org.davidmoten: DEBUG
 
 # Set schedule for this task to adhere to
 # @see https://crontab.guru for help, first parameter is seconds
@@ -80,3 +81,9 @@ token:
 cron: 
   collection: ${vcap.services.cf-butler-secrets.credentials.CRON_COLLECTION:0 0 0 * * *}
   execution: ${vcap.services.cf-butler-secrets.credentials.CRON_EXECUTION:0 0 2 * * *}
+  
+management:
+  endpoints:
+    web:
+      exposure:
+        include: ${vcap.services.cf-butler-secrets.credentials.EXPOSED_ACTUATOR_ENDPOINTS:info,health,metrics,scheduledtasks,loggers}
