@@ -64,7 +64,7 @@ cf:
   apiHost: ${vcap.services.cf-butler-secrets.credentials.CF_API-HOST}
   username: ${vcap.services.cf-butler-secrets.credentials.CF_USERNAME}
   password: ${vcap.services.cf-butler-secrets.credentials.CF_PASSWORD}
-  passcode: ${vcap.services.cf-butler-secrets.credentials.CF_PASSCODE}
+  refreshToken: ${vcap.services.cf-butler-secrets.credentials.CF_REFRESH-TOKEN}
   organizationBlackList: ${vcap.services.cf-butler-secrets.credentials.CF_ORGANIZATION-BLACK-LIST}
 
 token:
