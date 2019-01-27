@@ -1,6 +1,6 @@
 cf:
   apiHost: api.run.pcfone.io
-  passcode: xxxxxx
+  refreshToken: xxxxxx
   organizationBlackList:
     - system
 
