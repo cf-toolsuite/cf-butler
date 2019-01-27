@@ -93,7 +93,7 @@ done
 cf target -o pivot-cphillipson -s system
 cd cf-butler
 cf push --no-start
-cf set-env cf-butler SPRING_PROFILES_ACTIVE=test,cloud,secrets
+cf set-env cf-butler SPRING_PROFILES_ACTIVE 'test,cloud,secrets'
 cf create-service credhub default cf-butler-secrets -c ../../cf-butler/tests/demo-script/secrets.json
 cf bind-service cf-butler cf-butler-secrets
 cf start cf-butler
