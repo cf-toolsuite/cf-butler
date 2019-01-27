@@ -33,14 +33,6 @@ management:
 spring:
   profiles: jdbc
 
-  autoconfigure:
-    exclude:
-    - org.springframework.boot.autoconfigure.mongo.embedded.EmbeddedMongoAutoConfiguration
-    - org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration
-    - org.springframework.boot.autoconfigure.mongo.MongoReactiveAutoConfiguration
-    - org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration
-    - org.springframework.boot.autoconfigure.data.mongo.MongoReactiveDataAutoConfiguration
-
   datasource:
     driver-class-name: org.hsqldb.jdbc.JDBCDriver
     url: jdbc:hsqldb:mem:cf-butler
