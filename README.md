@@ -69,7 +69,7 @@ Based on choice the authorization token provider
 
 #### Single-sign on
 
-* `cf.passcode` - a temporary one-time passcode
+* `cf.refreshToken` - the refresh token to be found within `~/.cf/config.json` after your authenticate
 
 ### General configuration notes
 
@@ -172,15 +172,15 @@ Visit the link in the password prompt to retrieve a temporary passcode, then com
 
 > E.g., `https://login.run.pcfone.io/passcode`)
 
-Visit the passcode [link](https://login.run.pcfone.io/passcode) again
+Inspect the contents of `~/.cf/config.json` and copy the value of `RefreshToken`.
 
-Make a note of the passcode because you will need to use it in your `config/secrets.json` which at a minimum should contain
+Paste the value as the value for `CF_REFRESH-TOKEN` in your `config/secrets.json`
 
 ```
 {
   "TOKEN_PROVIDER": "sso",
   "CF_API-HOST": "xxxxx",
-  "CF_PASSCODE": "xxxxx",
+  "CF_REFRESH-TOKEN": "xxxxx",
 }
 ```
 
