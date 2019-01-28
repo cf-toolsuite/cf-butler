@@ -1,8 +1,8 @@
 # Pivotal Application Service > Butler
-
-> Incubating.
  
 [![Build Status](https://travis-ci.org/pacphi/cf-butler.svg?branch=master)](https://travis-ci.org/pacphi/cf-butler) [![Known Vulnerabilities](https://snyk.io/test/github/pacphi/cf-butler/badge.svg)](https://snyk.io/test/github/pacphi/cf-butler)
+
+> Status: Incubating
 
 You are a platform operator working for a Fortune 500 enterprise.  You've witnessed first-hand how the product development teams your team supports are super productive; happily invoking `cf push`, `cf cs` and `cf bs` many times per day to deploy applications, create services and bind them to those applications.  
 
@@ -11,6 +11,12 @@ This is great, except that over time, on your non-production foundations, you ha
 Reaching out to each development team to tell them to clean-up has become a chore.  Why not implement some automation that allows you to define and enforce some house-keeping policies for your non-production foundations where applications and services are perhaps more volatile?
 
 This is where `cf-butler` has your back.
+
+## What does it do?
+
+Please take 5-10 mintues to view this short video demonstration to get a sense of what `cf-butler` can do.
+
+[![Youtube screenshot](cf-butler-demo.jpg)](https://youtu.be/IyLJfC6N60Q)
  
 
 ## Prerequisites
@@ -203,10 +209,6 @@ Shutdown and destroy the app and service instances
 ```
 ./destroy.sh
 ```
-
-## What does this task do?
-
-// TODO Illustrate what this app does.  Perhaps record a demonstration video and link here?
 
 ## Endpoints
 
