@@ -1,5 +1,9 @@
 package io.pivotal.cfapp.repository;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -9,64 +13,44 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;
-
 
 @Profile("jdbc")
 @Component
 public class DatabaseCreator implements ApplicationRunner {
 
 	private final Database database;
+	private final ResourceLoader resourceLoader;
 
 	@Autowired
-	public DatabaseCreator(Database database) {
+	public DatabaseCreator(Database database, ResourceLoader resourceLoader) {
 		this.database = database;
+		this.resourceLoader = resourceLoader;
 	}
-	
+
 	@Override
 	public void run(ApplicationArguments args) throws Exception {
 		try (Connection c = database.connection().blockingGet()) {
 			c.setAutoCommit(true);
-			createAppDetailTable(c);
-			createServiceDetailTable(c);
-			createApplicationPolicyTable(c);
-			createServiceInstancePolicyTable(c);
-			createAppRelationshipTable(c);
-			createHistoricalRecordTable(c);
-        } catch (SQLException e) {
-            throw new SQLRuntimeException(e);
-        }
+			Resource schema = resourceLoader.getResource("classpath:db/hsql/schema.sql");
+			InputStream is = schema.getInputStream();
+			BufferedReader br = new BufferedReader(new InputStreamReader(is));
+			String line; String ddl;
+			while ((line = br.readLine()) != null) {
+				if (!line.isBlank()) {
+					ddl = line.strip().replace(";","");
+					c.prepareStatement(ddl).execute();
+				}
+			}
+			br.close();
+		} catch (IOException ioe) {
+			throw new RuntimeException(ioe);
+
+		} catch (SQLException sqle) {
+			throw new SQLRuntimeException(sqle);
+		}
 	}
 
-	protected void createAppDetailTable(Connection c) throws SQLException {
-        c.prepareStatement("create table app_detail ( id int identity primary key, organization varchar(100), space varchar(100), app_id varchar(50), app_name varchar(100), buildpack varchar(50), image varchar(250), stack varchar(25), running_instances int, total_instances int, urls varchar(2000), last_pushed timestamp, last_event varchar(50), last_event_actor varchar(100), last_event_time timestamp, requested_state varchar(25) )")
-			.execute();
-	}
-
-	protected void createServiceDetailTable(Connection c) throws SQLException {
-		c.prepareStatement("create table service_detail ( id int identity primary key, organization varchar(100), space varchar(100), service_id varchar(50), name varchar(100), service varchar(100), description varchar(1000), plan varchar(50), type varchar(30), bound_applications clob(20M), last_operation varchar(50), last_updated timestamp, dashboard_url varchar(250), requested_state varchar(25) )")
-    		.execute();
-	}
-
-	protected void createApplicationPolicyTable(Connection c) throws SQLException {
-		c.prepareStatement("create table application_policy ( description varchar(1000), state varchar(25), from_datetime timestamp, from_duration varchar(25), delete_services boolean, organization_whitelist clob(20M) )")
-			.execute();
-		
-	}
-	
-	protected void createServiceInstancePolicyTable(Connection c) throws SQLException {
-		c.prepareStatement("create table service_instance_policy ( description varchar(1000), from_datetime timestamp, from_duration varchar(25), organization_whitelist clob(20M) )")
-			.execute();
-	}
-	
-	protected void createAppRelationshipTable(Connection c) throws SQLException {
-		c.prepareStatement("create table app_relationship ( organization varchar(100), space varchar(100), app_id varchar(50), app_name varchar(100), service_id varchar(50), service_name varchar(100), service_plan varchar(50), service_type varchar(30) )")
-			.execute();
-	}
-	
-	protected void createHistoricalRecordTable(Connection c) throws SQLException {
-		c.prepareStatement("create table historical_record ( transaction_datetime timestamp, action_taken varchar(20), organization varchar(100), space varchar(100), app_id varchar(50), service_id varchar(50), type varchar(20), name varchar(300) )")
-			.execute();
-	}
-	
 }

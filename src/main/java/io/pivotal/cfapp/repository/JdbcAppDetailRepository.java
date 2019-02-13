@@ -33,38 +33,33 @@ public class JdbcAppDetailRepository {
 
 	public Mono<AppDetail> save(AppDetail entity) {
 		String createOne = "insert into app_detail (organization, space, app_id, app_name, buildpack, image, stack, running_instances, total_instances, urls, last_pushed, last_event, last_event_actor, last_event_time, requested_state) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-		Flowable<Integer> insert = database
-			.update(createOne)
-			.parameters(
-				entity.getOrganization(),
-				entity.getSpace(),
-				entity.getAppId(),
-				entity.getAppName(),
-				entity.getBuildpack(),
-				entity.getImage(),
-				entity.getStack(),
-				entity.getRunningInstances(),
-				entity.getTotalInstances(),
-				entity.getUrls(),
-				entity.getLastPushed() != null ? Timestamp.valueOf(entity.getLastPushed()): null,
-				entity.getLastEvent(),
-				entity.getLastEventActor(),
-				entity.getLastEventTime() != null ? Timestamp.valueOf(entity.getLastEventTime()): null,
-				entity.getRequestedState()
-			)
-			.returnGeneratedKeys()
-			.getAs(Integer.class);
-
-		String selectOne = "select id, organization, space, app_id, app_name, buildpack, image, stack, running_instances, total_instances, urls, last_pushed, last_event, last_event_actor, last_event_time, requested_state from app_detail where id = ?";
-		Flowable<AppDetail> result = database
-			.select(selectOne)
-			.parameterStream(insert)
-			.get(rs -> fromResultSet(rs));
-		return Mono.from(result);
+		return Mono
+				.from(database
+						.update(createOne)
+						.parameters(
+							entity.getOrganization(),
+							entity.getSpace(),
+							entity.getAppId(),
+							entity.getAppName(),
+							entity.getBuildpack(),
+							entity.getImage(),
+							entity.getStack(),
+							entity.getRunningInstances(),
+							entity.getTotalInstances(),
+							entity.getUrls(),
+							entity.getLastPushed() != null ? Timestamp.valueOf(entity.getLastPushed()): null,
+							entity.getLastEvent(),
+							entity.getLastEventActor(),
+							entity.getLastEventTime() != null ? Timestamp.valueOf(entity.getLastEventTime()): null,
+							entity.getRequestedState()
+						)
+						.counts())
+						.then(Mono.just(entity));
+			
 	}
 
 	public Flux<AppDetail> findAll() {
-		String selectAll = "select id, organization, space, app_id, app_name, buildpack, image, stack, running_instances, total_instances, urls, last_pushed, last_event, last_event_actor, last_event_time, requested_state from app_detail order by organization, space, app_name";
+		String selectAll = "select organization, space, app_id, app_name, buildpack, image, stack, running_instances, total_instances, urls, last_pushed, last_event, last_event_actor, last_event_time, requested_state from app_detail order by organization, space, app_name";
 		Flowable<AppDetail> result = database
 			.select(selectAll)
 			.get(rs -> fromResultSet(rs));
@@ -80,7 +75,7 @@ public class JdbcAppDetailRepository {
 	}
 	
 	public Mono<AppDetail> findByAppId(String appId) {
-		String selectOne = "select id, organization, space, app_id, app_name, buildpack, image, stack, running_instances, total_instances, urls, last_pushed, last_event, last_event_actor, last_event_time, requested_state from app_detail where app_id = ?";
+		String selectOne = "select organization, space, app_id, app_name, buildpack, image, stack, running_instances, total_instances, urls, last_pushed, last_event, last_event_actor, last_event_time, requested_state from app_detail where app_id = ?";
 		return Mono.from(database
 			.select(selectOne)
 			.parameter(appId)
@@ -94,7 +89,7 @@ public class JdbcAppDetailRepository {
 	}
 	
 	private Flux<Tuple2<AppDetail, ApplicationPolicy>> findAppicationsThatMayHaveServiceBindings(ApplicationPolicy policy) {
-		String select = "select id, organization, space, app_id, app_name, buildpack, image, stack, running_instances, total_instances, urls, last_pushed, last_event, last_event_actor, last_event_time, requested_state";
+		String select = "select organization, space, app_id, app_name, buildpack, image, stack, running_instances, total_instances, urls, last_pushed, last_event, last_event_actor, last_event_time, requested_state";
 		String from = "from app_detail";
 		StringBuilder where = new StringBuilder();
 		List<Object> paramValues = new ArrayList<>();
@@ -121,7 +116,7 @@ public class JdbcAppDetailRepository {
 	
 	private Flux<Tuple2<AppDetail, ApplicationPolicy>> findAppicationsThatDoNotHaveServiceBindings(ApplicationPolicy policy) {
 		String select = 
-				"select ad.id, ad.organization, ad.space, ad.app_id, ad.app_name, ad.buildpack, ad.image, " + 
+				"select ad.organization, ad.space, ad.app_id, ad.app_name, ad.buildpack, ad.image, " + 
 				"ad.stack, ad.running_instances, ad.total_instances, ad.urls, ad.last_pushed, ad.last_event, " + 
 				"ad.last_event_actor, ad.last_event_time, ad.requested_state";
 		String from = "from app_detail ad";
@@ -152,22 +147,21 @@ public class JdbcAppDetailRepository {
 	private AppDetail fromResultSet(ResultSet rs) throws SQLException {
 		return AppDetail
 				.builder()
-					.id(String.valueOf(rs.getInt(1)))
-					.organization(rs.getString(2))
-					.space(rs.getString(3))
-					.appId(rs.getString(4))
-					.appName(rs.getString(5))
-					.buildpack(rs.getString(6))
-					.image(rs.getString(7))
-					.stack(rs.getString(8))
-					.runningInstances(rs.getInt(9))
-					.totalInstances(rs.getInt(10))
-					.urls(rs.getString(11))
-					.lastPushed(rs.getTimestamp(12) != null ? rs.getTimestamp(12).toLocalDateTime(): null)
-					.lastEvent(rs.getString(13))
-					.lastEventActor(rs.getString(14))
-					.lastEventTime(rs.getTimestamp(15) != null ? rs.getTimestamp(15).toLocalDateTime(): null)
-					.requestedState(rs.getString(16))
+					.organization(rs.getString(1))
+					.space(rs.getString(2))
+					.appId(rs.getString(3))
+					.appName(rs.getString(4))
+					.buildpack(rs.getString(5))
+					.image(rs.getString(6))
+					.stack(rs.getString(7))
+					.runningInstances(rs.getInt(8))
+					.totalInstances(rs.getInt(9))
+					.urls(rs.getString(10))
+					.lastPushed(rs.getTimestamp(11) != null ? rs.getTimestamp(11).toLocalDateTime(): null)
+					.lastEvent(rs.getString(12))
+					.lastEventActor(rs.getString(13))
+					.lastEventTime(rs.getTimestamp(14) != null ? rs.getTimestamp(14).toLocalDateTime(): null)
+					.requestedState(rs.getString(15))
 					.build();
 	}
 	

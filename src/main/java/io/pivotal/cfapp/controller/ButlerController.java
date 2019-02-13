@@ -7,6 +7,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -59,11 +60,37 @@ public class ButlerController {
 								.map(p -> ResponseEntity.ok(p));
 	}
 	
+	@GetMapping(value = { "/policies/application/{id}" }, produces = MediaType.APPLICATION_JSON_VALUE)
+	public Mono<ResponseEntity<Policies>> obtainApplicationPolicy(@PathVariable String id) {
+		return policiesService.findApplicationPolicyById(id)
+								.map(p -> ResponseEntity.ok(p))
+								.defaultIfEmpty(ResponseEntity.notFound().build());
+	}
+	
+	@GetMapping(value = { "/policies/serviceInstance/{id}" }, produces = MediaType.APPLICATION_JSON_VALUE)
+	public Mono<ResponseEntity<Policies>> obtainServiceInstancePolicy(@PathVariable String id) {
+		return policiesService.findServiceInstancePolicyById(id)
+								.map(p -> ResponseEntity.ok(p))
+								.defaultIfEmpty(ResponseEntity.notFound().build());
+	}
+	
 	@GetMapping(value = { "/policies" }, produces = MediaType.APPLICATION_JSON_VALUE)
 	public Mono<ResponseEntity<Policies>> listPolicies() {
 		return policiesService.findAll()
 								.map(p -> ResponseEntity.ok(p))
 								.defaultIfEmpty(ResponseEntity.notFound().build());
+	}
+	
+	@DeleteMapping("/policies/application/{id}")
+	public Mono<ResponseEntity<Void>> deleteApplicationPolicy(@PathVariable String id) {
+		return policiesService.deleteApplicationPolicyById(id)
+								.map(p -> ResponseEntity.ok(p));
+	}
+	
+	@DeleteMapping("/policies/serviceInstance/{id}")
+	public Mono<ResponseEntity<Void>> deleteServiceInstancePolicy(@PathVariable String id) {
+		return policiesService.deleteServiceInstancePolicyById(id)
+								.map(p -> ResponseEntity.ok(p));
 	}
 	
 	@DeleteMapping("/policies")

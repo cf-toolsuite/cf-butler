@@ -25,17 +25,20 @@ Required
 
 * [Pivotal Application Service](https://pivotal.io/platform/pivotal-application-service) account
 
+
 ## Tools
 
 * [git](https://git-scm.com/downloads) 2.20.1 or better
 * [JDK](http://openjdk.java.net/install/) 11 or better
 * [cf](https://docs.cloudfoundry.org/cf-cli/install-go-cli.html) CLI 6.41.0 or better
 
+
 ## Clone
 
 ```
 git clone https://github.com/pacphi/cf-butler.git
 ```
+
 
 ## How to configure
 
@@ -133,11 +136,13 @@ To have access to a database management [console](http://hsqldb.org/doc/guide/ru
 
 > Note: this is not an available option when deploying to a PAS foundation.
 
+
 ## How to Build
 
 ```
 ./gradlew build
 ```
+
 
 ## How to Run
 
@@ -147,6 +152,7 @@ To have access to a database management [console](http://hsqldb.org/doc/guide/ru
 where `{target_foundation_profile}` is something like `pws` or `pcfone`
 
 > You'll need to manually stop to the application with `Ctrl+C`
+
 
 ## How to deploy to Pivotal Application Service
 
@@ -210,6 +216,7 @@ Shutdown and destroy the app and service instances
 ./destroy.sh
 ```
 
+
 ## Endpoints
 
 These REST endpoints have been exposed for administrative purposes.  
@@ -267,6 +274,31 @@ DELETE /policies
 ```
 
 > Delete all established policies
+
+```
+GET /policies/application/{id}
+```
+
+> Obtain application policy details by id
+
+```
+GET /policies/serviceInstance/{id}
+```
+
+> Obtain service instance policy details by id
+
+```
+DELETE /policies/application/{id}
+```
+
+> Delete an application policy by its id
+
+```
+DELETE /policies/serviceInstance/{id}
+```
+
+> Delete a service instance policy by its id
+
 
 ## Credits
 

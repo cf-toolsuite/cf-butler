@@ -32,4 +32,24 @@ public class JdbcPoliciesService implements PoliciesService {
 		return repo.deleteAll();
 	}
 
+	@Override
+	public Mono<Policies> findApplicationPolicyById(String id) {
+		return repo.findApplicationPolicyById(id);
+	}
+
+	@Override
+	public Mono<Policies> findServiceInstancePolicyById(String id) {
+		return repo.findServiceInstancePolicyById(id);
+	}
+
+	@Override
+	public Mono<Void> deleteApplicationPolicyById(String id) {
+		return repo.deleteApplicationPolicyById(id);
+	}
+
+	@Override
+	public Mono<Void> deleteServiceInstancePolicyById(String id) {
+		return repo.deleteServicePolicyById(id);
+	}
+
 }
