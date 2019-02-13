@@ -90,5 +90,18 @@ public class ApplicationPolicy {
 					.state(policy.getState())
 					.build();
 	}
+	
+	public static ApplicationPolicy seedWith(ApplicationPolicy policy, String id) {
+		return ApplicationPolicy
+				.builder()
+					.id(id)
+					.description(policy.getDescription())
+					.deleteServices(policy.isDeleteServices())
+					.fromDateTime(policy.getFromDateTime())
+					.fromDuration(policy.getFromDuration())
+					.organizationWhiteList(policy.getOrganizationWhiteList())
+					.state(policy.getState())
+					.build();
+	}
 
 }

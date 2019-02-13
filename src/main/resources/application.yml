@@ -20,12 +20,18 @@ cf:
   sslValidationSkipped: false
   organizationBlackList:
     - system
+  policies:
+    #provider: git
+    provider: dbms
+    #uri: 
+    #commit:
+    #filePaths:
 
 logging:
   level:
     org.springframework: INFO
-    reactor: DEBUG
-    org.davidmoten: DEBUG
+    #reactor: DEBUG
+    #org.davidmoten: DEBUG
 
 # Set schedule for this task to adhere to
 # @see https://crontab.guru for help, first parameter is seconds
@@ -37,8 +43,8 @@ management:
   endpoints:
     web:
       exposure:
-        include: info,health,metrics,scheduledtasks,loggers
-
+        include: info,health,metrics,scheduledtasks,loggers 
+  
 ---
 spring:
   profiles: jdbc

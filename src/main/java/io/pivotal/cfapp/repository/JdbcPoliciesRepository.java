@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
+import io.pivotal.cfapp.config.ButlerSettings.PoliciesSettings;
 import io.pivotal.cfapp.domain.ApplicationPolicy;
 import io.pivotal.cfapp.domain.Policies;
 import io.pivotal.cfapp.domain.ServiceInstancePolicy;
@@ -24,11 +25,15 @@ import reactor.core.publisher.Mono;
 @Repository
 public class JdbcPoliciesRepository {
 
-	private Database database;
+	private final Database database;
+	private final PoliciesSettings settings;
 
 	@Autowired
-	public JdbcPoliciesRepository(Database database) {
+	public JdbcPoliciesRepository(
+			Database database,
+			PoliciesSettings settings) {
 		this.database = database;
+		this.settings = settings;
 	}
 	
 	public Mono<Policies> save(Policies entity) {
@@ -37,13 +42,13 @@ public class JdbcPoliciesRepository {
 		List<ApplicationPolicy> applicationPolicies = entity.getApplicationPolicies()
 				.stream()
 				.filter(ap -> !ap.isInvalid())
-				.map(p -> ApplicationPolicy.seed(p))
+				.map(p -> seedApplicationPolicy(p))
 				.collect(Collectors.toList());
 		
 		List<ServiceInstancePolicy> serviceInstancePolicies = entity.getServiceInstancePolicies()
 				.stream()
 				.filter(sip -> !sip.isInvalid())
-				.map(p -> ServiceInstancePolicy.seed(p))
+				.map(p -> seedServiceInstancePolicy(p))
 				.collect(Collectors.toList());
 		
 		return Flux.fromIterable(applicationPolicies)
@@ -196,5 +201,13 @@ public class JdbcPoliciesRepository {
 							.update(deleteAllServiceInstancePolicies)
 							.counts()))
 				.then();
+	}
+	
+	private ApplicationPolicy seedApplicationPolicy(ApplicationPolicy policy) {
+		return settings.isVersionManaged() ? ApplicationPolicy.seedWith(policy, settings.getCommit()): ApplicationPolicy.seed(policy);
+	}
+	
+	private ServiceInstancePolicy seedServiceInstancePolicy(ServiceInstancePolicy policy) {
+		return settings.isVersionManaged() ? ServiceInstancePolicy.seedWith(policy, settings.getCommit()): ServiceInstancePolicy.seed(policy);
 	}
 }

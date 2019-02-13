@@ -3,6 +3,7 @@ package io.pivotal.cfapp.service;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
+import io.pivotal.cfapp.config.ButlerSettings.PoliciesSettings;
 import io.pivotal.cfapp.domain.Policies;
 import io.pivotal.cfapp.repository.JdbcPoliciesRepository;
 import reactor.core.publisher.Mono;
@@ -11,10 +12,16 @@ import reactor.core.publisher.Mono;
 @Service
 public class JdbcPoliciesService implements PoliciesService {
 
-	private JdbcPoliciesRepository repo;
+	private static final String UNSUPPORTED_OP_MESSAGE = "Policies are managed in a git repository.";
 	
-	public JdbcPoliciesService(JdbcPoliciesRepository repo) {
+	private final JdbcPoliciesRepository repo;
+	private final PoliciesSettings settings;
+	
+	public JdbcPoliciesService(
+			JdbcPoliciesRepository repo,
+			PoliciesSettings settings) {
 		this.repo = repo;
+		this.settings = settings;
 	}
 	
 	@Override
@@ -29,6 +36,9 @@ public class JdbcPoliciesService implements PoliciesService {
 
 	@Override
 	public Mono<Void> deleteAll() {
+		if (settings.isVersionManaged()) {
+			throw new UnsupportedOperationException(UNSUPPORTED_OP_MESSAGE);
+		}
 		return repo.deleteAll();
 	}
 
@@ -44,11 +54,17 @@ public class JdbcPoliciesService implements PoliciesService {
 
 	@Override
 	public Mono<Void> deleteApplicationPolicyById(String id) {
+		if (settings.isVersionManaged()) {
+			throw new UnsupportedOperationException(UNSUPPORTED_OP_MESSAGE);
+		}
 		return repo.deleteApplicationPolicyById(id);
 	}
 
 	@Override
 	public Mono<Void> deleteServiceInstancePolicyById(String id) {
+		if (settings.isVersionManaged()) {
+			throw new UnsupportedOperationException(UNSUPPORTED_OP_MESSAGE);
+		}
 		return repo.deleteServicePolicyById(id);
 	}
 

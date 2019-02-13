@@ -76,4 +76,15 @@ public class ServiceInstancePolicy {
 					.organizationWhiteList(policy.getOrganizationWhiteList())
 					.build();
 	}
+	
+	public static ServiceInstancePolicy seedWith(ServiceInstancePolicy policy, String id) {
+		return ServiceInstancePolicy
+				.builder()
+					.id(id)
+					.description(policy.getDescription())
+					.fromDateTime(policy.getFromDateTime())
+					.fromDuration(policy.getFromDuration())
+					.organizationWhiteList(policy.getOrganizationWhiteList())
+					.build();
+	}
 }
