@@ -72,6 +72,11 @@ cf:
   password: ${vcap.services.cf-butler-secrets.credentials.CF_PASSWORD}
   refreshToken: ${vcap.services.cf-butler-secrets.credentials.CF_REFRESH-TOKEN}
   organizationBlackList: ${vcap.services.cf-butler-secrets.credentials.CF_ORGANIZATION-BLACK-LIST}
+  policies:
+    provider: ${vcap.services.cf-butler-secrets.credentials.CF_POLICIES_PROVIDER:dbms}
+    uri: ${vcap.services.cf-butler-secrets.credentials.CF_POLICIES_URI}
+    commit: ${vcap.services.cf-butler-secrets.credentials.CF_POLICIES_COMMIT}
+    filePaths: ${vcap.services.cf-butler-secrets.credentials.CF_POLICIES_FILE-PATHS}
 
 token:
   provider: ${vcap.services.cf-butler-secrets.credentials.TOKEN_PROVIDER}

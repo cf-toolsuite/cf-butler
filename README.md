@@ -92,6 +92,23 @@ E.g., if you had a configuration file named `application-pws.yml`
 
 > See the [samples](samples) directory for some examples of configuration when deploying to [Pivotal Web Services](https://login.run.pivotal.io/login) or [PCF One](https://login.run.pcfone.io/login).
 
+### Managing policies
+
+Creation and deletion of policies are managed via API endpoints by default. When an audit trail is important to you, you may opt to set `cf.policies.provider` to `git`.  When you do this, you shift the lifecycle management of policies to Git.  You will have to specify additionaa configuration, like
+
+* `cf.policies.uri` the location of the repository that contains policy files in JSON format
+* `cf.policies.commit` the commit id to pull from
+* `cf.policies.filePaths` an array of file paths of policy files
+
+Policy files must adhere to a naming convention where:
+
+* a filename ending with `-AP.json` encapsulates an individual [ApplicationPolicy](src/main/java/io/pivotal/cfapp/domain/ApplicationPolicy.java)
+* a filename ending with `-SIP.json` encapsulates an individual [ServiceInstancePolicy](src/main/java/io/pivotal/cfapp/domain/ServiceInstancePolicy.java)
+
+A sample Github repository exists [here](https://github.com/pacphi/cf-butler-config-sample).
+
+Have a look at [secrets.pws.json](samples/secrets.pws.json) for an enable of how to configure secrets for deployment of `cf-butler` to PAS integrating with the aforementioned sample Github repository.
+
 ### To set the operations schedule
 
 Update the value of the `cron` properties in `application.yml`.  Consult this [article](https://www.baeldung.com/spring-scheduled-tasks) and the [Javadoc](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/scheduling/annotation/Scheduled.html#cron--) to understand how to tune it for your purposes.  
@@ -259,7 +276,7 @@ POST /policies
 }
 ```
 
-> Establish policies to remove stopped applications and/or orphaned services. 
+> Establish policies to remove stopped applications and/or orphaned services. This endpoint is only available when `cf.policies.provider` is set to `dbms`.
 
 > Consult the [java.time.Duration](https://docs.oracle.com/javase/8/docs/api/java/time/Duration.html#parse-java.lang.CharSequence-) javadoc for other examples of what you can specify when setting values for `from-duration` properties above.
 
@@ -273,7 +290,7 @@ GET /policies
 DELETE /policies
 ```
 
-> Delete all established policies
+> Delete all established policies. This endpoint is only available when `cf.policies.provider` is set to `dbms`.
 
 ```
 GET /policies/application/{id}
@@ -291,13 +308,13 @@ GET /policies/serviceInstance/{id}
 DELETE /policies/application/{id}
 ```
 
-> Delete an application policy by its id
+> Delete an application policy by its id. This endpoint is only available when `cf.policies.provider` is set to `dbms`.
 
 ```
 DELETE /policies/serviceInstance/{id}
 ```
 
-> Delete a service instance policy by its id
+> Delete a service instance policy by its id. This endpoint is only available when `cf.policies.provider` is set to `dbms`.
 
 
 ## Credits
