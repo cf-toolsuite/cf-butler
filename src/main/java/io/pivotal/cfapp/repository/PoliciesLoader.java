@@ -27,8 +27,8 @@ import lombok.extern.slf4j.Slf4j;
 @AutoConfigureAfter(DatabaseCreator.class)
 public class PoliciesLoader implements ApplicationRunner {
 
-	private static final String APPLICATION_POLICY_LABEL = "AP";
-	private static final String SERVICE_INSTANCE_POLICY_LABEL = "SIP";
+	private static final String APPLICATION_POLICY_SUFFIX = "-AP.json";
+	private static final String SERVICE_INSTANCE_POLICY_SUFFIX = "-SIP.json";
 	
 	private final GitClient client;
 	private final PoliciesService service;
@@ -59,21 +59,22 @@ public class PoliciesLoader implements ApplicationRunner {
 					String fileContent;
 					try {
 						fileContent = client.readFile(repo, settings.getCommit(), fp);
-						if (fp.contains(APPLICATION_POLICY_LABEL)) {
+						if (fp.endsWith(APPLICATION_POLICY_SUFFIX)) {
 							applicationPolicies.add(mapper.readValue(fileContent, ApplicationPolicy.class));
-						} else if (fp.contains(SERVICE_INSTANCE_POLICY_LABEL)) {
+						} else if (fp.endsWith(SERVICE_INSTANCE_POLICY_SUFFIX)) {
 							serviceInstancePolicies.add(mapper.readValue(fileContent, ServiceInstancePolicy.class));
 						} else {
 							log.warn(
-									"Policy file {} does not adhere to naming convention. File name must contain either {} or {}.", 
-									fp, APPLICATION_POLICY_LABEL, SERVICE_INSTANCE_POLICY_LABEL);
+									"Policy file {} does not adhere to naming convention. File name must end with either {} or {}.", 
+									fp, APPLICATION_POLICY_SUFFIX, SERVICE_INSTANCE_POLICY_SUFFIX);
 						}
 					} catch (IOException ioe) {
 						log.warn("Could not read {} from {} with commit {} ", fp, settings.getUri(), settings.getCommit());
 					}
 				});
 		service
-			.save(new Policies(applicationPolicies, serviceInstancePolicies))
+			.deleteAll()
+			.then(service.save(new Policies(applicationPolicies, serviceInstancePolicies)))
 			.subscribe();
 	}
 	

@@ -52,6 +52,13 @@ public class ButlerSettings {
     	public boolean isVersionManaged() {
     		return getProvider().equalsIgnoreCase("git");
     	}
-    }   
+    }
     
+    @Data
+    @Configuration
+    @ConfigurationProperties(prefix = "cf.dbms")
+    public class DbmsSettings {
+    
+    	private String provider = "hsql";
+    }
 }

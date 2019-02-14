@@ -26,6 +26,9 @@ cf:
     #uri: 
     #commit:
     #filePaths:
+  dbms:
+    provider: hsql
+    #provider: postgres
 
 logging:
   level:
@@ -73,10 +76,12 @@ cf:
   refreshToken: ${vcap.services.cf-butler-secrets.credentials.CF_REFRESH-TOKEN}
   organizationBlackList: ${vcap.services.cf-butler-secrets.credentials.CF_ORGANIZATION-BLACK-LIST}
   policies:
-    provider: ${vcap.services.cf-butler-secrets.credentials.CF_POLICIES_PROVIDER:dbms}
+    provider: ${vcap.services.cf-butler-secrets.credentials.CF_POLICIES_PROVIDER}
     uri: ${vcap.services.cf-butler-secrets.credentials.CF_POLICIES_URI}
     commit: ${vcap.services.cf-butler-secrets.credentials.CF_POLICIES_COMMIT}
     filePaths: ${vcap.services.cf-butler-secrets.credentials.CF_POLICIES_FILE-PATHS}
+  dbms:
+    provider: ${vcap.services.cf-butler-secrets.credentials.CF_DBMS_PROVIDER}
 
 token:
   provider: ${vcap.services.cf-butler-secrets.credentials.TOKEN_PROVIDER}

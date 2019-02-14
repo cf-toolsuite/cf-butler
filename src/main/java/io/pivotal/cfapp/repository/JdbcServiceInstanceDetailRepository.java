@@ -34,7 +34,7 @@ public class JdbcServiceInstanceDetailRepository {
 	}
 
 	public Mono<ServiceInstanceDetail> save(ServiceInstanceDetail entity) {
-		String createOne = "insert into service_detail (organization, space, service_id, name, service, description, plan, type, bound_applications, last_operation, last_updated, dashboard_url, requested_state) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		String createOne = "insert into service_instance_detail (organization, space, service_id, service_name, service, description, plan, type, bound_applications, last_operation, last_updated, dashboard_url, requested_state) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		return Mono
 				.from(
 					database
@@ -59,7 +59,7 @@ public class JdbcServiceInstanceDetailRepository {
 	}
 
 	public Flux<ServiceInstanceDetail> findAll() {
-		String selectAll = "select organization, space, service_id, name, service, description, plan, type, bound_applications, last_operation, last_updated, dashboard_url, requested_state from service_detail order by organization, space, service, name";
+		String selectAll = "select organization, space, service_id, name, service, description, plan, type, bound_applications, last_operation, last_updated, dashboard_url, requested_state from service_instance_detail order by organization, space, service, name";
 		Flowable<ServiceInstanceDetail> result = database
 			.select(selectAll)
 			.get(rs -> fromResultSet(rs));
@@ -67,7 +67,7 @@ public class JdbcServiceInstanceDetailRepository {
 	}
 
 	public Mono<Void> deleteAll() {
-		String deleteAll = "delete from service_detail";
+		String deleteAll = "delete from service_instance_detail";
 		Flowable<Integer> result = database
 			.update(deleteAll)
 			.counts();
@@ -75,8 +75,8 @@ public class JdbcServiceInstanceDetailRepository {
 	}
 	
 	public Flux<Tuple2<ServiceInstanceDetail, ServiceInstancePolicy>> findByServiceInstancePolicy(ServiceInstancePolicy policy) {
-		String select = "select organization, space, service_id, name, service, description, plan, type, bound_applications, last_operation, last_updated, dashboard_url, requested_state";
-		String from = "from service_detail";
+		String select = "select organization, space, service_id, service_name, service, description, plan, type, bound_applications, last_operation, last_updated, dashboard_url, requested_state";
+		String from = "from service_instance_detail";
 		StringBuilder where = new StringBuilder();
 		List<Object> paramValues = new ArrayList<>();
 		where.append("where bound_applications is null "); // orphans only

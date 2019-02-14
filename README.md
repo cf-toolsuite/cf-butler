@@ -92,6 +92,14 @@ E.g., if you had a configuration file named `application-pws.yml`
 
 > See the [samples](samples) directory for some examples of configuration when deploying to [Pivotal Web Services](https://login.run.pivotal.io/login) or [PCF One](https://login.run.pcfone.io/login).
 
+### Using an external database
+
+By default `cf-butler` employs an in-memory [HSQLDB](http://hsqldb.org) instance.  If you wish to configure an external database you must set the `cf.dbms.provider` then set `spring.datasource.*` properties as described [here](https://docs.spring.io/spring-boot/docs/current/reference/html/howto-data-access.html#howto-configure-a-datasource).
+
+[DDL](https://en.wikipedia.org/wiki/Data_definition_language) scripts for each supported database are managed underneath [src/main/db](src/main/db).
+
+> A sample [script](deploy.xdb.sh) and [secrets](samples/secrets.pws.json) for deploying `cf-butler` to Pivotal Web Services with an [ElephantSQL](https://www.elephantsql.com) backend exists for your perusal. 
+
 ### Managing policies
 
 Creation and deletion of policies are managed via API endpoints by default. When an audit trail is important to you, you may opt to set `cf.policies.provider` to `git`.  When you do this, you shift the lifecycle management of policies to Git.  You will have to specify additional configuration, like

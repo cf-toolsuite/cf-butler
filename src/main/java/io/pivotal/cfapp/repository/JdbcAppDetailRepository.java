@@ -32,7 +32,7 @@ public class JdbcAppDetailRepository {
 	}
 
 	public Mono<AppDetail> save(AppDetail entity) {
-		String createOne = "insert into app_detail (organization, space, app_id, app_name, buildpack, image, stack, running_instances, total_instances, urls, last_pushed, last_event, last_event_actor, last_event_time, requested_state) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		String createOne = "insert into application_detail (organization, space, app_id, app_name, buildpack, image, stack, running_instances, total_instances, urls, last_pushed, last_event, last_event_actor, last_event_time, requested_state) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		return Mono
 				.from(database
 						.update(createOne)
@@ -59,7 +59,7 @@ public class JdbcAppDetailRepository {
 	}
 
 	public Flux<AppDetail> findAll() {
-		String selectAll = "select organization, space, app_id, app_name, buildpack, image, stack, running_instances, total_instances, urls, last_pushed, last_event, last_event_actor, last_event_time, requested_state from app_detail order by organization, space, app_name";
+		String selectAll = "select organization, space, app_id, app_name, buildpack, image, stack, running_instances, total_instances, urls, last_pushed, last_event, last_event_actor, last_event_time, requested_state from application_detail order by organization, space, app_name";
 		Flowable<AppDetail> result = database
 			.select(selectAll)
 			.get(rs -> fromResultSet(rs));
@@ -67,7 +67,7 @@ public class JdbcAppDetailRepository {
 	}
 
 	public Mono<Void> deleteAll() {
-		String deleteAll = "delete from app_detail";
+		String deleteAll = "delete from application_detail";
 		Flowable<Integer> result = database
 			.update(deleteAll)
 			.counts();
@@ -75,7 +75,7 @@ public class JdbcAppDetailRepository {
 	}
 	
 	public Mono<AppDetail> findByAppId(String appId) {
-		String selectOne = "select organization, space, app_id, app_name, buildpack, image, stack, running_instances, total_instances, urls, last_pushed, last_event, last_event_actor, last_event_time, requested_state from app_detail where app_id = ?";
+		String selectOne = "select organization, space, app_id, app_name, buildpack, image, stack, running_instances, total_instances, urls, last_pushed, last_event, last_event_actor, last_event_time, requested_state from application_detail where app_id = ?";
 		return Mono.from(database
 			.select(selectOne)
 			.parameter(appId)
@@ -90,7 +90,7 @@ public class JdbcAppDetailRepository {
 	
 	private Flux<Tuple2<AppDetail, ApplicationPolicy>> findAppicationsThatMayHaveServiceBindings(ApplicationPolicy policy) {
 		String select = "select organization, space, app_id, app_name, buildpack, image, stack, running_instances, total_instances, urls, last_pushed, last_event, last_event_actor, last_event_time, requested_state";
-		String from = "from app_detail";
+		String from = "from application_detail";
 		StringBuilder where = new StringBuilder();
 		List<Object> paramValues = new ArrayList<>();
 		where.append("where requested_state = ? ");
@@ -119,8 +119,8 @@ public class JdbcAppDetailRepository {
 				"select ad.organization, ad.space, ad.app_id, ad.app_name, ad.buildpack, ad.image, " + 
 				"ad.stack, ad.running_instances, ad.total_instances, ad.urls, ad.last_pushed, ad.last_event, " + 
 				"ad.last_event_actor, ad.last_event_time, ad.requested_state";
-		String from = "from app_detail ad";
-		String leftJoin = "left join app_relationship ar on ad.app_id = ar.app_id";
+		String from = "from application_detail ad";
+		String leftJoin = "left join application_relationship ar on ad.app_id = ar.app_id";
 		StringBuilder where = new StringBuilder();
 		List<Object> paramValues = new ArrayList<>();
 		where.append("where ar.service_id is null and ad.requested_state = ? ");

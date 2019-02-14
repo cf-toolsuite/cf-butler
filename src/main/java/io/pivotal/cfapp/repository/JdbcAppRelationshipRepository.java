@@ -26,7 +26,7 @@ public class JdbcAppRelationshipRepository {
 
 	public Mono<AppRelationship> save(AppRelationship entity) {
 		Flowable<Long> insert = database
-									.update("insert into app_relationship (organization, space, app_id, app_name, service_id, service_name, service_plan, service_type) values (?, ?, ?, ?, ?, ?, ?, ?)")
+									.update("insert into application_relationship (organization, space, app_id, app_name, service_id, service_name, service_plan, service_type) values (?, ?, ?, ?, ?, ?, ?, ?)")
 									.parameters(
 										entity.getOrganization(),
 										entity.getSpace(),
@@ -40,20 +40,20 @@ public class JdbcAppRelationshipRepository {
 									.returnGeneratedKeys()
 									.getAs(Long.class);
 		return Mono.from(database
-					.select("select id, organization, space, app_id, app_name, service_id, service_name, service_plan, service_type from app_relationship where id = ?")
+					.select("select id, organization, space, app_id, app_name, service_id, service_name, service_plan, service_type from application_relationship where id = ?")
 					.parameterStream(insert)
 					.get(rs -> fromResultSet(rs)));
 	}
 
 	public Flux<AppRelationship> findAll() {
-		String selectAll = "select id, organization, space, app_id, app_name, service_id, service_name, service_plan, service_type from app_relationship order by organization, space, app_name";
+		String selectAll = "select id, organization, space, app_id, app_name, service_id, service_name, service_plan, service_type from application_relationship order by organization, space, app_name";
 		return Flux.from(database
 							.select(selectAll)
 							.get(rs -> fromResultSet(rs)));
 	}
 	
 	public Flux<AppRelationship> findByApplicationId(String applicationId) {
-		String select = "select id, organization, space, app_id, app_name, service_id, service_name, service_plan, service_type from app_relationship where app_id = ? order by organization, space, service_name";
+		String select = "select id, organization, space, app_id, app_name, service_id, service_name, service_plan, service_type from application_relationship where app_id = ? order by organization, space, service_name";
 		return Flux.from(database
 							.select(select)
 							.parameter(applicationId)
@@ -61,7 +61,7 @@ public class JdbcAppRelationshipRepository {
 	}
 
 	public Mono<Void> deleteAll() {
-		String deleteAll = "delete from app_relationship";
+		String deleteAll = "delete from application_relationship";
 		return Flux.from(database
 							.update(deleteAll)
 							.counts())

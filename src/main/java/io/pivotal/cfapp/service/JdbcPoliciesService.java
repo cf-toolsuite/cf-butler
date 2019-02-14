@@ -36,9 +36,6 @@ public class JdbcPoliciesService implements PoliciesService {
 
 	@Override
 	public Mono<Void> deleteAll() {
-		if (settings.isVersionManaged()) {
-			throw new UnsupportedOperationException(UNSUPPORTED_OP_MESSAGE);
-		}
 		return repo.deleteAll();
 	}
 

@@ -56,6 +56,7 @@ dependencies {
     implementation('org.springframework:spring-jdbc')
     implementation('com.zaxxer:HikariCP:3.3.1')
     implementation('org.hsqldb:hsqldb:2.4.1')
+    implementation('org.postgresql:postgresql:42.2.5')
     implementation('org.cloudfoundry:cloudfoundry-client-reactor:3.15.0.RELEASE')
     implementation('org.cloudfoundry:cloudfoundry-operations:3.15.0.RELEASE')
     implementation('io.projectreactor:reactor-core:3.2.6.RELEASE')
