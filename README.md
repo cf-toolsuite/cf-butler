@@ -94,7 +94,7 @@ E.g., if you had a configuration file named `application-pws.yml`
 
 ### Managing policies
 
-Creation and deletion of policies are managed via API endpoints by default. When an audit trail is important to you, you may opt to set `cf.policies.provider` to `git`.  When you do this, you shift the lifecycle management of policies to Git.  You will have to specify additionaa configuration, like
+Creation and deletion of policies are managed via API endpoints by default. When an audit trail is important to you, you may opt to set `cf.policies.provider` to `git`.  When you do this, you shift the lifecycle management of policies to Git.  You will have to specify additional configuration, like
 
 * `cf.policies.uri` the location of the repository that contains policy files in JSON format
 * `cf.policies.commit` the commit id to pull from
@@ -107,7 +107,9 @@ Policy files must adhere to a naming convention where:
 
 A sample Github repository exists [here](https://github.com/pacphi/cf-butler-config-sample).
 
-Have a look at [secrets.pws.json](samples/secrets.pws.json) for an enable of how to configure secrets for deployment of `cf-butler` to PAS integrating with the aforementioned sample Github repository.
+Have a look at [secrets.pws.json](samples/secrets.pws.json) for an example of how to configure secrets for deployment of `cf-butler` to PAS integrating with the aforementioned sample Github repository.
+
+On startup `cf-butler` will read files from the repo and cache in a database.  Each policy's id will be set to the commit id.
 
 ### To set the operations schedule
 
