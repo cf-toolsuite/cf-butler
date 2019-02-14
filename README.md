@@ -96,7 +96,7 @@ E.g., if you had a configuration file named `application-pws.yml`
 
 By default `cf-butler` employs an in-memory [HSQLDB](http://hsqldb.org) instance.  If you wish to configure an external database you must set the `cf.dbms.provider` then set `spring.datasource.*` properties as described [here](https://docs.spring.io/spring-boot/docs/current/reference/html/howto-data-access.html#howto-configure-a-datasource).
 
-[DDL](https://en.wikipedia.org/wiki/Data_definition_language) scripts for each supported database are managed underneath [src/main/db](src/main/db).
+[DDL](https://en.wikipedia.org/wiki/Data_definition_language) scripts for each supported database are managed underneath [src/main/resources/db](src/main/resources/db). Supported databases are: [hsql](src/main/resources/db/hsql/schema.ddl) and [postgres](src/main/resources/db/postgres/schema.ddl).
 
 > A sample [script](deploy.xdb.sh) and [secrets](samples/secrets.pws.json) for deploying `cf-butler` to Pivotal Web Services with an [ElephantSQL](https://www.elephantsql.com) backend exists for your perusal. 
 
