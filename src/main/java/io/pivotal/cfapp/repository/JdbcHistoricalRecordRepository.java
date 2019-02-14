@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 import io.pivotal.cfapp.domain.HistoricalRecord;
+import io.reactivex.Flowable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -25,25 +26,28 @@ public class JdbcHistoricalRecordRepository {
 	}
 
 	public Mono<HistoricalRecord> save(HistoricalRecord entity) {
-		String createOne = "insert into historical_record (transaction_datetime, action_taken, organization, space, app_id, service_id, type, name) values (?, ?, ?, ?, ?, ?, ?, ?)";
+		Flowable<Long> insert = database
+									.update("insert into historical_record (transaction_datetime, action_taken, organization, space, app_id, service_id, type, name) values (?, ?, ?, ?, ?, ?, ?, ?)")
+									.parameters(
+										entity.getTransactionDateTime() != null ? Timestamp.valueOf(entity.getTransactionDateTime()): null,
+										entity.getActionTaken(),
+										entity.getOrganization(),
+										entity.getSpace(),
+										entity.getAppId(),
+										entity.getServiceId(),
+										entity.getType(),
+										entity.getName()
+									)
+									.returnGeneratedKeys()
+									.getAs(Long.class);
 		return Mono.from(database
-							.update(createOne)
-							.parameters(
-								entity.getTransactionDateTime() != null ? Timestamp.valueOf(entity.getTransactionDateTime()): null,
-								entity.getActionTaken(),
-								entity.getOrganization(),
-								entity.getSpace(),
-								entity.getAppId(),
-								entity.getServiceId(),
-								entity.getType(),
-								entity.getName()
-							)
-							.counts()
-							.map(r -> entity));
+				.select("select id, transaction_datetime, action_taken, organization, space, app_id, service_id, type, name where id = ?")
+				.parameterStream(insert)
+				.get(rs -> fromResultSet(rs)));
 	}
 
 	public Flux<HistoricalRecord> findAll() {
-		String selectAll = "select transaction_datetime, action_taken, organization, space, app_id, service_id, type, name from historical_record order by transaction_datetime desc";
+		String selectAll = "select id, transaction_datetime, action_taken, organization, space, app_id, service_id, type, name from historical_record order by transaction_datetime desc";
 		return Flux.from(database
 							.select(selectAll)
 							.get(rs -> fromResultSet(rs)));
@@ -52,14 +56,15 @@ public class JdbcHistoricalRecordRepository {
 	private HistoricalRecord fromResultSet(ResultSet rs) throws SQLException {
 		return HistoricalRecord
 				.builder()
-					.transactionDateTime(rs.getTimestamp(1) != null ? rs.getTimestamp(1).toLocalDateTime(): null)
-					.actionTaken(rs.getString(2))
-					.organization(rs.getString(3))
-					.space(rs.getString(4))
-					.appId(rs.getString(5))
-					.serviceId(rs.getString(6))
-					.type(rs.getString(7))
-					.name(rs.getString(8))
+					.id(rs.getLong(1))
+					.transactionDateTime(rs.getTimestamp(2) != null ? rs.getTimestamp(2).toLocalDateTime(): null)
+					.actionTaken(rs.getString(3))
+					.organization(rs.getString(4))
+					.space(rs.getString(5))
+					.appId(rs.getString(6))
+					.serviceId(rs.getString(7))
+					.type(rs.getString(8))
+					.name(rs.getString(9))
 					.build();
 	}
 }

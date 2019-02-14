@@ -39,4 +39,26 @@ public class ButlerSettings {
     	return result;
     }
     
+    @Data
+    @Configuration
+    @ConfigurationProperties(prefix = "cf.policies")
+    public class PoliciesSettings {
+    	
+    	private String provider = "dbms";
+    	private String uri;
+    	private String commit;
+    	private Set<String> filePaths;
+    	
+    	public boolean isVersionManaged() {
+    		return getProvider().equalsIgnoreCase("git");
+    	}
+    }
+    
+    @Data
+    @Configuration
+    @ConfigurationProperties(prefix = "cf.dbms")
+    public class DbmsSettings {
+    
+    	private String provider = "hsql";
+    }
 }

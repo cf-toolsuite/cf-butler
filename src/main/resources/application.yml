@@ -20,12 +20,21 @@ cf:
   sslValidationSkipped: false
   organizationBlackList:
     - system
+  policies:
+    #provider: git
+    provider: dbms
+    #uri: 
+    #commit:
+    #filePaths:
+  dbms:
+    provider: hsql
+    #provider: postgres
 
 logging:
   level:
     org.springframework: INFO
-    reactor: DEBUG
-    org.davidmoten: DEBUG
+    #reactor: DEBUG
+    #org.davidmoten: DEBUG
 
 # Set schedule for this task to adhere to
 # @see https://crontab.guru for help, first parameter is seconds
@@ -37,8 +46,8 @@ management:
   endpoints:
     web:
       exposure:
-        include: info,health,metrics,scheduledtasks,loggers
-
+        include: info,health,metrics,scheduledtasks,loggers 
+  
 ---
 spring:
   profiles: jdbc
@@ -66,6 +75,13 @@ cf:
   password: ${vcap.services.cf-butler-secrets.credentials.CF_PASSWORD}
   refreshToken: ${vcap.services.cf-butler-secrets.credentials.CF_REFRESH-TOKEN}
   organizationBlackList: ${vcap.services.cf-butler-secrets.credentials.CF_ORGANIZATION-BLACK-LIST}
+  policies:
+    provider: ${vcap.services.cf-butler-secrets.credentials.CF_POLICIES_PROVIDER}
+    uri: ${vcap.services.cf-butler-secrets.credentials.CF_POLICIES_URI}
+    commit: ${vcap.services.cf-butler-secrets.credentials.CF_POLICIES_COMMIT}
+    filePaths: ${vcap.services.cf-butler-secrets.credentials.CF_POLICIES_FILE-PATHS}
+  dbms:
+    provider: ${vcap.services.cf-butler-secrets.credentials.CF_DBMS_PROVIDER}
 
 token:
   provider: ${vcap.services.cf-butler-secrets.credentials.TOKEN_PROVIDER}
