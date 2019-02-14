@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 import io.pivotal.cfapp.domain.AppRelationship;
+import io.reactivex.Flowable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -24,32 +25,35 @@ public class JdbcAppRelationshipRepository {
 	}
 
 	public Mono<AppRelationship> save(AppRelationship entity) {
-		String createOne = "insert into app_relationship (organization, space, app_id, app_name, service_id, service_name, service_plan, service_type) values (?, ?, ?, ?, ?, ?, ?, ?)";
+		Flowable<Long> insert = database
+									.update("insert into application_relationship (organization, space, app_id, app_name, service_id, service_name, service_plan, service_type) values (?, ?, ?, ?, ?, ?, ?, ?)")
+									.parameters(
+										entity.getOrganization(),
+										entity.getSpace(),
+										entity.getAppId(),
+										entity.getAppName(),
+										entity.getServiceId(),
+										entity.getServiceName(),
+										entity.getServicePlan(),
+										entity.getServiceType()
+									)
+									.returnGeneratedKeys()
+									.getAs(Long.class);
 		return Mono.from(database
-							.update(createOne)
-							.parameters(
-								entity.getOrganization(),
-								entity.getSpace(),
-								entity.getAppId(),
-								entity.getAppName(),
-								entity.getServiceId(),
-								entity.getServiceName(),
-								entity.getServicePlan(),
-								entity.getServiceType()
-							)
-							.counts()
-							.map(r -> entity));
+					.select("select id, organization, space, app_id, app_name, service_id, service_name, service_plan, service_type from application_relationship where id = ?")
+					.parameterStream(insert)
+					.get(rs -> fromResultSet(rs)));
 	}
 
 	public Flux<AppRelationship> findAll() {
-		String selectAll = "select organization, space, app_id, app_name, service_id, service_name, service_plan, service_type from app_relationship order by organization, space, app_name";
+		String selectAll = "select id, organization, space, app_id, app_name, service_id, service_name, service_plan, service_type from application_relationship order by organization, space, app_name";
 		return Flux.from(database
 							.select(selectAll)
 							.get(rs -> fromResultSet(rs)));
 	}
 	
 	public Flux<AppRelationship> findByApplicationId(String applicationId) {
-		String select = "select organization, space, app_id, app_name, service_id, service_name, service_plan, service_type from app_relationship where app_id = ? order by organization, space, service_name";
+		String select = "select id, organization, space, app_id, app_name, service_id, service_name, service_plan, service_type from application_relationship where app_id = ? order by organization, space, service_name";
 		return Flux.from(database
 							.select(select)
 							.parameter(applicationId)
@@ -57,7 +61,7 @@ public class JdbcAppRelationshipRepository {
 	}
 
 	public Mono<Void> deleteAll() {
-		String deleteAll = "delete from app_relationship";
+		String deleteAll = "delete from application_relationship";
 		return Flux.from(database
 							.update(deleteAll)
 							.counts())
@@ -67,14 +71,15 @@ public class JdbcAppRelationshipRepository {
 	private AppRelationship fromResultSet(ResultSet rs) throws SQLException {
 		return AppRelationship
 				.builder()
-				.organization(rs.getString(1))
-				.space(rs.getString(2))
-				.appId(rs.getString(3))
-				.appName(rs.getString(4))
-				.serviceId(rs.getString(5))
-				.serviceName(rs.getString(6))
-				.servicePlan(rs.getString(7))
-				.serviceType(rs.getString(8))
-				.build();
+					.id(rs.getLong(1))
+					.organization(rs.getString(2))
+					.space(rs.getString(3))
+					.appId(rs.getString(4))
+					.appName(rs.getString(5))
+					.serviceId(rs.getString(6))
+					.serviceName(rs.getString(7))
+					.servicePlan(rs.getString(8))
+					.serviceType(rs.getString(9))
+					.build();
 	}
 }

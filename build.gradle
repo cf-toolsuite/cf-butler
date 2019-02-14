@@ -3,7 +3,9 @@ buildscript {
         springBootVersion = '2.1.2.RELEASE' 
     }
     repositories { 
-        mavenCentral() 
+        mavenCentral()
+        maven { url "https://repo.spring.io/snapshot" }
+		maven { url "https://repo.spring.io/milestone" }
     }
     dependencies { 
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}") 
@@ -20,7 +22,9 @@ version = '0.1-SNAPSHOT'
 sourceCompatibility = 1.8
 
 repositories { 
-    mavenCentral() 
+    mavenCentral()
+    maven { url "https://repo.spring.io/snapshot" }
+	maven { url "https://repo.spring.io/milestone" }
 }
 
 bootRun {
@@ -40,16 +44,22 @@ dependencies {
     implementation('org.springframework.boot:spring-boot-configuration-processor')
     implementation('org.apache.commons:commons-lang3:3.7')
     implementation('com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.8')
+    implementation('com.fasterxml.uuid:java-uuid-generator:3.1.5')
     implementation('org.springframework.credhub:spring-credhub-cloud-connector:2.0.0.RELEASE')
     implementation('org.springframework.boot:spring-boot-starter-actuator')
     implementation('org.springframework.boot:spring-boot-starter-webflux')
+    implementation('org.springframework.data:spring-data-commons:2.1.4.RELEASE')
+    //implementation('io.r2dbc:r2dbc-spi:1.0.0.M6')
+    //implementation('io.r2dbc:r2dbc-postgresql:1.0.0.M6')
+    implementation('org.eclipse.jgit:org.eclipse.jgit:5.2.1.201812262042-r')
     implementation('com.github.davidmoten:rxjava2-jdbc:0.2.1')
     implementation('org.springframework:spring-jdbc')
-    implementation('com.zaxxer:HikariCP:3.3.0')
+    implementation('com.zaxxer:HikariCP:3.3.1')
     implementation('org.hsqldb:hsqldb:2.4.1')
+    implementation('org.postgresql:postgresql:42.2.5')
     implementation('org.cloudfoundry:cloudfoundry-client-reactor:3.15.0.RELEASE')
     implementation('org.cloudfoundry:cloudfoundry-operations:3.15.0.RELEASE')
-    implementation('io.projectreactor:reactor-core:3.2.5.RELEASE')
+    implementation('io.projectreactor:reactor-core:3.2.6.RELEASE')
     implementation('io.projectreactor.ipc:reactor-netty:0.7.14.RELEASE')
     testImplementation('org.springframework.boot:spring-boot-starter-test')
     testImplementation('io.projectreactor:reactor-test')

@@ -25,17 +25,20 @@ Required
 
 * [Pivotal Application Service](https://pivotal.io/platform/pivotal-application-service) account
 
+
 ## Tools
 
 * [git](https://git-scm.com/downloads) 2.20.1 or better
 * [JDK](http://openjdk.java.net/install/) 11 or better
 * [cf](https://docs.cloudfoundry.org/cf-cli/install-go-cli.html) CLI 6.41.0 or better
 
+
 ## Clone
 
 ```
 git clone https://github.com/pacphi/cf-butler.git
 ```
+
 
 ## How to configure
 
@@ -89,6 +92,33 @@ E.g., if you had a configuration file named `application-pws.yml`
 
 > See the [samples](samples) directory for some examples of configuration when deploying to [Pivotal Web Services](https://login.run.pivotal.io/login) or [PCF One](https://login.run.pcfone.io/login).
 
+### Using an external database
+
+By default `cf-butler` employs an in-memory [HSQLDB](http://hsqldb.org) instance.  If you wish to configure an external database you must set the `cf.dbms.provider` then set `spring.datasource.*` properties as described [here](https://docs.spring.io/spring-boot/docs/current/reference/html/howto-data-access.html#howto-configure-a-datasource).
+
+[DDL](https://en.wikipedia.org/wiki/Data_definition_language) scripts for each supported database are managed underneath [src/main/db](src/main/db).
+
+> A sample [script](deploy.xdb.sh) and [secrets](samples/secrets.pws.json) for deploying `cf-butler` to Pivotal Web Services with an [ElephantSQL](https://www.elephantsql.com) backend exists for your perusal. 
+
+### Managing policies
+
+Creation and deletion of policies are managed via API endpoints by default. When an audit trail is important to you, you may opt to set `cf.policies.provider` to `git`.  When you do this, you shift the lifecycle management of policies to Git.  You will have to specify additional configuration, like
+
+* `cf.policies.uri` the location of the repository that contains policy files in JSON format
+* `cf.policies.commit` the commit id to pull from
+* `cf.policies.filePaths` an array of file paths of policy files
+
+Policy files must adhere to a naming convention where:
+
+* a filename ending with `-AP.json` encapsulates an individual [ApplicationPolicy](src/main/java/io/pivotal/cfapp/domain/ApplicationPolicy.java)
+* a filename ending with `-SIP.json` encapsulates an individual [ServiceInstancePolicy](src/main/java/io/pivotal/cfapp/domain/ServiceInstancePolicy.java)
+
+A sample Github repository exists [here](https://github.com/pacphi/cf-butler-config-sample).
+
+Have a look at [secrets.pws.json](samples/secrets.pws.json) for an example of how to configure secrets for deployment of `cf-butler` to PAS integrating with the aforementioned sample Github repository.
+
+On startup `cf-butler` will read files from the repo and cache in a database.  Each policy's id will be set to the commit id.
+
 ### To set the operations schedule
 
 Update the value of the `cron` properties in `application.yml`.  Consult this [article](https://www.baeldung.com/spring-scheduled-tasks) and the [Javadoc](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/scheduling/annotation/Scheduled.html#cron--) to understand how to tune it for your purposes.  
@@ -133,11 +163,13 @@ To have access to a database management [console](http://hsqldb.org/doc/guide/ru
 
 > Note: this is not an available option when deploying to a PAS foundation.
 
+
 ## How to Build
 
 ```
 ./gradlew build
 ```
+
 
 ## How to Run
 
@@ -147,6 +179,7 @@ To have access to a database management [console](http://hsqldb.org/doc/guide/ru
 where `{target_foundation_profile}` is something like `pws` or `pcfone`
 
 > You'll need to manually stop to the application with `Ctrl+C`
+
 
 ## How to deploy to Pivotal Application Service
 
@@ -210,6 +243,7 @@ Shutdown and destroy the app and service instances
 ./destroy.sh
 ```
 
+
 ## Endpoints
 
 These REST endpoints have been exposed for administrative purposes.  
@@ -252,7 +286,7 @@ POST /policies
 }
 ```
 
-> Establish policies to remove stopped applications and/or orphaned services. 
+> Establish policies to remove stopped applications and/or orphaned services. This endpoint is only available when `cf.policies.provider` is set to `dbms`.
 
 > Consult the [java.time.Duration](https://docs.oracle.com/javase/8/docs/api/java/time/Duration.html#parse-java.lang.CharSequence-) javadoc for other examples of what you can specify when setting values for `from-duration` properties above.
 
@@ -266,7 +300,32 @@ GET /policies
 DELETE /policies
 ```
 
-> Delete all established policies
+> Delete all established policies. This endpoint is only available when `cf.policies.provider` is set to `dbms`.
+
+```
+GET /policies/application/{id}
+```
+
+> Obtain application policy details by id
+
+```
+GET /policies/serviceInstance/{id}
+```
+
+> Obtain service instance policy details by id
+
+```
+DELETE /policies/application/{id}
+```
+
+> Delete an application policy by its id. This endpoint is only available when `cf.policies.provider` is set to `dbms`.
+
+```
+DELETE /policies/serviceInstance/{id}
+```
+
+> Delete a service instance policy by its id. This endpoint is only available when `cf.policies.provider` is set to `dbms`.
+
 
 ## Credits
 
