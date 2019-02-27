@@ -30,7 +30,7 @@ public class ServiceInstanceDetailCsvReport {
         detail.append(ServiceInstanceDetail.headers());
         detail.append("\n");
         event.getDetail()
-                .forEach(a -> { 
+                .forEach(a -> {
                     detail.append(a.toCsv());
                     detail.append("\n");
                 });

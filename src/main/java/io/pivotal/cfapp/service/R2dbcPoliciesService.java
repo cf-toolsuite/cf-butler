@@ -1,29 +1,27 @@
 package io.pivotal.cfapp.service;
 
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 import io.pivotal.cfapp.config.ButlerSettings.PoliciesSettings;
 import io.pivotal.cfapp.domain.Policies;
-import io.pivotal.cfapp.repository.JdbcPoliciesRepository;
+import io.pivotal.cfapp.repository.R2dbcPoliciesRepository;
 import reactor.core.publisher.Mono;
 
-@Profile("jdbc")
 @Service
-public class JdbcPoliciesService implements PoliciesService {
+public class R2dbcPoliciesService implements PoliciesService {
 
 	private static final String UNSUPPORTED_OP_MESSAGE = "Policies are managed in a git repository.";
-	
-	private final JdbcPoliciesRepository repo;
+
+	private final R2dbcPoliciesRepository repo;
 	private final PoliciesSettings settings;
-	
-	public JdbcPoliciesService(
-			JdbcPoliciesRepository repo,
+
+	public R2dbcPoliciesService(
+			R2dbcPoliciesRepository repo,
 			PoliciesSettings settings) {
 		this.repo = repo;
 		this.settings = settings;
 	}
-	
+
 	@Override
 	public Mono<Policies> save(Policies entity) {
 		return repo.save(entity);

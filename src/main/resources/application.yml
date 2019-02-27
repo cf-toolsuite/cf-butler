@@ -27,7 +27,7 @@ cf:
     #commit:
     #filePaths:
   dbms:
-    provider: hsql
+    provider: h2
     #provider: postgres
 
 logging:
@@ -46,25 +46,20 @@ management:
   endpoints:
     web:
       exposure:
-        include: info,health,metrics,scheduledtasks,loggers 
-  
----
-spring:
-  profiles: jdbc
+        include: info,health,metrics,scheduledtasks,loggers
 
+spring:
   datasource:
-    driver-class-name: org.hsqldb.jdbc.JDBCDriver
-    url: jdbc:hsqldb:mem:cf-butler
+    driver-class-name: org.h2.Driver
+    url: mem:cf-butler
     username: sa
-    password: 
+    password: sa
 
 ---
 ## Assumes naming convention for secrets service
 ## Name of credhub service instance must be cf-butler-secrets
 spring:
   profiles: secrets
-  profiles.include: 
-  - jdbc
 
   credhub:
     url: https://credhub.service.cf.internal:8844
@@ -85,11 +80,11 @@ cf:
 
 token:
   provider: ${vcap.services.cf-butler-secrets.credentials.TOKEN_PROVIDER}
-  
-cron: 
+
+cron:
   collection: ${vcap.services.cf-butler-secrets.credentials.CRON_COLLECTION:0 0 0 * * *}
   execution: ${vcap.services.cf-butler-secrets.credentials.CRON_EXECUTION:0 0 2 * * *}
-  
+
 management:
   endpoints:
     web:

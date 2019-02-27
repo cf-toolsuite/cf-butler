@@ -3,6 +3,7 @@ package io.pivotal.cfapp.domain;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.data.annotation.Id;
@@ -14,7 +15,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.uuid.Generators;
-import com.github.davidmoten.guavamini.Optional;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -58,9 +58,9 @@ public class ServiceInstancePolicy {
 
 	@JsonIgnore
 	public boolean isInvalid() {
-		return Optional.fromNullable(id).isPresent() ||
-			(Optional.fromNullable(fromDateTime).isPresent() && Optional.fromNullable(fromDuration).isPresent())
-			|| (!Optional.fromNullable(fromDateTime).isPresent() && !Optional.fromNullable(fromDuration).isPresent());
+		return Optional.ofNullable(id).isPresent() ||
+			(Optional.ofNullable(fromDateTime).isPresent() && Optional.ofNullable(fromDuration).isPresent())
+			|| (!Optional.ofNullable(fromDateTime).isPresent() && !Optional.ofNullable(fromDuration).isPresent());
 	}
 
 	public Set<String> getOrganizationWhiteList() {
@@ -76,7 +76,7 @@ public class ServiceInstancePolicy {
 					.organizationWhiteList(policy.getOrganizationWhiteList())
 					.build();
 	}
-	
+
 	public static ServiceInstancePolicy seedWith(ServiceInstancePolicy policy, String id) {
 		return ServiceInstancePolicy
 				.builder()

@@ -16,7 +16,7 @@ public class ButlerSettings {
 
 	private static final String SYSTEM_ORG = "system";
 	private static final Set<String> DEFAULT_BLACKLIST = Set.of(SYSTEM_ORG);
-	
+
     private String apiHost;
     private boolean sslValidationSkipped;
     private String username;
@@ -27,38 +27,38 @@ public class ButlerSettings {
 
     public Set<String> getOrganizationBlackList() {
     	while (organizationBlackList.remove(""));
-    	Set<String> nonEmptyBlacklist = CollectionUtils.isEmpty(organizationBlackList) ? 
+    	Set<String> nonEmptyBlacklist = CollectionUtils.isEmpty(organizationBlackList) ?
     			DEFAULT_BLACKLIST: organizationBlackList;
     	return merge(nonEmptyBlacklist);
-    } 
-    
+    }
+
     private Set<String> merge(Set<String> orgBlackList) {
     	Set<String> result = new HashSet<>();
     	result.addAll(orgBlackList);
     	result.addAll(DEFAULT_BLACKLIST);
     	return result;
     }
-    
+
     @Data
     @Configuration
     @ConfigurationProperties(prefix = "cf.policies")
     public class PoliciesSettings {
-    	
+
     	private String provider = "dbms";
     	private String uri;
     	private String commit;
     	private Set<String> filePaths;
-    	
+
     	public boolean isVersionManaged() {
     		return getProvider().equalsIgnoreCase("git");
     	}
     }
-    
+
     @Data
     @Configuration
     @ConfigurationProperties(prefix = "cf.dbms")
     public class DbmsSettings {
-    
-    	private String provider = "hsql";
+
+    	private String provider = "h2";
     }
 }

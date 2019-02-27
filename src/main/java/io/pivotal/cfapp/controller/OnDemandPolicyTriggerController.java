@@ -16,7 +16,7 @@ public class OnDemandPolicyTriggerController {
 
 	private AppPolicyExecutorTask appPolicyExecutor;
 	private ServiceInstancePolicyExecutorTask serviceInstancePolicyExecutor;
-	
+
 	@Autowired
 	public OnDemandPolicyTriggerController(
 			AppPolicyExecutorTask appPolicyExecutor,
@@ -25,12 +25,12 @@ public class OnDemandPolicyTriggerController {
 		this.appPolicyExecutor = appPolicyExecutor;
 		this.serviceInstancePolicyExecutor = serviceInstancePolicyExecutor;
 	}
-	
+
 	@PostMapping("/policies/execute")
 	public Mono<ResponseEntity<Void>> triggerPolicyExection() {
 		appPolicyExecutor.execute();
 		serviceInstancePolicyExecutor.execute();
 		return Mono.just(ResponseEntity.accepted().build());
 	}
-	
+
 }

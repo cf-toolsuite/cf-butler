@@ -94,9 +94,9 @@ E.g., if you had a configuration file named `application-pws.yml`
 
 ### Using an external database
 
-By default `cf-butler` employs an in-memory [HSQLDB](http://hsqldb.org) instance.  If you wish to configure an external database you must set the `cf.dbms.provider` then set `spring.datasource.*` properties as described [here](https://docs.spring.io/spring-boot/docs/current/reference/html/howto-data-access.html#howto-configure-a-datasource).
+By default `cf-butler` employs an in-memory [H2](http://www.h2database.com) instance.  If you wish to configure an external database you must set the `cf.dbms.provider` then set `spring.datasource.*` properties as described [here](https://docs.spring.io/spring-boot/docs/current/reference/html/howto-data-access.html#howto-configure-a-datasource).
 
-[DDL](https://en.wikipedia.org/wiki/Data_definition_language) scripts for each supported database are managed underneath [src/main/resources/db](src/main/resources/db). Supported databases are: [hsql](src/main/resources/db/hsql/schema.ddl) and [postgres](src/main/resources/db/postgres/schema.ddl).
+[DDL](https://en.wikipedia.org/wiki/Data_definition_language) scripts for each supported database are managed underneath [src/main/resources/db](src/main/resources/db). Supported databases are: [h2](src/main/resources/db/h2/schema.ddl) and [postgres](src/main/resources/db/postgres/schema.ddl).
 
 > A sample [script](deploy.xdb.sh) and [secrets](samples/secrets.pws.json) for deploying `cf-butler` to Pivotal Web Services with an [ElephantSQL](https://www.elephantsql.com) backend exists for your perusal. 
 
@@ -152,16 +152,6 @@ Add an entry in your `config/secrets.json` like
 Within each [ApplicationPolicy](https://github.com/pacphi/cf-butler/blob/master/src/main/java/io/pivotal/cfapp/domain/ApplicationPolicy.java) or [ServiceInstancePolicy](https://github.com/pacphi/cf-butler/blob/master/src/main/java/io/pivotal/cfapp/domain/ServiceInstancePolicy.java) you may optionally specify a list of organizations that will be whitelisted.  Policy execution will be restricted to just these organizations in the whitelist.
 
 > If the organization whitelist is not specified in a policy then that policy's execution applies to all organizations on the foundation (except for those in the organization blacklist).
-
-### Troubleshooting
-
-To have access to a database management [console](http://hsqldb.org/doc/guide/running-chapt.html#rgc_access_tools) which would allow you to execute queries against the in-memory database, you will need to set an additional JVM argument.  
-
-```
--Djava.awt.headless=false
-```
-
-> Note: this is not an available option when deploying to a PAS foundation.
 
 
 ## How to Build

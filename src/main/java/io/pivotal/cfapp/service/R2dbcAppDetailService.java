@@ -1,24 +1,22 @@
 package io.pivotal.cfapp.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 import io.pivotal.cfapp.domain.AppDetail;
 import io.pivotal.cfapp.domain.ApplicationPolicy;
-import io.pivotal.cfapp.repository.JdbcAppDetailRepository;
+import io.pivotal.cfapp.repository.R2dbcAppDetailRepository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 
-@Profile("jdbc")
 @Service
-public class JdbcAppDetailService implements AppDetailService {
+public class R2dbcAppDetailService implements AppDetailService {
 
-	private JdbcAppDetailRepository repo;
+	private R2dbcAppDetailRepository repo;
 
 	@Autowired
-	public JdbcAppDetailService(JdbcAppDetailRepository repo) {
+	public R2dbcAppDetailService(R2dbcAppDetailRepository repo) {
 		this.repo = repo;
 	}
 
@@ -31,7 +29,7 @@ public class JdbcAppDetailService implements AppDetailService {
 	public Mono<AppDetail> save(AppDetail entity) {
 		return repo.save(entity);
 	}
-	
+
 	@Override
 	public Mono<AppDetail> findByAppId(String appId) {
 		return repo.findByAppId(appId);
