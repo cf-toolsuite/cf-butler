@@ -1,11 +1,16 @@
 package io.pivotal.cfapp.repository;
 
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.r2dbc.function.DatabaseClient;
+import org.springframework.data.r2dbc.function.DatabaseClient.GenericInsertSpec;
 import org.springframework.stereotype.Repository;
 
+import io.pivotal.cfapp.config.ButlerSettings.DbmsSettings;
 import io.pivotal.cfapp.domain.AppRelationship;
+import io.pivotal.cfapp.domain.IndexPrefix;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -13,30 +18,44 @@ import reactor.core.publisher.Mono;
 public class R2dbcAppRelationshipRepository {
 
 	private DatabaseClient client;
+	private IndexPrefix prefix;
 
 	@Autowired
-	public R2dbcAppRelationshipRepository(DatabaseClient client) {
+	public R2dbcAppRelationshipRepository(
+		DatabaseClient client,
+		DbmsSettings settings) {
 		this.client = client;
+		this.prefix = IndexPrefix.valueOf(settings.getProvider().toUpperCase());
 	}
 
 	public Mono<AppRelationship> save(AppRelationship entity) {
-		return client.insert().into("application_relationship")
-								.value("organization", entity.getOrganization())
-								.value("space", entity.getSpace())
-								.value("app_id", entity.getAppId())
-								.value("app_name", entity.getAppName())
-								.value("service_id", entity.getServiceId())
-								.value("service_name", entity.getServiceName())
-								.value("service_plan", entity.getServicePlan())
-								.value("service_type", entity.getServiceType())
-								.fetch()
-								.rowsUpdated()
-								.then(client.execute().sql("select id, organization, space, app_id, app_name, service_id, service_name, service_plan, service_type from application_relationship where app_id = ? and service_id = ?")
-												.bind("app_id", entity.getAppId())
-												.bind("service_id", entity.getServiceId())
-												.as(AppRelationship.class)
-												.fetch()
-												.one());
+		GenericInsertSpec<Map<String, Object>> spec =
+			client.insert().into("application_relationship")
+				.value("organization", entity.getOrganization());
+		spec = spec.value("space", entity.getSpace());
+		spec = spec.value("app_id", entity.getAppId());
+		if (entity.getAppName() != null) {
+			spec = spec.value("app_name", entity.getAppName());
+		} else {
+			spec = spec.nullValue("app_name", String.class);
+		}
+		spec = spec.value("service_id", entity.getServiceId());
+		if (entity.getServiceName() != null) {
+			spec = spec.value("service_name", entity.getServiceName());
+		} else {
+			spec = spec.nullValue("service_name", String.class);
+		}
+		if (entity.getServicePlan() != null) {
+			spec = spec.value("service_plan", entity.getServicePlan());
+		} else {
+			spec = spec.nullValue("service_plan", String.class);
+		}
+		if (entity.getServiceType() != null) {
+			spec = spec.value("service_type", entity.getServiceType());
+		} else {
+			spec = spec.nullValue("service_type", String.class);
+		}
+		return spec.fetch().rowsUpdated().then(Mono.just(entity));
 	}
 
 	public Flux<AppRelationship> findAll() {
@@ -48,9 +67,10 @@ public class R2dbcAppRelationshipRepository {
 	}
 
 	public Flux<AppRelationship> findByApplicationId(String applicationId) {
-		String selectOne = "select id, organization, space, app_id, app_name, service_id, service_name, service_plan, service_type from application_relationship where app_id = ? order by organization, space, service_name";
+		String index = prefix.getSymbol() + 1;
+		String selectOne = "select pk, organization, space, app_id, app_name, service_id, service_name, service_plan, service_type from application_relationship where app_id = " + index + " order by organization, space, service_name";
 		return client.execute().sql(selectOne)
-						.bind("app_id", applicationId)
+						.bind(index, applicationId)
 						.as(AppRelationship.class)
 						.fetch()
 						.all();

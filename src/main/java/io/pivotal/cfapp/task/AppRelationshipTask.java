@@ -44,7 +44,7 @@ public class AppRelationshipTask implements ApplicationRunner {
     public void run(ApplicationArguments args) throws Exception {
     	collect();
     }
-    
+
     public void collect() {
     	Hooks.onOperatorDebug();
     	service
@@ -133,7 +133,7 @@ public class AppRelationshipTask implements ApplicationRunner {
 			.map(resource -> resource.getEntity())
     		.map(i -> AppRelationshipRequest.from(request).applicationId(i.getApplicationId()).build());
     }
-    
+
     protected Mono<AppRelationshipRequest> getServiceBoundApplicationNames(AppRelationshipRequest request) {
     	return Mono.just(request.getApplicationId())
     		.flatMap(appId ->

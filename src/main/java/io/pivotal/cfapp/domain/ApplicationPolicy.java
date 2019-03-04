@@ -27,6 +27,8 @@ import lombok.Getter;
 public class ApplicationPolicy {
 
 	@Id
+	private Long pk;
+
 	@Builder.Default
 	@JsonProperty("id")
 	private String id = Generators.timeBasedGenerator().generate().toString();
@@ -51,13 +53,15 @@ public class ApplicationPolicy {
 
 	@JsonCreator
 	ApplicationPolicy(
+			@JsonProperty("pk") Long pk,
 			@JsonProperty("id") String id,
-			@JsonProperty("description") String description, 
+			@JsonProperty("description") String description,
 			@JsonProperty("state") String state,
 			@JsonProperty("from-datetime") LocalDateTime fromDateTime,
 			@JsonProperty("from-duration") Duration fromDuration,
 			@JsonProperty("delete-services") boolean deleteServices,
 			@JsonProperty("organization-whitelist") Set<String> organizationWhiteList) {
+		this.pk = pk;
 		this.id = id;
 		this.description = description;
 		this.state = state;
@@ -75,10 +79,15 @@ public class ApplicationPolicy {
 						&& !Optional.ofNullable(fromDuration).isPresent());
 	}
 
+	@JsonIgnore
+	public Long getPk() {
+		return pk;
+	}
+
 	public Set<String> getOrganizationWhiteList() {
 		return CollectionUtils.isEmpty(organizationWhiteList) ? new HashSet<>() : organizationWhiteList;
 	}
-	
+
 	public static ApplicationPolicy seed(ApplicationPolicy policy) {
 		return ApplicationPolicy
 				.builder()
@@ -90,7 +99,7 @@ public class ApplicationPolicy {
 					.state(policy.getState())
 					.build();
 	}
-	
+
 	public static ApplicationPolicy seedWith(ApplicationPolicy policy, String id) {
 		return ApplicationPolicy
 				.builder()

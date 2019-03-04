@@ -33,7 +33,8 @@ cf:
 logging:
   level:
     org.springframework: INFO
-    #reactor: DEBUG
+    io.r2dbc: DEBUG
+    reactor.core: DEBUG
     #org.davidmoten: DEBUG
 
 # Set schedule for this task to adhere to
@@ -51,7 +52,7 @@ management:
 spring:
   datasource:
     driver-class-name: org.h2.Driver
-    url: mem:cf-butler
+    url: mem:cf-butler;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false
     username: sa
     password: sa
 

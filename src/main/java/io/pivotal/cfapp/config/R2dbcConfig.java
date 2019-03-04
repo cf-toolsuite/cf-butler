@@ -11,6 +11,7 @@ import org.springframework.data.r2dbc.dialect.H2Dialect;
 import org.springframework.data.r2dbc.dialect.PostgresDialect;
 import org.springframework.data.r2dbc.function.DatabaseClient;
 import org.springframework.data.r2dbc.function.DefaultReactiveDataAccessStrategy;
+import org.springframework.data.r2dbc.function.ReactiveDataAccessStrategy;
 import org.springframework.data.r2dbc.repository.support.R2dbcRepositoryFactory;
 import org.springframework.data.relational.core.mapping.RelationalMappingContext;
 
@@ -62,10 +63,12 @@ public class R2dbcConfig {
         return DatabaseClient
                 .builder()
                     .connectionFactory(connectionFactory(properties, settings))
+                    .dataAccessStrategy(dataAccessStrategy(dialect(settings)))
                     .build();
     }
 
     @Bean
+    @SuppressWarnings("rawtypes")
     public MappingContext mappingContext() {
         final RelationalMappingContext relationalMappingContext = new RelationalMappingContext();
         relationalMappingContext.afterPropertiesSet();
@@ -88,11 +91,17 @@ public class R2dbcConfig {
     }
 
     @Bean
+    @SuppressWarnings("unchecked")
     public R2dbcRepositoryFactory repositoryFactory(
         DataSourceProperties properties, DbmsSettings settings) {
         return new R2dbcRepositoryFactory(
             databaseClient(properties, settings),
             mappingContext(),
-            new DefaultReactiveDataAccessStrategy(dialect(settings)));
+            dataAccessStrategy(dialect(settings)));
+    }
+
+    @Bean
+    ReactiveDataAccessStrategy dataAccessStrategy(Dialect dialect) {
+        return new DefaultReactiveDataAccessStrategy(dialect);
     }
 }

@@ -21,7 +21,7 @@ import org.springframework.util.Assert;
 @Component
 @ConditionalOnProperty(prefix = "cf.policies", name = "provider", havingValue = "git")
 public class GitClient {
-	
+
 	public Repository getRepository(String uri) throws GitAPIException, IOException {
 		Assert.hasText(uri, "URI of remote Git repository must be specified");
 		Assert.isTrue(uri.endsWith(".git"), "URI must end with .git");
@@ -43,7 +43,7 @@ public class GitClient {
 				.call();
 		return Git.open(directory).getRepository();
 	}
-	
+
     public String readFile(Repository repo, String commitId, String filepath) throws IOException {
     	ObjectId oid = repo.resolve(commitId);
         RevCommit commit = repo.parseCommit(oid);
