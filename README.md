@@ -94,7 +94,7 @@ E.g., if you had a configuration file named `application-pws.yml`
 
 ### Using an external database
 
-By default `cf-butler` employs an in-memory [H2](http://www.h2database.com) instance.  If you wish to configure an external database you must set the `cf.dbms.provider` then set `spring.datasource.*` properties as described [here](https://docs.spring.io/spring-boot/docs/current/reference/html/howto-data-access.html#howto-configure-a-datasource).
+By default `cf-butler` employs an in-memory [H2](http://www.h2database.com) instance.  If you wish to configure an external database you must set set `spring.r2dbc.*` properties as described [here](https://github.com/spring-projects-experimental/spring-boot-r2dbc).
 
 [DDL](https://en.wikipedia.org/wiki/Data_definition_language) scripts for each supported database are managed underneath [src/main/resources/db](src/main/resources/db). Supported databases are: [h2](src/main/resources/db/h2/schema.ddl) and [postgres](src/main/resources/db/postgres/schema.ddl).
 
@@ -160,6 +160,7 @@ Within each [ApplicationPolicy](https://github.com/pacphi/cf-butler/blob/master/
 ./gradlew build
 ```
 
+> Footnote: currently embedding implementation borrowed directly from r2dbc-spi (url-parser branch) and spring-boot-starter-rdbc projects until updated releases of these artifacts are made publicly available.
 
 ## How to Run
 

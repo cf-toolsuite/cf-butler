@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.CollectionUtils;
 
@@ -53,14 +52,6 @@ public class ButlerSettings {
     	public boolean isVersionManaged() {
     		return getProvider().equalsIgnoreCase("git");
     	}
-    }
-
-    @Data
-    @Configuration
-    @ConfigurationProperties(prefix = "cf.dbms")
-    public class DbmsSettings {
-
-        private String provider = "h2";
     }
 
 }

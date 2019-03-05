@@ -26,9 +26,6 @@ cf:
     #uri: 
     #commit:
     #filePaths:
-  dbms:
-    provider: h2
-    #provider: postgres
 
 logging:
   level:
@@ -47,13 +44,15 @@ management:
     web:
       exposure:
         include: info,health,metrics,scheduledtasks,loggers
+  endpoint:
+    health:
+      show-details: always
 
 spring:
-  datasource:
-    driver-class-name: org.h2.Driver
-    url: mem:cf-butler;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false
+  r2dbc:
+    url: r2dbc:h2:mem:///cf-butler?options=DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false
     username: sa
-    password: sa
+    password: 
 
 ---
 ## Assumes naming convention for secrets service

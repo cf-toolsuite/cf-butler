@@ -2,8 +2,6 @@ package io.pivotal.cfapp.repository;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,10 +10,9 @@ import org.springframework.data.r2dbc.function.DatabaseClient;
 import org.springframework.data.r2dbc.function.DatabaseClient.GenericInsertSpec;
 import org.springframework.stereotype.Repository;
 
-import io.pivotal.cfapp.config.ButlerSettings.DbmsSettings;
+import io.pivotal.cfapp.config.DbmsSettings;
 import io.pivotal.cfapp.domain.AppDetail;
 import io.pivotal.cfapp.domain.ApplicationPolicy;
-import io.pivotal.cfapp.domain.IndexPrefix;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
@@ -25,14 +22,14 @@ import reactor.util.function.Tuples;
 public class R2dbcAppDetailRepository {
 
 	private final DatabaseClient client;
-	private IndexPrefix prefix;
+	private DbmsSettings settings;
 
 	@Autowired
 	public R2dbcAppDetailRepository(
 		DatabaseClient client,
 		DbmsSettings settings) {
 		this.client = client;
-		this.prefix = IndexPrefix.valueOf(settings.getProvider().toUpperCase());
+		this.settings = settings;
 	}
 
 	public Mono<AppDetail> save(AppDetail entity) {
@@ -116,7 +113,7 @@ public class R2dbcAppDetailRepository {
 	}
 
 	public Mono<AppDetail> findByAppId(String appId) {
-		String index = prefix.getSymbol() + 1;
+		String index = settings.getBindPrefix() + 1;
 		String selectOne = "select pk, organization, space, app_id, app_name, buildpack, image, stack, running_instances, total_instances, urls, last_pushed, last_event, last_event_actor, last_event_time, requested_state from application_detail where app_id = " + index;
 		return client.execute().sql(selectOne)
 						.bind(index, appId)
@@ -135,22 +132,22 @@ public class R2dbcAppDetailRepository {
 		String select = "select pk, organization, space, app_id, app_name, buildpack, image, stack, running_instances, total_instances, urls, last_pushed, last_event, last_event_actor, last_event_time, requested_state";
 		String from = "from application_detail";
 		StringBuilder where = new StringBuilder();
-		where.append("where requested_state = " + prefix.getSymbol() + 1 + " ");
+		where.append("where requested_state = " + settings.getBindPrefix() + 1 + " ");
 		Timestamp temporal = null;
 		if (policy.getFromDateTime() != null) {
-			where.append("and last_event_time <= " + prefix.getSymbol() + 2 + " ");
+			where.append("and last_event_time <= " + settings.getBindPrefix() + 2 + " ");
 			temporal = Timestamp.valueOf(policy.getFromDateTime());
 		}
 		if (policy.getFromDuration() != null) {
-			where.append("and last_event_time <= " + prefix.getSymbol() + 2 + " ");
+			where.append("and last_event_time <= " + settings.getBindPrefix() + 2 + " ");
 			LocalDateTime eventTime = LocalDateTime.now().minus(policy.getFromDuration());
 			temporal = Timestamp.valueOf(eventTime);
 		}
 		String orderBy = "order by organization, space, app_name";
 		String sql = String.join(" ", select, from, where, orderBy);
 		return client.execute().sql(sql)
-						.bind(prefix.getSymbol() + 1, policy.getState())
-						.bind(prefix.getSymbol() + 2, temporal)
+						.bind(settings.getBindPrefix() + 1, policy.getState())
+						.bind(settings.getBindPrefix() + 2, temporal)
 						.as(AppDetail.class)
 						.fetch().all().map(r -> toTuple(r, policy));
 	}
@@ -163,22 +160,22 @@ public class R2dbcAppDetailRepository {
 		String from = "from application_detail ad";
 		String leftJoin = "left join application_relationship ar on ad.app_id = ar.app_id";
 		StringBuilder where = new StringBuilder();
-		where.append("where ar.service_id is null and ad.requested_state = " + prefix.getSymbol() + 1 + " ");
+		where.append("where ar.service_id is null and ad.requested_state = " + settings.getBindPrefix() + 1 + " ");
 		Timestamp temporal = null;
 		if (policy.getFromDateTime() != null) {
-			where.append("and ad.last_event_time <= " + prefix.getSymbol() + 2 + " ");
+			where.append("and ad.last_event_time <= " + settings.getBindPrefix() + 2 + " ");
 			temporal = Timestamp.valueOf(policy.getFromDateTime());
 		}
 		if (policy.getFromDuration() != null) {
-			where.append("and ad.last_event_time <= " + prefix.getSymbol() + 2 + " ");
+			where.append("and ad.last_event_time <= " + settings.getBindPrefix() + 2 + " ");
 			LocalDateTime eventTime = LocalDateTime.now().minus(policy.getFromDuration());
 			temporal = Timestamp.valueOf(eventTime);
 		}
 		String orderBy = "order by ad.organization, ad.space, ad.app_name";
 		String sql = String.join(" ", select, from, leftJoin, where, orderBy);
 		return client.execute().sql(sql)
-						.bind(prefix.getSymbol() + 1, policy.getState())
-						.bind(prefix.getSymbol() + 2, temporal)
+						.bind(settings.getBindPrefix() + 1, policy.getState())
+						.bind(settings.getBindPrefix() + 2, temporal)
 						.as(AppDetail.class)
 						.fetch().all().map(r -> toTuple(r, policy));
 	}

@@ -15,10 +15,9 @@ import org.springframework.data.r2dbc.function.DatabaseClient;
 import org.springframework.data.r2dbc.function.DatabaseClient.GenericInsertSpec;
 import org.springframework.stereotype.Repository;
 
-import io.pivotal.cfapp.config.ButlerSettings.DbmsSettings;
+import io.pivotal.cfapp.config.DbmsSettings;
 import io.pivotal.cfapp.config.ButlerSettings.PoliciesSettings;
 import io.pivotal.cfapp.domain.ApplicationPolicy;
-import io.pivotal.cfapp.domain.IndexPrefix;
 import io.pivotal.cfapp.domain.Policies;
 import io.pivotal.cfapp.domain.ServiceInstancePolicy;
 
@@ -30,7 +29,7 @@ public class R2dbcPoliciesRepository {
 
 	private final DatabaseClient client;
 	private final PoliciesSettings policiesSettings;
-	private final IndexPrefix prefix;
+	private final DbmsSettings dbmsSettings;
 
 	@Autowired
 	public R2dbcPoliciesRepository(
@@ -39,7 +38,7 @@ public class R2dbcPoliciesRepository {
 		DbmsSettings dbmsSettings) {
 		this.client = client;
 		this.policiesSettings = policiesSettings;
-		this.prefix = IndexPrefix.valueOf(dbmsSettings.getProvider().toUpperCase());
+		this.dbmsSettings = dbmsSettings;
 	}
 
 	public Mono<Policies> save(Policies entity) {
@@ -57,7 +56,7 @@ public class R2dbcPoliciesRepository {
 	}
 
 	public Mono<Policies> findServiceInstancePolicyById(String id) {
-		String index = prefix.getSymbol() + 1;
+		String index = dbmsSettings.getBindPrefix() + 1;
 		String selectServiceInstancePolicy = "select pk, id, description, from_datetime, from_duration, organization_whitelist from service_instance_policy where id = " + index;
 		List<ServiceInstancePolicy> serviceInstancePolicies = new ArrayList<>();
 		return
@@ -81,7 +80,7 @@ public class R2dbcPoliciesRepository {
 	}
 
 	public Mono<Policies> findApplicationPolicyById(String id) {
-		String index = prefix.getSymbol() + 1;
+		String index = dbmsSettings.getBindPrefix() + 1;
 		String selectApplicationPolicy = "select pk, id, description, state, from_datetime, from_duration, delete_services, organization_whitelist from application_policy where id = " + index;
 		List<ApplicationPolicy> applicationPolicies = new ArrayList<>();
 		return
@@ -149,7 +148,7 @@ public class R2dbcPoliciesRepository {
 	}
 
 	public Mono<Void> deleteApplicationPolicyById(String id) {
-		String index = prefix.getSymbol() + 1;
+		String index = dbmsSettings.getBindPrefix() + 1;
 		String deleteApplicationPolicy = "delete from application_policy where id = " + index;
 		return
 			Flux
@@ -161,7 +160,7 @@ public class R2dbcPoliciesRepository {
 	}
 
 	public Mono<Void> deleteServicePolicyById(String id) {
-		String index = prefix.getSymbol() + 1;
+		String index = dbmsSettings.getBindPrefix() + 1;
 		String deleteServiceInstancePolicy = "delete from service_instance_policy where id = " + index;
 		return
 			Flux

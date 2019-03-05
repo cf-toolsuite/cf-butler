@@ -12,12 +12,6 @@ buildscript {
     }
 }
 
-ext['r2dbc-client.version'] = '1.0.0.M7'
-ext['r2dbc-h2.version'] = '1.0.0.M7'
-ext['r2dbc-postgresql.version'] = '1.0.0.M7'
-ext['r2dbc-proxy.version'] = '1.0.0.M7'
-ext['r2dbc-spi.version'] = '1.0.0.M7'
-
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
@@ -48,11 +42,11 @@ dependencies {
     implementation('org.springframework.credhub:spring-credhub-cloud-connector:2.0.0.RELEASE')
     implementation('org.springframework.boot:spring-boot-starter-actuator')
     implementation('org.springframework.boot:spring-boot-starter-webflux')
-    implementation('org.springframework.data:spring-data-commons:2.1.5.RELEASE')
-    implementation('org.springframework.data:spring-data-r2dbc:1.0.0.M1')
-    implementation('io.r2dbc:r2dbc-spi:1.0.0.M7')
-    implementation('io.r2dbc:r2dbc-h2:1.0.0.M7')
-    implementation('io.r2dbc:r2dbc-postgresql:1.0.0.M7')
+    //implementation('org.springframework.boot:spring-boot-starter-data-r2dbc:0.1.0.BUILD-SNAPSHOT')
+    implementation('org.springframework.data:spring-data-r2dbc:1.0.0.BUILD-SNAPSHOT')
+    implementation('io.r2dbc:r2dbc-client:1.0.0.BUILD-SNAPSHOT')
+    implementation('io.r2dbc:r2dbc-h2:1.0.0.BUILD-SNAPSHOT')
+    implementation('io.r2dbc:r2dbc-postgresql:1.0.0.BUILD-SNAPSHOT')
     implementation('org.eclipse.jgit:org.eclipse.jgit:5.2.1.201812262042-r')
     implementation('org.cloudfoundry:cloudfoundry-client-reactor:3.15.0.RELEASE')
     implementation('org.cloudfoundry:cloudfoundry-operations:3.15.0.RELEASE')

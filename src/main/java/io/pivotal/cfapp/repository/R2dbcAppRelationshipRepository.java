@@ -8,9 +8,8 @@ import org.springframework.data.r2dbc.function.DatabaseClient;
 import org.springframework.data.r2dbc.function.DatabaseClient.GenericInsertSpec;
 import org.springframework.stereotype.Repository;
 
-import io.pivotal.cfapp.config.ButlerSettings.DbmsSettings;
+import io.pivotal.cfapp.config.DbmsSettings;
 import io.pivotal.cfapp.domain.AppRelationship;
-import io.pivotal.cfapp.domain.IndexPrefix;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -18,14 +17,14 @@ import reactor.core.publisher.Mono;
 public class R2dbcAppRelationshipRepository {
 
 	private DatabaseClient client;
-	private IndexPrefix prefix;
+	private DbmsSettings settings;
 
 	@Autowired
 	public R2dbcAppRelationshipRepository(
 		DatabaseClient client,
 		DbmsSettings settings) {
 		this.client = client;
-		this.prefix = IndexPrefix.valueOf(settings.getProvider().toUpperCase());
+		this.settings = settings;
 	}
 
 	public Mono<AppRelationship> save(AppRelationship entity) {
@@ -67,7 +66,7 @@ public class R2dbcAppRelationshipRepository {
 	}
 
 	public Flux<AppRelationship> findByApplicationId(String applicationId) {
-		String index = prefix.getSymbol() + 1;
+		String index = settings.getBindPrefix() + 1;
 		String selectOne = "select pk, organization, space, app_id, app_name, service_id, service_name, service_plan, service_type from application_relationship where app_id = " + index + " order by organization, space, service_name";
 		return client.execute().sql(selectOne)
 						.bind(index, applicationId)

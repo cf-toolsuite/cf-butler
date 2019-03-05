@@ -13,7 +13,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.r2dbc.function.DatabaseClient;
 import org.springframework.stereotype.Component;
 
-import io.pivotal.cfapp.config.ButlerSettings.DbmsSettings;
+import io.pivotal.cfapp.config.DbmsSettings;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -36,9 +36,10 @@ public class DatabaseCreator implements ApplicationRunner {
 
 	@Override
 	public void run(ApplicationArguments args) {
-		String line; String ddl = ""; String location = "";
+		String line; String provider = ""; String ddl = ""; String location = "";
 		try {
-			location = String.join("/", "classpath:db", settings.getProvider(), "schema.ddl");
+			provider = settings.getProvider().toLowerCase().replaceAll("\\s","");
+			location = String.join("/", "classpath:db", provider, "schema.ddl");
 			Resource schema = resourceLoader.getResource(location);
 			InputStream is = schema.getInputStream();
 			BufferedReader br = new BufferedReader(new InputStreamReader(is));

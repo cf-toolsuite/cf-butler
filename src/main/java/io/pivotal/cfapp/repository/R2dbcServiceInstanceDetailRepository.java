@@ -2,9 +2,7 @@ package io.pivotal.cfapp.repository;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +11,7 @@ import org.springframework.data.r2dbc.function.DatabaseClient;
 import org.springframework.data.r2dbc.function.DatabaseClient.GenericInsertSpec;
 import org.springframework.stereotype.Repository;
 
-import io.pivotal.cfapp.config.ButlerSettings.DbmsSettings;
-import io.pivotal.cfapp.domain.IndexPrefix;
+import io.pivotal.cfapp.config.DbmsSettings;
 import io.pivotal.cfapp.domain.ServiceInstanceDetail;
 import io.pivotal.cfapp.domain.ServiceInstancePolicy;
 import io.r2dbc.spi.Row;
@@ -27,14 +24,14 @@ import reactor.util.function.Tuples;
 public class R2dbcServiceInstanceDetailRepository {
 
 	private final DatabaseClient client;
-	private final IndexPrefix prefix;
+	private final DbmsSettings settings;
 
 	@Autowired
 	public R2dbcServiceInstanceDetailRepository(
 		DatabaseClient client,
 		DbmsSettings settings) {
 		this.client = client;
-		this.prefix = IndexPrefix.valueOf(settings.getProvider().toUpperCase());
+		this.settings = settings;
 	}
 
 	public Mono<ServiceInstanceDetail> save(ServiceInstanceDetail entity) {
@@ -132,7 +129,7 @@ public class R2dbcServiceInstanceDetailRepository {
 	}
 
 	public Flux<Tuple2<ServiceInstanceDetail, ServiceInstancePolicy>> findByServiceInstancePolicy(ServiceInstancePolicy policy) {
-		String index = prefix.getSymbol() + 1;
+		String index = settings.getBindPrefix() + 1;
 		String select = "select pk, organization, space, service_id, service_name, service, description, plan, type, bound_applications, last_operation, last_updated, dashboard_url, requested_state";
 		String from = "from service_instance_detail";
 		StringBuilder where = new StringBuilder();
