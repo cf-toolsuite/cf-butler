@@ -32,10 +32,9 @@ cf:
 
 logging:
   level:
-    org.springframework: INFO
-    io.r2dbc: DEBUG
-    reactor.core: DEBUG
-    #org.davidmoten: DEBUG
+    org.springframework: WARN
+    #io.r2dbc: DEBUG
+    #reactor.core: DEBUG
 
 # Set schedule for this task to adhere to
 # @see https://crontab.guru for help, first parameter is seconds
