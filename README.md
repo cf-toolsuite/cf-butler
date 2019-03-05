@@ -94,9 +94,25 @@ E.g., if you had a configuration file named `application-pws.yml`
 
 ### Using an external database
 
-By default `cf-butler` employs an in-memory [H2](http://www.h2database.com) instance.  If you wish to configure an external database you must set set `spring.r2dbc.*` properties as described [here](https://github.com/spring-projects-experimental/spring-boot-r2dbc).
+By default `cf-butler` employs an in-memory [H2](http://www.h2database.com) instance.  
 
-[DDL](https://en.wikipedia.org/wiki/Data_definition_language) scripts for each supported database are managed underneath [src/main/resources/db](src/main/resources/db). Supported databases are: [h2](src/main/resources/db/h2/schema.ddl) and [postgres](src/main/resources/db/postgres/schema.ddl).
+If you wish to configure an external database you must set set `spring.r2dbc.*` properties as described [here](https://github.com/spring-projects-experimental/spring-boot-r2dbc).
+
+Before you `cf push`, stash the credentials for your database in `config/secrets.json` like so
+
+```
+{
+  "R2DBC_URL": "rdbc:postgresql://<server>:<port>/<database>",
+  "R2DBC_USERNAME": "<username>",
+  "R2DBC_PASSWORD": "<password>"
+}
+```
+
+> Replace place-holders encapsulated in `<>` above with real credentials
+
+Or you may wish to `cf bind-service` to a database service instance. In this case you must abide by a naming convention. The name of your service instance must be `cf-butler-backend`.
+
+[DDL](https://en.wikipedia.org/wiki/Data_definition_language) scripts for each supported database are managed underneath [src/main/resources/db](src/main/resources/db). Supported databases are: [h2](src/main/resources/db/h2/schema.ddl) and [postgresql](src/main/resources/db/postgresql/schema.ddl).
 
 > A sample [script](deploy.xdb.sh) and [secrets](samples/secrets.pws.json) for deploying `cf-butler` to Pivotal Web Services with an [ElephantSQL](https://www.elephantsql.com) backend exists for your perusal. 
 

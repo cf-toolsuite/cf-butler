@@ -63,6 +63,11 @@ spring:
   credhub:
     url: https://credhub.service.cf.internal:8844
 
+  r2dbc:
+    url: ${vcap.services.cf-butler-secrets.credentials.R2DBC_URL}
+    username: ${vcap.services.cf-butler-secrets.credentials.R2DBC_USERNAME}
+    password: ${vcap.services.cf-butler-secrets.credentials.R2DBC_PASSWORD}
+
 cf:
   apiHost: ${vcap.services.cf-butler-secrets.credentials.CF_API-HOST}
   username: ${vcap.services.cf-butler-secrets.credentials.CF_USERNAME}
@@ -74,8 +79,6 @@ cf:
     uri: ${vcap.services.cf-butler-secrets.credentials.CF_POLICIES_URI}
     commit: ${vcap.services.cf-butler-secrets.credentials.CF_POLICIES_COMMIT}
     filePaths: ${vcap.services.cf-butler-secrets.credentials.CF_POLICIES_FILE-PATHS}
-  dbms:
-    provider: ${vcap.services.cf-butler-secrets.credentials.CF_DBMS_PROVIDER}
 
 token:
   provider: ${vcap.services.cf-butler-secrets.credentials.TOKEN_PROVIDER}
