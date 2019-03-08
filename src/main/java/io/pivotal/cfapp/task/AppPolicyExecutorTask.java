@@ -60,9 +60,8 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
     public void run(ApplicationArguments args) throws Exception {
     	// do nothing at startup
     }
-    
+
     public void execute() {
-    	// TODO implement filter based on each policy's organization-whitelist
     	Hooks.onOperatorDebug();
     	deleteApplicationsWithNoServiceBindings()
 	    	.then(deleteApplicationsWithServiceBindingsButDoNotDeleteBoundServiceInstances())
@@ -89,7 +88,7 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
 			            .flatMap(historicalRecordService::save)
 			            .then();
     }
-	
+
 	protected Mono<Void> deleteApplicationsWithServiceBindingsButDoNotDeleteBoundServiceInstances() {
 		// these are the applications with service bindings
 		// in this case the application policy has been configured with delete-services = false
@@ -139,7 +138,7 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
 			            .flatMap(historicalRecordService::save)
 			            .then();
 	}
-    
+
 	protected Mono<HistoricalRecord> unbindServiceInstance(AppRelationship relationship) {
 		return DefaultCloudFoundryOperations.builder()
 	            .from(opsClient)
@@ -163,9 +162,9 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
 										.serviceId(relationship.getServiceId())
 										.type("service-instance")
 										.name(serviceInstanceName(relationship))
-										.build()));      
+										.build()));
 	}
-	
+
     protected Mono<HistoricalRecord> deleteApplication(AppDetail detail) {
     	return DefaultCloudFoundryOperations.builder()
                 .from(opsClient)
@@ -190,7 +189,7 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
 									.name(detail.getAppName())
 									.build()));
     }
-    
+
     protected Mono<HistoricalRecord> deleteServiceInstance(AppRelationship relationship) {
     	return DefaultCloudFoundryOperations.builder()
                 .from(opsClient)
@@ -209,24 +208,24 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
 										.serviceId(relationship.getServiceId())
 										.type("service-instance")
 										.name(serviceInstanceName(relationship))
-										.build()));			
+										.build()));
     }
 
 	private String serviceInstanceName(AppRelationship relationship) {
-		return String.join("____", relationship.getServiceName(), relationship.getServiceType(), relationship.getServicePlan());
+		return String.join("__", relationship.getServiceName(), relationship.getServiceType(), relationship.getServicePlan());
 	}
-    
+
     private boolean isBlacklisted(String  organization) {
 		return !settings.getOrganizationBlackList().contains(organization);
 	}
-    
+
     private boolean isWhitelisted(ApplicationPolicy policy, String organization) {
     	Set<String> prunedSet = new HashSet<>(policy.getOrganizationWhiteList());
     	while (prunedSet.remove(""));
-    	Set<String> whitelist = 
-    			CollectionUtils.isEmpty(prunedSet) ? 
+    	Set<String> whitelist =
+    			CollectionUtils.isEmpty(prunedSet) ?
     					prunedSet: policy.getOrganizationWhiteList();
-    	return 
+    	return
 			whitelist.isEmpty() ? true: policy.getOrganizationWhiteList().contains(organization);
 	}
 }

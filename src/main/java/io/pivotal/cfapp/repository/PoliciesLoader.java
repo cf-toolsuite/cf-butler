@@ -29,7 +29,7 @@ public class PoliciesLoader implements ApplicationRunner {
 
 	private static final String APPLICATION_POLICY_SUFFIX = "-AP.json";
 	private static final String SERVICE_INSTANCE_POLICY_SUFFIX = "-SIP.json";
-	
+
 	private final GitClient client;
 	private final PoliciesService service;
 	private final PoliciesSettings settings;
@@ -47,7 +47,7 @@ public class PoliciesLoader implements ApplicationRunner {
 		this.settings = settings;
 		this.mapper = mapper;
 	}
-	
+
 	@Override
 	public void run(ApplicationArguments args) throws Exception {
 		Repository repo = client.getRepository(settings.getUri());
@@ -77,5 +77,5 @@ public class PoliciesLoader implements ApplicationRunner {
 			.then(service.save(new Policies(applicationPolicies, serviceInstancePolicies)))
 			.subscribe();
 	}
-	
+
 }

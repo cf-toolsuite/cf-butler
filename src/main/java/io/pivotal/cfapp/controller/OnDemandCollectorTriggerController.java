@@ -16,7 +16,7 @@ public class OnDemandCollectorTriggerController {
 
 	private AppDetailTask appInfoCollector;
 	private ServiceInstanceDetailTask serviceInstanceInfoCollector;
-	
+
 	@Autowired
 	public OnDemandCollectorTriggerController(
 			AppDetailTask appInfoCollector,
@@ -25,14 +25,12 @@ public class OnDemandCollectorTriggerController {
 		this.appInfoCollector = appInfoCollector;
 		this.serviceInstanceInfoCollector = serviceInstanceInfoCollector;
 	}
-	
+
 	@PostMapping("/collect")
 	public Mono<ResponseEntity<Void>> triggerCollection() {
 		appInfoCollector.collect();
 		serviceInstanceInfoCollector.collect();
 		return Mono.just(ResponseEntity.accepted().build());
 	}
-	
-	
-	
+
 }

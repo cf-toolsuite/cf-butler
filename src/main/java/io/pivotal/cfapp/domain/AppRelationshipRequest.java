@@ -18,7 +18,7 @@ public class AppRelationshipRequest {
     private String serviceName;
     private String applicationId;
     private String applicationName;
-    
+
     public static AppRelationshipRequestBuilder from(AppRelationshipRequest request) {
         return AppRelationshipRequest
                 .builder()

@@ -1,22 +1,20 @@
 package io.pivotal.cfapp.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 import io.pivotal.cfapp.domain.AppRelationship;
-import io.pivotal.cfapp.repository.JdbcAppRelationshipRepository;
+import io.pivotal.cfapp.repository.R2dbcAppRelationshipRepository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-@Profile("jdbc")
 @Service
-public class JdbcAppRelationshipService implements AppRelationshipService {
+public class R2dbcAppRelationshipService implements AppRelationshipService {
 
-	private JdbcAppRelationshipRepository repo;
+	private R2dbcAppRelationshipRepository repo;
 
 	@Autowired
-	public JdbcAppRelationshipService(JdbcAppRelationshipRepository repo) {
+	public R2dbcAppRelationshipService(R2dbcAppRelationshipRepository repo) {
 		this.repo = repo;
 	}
 

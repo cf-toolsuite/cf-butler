@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 public class AppRelationship {
 
 	@Id
-	private Long id;
+	private Long pk;
 	private String organization;
 	private String space;
 	private String appId;
@@ -34,7 +34,7 @@ public class AppRelationship {
 	private String wrap(String value) {
 		return value != null ? StringUtils.wrap(value, '"') : StringUtils.wrap("", '"');
 	}
-	
+
 	public static String headers() {
         return String.join(",", "organization", "space", "application id",
                 "application name", "service id", "service name", "service plan", "service type");

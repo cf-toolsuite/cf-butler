@@ -52,7 +52,7 @@ public class ServiceInstancePolicyExecutorTask implements ApplicationRunner {
     public void run(ApplicationArguments args) throws Exception {
     	// do nothing at startup
     }
-    
+
     public void execute() {
     	Hooks.onOperatorDebug();
     	policiesService
@@ -71,7 +71,7 @@ public class ServiceInstancePolicyExecutorTask implements ApplicationRunner {
     protected void runTask() {
         execute();
     }
-    
+
     protected Mono<HistoricalRecord> deleteServiceInstance(ServiceInstanceDetail sd) {
     	return DefaultCloudFoundryOperations.builder()
                 .from(opsClient)
@@ -88,21 +88,21 @@ public class ServiceInstancePolicyExecutorTask implements ApplicationRunner {
 										.space(sd.getSpace())
 										.serviceId(sd.getServiceId())
 										.type("service-instance")
-										.name(String.join("____", sd.getName(), sd.getType(), sd.getPlan()))
-										.build()));			
+										.name(String.join("__", sd.getName(), sd.getType(), sd.getPlan()))
+										.build()));
     }
-    
+
     private boolean isBlacklisted(String  organization) {
 		return !settings.getOrganizationBlackList().contains(organization);
 	}
-    
+
     private boolean isWhitelisted(ServiceInstancePolicy policy, String organization) {
     	Set<String> prunedSet = new HashSet<>(policy.getOrganizationWhiteList());
     	while (prunedSet.remove(""));
-    	Set<String> whitelist = 
-    			CollectionUtils.isEmpty(prunedSet) ? 
+    	Set<String> whitelist =
+    			CollectionUtils.isEmpty(prunedSet) ?
     					prunedSet: policy.getOrganizationWhiteList();
-    	return 
+    	return
 			whitelist.isEmpty() ? true: policy.getOrganizationWhiteList().contains(organization);
 	}
 }

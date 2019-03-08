@@ -18,31 +18,31 @@ import reactor.core.publisher.Mono;
 public class DbmsOnlyPoliciesController {
 
 	private final PoliciesService policiesService;
-	
+
 	@Autowired
 	public DbmsOnlyPoliciesController(
 			PoliciesService policiesService) {
 		this.policiesService = policiesService;
 	}
-	
+
 	@PostMapping("/policies")
 	public Mono<ResponseEntity<Policies>> establishPolicies(@RequestBody Policies policies) {
 		return policiesService.save(policies)
 								.map(p -> ResponseEntity.ok(p));
 	}
-		
+
 	@DeleteMapping("/policies/application/{id}")
 	public Mono<ResponseEntity<Void>> deleteApplicationPolicy(@PathVariable String id) {
 		return policiesService.deleteApplicationPolicyById(id)
 								.map(p -> ResponseEntity.ok(p));
 	}
-	
+
 	@DeleteMapping("/policies/serviceInstance/{id}")
 	public Mono<ResponseEntity<Void>> deleteServiceInstancePolicy(@PathVariable String id) {
 		return policiesService.deleteServiceInstancePolicyById(id)
 								.map(p -> ResponseEntity.ok(p));
 	}
-	
+
 	@DeleteMapping("/policies")
 	public Mono<ResponseEntity<Void>> deleteAllPolicies() {
 		return policiesService.deleteAll()
