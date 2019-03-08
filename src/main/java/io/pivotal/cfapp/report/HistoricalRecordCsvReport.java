@@ -30,7 +30,7 @@ public class HistoricalRecordCsvReport {
         detail.append(HistoricalRecord.headers());
         detail.append("\n");
         event.getRecords()
-                .forEach(a -> { 
+                .forEach(a -> {
                     detail.append(a.toCsv());
                     detail.append("\n");
                 });

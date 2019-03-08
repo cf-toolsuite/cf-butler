@@ -20,7 +20,7 @@ public class ServiceRequest {
     private String serviceName;
     private List<String> applicationIds;
     private List<String> applicationNames;
-    
+
     public static ServiceRequestBuilder from(ServiceRequest request) {
         return ServiceRequest
                 .builder()

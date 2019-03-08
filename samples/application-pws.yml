@@ -5,9 +5,6 @@ cf:
   organizationBlackList:
     - system
 
-spring:
-  profiles.include: jdbc
-
 logging:
   level:
     de.flapdoodle.embed.mongo: INFO
@@ -18,7 +15,7 @@ logging:
 # Set schedule for this task to adhere to
 # @see https://crontab.guru for help, first parameter is seconds
 cron:
-  collection: "0 0 0 * * *" 
+  collection: "0 0 0 * * *"
   execution: "0 0 2 * * *"
 
 management:
@@ -26,13 +23,3 @@ management:
     web:
       exposure:
         include: info,health,metrics,scheduledtasks,loggers,logfile
-
----
-spring:
-  profiles: jdbc
-
-  datasource:
-    driver-class-name: org.hsqldb.jdbc.JDBCDriver
-    url: jdbc:hsqldb:mem:cf-butler
-    username: sa
-    password: 

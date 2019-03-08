@@ -7,9 +7,6 @@ cf:
 token:
   provider: sso
 
-spring:
-  profiles.include: jdbc
-
 logging:
   level:
     de.flapdoodle.embed.mongo: INFO
@@ -28,13 +25,3 @@ management:
     web:
       exposure:
         include: info,health,metrics,scheduledtasks,loggers,logfile
-
----
-spring:
-  profiles: jdbc
-
-  datasource:
-    driver-class-name: org.hsqldb.jdbc.JDBCDriver
-    url: jdbc:hsqldb:mem:cf-butler
-    username: sa
-    password: 

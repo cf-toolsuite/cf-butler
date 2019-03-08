@@ -1,25 +1,23 @@
 package io.pivotal.cfapp.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 import io.pivotal.cfapp.domain.HistoricalRecord;
-import io.pivotal.cfapp.repository.JdbcHistoricalRecordRepository;
+import io.pivotal.cfapp.repository.R2dbcHistoricalRecordRepository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-@Profile("jdbc")
 @Service
-public class JdbcHistoricalRecordService implements HistoricalRecordService {
+public class R2dbcHistoricalRecordService implements HistoricalRecordService {
 
-	private final JdbcHistoricalRecordRepository repo;
-	
+	private final R2dbcHistoricalRecordRepository repo;
+
 	@Autowired
-	public JdbcHistoricalRecordService(JdbcHistoricalRecordRepository repo) {
+	public R2dbcHistoricalRecordService(R2dbcHistoricalRecordRepository repo) {
 		this.repo = repo;
 	}
-	
+
 	@Override
 	public Mono<HistoricalRecord> save(HistoricalRecord entity) {
 		return repo.save(entity);

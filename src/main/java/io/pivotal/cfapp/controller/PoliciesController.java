@@ -15,32 +15,32 @@ import reactor.core.publisher.Mono;
 public class PoliciesController {
 
 	private final PoliciesService policiesService;
-	
+
 	@Autowired
 	public PoliciesController(
 			PoliciesService policiesService) {
 		this.policiesService = policiesService;
 	}
-	
+
 	@GetMapping(value = { "/policies/application/{id}" }, produces = MediaType.APPLICATION_JSON_VALUE)
 	public Mono<ResponseEntity<Policies>> obtainApplicationPolicy(@PathVariable String id) {
 		return policiesService.findApplicationPolicyById(id)
 								.map(p -> ResponseEntity.ok(p))
 								.defaultIfEmpty(ResponseEntity.notFound().build());
 	}
-	
+
 	@GetMapping(value = { "/policies/serviceInstance/{id}" }, produces = MediaType.APPLICATION_JSON_VALUE)
 	public Mono<ResponseEntity<Policies>> obtainServiceInstancePolicy(@PathVariable String id) {
 		return policiesService.findServiceInstancePolicyById(id)
 								.map(p -> ResponseEntity.ok(p))
 								.defaultIfEmpty(ResponseEntity.notFound().build());
 	}
-	
+
 	@GetMapping(value = { "/policies" }, produces = MediaType.APPLICATION_JSON_VALUE)
 	public Mono<ResponseEntity<Policies>> listAllPolicies() {
 		return policiesService.findAll()
 								.map(p -> ResponseEntity.ok(p))
 								.defaultIfEmpty(ResponseEntity.notFound().build());
 	}
-	
+
 }

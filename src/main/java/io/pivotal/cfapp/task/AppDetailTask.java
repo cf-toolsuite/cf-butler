@@ -44,7 +44,7 @@ public class AppDetailTask implements ApplicationRunner {
     public void run(ApplicationArguments args) throws Exception {
         collect();
     }
-    
+
     public void collect() {
     	Hooks.onOperatorDebug();
         service
@@ -56,7 +56,7 @@ public class AppDetailTask implements ApplicationRunner {
             .flatMap(withLastEventRequest -> enrichWithAppEvent(withLastEventRequest))
             .flatMap(service::save)
             .collectList()
-            .subscribe(r -> 
+            .subscribe(r ->
                 publisher.publishEvent(
                     new AppDetailRetrievedEvent(this)
                         .detail(r)
@@ -133,7 +133,7 @@ public class AppDetailTask implements ApplicationRunner {
 
     private String toTruncatedString(List<String> urls) {
     	String rawData = String.join(",", urls);
-    	return rawData.length() <= 2000 ? rawData : rawData.substring(0, 2000);  
+    	return rawData.length() <= 2000 ? rawData : rawData.substring(0, 2000);
     }
 
     protected Mono<AppDetail> enrichWithAppEvent(AppDetail detail) {
@@ -151,7 +151,7 @@ public class AppDetailTask implements ApplicationRunner {
                                        .time(e.getTime())
                                        .build())
                        .next()
-                       .map(e -> 
+                       .map(e ->
                                AppDetail.from(detail)
                                            .lastEvent(e.getName())
                                            .lastEventActor(e.getActor())

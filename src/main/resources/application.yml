@@ -26,15 +26,12 @@ cf:
     #uri: 
     #commit:
     #filePaths:
-  dbms:
-    provider: hsql
-    #provider: postgres
 
 logging:
   level:
-    org.springframework: INFO
-    #reactor: DEBUG
-    #org.davidmoten: DEBUG
+    org.springframework: WARN
+    #io.r2dbc: DEBUG
+    #reactor.core: DEBUG
 
 # Set schedule for this task to adhere to
 # @see https://crontab.guru for help, first parameter is seconds
@@ -46,15 +43,14 @@ management:
   endpoints:
     web:
       exposure:
-        include: info,health,metrics,scheduledtasks,loggers 
-  
----
-spring:
-  profiles: jdbc
+        include: info,health,metrics,scheduledtasks,loggers
+  endpoint:
+    health:
+      show-details: always
 
-  datasource:
-    driver-class-name: org.hsqldb.jdbc.JDBCDriver
-    url: jdbc:hsqldb:mem:cf-butler
+spring:
+  r2dbc:
+    url: r2dbc:h2:mem:///cf-butler?options=DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false
     username: sa
     password: 
 
@@ -63,11 +59,14 @@ spring:
 ## Name of credhub service instance must be cf-butler-secrets
 spring:
   profiles: secrets
-  profiles.include: 
-  - jdbc
 
   credhub:
     url: https://credhub.service.cf.internal:8844
+
+  r2dbc:
+    url: ${vcap.services.cf-butler-secrets.credentials.R2DBC_URL}
+    username: ${vcap.services.cf-butler-secrets.credentials.R2DBC_USERNAME}
+    password: ${vcap.services.cf-butler-secrets.credentials.R2DBC_PASSWORD}
 
 cf:
   apiHost: ${vcap.services.cf-butler-secrets.credentials.CF_API-HOST}
@@ -80,16 +79,14 @@ cf:
     uri: ${vcap.services.cf-butler-secrets.credentials.CF_POLICIES_URI}
     commit: ${vcap.services.cf-butler-secrets.credentials.CF_POLICIES_COMMIT}
     filePaths: ${vcap.services.cf-butler-secrets.credentials.CF_POLICIES_FILE-PATHS}
-  dbms:
-    provider: ${vcap.services.cf-butler-secrets.credentials.CF_DBMS_PROVIDER}
 
 token:
   provider: ${vcap.services.cf-butler-secrets.credentials.TOKEN_PROVIDER}
-  
-cron: 
+
+cron:
   collection: ${vcap.services.cf-butler-secrets.credentials.CRON_COLLECTION:0 0 0 * * *}
   execution: ${vcap.services.cf-butler-secrets.credentials.CRON_EXECUTION:0 0 2 * * *}
-  
+
 management:
   endpoints:
     web:

@@ -1,23 +1,21 @@
 package io.pivotal.cfapp.service;
 
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 import io.pivotal.cfapp.domain.ServiceInstanceDetail;
 import io.pivotal.cfapp.domain.ServiceInstancePolicy;
-import io.pivotal.cfapp.repository.JdbcServiceInstanceDetailRepository;
+import io.pivotal.cfapp.repository.R2dbcServiceInstanceDetailRepository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 
-@Profile("jdbc")
 @Service
-public class JdbcServiceInstanceDetailService implements ServiceInstanceDetailService {
+public class R2dbcServiceInstanceDetailService implements ServiceInstanceDetailService {
 
-	private JdbcServiceInstanceDetailRepository repo;
+	private R2dbcServiceInstanceDetailRepository repo;
 
-	public JdbcServiceInstanceDetailService(
-			JdbcServiceInstanceDetailRepository repo) {
+	public R2dbcServiceInstanceDetailService(
+			R2dbcServiceInstanceDetailRepository repo) {
 		this.repo = repo;
 	}
 

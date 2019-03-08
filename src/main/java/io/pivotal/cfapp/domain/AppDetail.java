@@ -19,9 +19,10 @@ import lombok.ToString;
 @ToString
 public class AppDetail {
 
+	@Id
+	private Long pk;
 	private String organization;
 	private String space;
-	@Id
 	private String appId;
 	private String appName;
 	private String buildpack;
@@ -54,10 +55,11 @@ public class AppDetail {
 				"stack", "running instances", "total instances", "urls", "last pushed", "last event",
 				"last event actor", "last event time", "requested state");
 	}
-	
+
 	public static AppDetailBuilder from(AppDetail detail) {
         return AppDetail
-        		.builder()
+				.builder()
+					.pk(detail.getPk())
                     .organization(detail.getOrganization())
                     .space(detail.getSpace())
                     .appId(detail.getAppId())

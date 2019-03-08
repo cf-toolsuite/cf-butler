@@ -7,9 +7,9 @@ import io.pivotal.cfapp.domain.AppRelationship;
 import io.pivotal.cfapp.task.AppRelationshipRetrievedEvent;
 
 public class AppRelationshipCsvReport  {
-    
+
 	private ButlerSettings appSettings;
-	
+
 	public AppRelationshipCsvReport(ButlerSettings appSettings) {
 		this.appSettings = appSettings;
 	}
@@ -23,14 +23,14 @@ public class AppRelationshipCsvReport  {
         preamble.append(".");
         return preamble.toString();
     }
-    
+
     public String generateDetail(AppRelationshipRetrievedEvent event) {
         StringBuffer details = new StringBuffer();
         details.append("\n");
         details.append(AppRelationship.headers());
         details.append("\n");
         event.getRelations()
-                .forEach(a -> { 
+                .forEach(a -> {
                     details.append(a.toCsv());
                     details.append("\n");
                 });

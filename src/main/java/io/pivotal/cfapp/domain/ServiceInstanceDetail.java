@@ -18,9 +18,10 @@ import lombok.NoArgsConstructor;
 @Getter
 public class ServiceInstanceDetail {
 
+	@Id
+	private Long pk;
 	private String organization;
 	private String space;
-	@Id
 	private String serviceId;
 	private String name;
 	private String service;
@@ -44,7 +45,7 @@ public class ServiceInstanceDetail {
 	private String wrap(String value) {
 		return value != null ? StringUtils.wrap(value, '"') : StringUtils.wrap("", '"');
 	}
-	
+
 	public static String headers() {
         return String.join(",", "organization", "space", "service id",
                 "name", "service", "description", "plan", "type", "bound applications", "last operation", "last updated", "dashboard url", "requested state");
@@ -52,7 +53,8 @@ public class ServiceInstanceDetail {
 
 	public static ServiceInstanceDetailBuilder from(ServiceInstanceDetail detail) {
         return ServiceInstanceDetail
-        		.builder()
+				.builder()
+					.pk(detail.getPk())
                     .organization(detail.getOrganization())
                     .space(detail.getSpace())
                     .serviceId(detail.getServiceId())

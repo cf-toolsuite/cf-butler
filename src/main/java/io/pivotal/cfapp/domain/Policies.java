@@ -13,13 +13,13 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({ "application-policies", "service-instance-policies"})
 public class Policies {
-	
+
 	@JsonProperty("application-policies")
 	private List<ApplicationPolicy> applicationPolicies;
-	
+
 	@JsonProperty("service-instance-policies")
 	private List<ServiceInstancePolicy> serviceInstancePolicies;
-	
+
 	@JsonCreator
 	public Policies(
 			@JsonProperty("application-policies") List<ApplicationPolicy> applicationPolicies, 
@@ -35,10 +35,10 @@ public class Policies {
 	public List<ServiceInstancePolicy> getServiceInstancePolicies() {
 		return serviceInstancePolicies != null ? serviceInstancePolicies: Collections.emptyList();
 	}
-	
+
 	@JsonIgnore
 	public boolean isEmpty() {
 		return getApplicationPolicies().isEmpty() && getServiceInstancePolicies().isEmpty();
 	}
-	
+
 }

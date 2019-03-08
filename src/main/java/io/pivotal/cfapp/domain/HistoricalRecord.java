@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 public class HistoricalRecord {
 
 	@Id
-	private Long id;
+	private Long pk;
 	private LocalDateTime transactionDateTime;
 	private String actionTaken;
 	private String organization;
@@ -29,7 +29,7 @@ public class HistoricalRecord {
 	private String name;
 
 	public String toCsv() {
-		return String.join(",", 
+		return String.join(",",
 				wrap(getTransactionDateTime() != null ? getTransactionDateTime().toString() : ""),
 				wrap(getActionTaken()), wrap(getOrganization()), wrap(getSpace()), wrap(getAppId()),
 				wrap(getServiceId()), wrap(getType()), wrap(getName()));
@@ -38,7 +38,7 @@ public class HistoricalRecord {
 	private String wrap(String value) {
 		return value != null ? StringUtils.wrap(value, '"') : StringUtils.wrap("", '"');
 	}
-	
+
 	public static String headers() {
         return String.join(",", "transaction date/time", "action taken", "organization", "space",
                 "application id", "service id", "type", "name");

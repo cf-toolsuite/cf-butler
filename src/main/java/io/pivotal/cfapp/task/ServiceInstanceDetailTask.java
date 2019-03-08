@@ -48,7 +48,7 @@ public class ServiceInstanceDetailTask implements ApplicationRunner {
     public void run(ApplicationArguments args) throws Exception {
     	collect();
     }
-    
+
     public void collect() {
     	Hooks.onOperatorDebug();
     	service

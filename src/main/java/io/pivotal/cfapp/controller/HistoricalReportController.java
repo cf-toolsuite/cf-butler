@@ -19,7 +19,7 @@ public class HistoricalReportController {
 
 	private final HistoricalRecordService historicalRecordService;
 	private final HistoricalRecordCsvReport report;
-	
+
 	@Autowired
 	public HistoricalReportController(
 			ButlerSettings butlerSettings,
