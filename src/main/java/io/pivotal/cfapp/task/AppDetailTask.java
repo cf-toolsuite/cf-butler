@@ -2,7 +2,6 @@ package io.pivotal.cfapp.task;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.List;
 
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.operations.applications.GetApplicationEventsRequest;
@@ -122,18 +121,13 @@ public class AppDetailTask implements ApplicationRunner {
                                     .stack(a.getStack())
                                     .runningInstances(a.getRunningInstances())
                                     .totalInstances(a.getInstances())
-                                    .urls(toTruncatedString(a.getUrls()))
+                                    .urls(a.getUrls())
                                     .lastPushed(a.getLastUploaded() != null ? a.getLastUploaded()
                                                 .toInstant()
                                                 .atZone(ZoneId.systemDefault())
-                                                .toLocalDateTime(): LocalDateTime.of(1400, 1,1,12,0,0,0))
+                                                .toLocalDateTime(): LocalDateTime.MIN)
                                     .requestedState(a.getRequestedState().toLowerCase())
                                     .build());
-    }
-
-    private String toTruncatedString(List<String> urls) {
-    	String rawData = String.join(",", urls);
-    	return rawData.length() <= 2000 ? rawData : rawData.substring(0, 2000);
     }
 
     protected Mono<AppDetail> enrichWithAppEvent(AppDetail detail) {

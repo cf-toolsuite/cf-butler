@@ -17,7 +17,7 @@ import reactor.core.publisher.Mono;
 @Repository
 public class R2dbcHistoricalRecordRepository {
 
-	private DatabaseClient client;
+	private final DatabaseClient client;
 
 	@Autowired
 	public R2dbcHistoricalRecordRepository(DatabaseClient client) {

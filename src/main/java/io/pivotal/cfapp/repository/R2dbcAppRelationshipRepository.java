@@ -16,8 +16,8 @@ import reactor.core.publisher.Mono;
 @Repository
 public class R2dbcAppRelationshipRepository {
 
-	private DatabaseClient client;
-	private DbmsSettings settings;
+	private final DatabaseClient client;
+	private final DbmsSettings settings;
 
 	@Autowired
 	public R2dbcAppRelationshipRepository(

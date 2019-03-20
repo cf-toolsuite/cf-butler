@@ -1,5 +1,7 @@
 package io.pivotal.cfapp.service;
 
+import java.time.LocalDate;
+
 import org.springframework.stereotype.Service;
 
 import io.pivotal.cfapp.domain.ServiceInstanceDetail;
@@ -14,8 +16,7 @@ public class R2dbcServiceInstanceDetailService implements ServiceInstanceDetailS
 
 	private R2dbcServiceInstanceDetailRepository repo;
 
-	public R2dbcServiceInstanceDetailService(
-			R2dbcServiceInstanceDetailRepository repo) {
+	public R2dbcServiceInstanceDetailService(R2dbcServiceInstanceDetailRepository repo) {
 		this.repo = repo;
 	}
 
@@ -35,8 +36,14 @@ public class R2dbcServiceInstanceDetailService implements ServiceInstanceDetailS
 	}
 
 	@Override
-	public Flux<Tuple2<ServiceInstanceDetail, ServiceInstancePolicy>> findByServiceInstancePolicy(ServiceInstancePolicy policy) {
+	public Flux<Tuple2<ServiceInstanceDetail, ServiceInstancePolicy>> findByServiceInstancePolicy(
+			ServiceInstancePolicy policy) {
 		return repo.findByServiceInstancePolicy(policy);
+	}
+
+	@Override
+	public Flux<ServiceInstanceDetail> findByDateRange(LocalDate start, LocalDate end) {
+		return repo.findByDateRange(start, end);
 	}
 
 }

@@ -14,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ServiceInstanceDetailConsoleNotifier implements ApplicationListener<ServiceInstanceDetailRetrievedEvent> {
 
 	private final ServiceInstanceDetailCsvReport report;
-	
+
     @Autowired
     public ServiceInstanceDetailConsoleNotifier(ButlerSettings appSettings) {
         this.report = new ServiceInstanceDetailCsvReport(appSettings);
@@ -24,5 +24,5 @@ public class ServiceInstanceDetailConsoleNotifier implements ApplicationListener
 	public void onApplicationEvent(ServiceInstanceDetailRetrievedEvent event) {
 		log.info(String.join("\n\n", report.generatePreamble(), report.generateDetail(event)));
 	}
-  
+
 }

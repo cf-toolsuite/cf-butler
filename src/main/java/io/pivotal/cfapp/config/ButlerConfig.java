@@ -37,7 +37,7 @@ public class ButlerConfig {
             .password(settings.getPassword())
             .build();
     }
-    
+
     @Bean
     @ConditionalOnProperty(prefix="token", name="provider", havingValue="sso")
     TokenProvider refreshGrantTokenProvider(ButlerSettings settings) {
