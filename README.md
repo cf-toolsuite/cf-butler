@@ -255,6 +255,8 @@ Shutdown and destroy the app and service instances
 
 These REST endpoints have been exposed for administrative purposes.  
 
+### Organization
+
 ```
 GET /organizations
 ```
@@ -264,6 +266,8 @@ GET /organizations
 GET /orgnizations/count
 ```
 > Counts the number of organizations on a foundation
+
+### User
 
 ```
 GET /space-users
@@ -324,6 +328,8 @@ GET /users
 GET /users/count
 ```
 > Provides details and light metrics for users by role within
+
+### Snapshot
 
 ```
 GET /snapshot/summary
@@ -427,6 +433,27 @@ GET /snapshot/detail
 
 > **Note**: this detail report does not take the place of an official foundation Accounting Report. However, it does provide a much more detailed snapshot of all the applications that were currently running at the time of collection.
 
+### Accounting
+
+> **Note**: you will need to set the `cf.ouathToken` property prior to deploying cf-butler for all `/accounting` endpoints
+
+```
+GET /accounting/applications
+```
+> Produces a system-wide account report of [application usage](https://docs.pivotal.io/pivotalcf/2-4/opsguide/accounting-report.html#app-usage)
+
+```
+GET /accounting/services
+```
+> Produces a system-wide account report of [service usage](https://docs.pivotal.io/pivotalcf/2-4/opsguide/accounting-report.html#service-usage)
+
+```
+GET /accounting/tasks
+```
+> Produces a system-wide account report of [task usage](https://docs.pivotal.io/pivotalcf/2-4/opsguide/accounting-report.html#task-usage)
+
+### Policies
+
 ```
 POST /policies
 
@@ -497,6 +524,7 @@ DELETE /policies/serviceInstance/{id}
 GET /policies/report
 ```
 > Produces `text/plain` historical output detailing what applications and service instances have been removed
+
 
 ## Credits
 
