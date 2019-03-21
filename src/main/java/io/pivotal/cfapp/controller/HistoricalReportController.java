@@ -28,7 +28,7 @@ public class HistoricalReportController {
 		this.report = new HistoricalRecordCsvReport(butlerSettings);
 	}
 
-	@GetMapping(value = { "/report" }, produces = MediaType.TEXT_PLAIN_VALUE)
+	@GetMapping(value = { "/policies/report" }, produces = MediaType.TEXT_PLAIN_VALUE)
 	public Mono<ResponseEntity<String>> generateReport() {
 		return historicalRecordService
 				.findAll()

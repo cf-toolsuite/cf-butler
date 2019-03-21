@@ -4,10 +4,9 @@ import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.pivotal.cfapp.domain.Organization;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.function.Tuple2;
-import reactor.util.function.Tuples;
 
 
 @RestController
@@ -20,7 +19,7 @@ public class OrganizationController {
     }
 
     @GetMapping("/organizations")
-    public Flux<Tuple2<String, String>> listAllOrganizations() {
+    public Flux<Organization> listAllOrganizations() {
         return getOrganizations();
     }
 
@@ -29,13 +28,13 @@ public class OrganizationController {
         return getOrganizations().count();
     }
 
-    private Flux<Tuple2<String, String>> getOrganizations() {
+    private Flux<Organization> getOrganizations() {
         return DefaultCloudFoundryOperations.builder()
             .from(opsClient)
             .build()
                 .organizations()
                     .list()
-                    .map(os -> Tuples.of(os.getId(), os.getName()));
+                    .map(os -> new Organization(os.getId(), os.getName()));
     }
 
 }
