@@ -1,10 +1,11 @@
 package io.pivotal.cfapp.controller;
 
-import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.pivotal.cfapp.domain.Organization;
+import io.pivotal.cfapp.service.OrganizationService;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -12,29 +13,21 @@ import reactor.core.publisher.Mono;
 @RestController
 public class OrganizationController {
 
-    private DefaultCloudFoundryOperations opsClient;
+    private final OrganizationService service;
 
-    public OrganizationController(DefaultCloudFoundryOperations opsClient) {
-        this.opsClient = opsClient;
+    @Autowired
+    public OrganizationController(OrganizationService service) {
+        this.service = service;
     }
 
     @GetMapping("/organizations")
     public Flux<Organization> listAllOrganizations() {
-        return getOrganizations();
+        return service.getOrganizations();
     }
 
     @GetMapping("/organizations/count")
     public Mono<Long> organizationsCount() {
-        return getOrganizations().count();
-    }
-
-    private Flux<Organization> getOrganizations() {
-        return DefaultCloudFoundryOperations.builder()
-            .from(opsClient)
-            .build()
-                .organizations()
-                    .list()
-                    .map(os -> new Organization(os.getId(), os.getName()));
+        return service.getOrganizations().count();
     }
 
 }
