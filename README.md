@@ -322,12 +322,12 @@ GET /space-users/{organization}/{space}
 ```
 GET /users
 ```
-> Counts the number of users on a foundation
+> Lists all unique user accounts on a foundation
 
 ```
 GET /users/count
 ```
-> Provides details and light metrics for users by role within
+> Counts the number of user accounts on a foundation
 
 ### Snapshot
 
