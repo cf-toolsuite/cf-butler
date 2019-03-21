@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
+import org.cloudfoundry.operations.applications.ApplicationDetail;
 import org.cloudfoundry.operations.applications.GetApplicationEventsRequest;
 import org.cloudfoundry.operations.applications.GetApplicationRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import io.pivotal.cfapp.domain.AppDetail;
 import io.pivotal.cfapp.domain.AppEvent;
 import io.pivotal.cfapp.domain.AppRequest;
 import io.pivotal.cfapp.domain.Buildpack;
+import io.pivotal.cfapp.domain.AppDetail.AppDetailBuilder;
 import io.pivotal.cfapp.service.AppDetailService;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Hooks;
@@ -110,24 +112,32 @@ public class AppDetailTask implements ApplicationRunner {
                 .applications()
                     .get(GetApplicationRequest.builder().name(request.getAppName()).build())
                     .onErrorResume(e -> Mono.empty())
-                    .map(a -> AppDetail
-                                .builder()
-                                    .organization(request.getOrganization())
-                                    .space(request.getSpace())
-                                    .appId(request.getId())
-                                    .appName(request.getAppName())
-                                    .buildpack(Buildpack.is(a.getBuildpack()))
-                                    .image(request.getImage())
-                                    .stack(a.getStack())
-                                    .runningInstances(a.getRunningInstances())
-                                    .totalInstances(a.getInstances())
-                                    .urls(a.getUrls())
-                                    .lastPushed(a.getLastUploaded() != null ? a.getLastUploaded()
-                                                .toInstant()
-                                                .atZone(ZoneId.systemDefault())
-                                                .toLocalDateTime(): LocalDateTime.MIN)
-                                    .requestedState(a.getRequestedState().toLowerCase())
-                                    .build());
+                    .map(a -> fromApplicationDetail(a, request));
+    }
+
+    private AppDetail fromApplicationDetail(ApplicationDetail a, AppRequest request) {
+        AppDetailBuilder builder = AppDetail.builder();
+        builder
+            .organization(request.getOrganization())
+            .space(request.getSpace())
+            .appId(request.getId())
+            .appName(request.getAppName());
+        String buildpack = Buildpack.is(a.getBuildpack(), request.getImage());
+        if (buildpack != null)  {
+            builder.buildpack(buildpack);
+        }
+        return builder
+            .image(request.getImage())
+            .stack(a.getStack())
+            .runningInstances(a.getRunningInstances())
+            .totalInstances(a.getInstances())
+            .urls(a.getUrls())
+            .lastPushed(a.getLastUploaded() != null ? a.getLastUploaded()
+                        .toInstant()
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDateTime(): LocalDateTime.MIN)
+            .requestedState(a.getRequestedState().toLowerCase())
+            .build();
     }
 
     protected Mono<AppDetail> enrichWithAppEvent(AppDetail detail) {

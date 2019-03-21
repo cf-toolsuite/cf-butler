@@ -66,7 +66,7 @@ public class R2dbcAppMetricsRepository {
 	}
 
 	public Flux<Tuple2<String, Long>> byBuildpack() {
-		String sql = "select buildpack, count(buildpack) as cnt from application_detail where image is null group by buildpack";
+		String sql = "select buildpack, count(buildpack) as cnt from application_detail where image is null and buildpack is not null group by buildpack";
 		return client.execute().sql(sql)
 					.map((row, metadata)
 							-> Tuples.of(row.get("buildpack", String.class) != null ? row.get("buildpack", String.class): "--", row.get("cnt", Long.class)))

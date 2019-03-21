@@ -18,19 +18,22 @@ public class Buildpack {
             "swift", "rust", "emberjs", "pyspark", "tc",
             "weblogic" };
 
-    public static String is(String input) {
-        if (StringUtils.isBlank(input)) {
-            return "unknown";
-        }
-        Set<String> candidate =
-                Arrays.asList(packs)
-                        .stream()
-                            .filter(p -> input.contains(p))
-                            .collect(Collectors.toSet());
-        if (candidate.size() == 1) {
-            return candidate.iterator().next();
+    public static String is(String input, String image) {
+        if (!StringUtils.isBlank(image)) {
+            return null;
+        } else if (StringUtils.isBlank(input)) {
+            return "anomalous";
         } else {
-            return "unknown";
+            Set<String> candidate =
+                    Arrays.asList(packs)
+                            .stream()
+                                .filter(p -> input.contains(p))
+                                .collect(Collectors.toSet());
+            if (candidate.size() == 1) {
+                return candidate.iterator().next();
+            } else {
+                return "unknown";
+            }
         }
     }
 
