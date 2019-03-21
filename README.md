@@ -435,7 +435,7 @@ GET /snapshot/detail
 
 ### Accounting
 
-> **Note**: you will need to set the `cf.ouathToken` property prior to deploying cf-butler for all `/accounting` endpoints
+> **Note**: You will need to set the `cf.oauthToken` property (e.g., in your `application.yml`) prior to deploying `cf-butler` for all `/accounting` endpoints.  To obtain the token first complete succesful authentication with `cf login`, then type `cf oauth-token`.
 
 ```
 GET /accounting/applications
