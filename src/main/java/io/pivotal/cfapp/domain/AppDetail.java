@@ -3,6 +3,8 @@ package io.pivotal.cfapp.domain;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.annotation.Id;
 
@@ -21,6 +23,7 @@ import lombok.ToString;
 public class AppDetail {
 
 	@Id
+	@JsonIgnore
 	private Long pk;
 	private String organization;
 	private String space;

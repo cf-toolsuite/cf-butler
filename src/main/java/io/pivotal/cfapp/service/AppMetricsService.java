@@ -1,7 +1,5 @@
 package io.pivotal.cfapp.service;
 
-import java.util.Map;
-
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
@@ -25,6 +23,8 @@ public interface AppMetricsService {
 	Mono<Long> totalRunningApplicationInstances();
 
 	Mono<Long> totalStoppedApplicationInstances();
+
+	Mono<Long> totalAnomalousApplicationInstances();
 
 	Flux<Tuple2<String, Long>> totalVelocity();
 

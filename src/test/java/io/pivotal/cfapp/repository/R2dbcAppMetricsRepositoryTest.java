@@ -35,7 +35,7 @@ public class R2dbcAppMetricsRepositoryTest {
     }
 
     @BeforeEach
-    public void createDetail() {
+    public void setUp() {
         AppDetail entity = AppDetail
                             .builder()
                                 .appId("foo-id")
@@ -55,19 +55,41 @@ public class R2dbcAppMetricsRepositoryTest {
     @Test
     public void testByOrganization() {
         Flux<Tuple2<String, Long>> input = metricsRepo.byOrganization();
-        StepVerifier.create(input).assertNext(m -> assertEquals(1, m.getT2())).verifyComplete();
+        StepVerifier.create(input)
+            .assertNext(m -> {
+                assertEquals(1L, m.getT2());
+                assertEquals("zoo-labs", m.getT1());
+            }).verifyComplete();
     }
 
     @Test
     public void testByStack() {
         Flux<Tuple2<String, Long>> input = metricsRepo.byStack();
-        StepVerifier.create(input).assertNext(m -> assertEquals(1, m.getT2())).verifyComplete();
+        StepVerifier.create(input)
+            .assertNext(m -> {
+                assertEquals(1L, m.getT2());
+                assertEquals("cflinuxfs3", m.getT1());
+            }).verifyComplete();
+    }
+
+    @Test
+    public void testByDockerImage() {
+        Flux<Tuple2<String, Long>> input = metricsRepo.byDockerImage();
+        StepVerifier.create(input)
+            .assertNext(m -> {
+                assertEquals(0L, m.getT2());
+                assertEquals("--", m.getT1());
+            }).verifyComplete();
     }
 
     @Test
     public void testByBuildpack() {
         Flux<Tuple2<String, Long>> input = metricsRepo.byBuildpack();
-        StepVerifier.create(input).assertNext(m -> assertEquals(1, m.getT2())).verifyComplete();
+        StepVerifier.create(input)
+            .assertNext(m -> {
+                assertEquals(1L, m.getT2());
+                assertEquals("java_buildpack", m.getT1());
+            }).verifyComplete();
     }
 
     @Test

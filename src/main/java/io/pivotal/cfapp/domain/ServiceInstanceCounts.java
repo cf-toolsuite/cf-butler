@@ -1,6 +1,5 @@
 package io.pivotal.cfapp.domain;
 
-import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -12,7 +11,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import reactor.util.function.Tuple3;
 
 @Builder
 @AllArgsConstructor(access=AccessLevel.PACKAGE)
@@ -29,7 +27,7 @@ public class ServiceInstanceCounts {
     private Map<String,Long> byService;
 
     @JsonProperty("by-service-and-plan")
-    private List<Tuple3<String, String, Long>> byServiceAndPlan;
+    private Map<String, Long> byServiceAndPlan;
 
     @JsonProperty("total-service-instances")
     private Long totalServiceInstances;

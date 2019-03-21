@@ -4,8 +4,6 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.r2dbc.function.DatabaseClient;
@@ -32,15 +30,16 @@ public class R2dbcAppMetricsRepository {
 	}
 
 	protected Flux<Tuple2<String, Long>> by(String columnName) {
-		String sql = "select " + columnName + ", count(*) as cnt from application_detail group by " + columnName;
+		String sql = "select " + columnName + ", count(" + columnName + ") as cnt from application_detail group by " + columnName;
 		return client.execute().sql(sql)
 					.map((row, metadata)
-							-> Tuples.of(row.get(columnName, String.class), row.get("cnt", Long.class)))
-					.all();
+							-> Tuples.of(row.get(columnName, String.class) != null ? row.get(columnName, String.class): "--", row.get("cnt", Long.class)))
+					.all()
+					.defaultIfEmpty(Tuples.of("--", 0L));
 	}
 
 	protected Mono<Long> countByDateRange(LocalDate start, LocalDate end) {
-		String sql = "select count(*) as cnt from application_detail where last_pushed <= " + settings.getBindPrefix() + 1 + " and last_pushed > " + settings.getBindPrefix() + 2;
+		String sql = "select count(last_pushed) as cnt from application_detail where last_pushed <= " + settings.getBindPrefix() + 1 + " and last_pushed > " + settings.getBindPrefix() + 2;
 		return client.execute().sql(sql)
 				.bind(settings.getBindPrefix() + 1, Timestamp.valueOf(LocalDateTime.of(end, LocalTime.MAX)))
 				.bind(settings.getBindPrefix() + 2, Timestamp.valueOf(LocalDateTime.of(start, LocalTime.MIDNIGHT)))
@@ -50,7 +49,7 @@ public class R2dbcAppMetricsRepository {
 	}
 
 	protected Mono<Long> countStagnant(LocalDate end) {
-		String sql = "select count(*) as cnt from application_detail where last_pushed < " + settings.getBindPrefix() + 1;
+		String sql = "select count(last_pushed) as cnt from application_detail where last_pushed < " + settings.getBindPrefix() + 1;
 		return client.execute().sql(sql)
 				.bind(settings.getBindPrefix() + 1, Timestamp.valueOf(LocalDateTime.of(end, LocalTime.MIDNIGHT)))
 				.map((row, metadata) -> row.get("cnt", Long.class))
@@ -80,22 +79,42 @@ public class R2dbcAppMetricsRepository {
 
 	public Mono<Long> totalApplications() {
 		String sql = "select count(*) as cnt from application_detail";
-		return client.execute().sql(sql).map((row, metadata) -> row.get("cnt", Long.class)).one();
+		return client.execute().sql(sql)
+				.map((row, metadata) -> row.get("cnt", Long.class))
+				.one()
+				.defaultIfEmpty(0L);
 	}
 
 	public Mono<Long> totalApplicationInstances() {
 		String sql = "select sum(total_instances) as cnt from application_detail";
-		return client.execute().sql(sql).map((row, metadata) -> row.get("cnt", Long.class)).one();
+		return client.execute().sql(sql)
+				.map((row, metadata) -> row.get("cnt", Long.class))
+				.one()
+				.defaultIfEmpty(0L);
 	}
 
 	public Mono<Long> totalRunningApplicationInstances() {
 		String sql = "select sum(running_instances) as cnt from application_detail where requested_state = 'started'";
-		return client.execute().sql(sql).map((row, metadata) -> row.get("cnt", Long.class)).one();
+		return client.execute().sql(sql)
+				.map((row, metadata) -> row.get("cnt", Long.class))
+				.one()
+				.defaultIfEmpty(0L);
+	}
+
+	public Mono<Long> totalAnomalousApplicationInstances() {
+		String sql = "select count(running_instances) as cnt from application_detail where requested_state = 'started' and running_instances = 0";
+		return client.execute().sql(sql)
+				.map((row, metadata) -> row.get("cnt", Long.class))
+				.one()
+				.defaultIfEmpty(0L);
 	}
 
 	public Mono<Long> totalStoppedApplicationInstances() {
 		String sql = "select sum(total_instances) as cnt from application_detail where requested_state = 'stopped'";
-		return client.execute().sql(sql).map((row, metadata) -> row.get("cnt", Long.class)).one();
+		return client.execute().sql(sql)
+				.map((row, metadata) -> row.get("cnt", Long.class))
+				.one()
+				.defaultIfEmpty(0L);
 	}
 
 	public Flux<Tuple2<String, Long>> totalVelocity() {

@@ -1,7 +1,5 @@
 package io.pivotal.cfapp.service;
 
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -62,6 +60,11 @@ public class R2dbcAppMetricsService implements AppMetricsService {
 	@Override
 	public Mono<Long> totalStoppedApplicationInstances() {
 		return repo.totalStoppedApplicationInstances();
+	}
+
+	@Override
+	public Mono<Long> totalAnomalousApplicationInstances() {
+		return repo.totalAnomalousApplicationInstances();
 	}
 
 	@Override

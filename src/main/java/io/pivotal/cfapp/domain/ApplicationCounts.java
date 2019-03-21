@@ -18,7 +18,7 @@ import lombok.ToString;
 @Getter
 @ToString
 @JsonPropertyOrder({ "by-organization", "by-buildpack", "by-stack", "by-dockerimage", "by-status",
-"total-applications", "total-running-application-instances", "total-stopped-application-instances", 
+"total-applications", "total-running-application-instances", "total-stopped-application-instances", "total-anomalous-application-instances",
 "total-application-instances", "velocity"})
 public class ApplicationCounts {
 
@@ -45,6 +45,9 @@ public class ApplicationCounts {
 
     @JsonProperty("total-stopped-application-instances")
     private Long totalStoppedApplicationInstances;
+
+    @JsonProperty("total-anomalous-application-instances")
+    private Long totalAnomalousApplicationInstances;
 
     @JsonProperty("total-application-instances")
     private Long totalApplicationInstances;

@@ -4,8 +4,6 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.r2dbc.function.DatabaseClient;
@@ -15,7 +13,6 @@ import io.pivotal.cfapp.config.DbmsSettings;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
-import reactor.util.function.Tuple3;
 import reactor.util.function.Tuples;
 
 @Repository
@@ -33,15 +30,16 @@ public class R2dbcServiceInstanceMetricsRepository {
 	}
 
 	protected Flux<Tuple2<String, Long>> by(String columnName) {
-		String sql = "select " + columnName + ", count(*) as cnt from service_instance_detail group by " + columnName;
+		String sql = "select " + columnName + ", count(" + columnName + ") as cnt from service_instance_detail group by " + columnName;
 		return client.execute().sql(sql)
 					.map((row, metadata)
-							-> Tuples.of(row.get(columnName, String.class), row.get("cnt", Long.class)))
-					.all();
+							-> Tuples.of(row.get(columnName, String.class) != null ? row.get(columnName, String.class): "--", row.get("cnt", Long.class)))
+					.all()
+					.defaultIfEmpty(Tuples.of("--", 0L));
 	}
 
 	protected Mono<Long> countByDateRange(LocalDate start, LocalDate end) {
-		String sql = "select count(*) as cnt from service_instance_detail where last_updated <= " + settings.getBindPrefix() + 1 + " and last_updated > " + settings.getBindPrefix() + 2;
+		String sql = "select count(last_updated) as cnt from service_instance_detail where last_updated <= " + settings.getBindPrefix() + 1 + " and last_updated > " + settings.getBindPrefix() + 2;
 		return client.execute().sql(sql)
 				.bind(settings.getBindPrefix() + 1, Timestamp.valueOf(LocalDateTime.of(end, LocalTime.MAX)))
 				.bind(settings.getBindPrefix() + 2, Timestamp.valueOf(LocalDateTime.of(start, LocalTime.MIDNIGHT)))
@@ -51,7 +49,7 @@ public class R2dbcServiceInstanceMetricsRepository {
 	}
 
 	protected Mono<Long> countStagnant(LocalDate end) {
-		String sql = "select count(*) as cnt from service_instance_detail where last_updated < " + settings.getBindPrefix() + 1;
+		String sql = "select count(last_updated) as cnt from service_instance_detail where last_updated < " + settings.getBindPrefix() + 1;
 		return client.execute().sql(sql)
 				.bind(settings.getBindPrefix() + 1, Timestamp.valueOf(LocalDateTime.of(end, LocalTime.MIDNIGHT)))
 				.map((row, metadata) -> row.get("cnt", Long.class))
@@ -64,23 +62,42 @@ public class R2dbcServiceInstanceMetricsRepository {
 	}
 
 	public Flux<Tuple2<String, Long>> byService() {
-		return by("service");
+		String sqlup = "select type, count(type) as cnt from service_instance_detail where type = 'user_provided_service_instance' group by service";
+		Flux<Tuple2<String, Long>> ups = client.execute().sql(sqlup)
+					.map((row, metadata)
+							-> Tuples.of("user-provided", row.get("cnt", Long.class)))
+					.all()
+					.defaultIfEmpty(Tuples.of("user-provided", 0L));
+		String sqlms = "select service, count(service) as cnt from service_instance_detail where type = 'managed_service_instance' group by service";
+		Flux<Tuple2<String, Long>> ms = client.execute().sql(sqlms)
+					.map((row, metadata)
+							-> Tuples.of(row.get("service", String.class) != null ? row.get("service", String.class): "managed", row.get("cnt", Long.class)))
+					.all()
+					.defaultIfEmpty(Tuples.of("managed", 0L));
+		return ups.concatWith(ms);
 	}
 
-	public Flux<Tuple3<String, String, Long>> byServiceAndPlan() {
-		String sql = "select service, plan, count(*) as cnt from service_instance_detail group by service, plan";
+	public Flux<Tuple2<String, Long>> byServiceAndPlan() {
+		String sql = "select service, plan, count(*) as cnt from service_instance_detail where type = 'managed_service_instance' group by service, plan";
 		return client.execute().sql(sql)
 					.map((row, metadata)
 							-> Tuples.of(
-									row.get("service", String.class),
-									row.get("plan", String.class),
+									String.join(
+										"/",
+										row.get("service", String.class) != null ? row.get("service", String.class): "unknown",
+										row.get("plan", String.class) != null ? row.get("plan", String.class): "unknown"
+									),
 									row.get("cnt", Long.class)))
-					.all();
+					.all()
+					.defaultIfEmpty(Tuples.of("unknown", 0L));
 	}
 
 	public Mono<Long> totalServiceInstances() {
 		String sql = "select count(*) as cnt from service_instance_detail";
-		return client.execute().sql(sql).map((row, metadata) -> row.get("cnt", Long.class)).one();
+		return client.execute().sql(sql)
+				.map((row, metadata) -> row.get("cnt", Long.class))
+				.one()
+				.defaultIfEmpty(0L);
 	}
 
 	public Flux<Tuple2<String, Long>> totalVelocity() {
