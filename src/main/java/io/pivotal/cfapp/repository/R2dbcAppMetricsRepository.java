@@ -66,11 +66,21 @@ public class R2dbcAppMetricsRepository {
 	}
 
 	public Flux<Tuple2<String, Long>> byBuildpack() {
-		return by("buildpack");
+		String sql = "select buildpack, count(buildpack) as cnt from application_detail where image is null group by buildpack";
+		return client.execute().sql(sql)
+					.map((row, metadata)
+							-> Tuples.of(row.get("buildpack", String.class) != null ? row.get("buildpack", String.class): "--", row.get("cnt", Long.class)))
+					.all()
+					.defaultIfEmpty(Tuples.of("--", 0L));
 	}
 
 	public Flux<Tuple2<String, Long>> byDockerImage() {
-		return by("image");
+		String sql = "select image, count(image) as cnt from application_detail where image is not null group by image";
+		return client.execute().sql(sql)
+					.map((row, metadata)
+							-> Tuples.of(row.get("image", String.class) != null ? row.get("image", String.class): "--", row.get("cnt", Long.class)))
+					.all()
+					.defaultIfEmpty(Tuples.of("--", 0L));
 	}
 
 	public Flux<Tuple2<String, Long>> byStatus() {
