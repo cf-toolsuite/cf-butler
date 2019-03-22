@@ -43,10 +43,14 @@ management:
   endpoints:
     web:
       exposure:
-        include: info,health,metrics,scheduledtasks,loggers
+        include: info,health,metrics,scheduledtasks,loggers,prometheus
   endpoint:
     health:
       show-details: always
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
 
 spring:
   r2dbc:
