@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.pivotal.cfapp.domain.accounting.application.SystemWideAppReport;
+import io.pivotal.cfapp.domain.accounting.service.SystemWideServiceReport;
+import io.pivotal.cfapp.domain.accounting.task.SystemWideTaskReport;
 import io.pivotal.cfapp.service.UsageService;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -26,20 +29,24 @@ public class UsageController {
         this.service = service;
     }
 
-    @GetMapping(value = "accounting/tasks", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<String> getTaskReport() {
+    @GetMapping(value = "accounting/tasks")
+    public Mono<SystemWideTaskReport> getTaskReport() {
         return service.getTaskReport();
     }
 
-    @GetMapping(value = "accounting/applications", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<String> getApplicationReport() {
+    @GetMapping(value = "accounting/applications")
+    public Mono<SystemWideAppReport> getApplicationReport() {
         return service.getApplicationReport();
     }
 
     @GetMapping(value = "accounting/services", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<String> getServiceReport() {
+    public Mono<SystemWideServiceReport> getServiceReport() {
         return service.getServiceReport();
     }
+
+    //----------
+    // FIXME Refactor Mono<String> JSON-like output to domain objects so we can start to drive aggregate calculations
+    // TODO How about adding convenience methods for a month-over-month and year's worth of usage data ty once?
 
     @GetMapping(value = "/usage/tasks/{orgGuid}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<String> getTaskUsage(@PathVariable("orgGuid") String orgGuid, @DateTimeFormat(iso = ISO.DATE) @RequestParam("start") LocalDate start, @DateTimeFormat(iso = ISO.DATE) @RequestParam("end") LocalDate end) {
@@ -71,5 +78,4 @@ public class UsageController {
         return service.getServiceUsage(start, end);
     }
 
-    // TODO How about adding convenience methods for a month-over-month and year's worth of usage data ty once?
 }

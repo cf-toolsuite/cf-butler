@@ -9,6 +9,9 @@ import org.springframework.util.Assert;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import io.pivotal.cfapp.config.ButlerSettings;
+import io.pivotal.cfapp.domain.accounting.application.SystemWideAppReport;
+import io.pivotal.cfapp.domain.accounting.service.SystemWideServiceReport;
+import io.pivotal.cfapp.domain.accounting.task.SystemWideTaskReport;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -47,16 +50,6 @@ public class UsageService {
                             .bodyToMono(String.class);
     }
 
-    private Mono<String> getSystemReport(String usageType) {
-        String uri = settings.getUsageDomain() + "/system_report/{usageType}";
-        return webClient
-                .get()
-                    .uri(uri, usageType)
-                    .header(HttpHeaders.AUTHORIZATION, settings.getOauthToken())
-                        .retrieve()
-                            .bodyToMono(String.class);
-    }
-
     public Mono<String> getTaskUsage(String orgGuid, LocalDate start, LocalDate end) {
         return getUsage("task_usages", orgGuid, start, end);
     }
@@ -81,15 +74,35 @@ public class UsageService {
         return orgService.getOrganizations().flatMap(o -> getServiceUsage(o.getId(), start, end));
     }
 
-    public Mono<String> getTaskReport() {
-        return getSystemReport("task_usages");
+    //----------
+
+    public Mono<SystemWideTaskReport> getTaskReport() {
+        String uri = settings.getUsageDomain() + "/system_report/task_usages";
+        return webClient
+                .get()
+                    .uri(uri)
+                    .header(HttpHeaders.AUTHORIZATION, settings.getOauthToken())
+                        .retrieve()
+                            .bodyToMono(SystemWideTaskReport.class);
     }
 
-    public Mono<String> getApplicationReport() {
-        return getSystemReport("app_usages");
+    public Mono<SystemWideAppReport> getApplicationReport() {
+        String uri = settings.getUsageDomain() + "/system_report/app_usages";
+        return webClient
+                .get()
+                    .uri(uri)
+                    .header(HttpHeaders.AUTHORIZATION, settings.getOauthToken())
+                        .retrieve()
+                            .bodyToMono(SystemWideAppReport.class);
     }
 
-    public Mono<String> getServiceReport() {
-        return getSystemReport("service_usages");
+    public Mono<SystemWideServiceReport> getServiceReport() {
+        String uri = settings.getUsageDomain() + "/system_report/service_usages";
+        return webClient
+                .get()
+                    .uri(uri)
+                    .header(HttpHeaders.AUTHORIZATION, settings.getOauthToken())
+                        .retrieve()
+                            .bodyToMono(SystemWideServiceReport.class);
     }
 }
