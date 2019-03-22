@@ -14,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 public class AppRelationshipConsoleNotifier implements ApplicationListener<AppRelationshipRetrievedEvent> {
 
 	private final AppRelationshipCsvReport report;
-	
+
     @Autowired
     public AppRelationshipConsoleNotifier(ButlerSettings appSettings) {
         this.report = new AppRelationshipCsvReport(appSettings);
@@ -25,5 +25,4 @@ public class AppRelationshipConsoleNotifier implements ApplicationListener<AppRe
 		log.info(String.join("\n\n", report.generatePreamble(), report.generateDetail(event)));
 	}
 
-    
 }

@@ -27,6 +27,7 @@ import lombok.Getter;
 public class ApplicationPolicy {
 
 	@Id
+	@JsonIgnore
 	private Long pk;
 
 	@Builder.Default

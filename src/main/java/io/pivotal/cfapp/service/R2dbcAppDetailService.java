@@ -1,5 +1,7 @@
 package io.pivotal.cfapp.service;
 
+import java.time.LocalDate;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -43,6 +45,11 @@ public class R2dbcAppDetailService implements AppDetailService {
 	@Override
 	public Flux<Tuple2<AppDetail, ApplicationPolicy>> findByApplicationPolicy(ApplicationPolicy policy, boolean mayHaveServiceBindings) {
 		return repo.findByApplicationPolicy(policy, mayHaveServiceBindings);
+	}
+
+	@Override
+	public Flux<AppDetail> findByDateRange(LocalDate start, LocalDate end) {
+		return repo.findByDateRange(start, end);
 	}
 
 }

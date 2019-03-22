@@ -1,6 +1,7 @@
 package io.pivotal.cfapp.task;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 
 import org.apache.commons.lang3.StringUtils;
@@ -129,7 +130,7 @@ public class ServiceInstanceDetailTask implements ApplicationRunner {
                                    .lastOperation(sd.getLastOperation())
                                    .lastUpdated(StringUtils.isNotBlank(sd.getUpdatedAt()) ? Instant.parse(sd.getUpdatedAt())
                                                .atZone(ZoneId.systemDefault())
-                                               .toLocalDateTime() : null)
+                                               .toLocalDateTime() : LocalDateTime.MIN)
                                    .dashboardUrl(sd.getDashboardUrl())
                                    .requestedState(StringUtils.isNotBlank(sd.getUpdatedAt()) ? sd.getStatus().toLowerCase(): "")
                                    .build());

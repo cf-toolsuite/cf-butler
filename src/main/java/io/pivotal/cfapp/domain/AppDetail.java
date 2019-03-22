@@ -1,6 +1,9 @@
 package io.pivotal.cfapp.domain;
 
 import java.time.LocalDateTime;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.annotation.Id;
@@ -20,6 +23,7 @@ import lombok.ToString;
 public class AppDetail {
 
 	@Id
+	@JsonIgnore
 	private Long pk;
 	private String organization;
 	private String space;
@@ -30,7 +34,7 @@ public class AppDetail {
 	private String stack;
 	private Integer runningInstances;
 	private Integer totalInstances;
-	private String urls;
+	private List<String> urls;
 	private LocalDateTime lastPushed;
 	private String lastEvent;
 	private String lastEventActor;
@@ -40,7 +44,7 @@ public class AppDetail {
 	public String toCsv() {
 		return String.join(",", wrap(getOrganization()), wrap(getSpace()), wrap(getAppId()), wrap(getAppName()),
 				wrap(getBuildpack()), wrap(getImage()), wrap(getStack()), wrap(String.valueOf(getRunningInstances())),
-				wrap(String.valueOf(getTotalInstances())), wrap(getUrls()),
+				wrap(String.valueOf(getTotalInstances())), wrap(wrap(String.join(",", getUrls()))),
 				wrap(getLastPushed() != null ? getLastPushed().toString() : ""), wrap(getLastEvent()),
 				wrap(getLastEventActor()), wrap(getLastEventTime() != null ? getLastEventTime().toString() : ""),
 				wrap(getRequestedState()));
@@ -58,22 +62,22 @@ public class AppDetail {
 
 	public static AppDetailBuilder from(AppDetail detail) {
         return AppDetail
-				.builder()
-					.pk(detail.getPk())
-                    .organization(detail.getOrganization())
-                    .space(detail.getSpace())
-                    .appId(detail.getAppId())
-                    .appName(detail.getAppName())
-                    .buildpack(detail.getBuildpack())
-                    .image(detail.getImage())
-                    .stack(detail.getStack())
-                    .runningInstances(detail.getRunningInstances())
-                    .totalInstances(detail.getTotalInstances())
-                    .urls(detail.getUrls())
-                    .lastPushed(detail.getLastPushed())
-                    .lastEvent(detail.getLastEvent())
-                    .lastEventActor(detail.getLastEventActor())
-                    .lastEventTime(detail.getLastEventTime())
-                    .requestedState(detail.getRequestedState());
+					.builder()
+						.pk(detail.getPk())
+						.organization(detail.getOrganization())
+						.space(detail.getSpace())
+						.appId(detail.getAppId())
+						.appName(detail.getAppName())
+						.buildpack(detail.getBuildpack())
+						.image(detail.getImage())
+						.stack(detail.getStack())
+						.runningInstances(detail.getRunningInstances())
+						.totalInstances(detail.getTotalInstances())
+						.urls(detail.getUrls())
+						.lastPushed(detail.getLastPushed())
+						.lastEvent(detail.getLastEvent())
+						.lastEventActor(detail.getLastEventActor())
+						.lastEventTime(detail.getLastEventTime())
+						.requestedState(detail.getRequestedState());
     }
 }

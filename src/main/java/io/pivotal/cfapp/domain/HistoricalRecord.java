@@ -2,6 +2,8 @@ package io.pivotal.cfapp.domain;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.annotation.Id;
 
@@ -18,6 +20,7 @@ import lombok.NoArgsConstructor;
 public class HistoricalRecord {
 
 	@Id
+	@JsonIgnore
 	private Long pk;
 	private LocalDateTime transactionDateTime;
 	private String actionTaken;

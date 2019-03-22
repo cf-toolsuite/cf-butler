@@ -233,6 +233,8 @@ public class R2dbcProperties implements BeanClassLoaderAware, InitializingBean {
 
 	static class DataSourceBeanCreationException extends BeanCreationException {
 
+		private static final long serialVersionUID = 1L;
+
 		private final R2dbcProperties properties;
 
 		private final EmbeddedDatabaseConnection connection;
