@@ -440,9 +440,9 @@ GET /snapshot/detail
 ```
 GET /accounting/applications
 ```
-> Produces a system-wide account report of [application usage](https://docs.pivotal.io/pivotalcf/2-4/opsguide/accounting-report.html#app-usage).
+> Produces a system-wide account report of [application usage](https://docs.pivotal.io/pivotalcf/2-4/opsguide/accounting-report.html#app-usage)
 
-> **Note**: Report excludes appliacation instances in the `system` org.
+> **Note**: Report excludes application instances in the `system` org
 
 ```
 GET /accounting/services
