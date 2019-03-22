@@ -17,7 +17,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.context.event.SimpleApplicationEventMulticaster;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
-import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -101,7 +100,7 @@ public class ButlerConfig {
     }
 
     // @see https://stackoverflow.com/questions/45418523/spring-5-webclient-using-ssl/53147631#53147631
-    
+
     @Bean
     @ConditionalOnProperty(prefix="cf", name="sslValidationSkipped", havingValue="true")
     public WebClient insecureWebClient() throws SSLException {

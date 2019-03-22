@@ -486,6 +486,8 @@ GET /accounting/services
 ```
 > Produces a system-wide account report of [service usage](https://docs.pivotal.io/pivotalcf/2-4/opsguide/accounting-report.html#service-usage)
 
+> **Note**: Report excludes user-provided service instances
+
 ```
 GET /accounting/tasks
 ```
