@@ -6,9 +6,9 @@
 
 You are a platform operator working for a Fortune 500 enterprise.  You've witnessed first-hand how the product development teams your team supports are super productive; happily invoking `cf push`, `cf cs` and `cf bs` many times per day to deploy applications, create services and bind them to those applications.  
 
-This is great, except that over time, on your non-production foundations, you have noticed in your [cf-app-inventory-report](https://github.com/pacphi/cf-app-inventory-report) and [cf-service-inventory-report](https://github.com/pacphi/cf-service-inventory-report) results a large number of stopped application instances and orphaned services (i.e., those not bound to any applications).
+This is great, except that over time, on your non-production foundations, as you've browsed organizations and spaces, you have noticed a large number of stopped application instances and orphaned services (i.e., those not bound to any applications).
 
-Reaching out to each development team to tell them to clean-up has become a chore.  Why not implement some automation that allows you to define and enforce some house-keeping policies for your non-production foundations where applications and services are perhaps more volatile?
+Reaching out to each development team to tell them to clean-up has become a chore.  Why not implement some automation that allows you a) to obtain snapshot and usage reports and b) define and enforce some house-keeping policies for your non-production foundations where applications and services are perhaps more volatile?
 
 This is where `cf-butler` has your back.
 
@@ -255,10 +255,206 @@ Shutdown and destroy the app and service instances
 
 These REST endpoints have been exposed for administrative purposes.  
 
+### Organization
+
 ```
-GET /report
+GET /organizations
 ```
-> Produces `text/plain` historical output detailing what applications and service instances have been removed
+> Lists organizations
+
+```
+GET /orgnizations/count
+```
+> Counts the number of organizations on a foundation
+
+### User
+
+```
+GET /space-users
+```
+> Provides details and light metrics for users by role within all organizations and spaces on a foundation
+
+Sample output
+```
+[
+  {
+    organization: "Northwest",
+    space: "akarode",
+    auditors: [ ],
+    developers: [
+      "wlund@pivotal.io",
+      "akarode@pivotal.io"
+    ],
+    managers: [
+      "wlund@pivotal.io",
+      "akarode@pivotal.io"
+    ],
+    users: [
+      "wlund@pivotal.io",
+      "akarode@pivotal.io"
+    ],
+    user-count: 2,
+  },
+  {
+    organization: "Northwest",
+    space: "arao",
+    auditors: [ ],
+    developers: [
+      "arao@pivotal.io"
+    ],
+    managers: [
+      "arao@pivotal.io"
+    ],
+    users: [
+      "arao@pivotal.io"
+    ],
+    user-count: 1
+  },
+...
+```
+> `users` is the unique subset of all users from each role in the organization/space
+
+```
+GET /space-users/{organization}/{space}
+```
+> Provides details and light metrics for users by role within a targeted organization and space
+
+```
+GET /users
+```
+> Lists all unique user accounts on a foundation
+
+```
+GET /users/count
+```
+> Counts the number of user accounts on a foundation
+
+### Snapshot
+
+```
+GET /snapshot/summary
+```
+> Provides summary metrics for applications, service instances, and users on a foundation
+
+> **Note**: this summary report does not take the place of an official foundation Accounting Report. The Accounting Report is focussed on calculating aggregates (on a monthly basis) such as: (a) the total hours of application instance usage, (b) the largest # of application instances running (a.k.a. maximum concurrent application instances), c) the total hours of service instance usage and (d) the largest # of service instances running (a.k.a. maximum concurrent service instances).
+
+Sample output
+```
+{
+  "application-counts": {
+    "by-organization": {
+      "Northwest": 35
+    },
+    "by-buildpack": {
+      "java": 28,
+      "nodejs": 2,
+      "unknown": 5
+    },
+    "by-stack": {
+      "cflinuxfs2": 20,
+      "cflinuxfs3": 15
+    },
+    "by-dockerimage": {
+      "--": 0
+    },
+    "by-status": {
+      "stopped": 15,
+      "started": 20
+    },
+    "total-applications": 35,
+    "total-running-application-instances": 21,
+    "total-stopped-application-instances": 18,
+    "total-anomalous-application-instances": 3,
+    "total-application-instances": 42,
+    "velocity": {
+      "between-two-days-and-one-week": 6,
+      "between-one-week-and-two-weeks": 0,
+      "between-one-day-and-two-days": 3,
+      "between-one-month-and-three-months": 5,
+      "between-three-months-and-six-months": 4,
+      "between-two-weeks-and-one-month": 1,
+      "in-last-day": 0,
+      "between-six-months-and-one-year": 10,
+      "beyond-one-year": 6
+    }
+  },
+  "service-instance-counts": {
+    "by-organization": {
+    "Northwest": 37
+  },
+  "by-service": {
+    "rediscloud": 2,
+    "elephantsql": 4,
+    "mlab": 2,
+    "p-service-registry": 2,
+    "cleardb": 10,
+    "p-config-server": 2,
+    "user-provided": 9,
+    "app-autoscaler": 2,
+    "cloudamqp": 4
+  },
+  "by-service-and-plan": {
+    "cleardb/spark": 10,
+    "mlab/sandbox": 2,
+    "rediscloud/30mb": 2,
+    "p-service-registry/trial": 2,
+    "elephantsql/turtle": 4,
+    "p-config-server/trial": 2,
+    "cloudamqp/lemur": 4,
+    "app-autoscaler/standard": 2
+  },
+  "total-service-instances": 37,
+  "velocity": {
+    "between-two-days-and-one-week": 4,
+    "between-one-week-and-two-weeks": 1,
+    "between-one-day-and-two-days": 2,
+    "between-one-month-and-three-months": 3,
+    "between-three-months-and-six-months": 0,
+    "between-two-weeks-and-one-month": 1,
+    "in-last-day": 0,
+    "between-six-months-and-one-year": 5,
+    "beyond-one-year": 8
+  }
+  },
+  "user-counts": {
+    "by-organization": {
+      "zoo-labs": 1,
+      "Northwest": 14
+    },
+    "total-users": 14
+  }
+}
+```
+
+```
+GET /snapshot/detail
+```
+> Provides lists of all applications, service instances, and users (by organization and space) on a foundation
+
+> **Note**: this detail report does not take the place of an official foundation Accounting Report. However, it does provide a much more detailed snapshot of all the applications that were currently running at the time of collection.
+
+### Accounting
+
+> **Note**: You will need to set the `cf.oauthToken` property (e.g., in your `application.yml`) prior to deploying `cf-butler` for all `/accounting` endpoints.  To obtain the token first complete succesful authentication with `cf login`, then type `cf oauth-token`.
+
+```
+GET /accounting/applications
+```
+> Produces a system-wide account report of [application usage](https://docs.pivotal.io/pivotalcf/2-4/opsguide/accounting-report.html#app-usage).
+
+> **Note**: Report excludes appliacation instances in the `system` org.
+
+```
+GET /accounting/services
+```
+> Produces a system-wide account report of [service usage](https://docs.pivotal.io/pivotalcf/2-4/opsguide/accounting-report.html#service-usage)
+
+```
+GET /accounting/tasks
+```
+> Produces a system-wide account report of [task usage](https://docs.pivotal.io/pivotalcf/2-4/opsguide/accounting-report.html#task-usage)
+
+### Policies
 
 ```
 POST /policies
@@ -292,7 +488,6 @@ POST /policies
   ]
 }
 ```
-
 > Establish policies to remove stopped applications and/or orphaned services. This endpoint is only available when `cf.policies.provider` is set to `dbms`.
 
 > Consult the [java.time.Duration](https://docs.oracle.com/javase/8/docs/api/java/time/Duration.html#parse-java.lang.CharSequence-) javadoc for other examples of what you can specify when setting values for `from-duration` properties above.
@@ -300,38 +495,37 @@ POST /policies
 ```
 GET /policies
 ```
-
 > List current policies
 
 ```
 DELETE /policies
 ```
-
 > Delete all established policies. This endpoint is only available when `cf.policies.provider` is set to `dbms`.
 
 ```
 GET /policies/application/{id}
 ```
-
 > Obtain application policy details by id
 
 ```
 GET /policies/serviceInstance/{id}
 ```
-
 > Obtain service instance policy details by id
 
 ```
 DELETE /policies/application/{id}
 ```
-
 > Delete an application policy by its id. This endpoint is only available when `cf.policies.provider` is set to `dbms`.
 
 ```
 DELETE /policies/serviceInstance/{id}
 ```
-
 > Delete a service instance policy by its id. This endpoint is only available when `cf.policies.provider` is set to `dbms`.
+
+```
+GET /policies/report
+```
+> Produces `text/plain` historical output detailing what applications and service instances have been removed
 
 
 ## Credits

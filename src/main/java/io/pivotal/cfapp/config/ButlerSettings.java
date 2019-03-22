@@ -23,14 +23,20 @@ public class ButlerSettings {
     private String password;
     // this is the value of RefreshToken within ~/.cf/config.json after one authenticates w/ cf login -a {api_endpoint} -sso
     private String refreshToken;
-    private Set<String> organizationBlackList;
+	// use cf oauth-token to obtain this value
+	private String oauthToken;
+	private Set<String> organizationBlackList;
 
     public Set<String> getOrganizationBlackList() {
     	while (organizationBlackList.remove(""));
     	Set<String> nonEmptyBlacklist = CollectionUtils.isEmpty(organizationBlackList) ?
     			DEFAULT_BLACKLIST: organizationBlackList;
     	return merge(nonEmptyBlacklist);
-    }
+	}
+
+	public String getUsageDomain() {
+		return "https://" + getApiHost().replace("api.", "app-usage.");
+	}
 
     private Set<String> merge(Set<String> orgBlackList) {
     	Set<String> result = new HashSet<>();

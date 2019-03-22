@@ -1,5 +1,7 @@
 package io.pivotal.cfapp.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.annotation.Id;
 
@@ -16,6 +18,7 @@ import lombok.NoArgsConstructor;
 public class AppRelationship {
 
 	@Id
+	@JsonIgnore
 	private Long pk;
 	private String organization;
 	private String space;

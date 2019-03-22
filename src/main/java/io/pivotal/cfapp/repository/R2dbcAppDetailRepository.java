@@ -1,7 +1,10 @@
 package io.pivotal.cfapp.repository;
 
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Arrays;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +16,7 @@ import org.springframework.stereotype.Repository;
 import io.pivotal.cfapp.config.DbmsSettings;
 import io.pivotal.cfapp.domain.AppDetail;
 import io.pivotal.cfapp.domain.ApplicationPolicy;
+import io.r2dbc.spi.Row;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
@@ -22,7 +26,7 @@ import reactor.util.function.Tuples;
 public class R2dbcAppDetailRepository {
 
 	private final DatabaseClient client;
-	private DbmsSettings settings;
+	private final DbmsSettings settings;
 
 	@Autowired
 	public R2dbcAppDetailRepository(
@@ -65,7 +69,7 @@ public class R2dbcAppDetailRepository {
 			spec = spec.nullValue("total_instances", String.class);
 		}
 		if (entity.getUrls() != null) {
-			spec = spec.value("urls", entity.getUrls());
+			spec = spec.value("urls", String.join(",", entity.getUrls()));
 		} else {
 			spec = spec.nullValue("urls", String.class);
 		}
@@ -100,8 +104,7 @@ public class R2dbcAppDetailRepository {
 	public Flux<AppDetail> findAll() {
 		return client.select().from("application_detail")
 						.orderBy(Sort.by("organization", "space", "app_name"))
-						.as(AppDetail.class)
-						.fetch()
+						.map((row, metadata) -> fromRow(row))
 						.all();
 	}
 
@@ -112,13 +115,21 @@ public class R2dbcAppDetailRepository {
 						.then();
 	}
 
+	public Flux<AppDetail> findByDateRange(LocalDate start, LocalDate end) {
+		String sql = "select pk, organization, space, app_id, app_name, buildpack, image, stack, running_instances, total_instances, urls, last_pushed, last_event, last_event_actor, last_event_time, requested_state from application_detail where last_pushed <= " + settings.getBindPrefix() + 2 + " and last_pushed > " + settings.getBindPrefix() + 1 + " order by last_pushed desc";
+		return client.execute().sql(sql)
+				.bind(settings.getBindPrefix() + 1, Timestamp.valueOf(LocalDateTime.of(end, LocalTime.MAX)))
+				.bind(settings.getBindPrefix() + 2, Timestamp.valueOf(LocalDateTime.of(start, LocalTime.MIDNIGHT)))
+				.map((row, metadata) -> fromRow(row))
+				.all();
+	}
+
 	public Mono<AppDetail> findByAppId(String appId) {
 		String index = settings.getBindPrefix() + 1;
 		String selectOne = "select pk, organization, space, app_id, app_name, buildpack, image, stack, running_instances, total_instances, urls, last_pushed, last_event, last_event_actor, last_event_time, requested_state from application_detail where app_id = " + index;
 		return client.execute().sql(selectOne)
 						.bind(index, appId)
-						.as(AppDetail.class)
-						.fetch()
+						.map((row, metadata) -> fromRow(row))
 						.one();
 	}
 
@@ -148,8 +159,9 @@ public class R2dbcAppDetailRepository {
 		return client.execute().sql(sql)
 						.bind(settings.getBindPrefix() + 1, policy.getState())
 						.bind(settings.getBindPrefix() + 2, temporal)
-						.as(AppDetail.class)
-						.fetch().all().map(r -> toTuple(r, policy));
+						.map((row, metadata) -> fromRow(row))
+						.all()
+						.map(r -> toTuple(r, policy));
 	}
 
 	private Flux<Tuple2<AppDetail, ApplicationPolicy>> findApplicationsThatDoNotHaveServiceBindings(ApplicationPolicy policy) {
@@ -176,8 +188,37 @@ public class R2dbcAppDetailRepository {
 		return client.execute().sql(sql)
 						.bind(settings.getBindPrefix() + 1, policy.getState())
 						.bind(settings.getBindPrefix() + 2, temporal)
-						.as(AppDetail.class)
-						.fetch().all().map(r -> toTuple(r, policy));
+						.map((row, metadata) -> fromRow(row))
+						.all()
+						.map(r -> toTuple(r, policy));
+	}
+
+	private AppDetail fromRow(Row row) {
+		return AppDetail
+				.builder()
+					.pk(row.get("pk", Long.class))
+					.organization(row.get("organization", String.class))
+					.space(row.get("space", String.class))
+					.appId(row.get("app_id", String.class))
+					.appName(row.get("app_name", String.class))
+					.buildpack(row.get("buildpack", String.class))
+					.runningInstances(row.get("running_instances", Integer.class))
+					.totalInstances(row.get("total_instances", Integer.class))
+					.image(row.get("image", String.class))
+					.stack(row.get("stack", String.class))
+					.urls(row.get("urls", String.class) != null
+							? Arrays.asList(row.get("urls", String.class).split("\\s*,\\s*"))
+							: null)
+					.lastEvent(row.get("last_event", String.class))
+					.lastEventActor(row.get("last_event_actor", String.class))
+					.lastEventTime(row.get("last_event_time", Timestamp.class) != null
+							? row.get("last_event_time", Timestamp.class).toLocalDateTime()
+							: null)
+					.lastPushed(row.get("last_pushed", Timestamp.class) != null
+							? row.get("last_pushed", Timestamp.class).toLocalDateTime()
+							: null)
+					.requestedState(row.get("requested_state", String.class))
+					.build();
 	}
 
 	private Tuple2<AppDetail, ApplicationPolicy> toTuple(AppDetail detail, ApplicationPolicy policy) {

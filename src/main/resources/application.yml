@@ -21,9 +21,9 @@ cf:
   organizationBlackList:
     - system
   policies:
-    #provider: git
     provider: dbms
-    #uri: 
+    #provider: git
+    #uri:
     #commit:
     #filePaths:
 
@@ -51,6 +51,7 @@ management:
 spring:
   r2dbc:
     url: r2dbc:h2:mem:///cf-butler?options=DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false
+    name: cf-butler
     username: sa
     password: 
 
@@ -72,6 +73,7 @@ cf:
   apiHost: ${vcap.services.cf-butler-secrets.credentials.CF_API-HOST}
   username: ${vcap.services.cf-butler-secrets.credentials.CF_USERNAME}
   password: ${vcap.services.cf-butler-secrets.credentials.CF_PASSWORD}
+  oauthToken: ${vcap.services.cf-butler-secrets.credentials.CF_OAUTH_TOKEN}
   refreshToken: ${vcap.services.cf-butler-secrets.credentials.CF_REFRESH-TOKEN}
   organizationBlackList: ${vcap.services.cf-butler-secrets.credentials.CF_ORGANIZATION-BLACK-LIST}
   policies:
