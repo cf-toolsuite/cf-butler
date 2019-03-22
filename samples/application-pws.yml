@@ -23,4 +23,4 @@ management:
   endpoints:
     web:
       exposure:
-        include: info,health,metrics,scheduledtasks,loggers,logfile
+        include: info,health,metrics,scheduledtasks,loggers,prometheus
