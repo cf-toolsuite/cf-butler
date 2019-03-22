@@ -381,40 +381,40 @@ Sample output
   "service-instance-counts": {
     "by-organization": {
     "Northwest": 37
-  },
-  "by-service": {
-    "rediscloud": 2,
-    "elephantsql": 4,
-    "mlab": 2,
-    "p-service-registry": 2,
-    "cleardb": 10,
-    "p-config-server": 2,
-    "user-provided": 9,
-    "app-autoscaler": 2,
-    "cloudamqp": 4
-  },
-  "by-service-and-plan": {
-    "cleardb/spark": 10,
-    "mlab/sandbox": 2,
-    "rediscloud/30mb": 2,
-    "p-service-registry/trial": 2,
-    "elephantsql/turtle": 4,
-    "p-config-server/trial": 2,
-    "cloudamqp/lemur": 4,
-    "app-autoscaler/standard": 2
-  },
-  "total-service-instances": 37,
-  "velocity": {
-    "between-two-days-and-one-week": 4,
-    "between-one-week-and-two-weeks": 1,
-    "between-one-day-and-two-days": 2,
-    "between-one-month-and-three-months": 3,
-    "between-three-months-and-six-months": 0,
-    "between-two-weeks-and-one-month": 1,
-    "in-last-day": 0,
-    "between-six-months-and-one-year": 5,
-    "beyond-one-year": 8
-  }
+    },
+    "by-service": {
+      "rediscloud": 2,
+      "elephantsql": 4,
+      "mlab": 2,
+      "p-service-registry": 2,
+      "cleardb": 10,
+      "p-config-server": 2,
+      "user-provided": 9,
+      "app-autoscaler": 2,
+      "cloudamqp": 4
+    },
+    "by-service-and-plan": {
+      "cleardb/spark": 10,
+      "mlab/sandbox": 2,
+      "rediscloud/30mb": 2,
+      "p-service-registry/trial": 2,
+      "elephantsql/turtle": 4,
+      "p-config-server/trial": 2,
+      "cloudamqp/lemur": 4,
+      "app-autoscaler/standard": 2
+    },
+    "total-service-instances": 37,
+    "velocity": {
+      "between-two-days-and-one-week": 4,
+      "between-one-week-and-two-weeks": 1,
+      "between-one-day-and-two-days": 2,
+      "between-one-month-and-three-months": 3,
+      "between-three-months-and-six-months": 0,
+      "between-two-weeks-and-one-month": 1,
+      "in-last-day": 0,
+      "between-six-months-and-one-year": 5,
+      "beyond-one-year": 8
+    }
   },
   "user-counts": {
     "by-organization": {
