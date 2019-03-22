@@ -5,38 +5,77 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import io.pivotal.cfapp.config.ButlerSettings;
 import io.pivotal.cfapp.domain.ApplicationCounts;
 import io.pivotal.cfapp.domain.ServiceInstanceCounts;
 import io.pivotal.cfapp.domain.SnapshotDetail;
 import io.pivotal.cfapp.domain.SnapshotSummary;
 import io.pivotal.cfapp.domain.UserCounts;
+import io.pivotal.cfapp.report.AppDetailCsvReport;
+import io.pivotal.cfapp.report.ServiceInstanceDetailCsvReport;
+import io.pivotal.cfapp.task.AppDetailRetrievedEvent;
+import io.pivotal.cfapp.task.ServiceInstanceDetailRetrievedEvent;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 
 @Service
 public class SnapshotService {
 
-    protected final AppDetailService appDetailService;
-    protected final ServiceInstanceDetailService siDetailService;
-    protected final AppRelationshipService appRelationshipService;
-    protected final SpaceUsersService spaceUsersService;
-    protected final AppMetricsService appMetricsService;
-    protected final ServiceInstanceMetricsService siMetricsService;
+    private final AppDetailService appDetailService;
+    private final ServiceInstanceDetailService siDetailService;
+    private final AppRelationshipService appRelationshipService;
+    private final SpaceUsersService spaceUsersService;
+    private final AppMetricsService appMetricsService;
+    private final ServiceInstanceMetricsService siMetricsService;
+    private final AppDetailCsvReport appDetailCsvReport;
+    private final ServiceInstanceDetailCsvReport siDetailCsvReport;
 
     @Autowired
     public SnapshotService(
+        ButlerSettings settings,
         AppDetailService appDetailService,
         ServiceInstanceDetailService siDetailService,
         AppRelationshipService appRelationshipService,
         SpaceUsersService spaceUsersService,
         AppMetricsService appMetricsService,
-        ServiceInstanceMetricsService siMetricsService) {
+        ServiceInstanceMetricsService siMetricsService
+        ) {
         this.appDetailService = appDetailService;
         this.siDetailService = siDetailService;
         this.appRelationshipService = appRelationshipService;
         this.spaceUsersService = spaceUsersService;
         this.appMetricsService = appMetricsService;
         this.siMetricsService = siMetricsService;
+        this.appDetailCsvReport = new AppDetailCsvReport(settings);
+        this.siDetailCsvReport = new ServiceInstanceDetailCsvReport(settings);
+    }
+
+    public Mono<String> assembleCsvAIReport() {
+        return appDetailService
+				.findAll()
+				.collectList()
+		        .map(r -> new AppDetailRetrievedEvent(this)
+							.detail(r)
+				)
+		        .map(event ->
+		        	String.join(
+		        			"\n\n",
+		        			appDetailCsvReport.generatePreamble(),
+		        			appDetailCsvReport.generateDetail(event)));
+    }
+
+    public Mono<String> assembleCsvSIReport() {
+        return siDetailService
+				.findAll()
+				.collectList()
+		        .map(r -> new ServiceInstanceDetailRetrievedEvent(this)
+							.detail(r)
+				)
+		        .map(event ->
+		        	String.join(
+		        			"\n\n",
+		        			siDetailCsvReport.generatePreamble(),
+		        			siDetailCsvReport.generateDetail(event)));
     }
 
     public Mono<SnapshotDetail> assembleSnapshotDetail() {
