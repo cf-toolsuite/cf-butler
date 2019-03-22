@@ -129,7 +129,7 @@ Policy files must adhere to a naming convention where:
 * a filename ending with `-AP.json` encapsulates an individual [ApplicationPolicy](src/main/java/io/pivotal/cfapp/domain/ApplicationPolicy.java)
 * a filename ending with `-SIP.json` encapsulates an individual [ServiceInstancePolicy](src/main/java/io/pivotal/cfapp/domain/ServiceInstancePolicy.java)
 
-A sample Github repository exists [here](https://github.com/pacphi/cf-butler-config-sample).
+A sample Github repository exists [here](https://github.com/pacphi/cf-butler-sample-config).
 
 Have a look at [secrets.pws.json](samples/secrets.pws.json) for an example of how to configure secrets for deployment of `cf-butler` to PAS integrating with the aforementioned sample Github repository.
 
