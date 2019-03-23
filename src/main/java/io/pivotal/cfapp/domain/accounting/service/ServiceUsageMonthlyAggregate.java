@@ -10,7 +10,7 @@ import lombok.Data;
 
 @Data
 @JsonPropertyOrder({"service_name", "service_guid", "usages", "plans"})
-public class MonthlyServiceReport {
+public class ServiceUsageMonthlyAggregate {
 
     @JsonProperty("service_name")
     public String serviceName;
@@ -19,9 +19,9 @@ public class MonthlyServiceReport {
     public String serviceGuid;
 
     @JsonProperty("usages")
-    public List<Usage> usages;
+    public List<ServiceUsageMonthly> usages;
 
     @JsonProperty("plans")
-    public List<Plan> plans;
+    public List<ServicePlanUsageMonthly> plans;
 
 }

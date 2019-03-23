@@ -9,9 +9,9 @@ import org.springframework.util.Assert;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import io.pivotal.cfapp.config.ButlerSettings;
-import io.pivotal.cfapp.domain.accounting.application.SystemWideAppReport;
-import io.pivotal.cfapp.domain.accounting.service.SystemWideServiceReport;
-import io.pivotal.cfapp.domain.accounting.task.SystemWideTaskReport;
+import io.pivotal.cfapp.domain.accounting.application.AppUsageReport;
+import io.pivotal.cfapp.domain.accounting.service.ServiceUsageReport;
+import io.pivotal.cfapp.domain.accounting.task.TaskUsageReport;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -76,33 +76,33 @@ public class UsageService {
 
     //----------
 
-    public Mono<SystemWideTaskReport> getTaskReport() {
+    public Mono<TaskUsageReport> getTaskReport() {
         String uri = settings.getUsageDomain() + "/system_report/task_usages";
         return webClient
                 .get()
                     .uri(uri)
                     .header(HttpHeaders.AUTHORIZATION, settings.getOauthToken())
                         .retrieve()
-                            .bodyToMono(SystemWideTaskReport.class);
+                            .bodyToMono(TaskUsageReport.class);
     }
 
-    public Mono<SystemWideAppReport> getApplicationReport() {
+    public Mono<AppUsageReport> getApplicationReport() {
         String uri = settings.getUsageDomain() + "/system_report/app_usages";
         return webClient
                 .get()
                     .uri(uri)
                     .header(HttpHeaders.AUTHORIZATION, settings.getOauthToken())
                         .retrieve()
-                            .bodyToMono(SystemWideAppReport.class);
+                            .bodyToMono(AppUsageReport.class);
     }
 
-    public Mono<SystemWideServiceReport> getServiceReport() {
+    public Mono<ServiceUsageReport> getServiceReport() {
         String uri = settings.getUsageDomain() + "/system_report/service_usages";
         return webClient
                 .get()
                     .uri(uri)
                     .header(HttpHeaders.AUTHORIZATION, settings.getOauthToken())
                         .retrieve()
-                            .bodyToMono(SystemWideServiceReport.class);
+                            .bodyToMono(ServiceUsageReport.class);
     }
 }

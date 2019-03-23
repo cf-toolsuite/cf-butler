@@ -1,20 +1,19 @@
 package io.pivotal.cfapp.controller;
 
-import static org.springframework.format.annotation.DateTimeFormat.ISO;
-
 import java.time.LocalDate;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.pivotal.cfapp.domain.accounting.application.SystemWideAppReport;
-import io.pivotal.cfapp.domain.accounting.service.SystemWideServiceReport;
-import io.pivotal.cfapp.domain.accounting.task.SystemWideTaskReport;
+import io.pivotal.cfapp.domain.accounting.application.AppUsageReport;
+import io.pivotal.cfapp.domain.accounting.service.ServiceUsageReport;
+import io.pivotal.cfapp.domain.accounting.task.TaskUsageReport;
 import io.pivotal.cfapp.service.UsageService;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -30,17 +29,17 @@ public class UsageController {
     }
 
     @GetMapping(value = "accounting/tasks")
-    public Mono<SystemWideTaskReport> getTaskReport() {
+    public Mono<TaskUsageReport> getTaskReport() {
         return service.getTaskReport();
     }
 
     @GetMapping(value = "accounting/applications")
-    public Mono<SystemWideAppReport> getApplicationReport() {
+    public Mono<AppUsageReport> getApplicationReport() {
         return service.getApplicationReport();
     }
 
     @GetMapping(value = "accounting/services", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<SystemWideServiceReport> getServiceReport() {
+    public Mono<ServiceUsageReport> getServiceReport() {
         return service.getServiceReport();
     }
 

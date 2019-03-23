@@ -9,15 +9,15 @@ import lombok.Data;
 
 @Data
 @JsonPropertyOrder({"report_time", "monthly_reports", "yearly_reports"})
-public class SystemWideTaskReport {
+public class TaskUsageReport {
 
     @JsonProperty("report_time")
     private String reportTime;
 
     @JsonProperty("monthly_reports")
-    private List<MonthlyTaskReport> monthlyReports;
+    private List<TaskUsageMonthly> monthlyReports;
 
     @JsonProperty("yearly_reports")
-    private List<YearlyTaskReport> yearlyReports;
+    private List<TaskUsageYearly> yearlyReports;
 }
 
