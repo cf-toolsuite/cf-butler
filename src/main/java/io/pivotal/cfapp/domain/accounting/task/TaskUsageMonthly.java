@@ -7,7 +7,7 @@ import lombok.Data;
 
 @Data
 @JsonPropertyOrder({"month", "year", "total_task_runs", "maximum_concurrent_tasks", "task_hours"})
-public class MonthlyTaskReport {
+public class TaskUsageMonthly {
 
     @JsonProperty("month")
     private Integer month;

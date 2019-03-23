@@ -6,11 +6,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.Data;
 
 @Data
-@JsonPropertyOrder({"month", "year", "average_app_instances","maximum_app_instances", "app_instance_hours"})
-public class MonthlyAppReport {
-
-    @JsonProperty("month")
-    private Integer month;
+@JsonPropertyOrder({"year", "average_app_instances", "maximum_app_instances", "app_instance_hours"})
+public class AppUsageYearly {
 
     @JsonProperty("year")
     private Integer year;
@@ -23,5 +20,4 @@ public class MonthlyAppReport {
 
     @JsonProperty("app_instance_hours")
     private Double appInstanceHours;
-
 }

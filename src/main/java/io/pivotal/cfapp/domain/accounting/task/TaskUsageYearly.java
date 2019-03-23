@@ -7,7 +7,7 @@ import lombok.Data;
 
 @Data
 @JsonPropertyOrder({"year", "total_task_runs", "maximum_concurrent_tasks", "task_hours"})
-public class YearlyTaskReport {
+public class TaskUsageYearly {
 
     @JsonProperty("year")
     private Integer year;
