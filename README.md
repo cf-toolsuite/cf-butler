@@ -178,7 +178,7 @@ Within each [ApplicationPolicy](https://github.com/pacphi/cf-butler/blob/master/
 
 > Footnote: currently embedding implementation borrowed directly from r2dbc-spi (url-parser branch) and spring-boot-starter-rdbc projects until updated releases of these artifacts are made publicly available.
 
-## How to Run
+## How to Run with Gradle
 
 ```
 ./gradlew bootRun -Dspring.profiles.active={target_foundation_profile}
@@ -187,10 +187,42 @@ where `{target_foundation_profile}` is something like `pws` or `pcfone`
 
 > You'll need to manually stop to the application with `Ctrl+C`
 
+## How to Run with Docker
+
+You might choose this option when experimenting with an external database provider image like [postgres](https://github.com/docker-library/postgres/blob/6c3b27f1433ad81675afb386a182098dc867e3e8/11/alpine/Dockerfile)
+
+Build
+
+```
+docker build -t pivotalio/cf-butler:latest .
+```
+
+Run
+
+```
+docker run -it --rm -e SPRING_PROFILES_ACTIVE={env} pivotalio/cf-butler
+```
+> **Note**: You should have authored an `application-{env}.yml` that encapsulates the appropriate configuration within `src/main/resources` before you built the `cf-butler-{version}-SNAPSHOT.jar` artifact with Gradle
+
+Stop
+
+```
+docker ps -a
+docker stop {pid}
+```
+> where `{pid}` is the Docker process id
+
+Cleanup
+
+```
+docker rm {pid}
+```
+> where `{pid}` is the Docker process id
+
 
 ## How to deploy to Pivotal Application Service
 
-### with Username and password authorization 
+### with Username and password authorization
 
 The following instructions explain how to get started when `token.provider` is set to `userpass`
 
