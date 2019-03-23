@@ -77,6 +77,7 @@ cf:
   apiHost: ${vcap.services.cf-butler-secrets.credentials.CF_API-HOST}
   username: ${vcap.services.cf-butler-secrets.credentials.CF_USERNAME}
   password: ${vcap.services.cf-butler-secrets.credentials.CF_PASSWORD}
+  sslValidationSkipped: ${vcap.services.cf-butler-secrets.credentials.CF_SKIP_SSL_VALIDATION:false}
   oauthToken: ${vcap.services.cf-butler-secrets.credentials.CF_OAUTH_TOKEN}
   refreshToken: ${vcap.services.cf-butler-secrets.credentials.CF_REFRESH-TOKEN}
   organizationBlackList: ${vcap.services.cf-butler-secrets.credentials.CF_ORGANIZATION-BLACK-LIST}
