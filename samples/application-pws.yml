@@ -2,7 +2,6 @@ cf:
   apiHost: api.run.pivotal.io
   username: you@mail.me
   password: xxxxxx
-  oauthToken: "bearer blah blah blah"
   organizationBlackList:
     - system
 
