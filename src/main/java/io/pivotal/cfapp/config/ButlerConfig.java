@@ -32,69 +32,75 @@ import reactor.netty.tcp.TcpClient;
 public class ButlerConfig {
 
     @Bean
-    DefaultConnectionContext connectionContext(ButlerSettings settings) {
-        return DefaultConnectionContext.builder()
-            .apiHost(settings.getApiHost())
-            .skipSslValidation(settings.isSslValidationSkipped())
-            .build();
+    public DefaultConnectionContext connectionContext(ButlerSettings settings) {
+        return DefaultConnectionContext
+                .builder()
+                    .apiHost(settings.getApiHost())
+                    .skipSslValidation(settings.isSslValidationSkipped())
+                    .build();
     }
 
     @Bean
     @ConditionalOnProperty(prefix="token", name="provider", havingValue="userpass", matchIfMissing=true)
-    TokenProvider tokenProvider(ButlerSettings settings) {
-        return PasswordGrantTokenProvider.builder()
-            .username(settings.getUsername())
-            .password(settings.getPassword())
-            .build();
+    public TokenProvider tokenProvider(ButlerSettings settings) {
+        return PasswordGrantTokenProvider
+                .builder()
+                    .username(settings.getUsername())
+                    .password(settings.getPassword())
+                    .build();
     }
 
     @Bean
     @ConditionalOnProperty(prefix="token", name="provider", havingValue="sso")
-    TokenProvider refreshGrantTokenProvider(ButlerSettings settings) {
-        return RefreshTokenGrantTokenProvider.builder()
-            .token(settings.getRefreshToken())
-            .build();
+    public TokenProvider refreshGrantTokenProvider(ButlerSettings settings) {
+        return RefreshTokenGrantTokenProvider
+                .builder()
+                    .token(settings.getRefreshToken())
+                    .build();
     }
 
     @Bean
-    ReactorCloudFoundryClient cloudFoundryClient(ConnectionContext connectionContext, TokenProvider tokenProvider) {
-    return ReactorCloudFoundryClient.builder()
-        .connectionContext(connectionContext)
-        .tokenProvider(tokenProvider)
-        .build();
+    public ReactorCloudFoundryClient cloudFoundryClient(ConnectionContext connectionContext, TokenProvider tokenProvider) {
+        return ReactorCloudFoundryClient
+                .builder()
+                    .connectionContext(connectionContext)
+                    .tokenProvider(tokenProvider)
+                    .build();
 }
 
     @Bean
-    ReactorDopplerClient dopplerClient(ConnectionContext connectionContext, TokenProvider tokenProvider) {
-        return ReactorDopplerClient.builder()
-            .connectionContext(connectionContext)
-            .tokenProvider(tokenProvider)
-            .build();
+    public ReactorDopplerClient dopplerClient(ConnectionContext connectionContext, TokenProvider tokenProvider) {
+        return ReactorDopplerClient
+                .builder()
+                    .connectionContext(connectionContext)
+                    .tokenProvider(tokenProvider)
+                    .build();
     }
 
     @Bean
-    ReactorUaaClient uaaClient(ConnectionContext connectionContext, TokenProvider tokenProvider) {
-        return ReactorUaaClient.builder()
-            .connectionContext(connectionContext)
-            .tokenProvider(tokenProvider)
-            .build();
+    public ReactorUaaClient uaaClient(ConnectionContext connectionContext, TokenProvider tokenProvider) {
+        return ReactorUaaClient
+                .builder()
+                    .connectionContext(connectionContext)
+                    .tokenProvider(tokenProvider)
+                    .build();
     }
 
     @Bean
-    DefaultCloudFoundryOperations opsClient(ReactorCloudFoundryClient cloudFoundryClient, 
+    public DefaultCloudFoundryOperations opsClient(ReactorCloudFoundryClient cloudFoundryClient, 
             ReactorDopplerClient dopplerClient, ReactorUaaClient uaaClient) {
-        return DefaultCloudFoundryOperations.builder()
-                .cloudFoundryClient(cloudFoundryClient)
-                .dopplerClient(dopplerClient)
-                .uaaClient(uaaClient)
-                .build();
+        return DefaultCloudFoundryOperations
+                .builder()
+                    .cloudFoundryClient(cloudFoundryClient)
+                    .dopplerClient(dopplerClient)
+                    .uaaClient(uaaClient)
+                    .build();
     }
 
     @Bean(name = "applicationEventMulticaster")
     public ApplicationEventMulticaster simpleApplicationEventMulticaster() {
-        SimpleApplicationEventMulticaster eventMulticaster 
-          = new SimpleApplicationEventMulticaster();
-
+        SimpleApplicationEventMulticaster eventMulticaster =
+            new SimpleApplicationEventMulticaster();
         eventMulticaster.setTaskExecutor(new SimpleAsyncTaskExecutor());
         return eventMulticaster;
     }
@@ -104,7 +110,8 @@ public class ButlerConfig {
     @Bean
     @ConditionalOnProperty(prefix="cf", name="sslValidationSkipped", havingValue="true")
     public WebClient insecureWebClient() throws SSLException {
-        SslContext sslContext = SslContextBuilder
+        SslContext sslContext =
+            SslContextBuilder
                 .forClient()
                 .trustManager(InsecureTrustManagerFactory.INSTANCE)
                 .build();

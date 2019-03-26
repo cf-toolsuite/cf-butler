@@ -1,8 +1,6 @@
 package io.pivotal.cfapp.service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.cloudfoundry.reactor.DefaultConnectionContext;
 import org.cloudfoundry.reactor.TokenProvider;
@@ -88,37 +86,39 @@ public class UsageService {
 
     public Mono<TaskUsageReport> getTaskReport() {
         String uri = settings.getUsageDomain() + "/system_report/task_usages";
-        return webClient
-                .get()
-                    .uri(uri)
-                    .header(HttpHeaders.AUTHORIZATION, getOauthToken())
-                        .retrieve()
-                            .bodyToMono(TaskUsageReport.class);
-    }
+        return getOauthToken()
+                .flatMap(t -> webClient
+                                .get()
+                                    .uri(uri)
+                                    .header(HttpHeaders.AUTHORIZATION, t)
+                                        .retrieve()
+                                            .bodyToMono(TaskUsageReport.class));
+            }
 
     public Mono<AppUsageReport> getApplicationReport() {
         String uri = settings.getUsageDomain() + "/system_report/app_usages";
-        return webClient
-                .get()
-                    .uri(uri)
-                    .header(HttpHeaders.AUTHORIZATION, getOauthToken())
-                        .retrieve()
-                            .bodyToMono(AppUsageReport.class);
+        return getOauthToken()
+                .flatMap(t -> webClient
+                                .get()
+                                    .uri(uri)
+                                    .header(HttpHeaders.AUTHORIZATION, t)
+                                        .retrieve()
+                                            .bodyToMono(AppUsageReport.class));
     }
 
     public Mono<ServiceUsageReport> getServiceReport() {
         String uri = settings.getUsageDomain() + "/system_report/service_usages";
-        return webClient
-                .get()
-                    .uri(uri)
-                    .header(HttpHeaders.AUTHORIZATION, getOauthToken())
-                        .retrieve()
-                            .bodyToMono(ServiceUsageReport.class);
-    }
+        return getOauthToken()
+                .flatMap(t -> webClient
+                                .get()
+                                    .uri(uri)
+                                    .header(HttpHeaders.AUTHORIZATION, t)
+                                        .retrieve()
+                                            .bodyToMono(ServiceUsageReport.class));
+            }
 
-    private String getOauthToken() {
-        final List<String> result = new ArrayList<>();
-        tokenProvider.getToken(connectionContext).subscribe(s -> result.add(s));
-        return result.get(0);
+    private Mono<String> getOauthToken() {
+        tokenProvider.invalidate(connectionContext);
+        return tokenProvider.getToken(connectionContext);
     }
 }
