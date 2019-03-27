@@ -1,5 +1,6 @@
 package io.pivotal.cfapp.repository;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -130,7 +131,7 @@ public class R2dbcAppMetricsRepository {
 	public Mono<Double> totalMemoryUsed() {
 		String sql = "select sum(memory_used) as tot from application_detail";
 		return client.execute().sql(sql)
-				.map((row, metadata) -> row.get("tot", Long.class))
+				.map((row, metadata) -> row.get("tot", BigDecimal.class))
 				.one()
 				.map(r -> toGigabytes(r))
 				.defaultIfEmpty(0.0);
@@ -139,7 +140,7 @@ public class R2dbcAppMetricsRepository {
 	public Mono<Double> totalDiskUsed() {
 		String sql = "select sum(disk_used) as tot from application_detail";
 		return client.execute().sql(sql)
-				.map((row, metadata) -> row.get("tot", Long.class))
+				.map((row, metadata) -> row.get("tot", BigDecimal.class))
 				.one()
 				.map(r -> toGigabytes(r))
 				.defaultIfEmpty(0.0);
@@ -160,8 +161,8 @@ public class R2dbcAppMetricsRepository {
 				countStagnant(now.minusYears(1)).map(r -> Tuples.of("beyond-one-year", r)));
 	}
 
-	private Double toGigabytes(Long input) {
-		return Double.valueOf(input / 1000000000.0);
+	private Double toGigabytes(BigDecimal input) {
+		return Double.valueOf(input.doubleValue() / 1000000000.0);
 	}
 
 }
