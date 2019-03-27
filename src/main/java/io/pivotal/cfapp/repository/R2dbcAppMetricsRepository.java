@@ -1,6 +1,8 @@
 package io.pivotal.cfapp.repository;
 
 import java.sql.Timestamp;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -127,6 +129,24 @@ public class R2dbcAppMetricsRepository {
 				.defaultIfEmpty(0L);
 	}
 
+	public Mono<Double> totalMemoryUsed() {
+		String sql = "select sum(memory_used) as tot from application_detail";
+		return client.execute().sql(sql)
+				.map((row, metadata) -> row.get("tot", Long.class))
+				.one()
+				.map(r -> toGigabytes(r))
+				.defaultIfEmpty(0.0);
+	}
+
+	public Mono<Double> totalDiskUsed() {
+		String sql = "select sum(disk_used) as tot from application_detail";
+		return client.execute().sql(sql)
+				.map((row, metadata) -> row.get("tot", Long.class))
+				.one()
+				.map(r -> toGigabytes(r))
+				.defaultIfEmpty(0.0);
+	}
+
 	public Flux<Tuple2<String, Long>> totalVelocity() {
 		final LocalDate now = LocalDate.now();
 		return
@@ -140,6 +160,10 @@ public class R2dbcAppMetricsRepository {
 				countByDateRange(now.minusMonths(6), now.minusMonths(3)).map(r -> Tuples.of("between-three-months-and-six-months", r)),
 				countByDateRange(now.minusYears(1), now.minusMonths(6)).map(r -> Tuples.of("between-six-months-and-one-year", r)),
 				countStagnant(now.minusYears(1)).map(r -> Tuples.of("beyond-one-year", r)));
+	}
+
+	private Double toGigabytes(Long input) {
+		return Double.valueOf(input / 1000000000.0);
 	}
 
 }
