@@ -47,6 +47,8 @@ public class R2dbcAppMetricsRepositoryTest {
                                 .buildpack("java_buildpack")
                                 .runningInstances(1)
                                 .totalInstances(1)
+                                .memoryUsage(1L)
+                                .diskUsage(1L)
                                 .requestedState("stopped")
                                 .build();
         StepVerifier.create(detailRepo.deleteAll().then(detailRepo.save(entity))).expectNext(entity).verifyComplete();

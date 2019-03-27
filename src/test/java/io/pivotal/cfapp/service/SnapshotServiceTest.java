@@ -56,6 +56,8 @@ public class SnapshotServiceTest {
                                 .buildpack("java_buildpack")
                                 .runningInstances(1)
                                 .totalInstances(1)
+                                .memoryUsage(1L)
+                                .diskUsage(1L)
                                 .requestedState("stopped")
                                 .build();
         StepVerifier.create(appService.deleteAll().then(appService.save(ad))).expectNext(ad).verifyComplete();
