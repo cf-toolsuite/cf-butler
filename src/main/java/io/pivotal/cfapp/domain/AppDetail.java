@@ -46,7 +46,7 @@ public class AppDetail {
 	public String toCsv() {
 		return String.join(",", wrap(getOrganization()), wrap(getSpace()), wrap(getAppId()), wrap(getAppName()),
 				wrap(getBuildpack()), wrap(getImage()), wrap(getStack()), wrap(String.valueOf(getRunningInstances())),
-				wrap(String.valueOf(getTotalInstances())), wrap(Long.toString(getMemoryUsage())), wrap(Long.toString(getDiskUsage())), 
+				wrap(String.valueOf(getTotalInstances())), wrap(Double.toString(toGigabytes(getMemoryUsage()))), wrap(Double.toString(toGigabytes(getDiskUsage()))), 
 				(wrap(String.join(",", getUrls()))), wrap(getLastPushed() != null ? getLastPushed().toString() : ""), wrap(getLastEvent()),
 				wrap(getLastEventActor()), wrap(getLastEventTime() != null ? getLastEventTime().toString() : ""),
 				wrap(getRequestedState()));
@@ -56,9 +56,13 @@ public class AppDetail {
 		return value != null ? StringUtils.wrap(value, '"') : StringUtils.wrap("", '"');
 	}
 
+	private Double toGigabytes(Long input) {
+		return Double.valueOf(input / 1000000000.0);
+	}
+
 	public static String headers() {
 		return String.join(",", "organization", "space", "application id", "application name", "buildpack", "image",
-				"stack", "running instances", "total instances", "memory used", "disk used", "urls", "last pushed", "last event",
+				"stack", "running instances", "total instances", "memory used (in gb)", "disk used (in gb)", "urls", "last pushed", "last event",
 				"last event actor", "last event time", "requested state");
 	}
 
@@ -83,5 +87,5 @@ public class AppDetail {
 						.lastEventActor(detail.getLastEventActor())
 						.lastEventTime(detail.getLastEventTime())
 						.requestedState(detail.getRequestedState());
-    }
+	}
 }
