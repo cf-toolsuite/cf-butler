@@ -34,6 +34,8 @@ public class AppDetail {
 	private String stack;
 	private Integer runningInstances;
 	private Integer totalInstances;
+	private Long memoryUsage;
+	private Long diskUsage;
 	private List<String> urls;
 	private LocalDateTime lastPushed;
 	private String lastEvent;
@@ -44,8 +46,8 @@ public class AppDetail {
 	public String toCsv() {
 		return String.join(",", wrap(getOrganization()), wrap(getSpace()), wrap(getAppId()), wrap(getAppName()),
 				wrap(getBuildpack()), wrap(getImage()), wrap(getStack()), wrap(String.valueOf(getRunningInstances())),
-				wrap(String.valueOf(getTotalInstances())), wrap(wrap(String.join(",", getUrls()))),
-				wrap(getLastPushed() != null ? getLastPushed().toString() : ""), wrap(getLastEvent()),
+				wrap(String.valueOf(getTotalInstances())), wrap(Long.toString(getMemoryUsage())), wrap(Long.toString(getDiskUsage())), 
+				(wrap(String.join(",", getUrls()))), wrap(getLastPushed() != null ? getLastPushed().toString() : ""), wrap(getLastEvent()),
 				wrap(getLastEventActor()), wrap(getLastEventTime() != null ? getLastEventTime().toString() : ""),
 				wrap(getRequestedState()));
 	}
@@ -56,7 +58,7 @@ public class AppDetail {
 
 	public static String headers() {
 		return String.join(",", "organization", "space", "application id", "application name", "buildpack", "image",
-				"stack", "running instances", "total instances", "urls", "last pushed", "last event",
+				"stack", "running instances", "total instances", "memory used", "disk used", "urls", "last pushed", "last event",
 				"last event actor", "last event time", "requested state");
 	}
 
@@ -73,6 +75,8 @@ public class AppDetail {
 						.stack(detail.getStack())
 						.runningInstances(detail.getRunningInstances())
 						.totalInstances(detail.getTotalInstances())
+						.memoryUsage(detail.getMemoryUsage())
+						.diskUsage(detail.getDiskUsage())
 						.urls(detail.getUrls())
 						.lastPushed(detail.getLastPushed())
 						.lastEvent(detail.getLastEvent())

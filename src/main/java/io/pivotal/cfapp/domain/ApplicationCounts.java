@@ -19,7 +19,7 @@ import lombok.ToString;
 @ToString
 @JsonPropertyOrder({ "by-organization", "by-buildpack", "by-stack", "by-dockerimage", "by-status",
 "total-applications", "total-running-application-instances", "total-stopped-application-instances", "total-anomalous-application-instances",
-"total-application-instances", "velocity"})
+"total-application-instances", "total-memory-used-in-mb", "total-disk-used-in-mb", "velocity"})
 public class ApplicationCounts {
 
     @JsonProperty("by-organization")
@@ -51,6 +51,12 @@ public class ApplicationCounts {
 
     @JsonProperty("total-application-instances")
     private Long totalApplicationInstances;
+
+    @JsonProperty("total-memory-used-in-gb")
+    private Double totalMemoryUsed;
+
+    @JsonProperty("total-disk-used-in-gb")
+    private Double totalDiskUsed;
 
     @JsonProperty("velocity")
     private Map<String,Long> velocity;

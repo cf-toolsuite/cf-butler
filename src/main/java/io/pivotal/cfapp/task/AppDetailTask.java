@@ -131,6 +131,8 @@ public class AppDetailTask implements ApplicationRunner {
             .stack(a.getStack())
             .runningInstances(a.getRunningInstances())
             .totalInstances(a.getInstances())
+            .diskUsage(a.getInstanceDetails().stream().mapToLong(id -> id.getDiskUsage()).sum())
+            .memoryUsage(a.getInstanceDetails().stream().mapToLong(id -> id.getMemoryUsage()).sum())
             .urls(a.getUrls())
             .lastPushed(a.getLastUploaded() != null ? a.getLastUploaded()
                         .toInstant()

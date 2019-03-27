@@ -63,6 +63,16 @@ public class R2dbcAppMetricsService implements AppMetricsService {
 	}
 
 	@Override
+	public Mono<Double> totalMemoryUsed() {
+		return repo.totalMemoryUsed();
+	}
+
+	@Override
+	public Mono<Double> totalDiskUsed() {
+		return repo.totalDiskUsed();
+	}
+
+	@Override
 	public Mono<Long> totalAnomalousApplicationInstances() {
 		return repo.totalAnomalousApplicationInstances();
 	}

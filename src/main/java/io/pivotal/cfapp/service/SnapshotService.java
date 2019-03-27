@@ -122,7 +122,8 @@ public class SnapshotService {
                     .flatMap(b -> appMetricsService.totalStoppedApplicationInstances().map(tsai -> b.totalStoppedApplicationInstances(tsai)))
                     .flatMap(b -> appMetricsService.totalAnomalousApplicationInstances().map(taai -> b.totalAnomalousApplicationInstances(taai)))
                     .flatMap(b -> appMetricsService.totalApplicationInstances().map(tai -> b.totalApplicationInstances(tai)))
-                    .flatMap(b -> appMetricsService.totalApplicationInstances().map(tai -> b.totalApplicationInstances(tai)))
+                    .flatMap(b -> appMetricsService.totalMemoryUsed().map(tmu -> b.totalMemoryUsed(tmu)))
+                    .flatMap(b -> appMetricsService.totalDiskUsed().map(tdu -> b.totalDiskUsed(tdu)))
                     .flatMap(b -> appMetricsService.totalVelocity().collect(Collectors.toMap(Tuple2::getT1, Tuple2::getT2)).map(v -> b.velocity(v).build()));
         }
 

@@ -61,12 +61,22 @@ public class R2dbcAppDetailRepository {
 		if (entity.getRunningInstances() != null) {
 			spec = spec.value("running_instances",entity.getRunningInstances());
 		} else {
-			spec = spec.nullValue("running_instances", String.class);
+			spec = spec.nullValue("running_instances", Integer.class);
 		}
 		if (entity.getTotalInstances() != null) {
 			spec = spec.value("total_instances", entity.getTotalInstances());
 		} else {
-			spec = spec.nullValue("total_instances", String.class);
+			spec = spec.nullValue("total_instances", Integer.class);
+		}
+		if (entity.getMemoryUsage() != null) {
+			spec = spec.value("memory_used", entity.getMemoryUsage());
+		} else {
+			spec = spec.nullValue("memory_used", Long.class);
+		}
+		if (entity.getDiskUsage() != null) {
+			spec = spec.value("disk_used", entity.getDiskUsage());
+		} else {
+			spec = spec.nullValue("disk_used", Long.class);
 		}
 		if (entity.getUrls() != null) {
 			spec = spec.value("urls", String.join(",", entity.getUrls()));
@@ -116,7 +126,7 @@ public class R2dbcAppDetailRepository {
 	}
 
 	public Flux<AppDetail> findByDateRange(LocalDate start, LocalDate end) {
-		String sql = "select pk, organization, space, app_id, app_name, buildpack, image, stack, running_instances, total_instances, urls, last_pushed, last_event, last_event_actor, last_event_time, requested_state from application_detail where last_pushed <= " + settings.getBindPrefix() + 2 + " and last_pushed > " + settings.getBindPrefix() + 1 + " order by last_pushed desc";
+		String sql = "select pk, organization, space, app_id, app_name, buildpack, image, stack, running_instances, total_instances, memory_used, disk_used, urls, last_pushed, last_event, last_event_actor, last_event_time, requested_state from application_detail where last_pushed <= " + settings.getBindPrefix() + 2 + " and last_pushed > " + settings.getBindPrefix() + 1 + " order by last_pushed desc";
 		return client.execute().sql(sql)
 				.bind(settings.getBindPrefix() + 1, Timestamp.valueOf(LocalDateTime.of(end, LocalTime.MAX)))
 				.bind(settings.getBindPrefix() + 2, Timestamp.valueOf(LocalDateTime.of(start, LocalTime.MIDNIGHT)))
@@ -126,7 +136,7 @@ public class R2dbcAppDetailRepository {
 
 	public Mono<AppDetail> findByAppId(String appId) {
 		String index = settings.getBindPrefix() + 1;
-		String selectOne = "select pk, organization, space, app_id, app_name, buildpack, image, stack, running_instances, total_instances, urls, last_pushed, last_event, last_event_actor, last_event_time, requested_state from application_detail where app_id = " + index;
+		String selectOne = "select pk, organization, space, app_id, app_name, buildpack, image, stack, running_instances, total_instances, memory_used, disk_used, urls, last_pushed, last_event, last_event_actor, last_event_time, requested_state from application_detail where app_id = " + index;
 		return client.execute().sql(selectOne)
 						.bind(index, appId)
 						.map((row, metadata) -> fromRow(row))
@@ -140,7 +150,7 @@ public class R2dbcAppDetailRepository {
 	}
 
 	private Flux<Tuple2<AppDetail, ApplicationPolicy>> findApplicationsThatMayHaveServiceBindings(ApplicationPolicy policy) {
-		String select = "select pk, organization, space, app_id, app_name, buildpack, image, stack, running_instances, total_instances, urls, last_pushed, last_event, last_event_actor, last_event_time, requested_state";
+		String select = "select pk, organization, space, app_id, app_name, buildpack, image, stack, running_instances, total_instances, memory_used, disk_used, urls, last_pushed, last_event, last_event_actor, last_event_time, requested_state";
 		String from = "from application_detail";
 		StringBuilder where = new StringBuilder();
 		where.append("where requested_state = " + settings.getBindPrefix() + 1 + " ");
@@ -167,7 +177,7 @@ public class R2dbcAppDetailRepository {
 	private Flux<Tuple2<AppDetail, ApplicationPolicy>> findApplicationsThatDoNotHaveServiceBindings(ApplicationPolicy policy) {
 		String select =
 				"select ad.pk, ad.organization, ad.space, ad.app_id, ad.app_name, ad.buildpack, ad.image, " + 
-				"ad.stack, ad.running_instances, ad.total_instances, ad.urls, ad.last_pushed, ad.last_event, " + 
+				"ad.stack, ad.running_instances, ad.total_instances, ad.memory_used, ad.disk_used, ad.urls, ad.last_pushed, ad.last_event, " + 
 				"ad.last_event_actor, ad.last_event_time, ad.requested_state";
 		String from = "from application_detail ad";
 		String leftJoin = "left join application_relationship ar on ad.app_id = ar.app_id";
@@ -204,6 +214,8 @@ public class R2dbcAppDetailRepository {
 					.buildpack(row.get("buildpack", String.class))
 					.runningInstances(row.get("running_instances", Integer.class))
 					.totalInstances(row.get("total_instances", Integer.class))
+					.memoryUsage(row.get("memory_used", Long.class))
+					.diskUsage(row.get("disk_used", Long.class))
 					.image(row.get("image", String.class))
 					.stack(row.get("stack", String.class))
 					.urls(row.get("urls", String.class) != null

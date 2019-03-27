@@ -26,6 +26,10 @@ public interface AppMetricsService {
 
 	Mono<Long> totalAnomalousApplicationInstances();
 
+	Mono<Double> totalMemoryUsed();
+
+	Mono<Double> totalDiskUsed();
+
 	Flux<Tuple2<String, Long>> totalVelocity();
 
 }
