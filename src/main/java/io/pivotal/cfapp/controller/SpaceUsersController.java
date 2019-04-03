@@ -45,12 +45,15 @@ public class SpaceUsersController {
 	}
 
 	@GetMapping("/users/count")
-	public Mono<Integer> getUserCount() {
-		return service.count();
+	public Mono<ResponseEntity<Integer>> getUserCount() {
+		return service.count()
+						.map(c -> ResponseEntity.ok(c));
 	}
 
 	@GetMapping("/users")
-	public Mono<Set<String>> getUniqueUsernames() {
-		return service.obtainUniqueUsernames();
+	public Mono<ResponseEntity<Set<String>>> getUniqueUsernames() {
+		return service.obtainUniqueUsernames()
+						.map(names -> ResponseEntity.ok(names))
+						.defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
 	}
 }
