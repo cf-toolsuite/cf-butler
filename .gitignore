@@ -27,7 +27,9 @@ logs/
 
 ### Visual Studio Code ###
 .vscode
+.history/
 
 ### User config
 config/secrets*.json
+config/application-*.yml
 src/main/resources/application-*.yml

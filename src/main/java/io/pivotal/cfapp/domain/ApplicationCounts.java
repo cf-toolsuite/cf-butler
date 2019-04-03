@@ -23,19 +23,19 @@ import lombok.ToString;
 public class ApplicationCounts {
 
     @JsonProperty("by-organization")
-    private Map<String,Long> byOrganization;
+    private Map<String, Long> byOrganization;
 
     @JsonProperty("by-buildpack")
-    private Map<String,Long> byBuildpack;
+    private Map<String, Long> byBuildpack;
 
     @JsonProperty("by-stack")
-    private Map<String,Long> byStack;
+    private Map<String, Long> byStack;
 
     @JsonProperty("by-dockerimage")
-    private Map<String,Long> byDockerImage;
+    private Map<String, Long> byDockerImage;
 
     @JsonProperty("by-status")
-    private Map<String,Long> byStatus;
+    private Map<String, Long> byStatus;
 
     @JsonProperty("total-applications")
     private Long totalApplications;
@@ -59,5 +59,5 @@ public class ApplicationCounts {
     private Double totalDiskUsed;
 
     @JsonProperty("velocity")
-    private Map<String,Long> velocity;
+    private Map<String, Long> velocity;
 }

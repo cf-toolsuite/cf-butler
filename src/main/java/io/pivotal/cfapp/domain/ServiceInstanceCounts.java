@@ -21,10 +21,10 @@ import lombok.ToString;
 public class ServiceInstanceCounts {
 
     @JsonProperty("by-organization")
-    private Map<String,Long> byOrganization;
+    private Map<String, Long> byOrganization;
 
     @JsonProperty("by-service")
-    private Map<String,Long> byService;
+    private Map<String, Long> byService;
 
     @JsonProperty("by-service-and-plan")
     private Map<String, Long> byServiceAndPlan;
@@ -33,5 +33,5 @@ public class ServiceInstanceCounts {
     private Long totalServiceInstances;
 
     @JsonProperty("velocity")
-    private Map<String,Long> velocity;
+    private Map<String, Long> velocity;
 }

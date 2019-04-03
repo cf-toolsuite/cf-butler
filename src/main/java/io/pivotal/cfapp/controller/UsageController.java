@@ -38,7 +38,7 @@ public class UsageController {
         return service.getApplicationReport();
     }
 
-    @GetMapping(value = "accounting/services", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "accounting/services")
     public Mono<ServiceUsageReport> getServiceReport() {
         return service.getServiceReport();
     }
