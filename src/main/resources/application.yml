@@ -27,12 +27,6 @@ cf:
     #commit:
     #filePaths:
 
-logging:
-  level:
-    org.springframework: WARN
-    #io.r2dbc: DEBUG
-    #reactor.core: DEBUG
-
 # Set schedule for this task to adhere to
 # @see https://crontab.guru for help, first parameter is seconds
 cron:
