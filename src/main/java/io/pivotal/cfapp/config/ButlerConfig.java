@@ -37,6 +37,7 @@ public class ButlerConfig {
                 .builder()
                     .apiHost(settings.getApiHost())
                     .skipSslValidation(settings.isSslValidationSkipped())
+                    .connectionPoolSize(settings.getConnectionPoolSize())
                     .build();
     }
 

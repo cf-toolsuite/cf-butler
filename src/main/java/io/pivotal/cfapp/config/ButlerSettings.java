@@ -18,13 +18,12 @@ public class ButlerSettings {
 	private static final Set<String> DEFAULT_BLACKLIST = Set.of(SYSTEM_ORG);
 
     private String apiHost;
-    private boolean sslValidationSkipped;
+	private boolean sslValidationSkipped;
+	private Integer connectionPoolSize;
     private String username;
     private String password;
     // this is the value of RefreshToken within ~/.cf/config.json after one authenticates w/ cf login -a {api_endpoint} -sso
     private String refreshToken;
-	// use cf oauth-token to obtain this value
-	private String oauthToken;
 	private Set<String> organizationBlackList;
 
     public Set<String> getOrganizationBlackList() {

@@ -18,6 +18,7 @@ cf:
   username: replace_me
   password: replace_me
   sslValidationSkipped: false
+  connectionPoolSize: 8
   organizationBlackList:
     - system
   policies:
@@ -72,6 +73,7 @@ cf:
   username: ${vcap.services.cf-butler-secrets.credentials.CF_USERNAME}
   password: ${vcap.services.cf-butler-secrets.credentials.CF_PASSWORD}
   sslValidationSkipped: ${vcap.services.cf-butler-secrets.credentials.CF_SKIP_SSL_VALIDATION:false}
+  connectionPoolSize: ${vcap.services.cf-butler-secrets.credentials.CF_CONNECTION_POOLSIZE:8}
   refreshToken: ${vcap.services.cf-butler-secrets.credentials.CF_REFRESH-TOKEN}
   organizationBlackList: ${vcap.services.cf-butler-secrets.credentials.CF_ORGANIZATION-BLACK-LIST}
   policies:
