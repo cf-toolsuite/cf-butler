@@ -50,12 +50,13 @@ public class UsageService {
         Assert.notNull(end, "End of date range must be specified!");
         Assert.isTrue(end.isAfter(start), "Date range is invalid!");
         String uri = settings.getUsageDomain() + "/organizations/{orgGuid}/{usageType}?start={start}&end={end}";
-        return webClient
-                .get()
-                    .uri(uri, orgGuid, usageType, start.toString(), end.toString())
-                    .header(HttpHeaders.AUTHORIZATION, settings.getOauthToken())
-                        .retrieve()
-                            .bodyToMono(String.class);
+        return getOauthToken()
+                .flatMap(t -> webClient
+                                .get()
+                                    .uri(uri, orgGuid, usageType, start.toString(), end.toString())
+                                    .header(HttpHeaders.AUTHORIZATION, t)
+                                        .retrieve()
+                                            .bodyToMono(String.class));
     }
 
     public Mono<String> getTaskUsage(String orgGuid, LocalDate start, LocalDate end) {
