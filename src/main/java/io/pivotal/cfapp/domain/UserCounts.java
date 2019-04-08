@@ -11,6 +11,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import lombok.Builder.Default;
 
 @Builder
 @AllArgsConstructor(access=AccessLevel.PACKAGE)
@@ -23,6 +24,7 @@ public class UserCounts {
     @JsonProperty("by-organization")
     private Map<String, Integer> byOrganization;
 
+    @Default
     @JsonProperty("total-users")
-    private Integer totalUsers;
+    private Integer totalUsers = 0;
 }

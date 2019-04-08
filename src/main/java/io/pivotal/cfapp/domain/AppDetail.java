@@ -14,6 +14,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import lombok.Builder.Default;
 
 @Builder
 @AllArgsConstructor(access=AccessLevel.PACKAGE)
@@ -32,10 +33,14 @@ public class AppDetail {
 	private String buildpack;
 	private String image;
 	private String stack;
-	private Integer runningInstances;
-	private Integer totalInstances;
-	private Long memoryUsage;
-	private Long diskUsage;
+	@Default
+	private Integer runningInstances = 0;
+	@Default
+	private Integer totalInstances = 0;
+	@Default
+	private Long memoryUsage = 0L;
+	@Default
+	private Long diskUsage = 0L;
 	private List<String> urls;
 	private LocalDateTime lastPushed;
 	private String lastEvent;
