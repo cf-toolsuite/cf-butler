@@ -11,6 +11,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import lombok.Builder.Default;
 
 @Builder
 @AllArgsConstructor(access=AccessLevel.PACKAGE)
@@ -37,26 +38,33 @@ public class ApplicationCounts {
     @JsonProperty("by-status")
     private Map<String, Long> byStatus;
 
+    @Default
     @JsonProperty("total-applications")
-    private Long totalApplications;
+    private Long totalApplications = 0L;
 
+    @Default
     @JsonProperty("total-running-application-instances")
-    private Long totalRunningApplicationInstances;
+    private Long totalRunningApplicationInstances = 0L;
 
+    @Default
     @JsonProperty("total-stopped-application-instances")
-    private Long totalStoppedApplicationInstances;
+    private Long totalStoppedApplicationInstances = 0L;
 
+    @Default
     @JsonProperty("total-anomalous-application-instances")
-    private Long totalAnomalousApplicationInstances;
+    private Long totalAnomalousApplicationInstances = 0L;
 
+    @Default
     @JsonProperty("total-application-instances")
-    private Long totalApplicationInstances;
+    private Long totalApplicationInstances = 0L;
 
+    @Default
     @JsonProperty("total-memory-used-in-gb")
-    private Double totalMemoryUsed;
+    private Double totalMemoryUsed = 0.0;
 
+    @Default
     @JsonProperty("total-disk-used-in-gb")
-    private Double totalDiskUsed;
+    private Double totalDiskUsed = 0.0;
 
     @JsonProperty("velocity")
     private Map<String, Long> velocity;
