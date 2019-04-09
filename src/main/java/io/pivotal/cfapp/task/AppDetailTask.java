@@ -129,10 +129,10 @@ public class AppDetailTask implements ApplicationRunner {
         return builder
             .image(request.getImage())
             .stack(a.getStack())
-            .runningInstances(a.getRunningInstances())
-            .totalInstances(a.getInstances())
-            .diskUsage(a.getInstanceDetails().stream().mapToLong(id -> id.getDiskUsage()).sum())
-            .memoryUsage(a.getInstanceDetails().stream().mapToLong(id -> id.getMemoryUsage()).sum())
+            .runningInstances(nullSafeInteger(a.getRunningInstances()))
+            .totalInstances(nullSafeInteger(a.getInstances()))
+            .diskUsage(a.getInstanceDetails().stream().mapToLong(id -> nullSafeLong(id.getDiskUsage())).sum())
+            .memoryUsage(a.getInstanceDetails().stream().mapToLong(id -> nullSafeLong(id.getMemoryUsage())).sum())
             .urls(a.getUrls())
             .lastPushed(a.getLastUploaded() != null ? a.getLastUploaded()
                         .toInstant()
@@ -165,5 +165,13 @@ public class AppDetailTask implements ApplicationRunner {
                                            .build()
                            )
                        .switchIfEmpty(Mono.just(detail));
+    }
+
+    private Long nullSafeLong(Long input) {
+        return input != null ? input: 0L;
+    }
+
+    private Integer nullSafeInteger(Integer input) {
+        return input != null ? input: 0;
     }
 }
