@@ -9,8 +9,8 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import io.pivotal.cfapp.domain.UserRequest;
 import io.pivotal.cfapp.domain.SpaceUsers;
+import io.pivotal.cfapp.domain.UserRequest;
 import io.pivotal.cfapp.service.SpaceUsersService;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Hooks;
@@ -19,7 +19,7 @@ import reactor.core.publisher.Mono;
 @Component
 public class SpaceUsersTask implements ApplicationRunner {
 
-    private DefaultCloudFoundryOperations opsClient;
+	private DefaultCloudFoundryOperations opsClient;
     private SpaceUsersService service;
 
     @Autowired
@@ -90,8 +90,8 @@ public class SpaceUsersTask implements ApplicationRunner {
                             (ex, data) -> OperationsLogging.log("Could not obtain subset of users in space. " + ex.getMessage()))
                         .next()
                 		.map(su -> SpaceUsers
-                						.builder()
-                							.organization(request.getOrganization())
+                                        .builder()
+                                            .organization(request.getOrganization())
                 							.space(request.getSpaceName())
                 							.auditors(su.getAuditors())
                 							.managers(su.getManagers())

@@ -15,7 +15,6 @@ public class UserRequest {
     private String organization;
     private String spaceName;
 
-
     public static UserRequestBuilder from(UserRequest request) {
         return UserRequest
                 .builder()

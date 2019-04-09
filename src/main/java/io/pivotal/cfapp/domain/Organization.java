@@ -4,7 +4,10 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import lombok.EqualsAndHashCode;
+
 @JsonPropertyOrder({ "id", "name"})
+@EqualsAndHashCode
 public class Organization {
 
     @JsonProperty("id")
@@ -18,8 +21,8 @@ public class Organization {
     public Organization(
         @JsonProperty("id") String id,
         @JsonProperty("name") String name) {
-        this.id = id;
-        this.name = name;
+            this.id = id;
+            this.name = name;
     }
 
     public String getId() {

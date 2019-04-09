@@ -27,7 +27,7 @@ public class SpaceUsers {
 
 	@Id
 	@JsonIgnore
-    private Long pk;
+	private Long pk;
 	private String organization;
 	private String space;
 	private List<String> auditors;
