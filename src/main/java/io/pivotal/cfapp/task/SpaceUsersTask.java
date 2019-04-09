@@ -1,14 +1,15 @@
 package io.pivotal.cfapp.task;
 
+import java.util.List;
+
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.operations.useradmin.ListSpaceUsersRequest;
 import org.cloudfoundry.operations.util.OperationsLogging;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
+import io.pivotal.cfapp.domain.Space;
 import io.pivotal.cfapp.domain.SpaceUsers;
 import io.pivotal.cfapp.domain.UserRequest;
 import io.pivotal.cfapp.service.SpaceUsersService;
@@ -17,7 +18,7 @@ import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
 
 @Component
-public class SpaceUsersTask implements ApplicationRunner {
+public class SpaceUsersTask implements ApplicationListener<SpacesRetrievedEvent> {
 
 	private DefaultCloudFoundryOperations opsClient;
     private SpaceUsersService service;
@@ -31,44 +32,19 @@ public class SpaceUsersTask implements ApplicationRunner {
     }
 
     @Override
-    public void run(ApplicationArguments args) throws Exception {
-        collect();
+    public void onApplicationEvent(SpacesRetrievedEvent event) {
+        collect(event.getSpaces());
     }
 
-
-    protected void collect() {
-        Hooks.onOperatorDebug();
-        service
+    public void collect(List<Space> spaces) {
+    	Hooks.onOperatorDebug();
+    	service
             .deleteAll()
-            .thenMany(getOrganizations())
-            .flatMap(spaceRequest -> getSpaces(spaceRequest))
+            .thenMany(Flux.fromIterable(spaces))
+            .map(s -> UserRequest.builder().organization(s.getOrganization()).spaceName(s.getSpace()).build())
             .flatMap(spaceUsersRequest -> getSpaceUsers(spaceUsersRequest))
             .flatMap(service::save)
             .subscribe();
-    }
-
-    @Scheduled(cron = "${cron.collection}")
-    protected void runTask() {
-        collect();
-    }
-
-    protected Flux<UserRequest> getOrganizations() {
-        return DefaultCloudFoundryOperations.builder()
-            .from(opsClient)
-            .build()
-                .organizations()
-                    .list()
-                    .map(os -> UserRequest.builder().organization(os.getName()).build());
-    }
-
-    protected Flux<UserRequest> getSpaces(UserRequest request) {
-        return DefaultCloudFoundryOperations.builder()
-            .from(opsClient)
-            .organization(request.getOrganization())
-            .build()
-                .spaces()
-                    .list()
-                    .map(ss -> UserRequest.from(request).spaceName(ss.getName()).build());
     }
 
     protected Mono<SpaceUsers> getSpaceUsers(UserRequest request) {

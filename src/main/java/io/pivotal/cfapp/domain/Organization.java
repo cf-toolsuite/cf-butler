@@ -4,12 +4,15 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import org.springframework.data.annotation.Id;
+
 import lombok.EqualsAndHashCode;
 
 @JsonPropertyOrder({ "id", "name"})
 @EqualsAndHashCode
 public class Organization {
 
+    @Id
     @JsonProperty("id")
     private final String id;
 

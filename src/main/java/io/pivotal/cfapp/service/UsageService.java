@@ -73,19 +73,19 @@ public class UsageService {
 
     public Flux<String> getTaskUsage(LocalDate start, LocalDate end) {
         return orgService
-                .getOrganizations()
+                .findAll()
                     .flatMap(o -> getTaskUsage(o.getId(), start, end));
     }
 
     public Flux<String> getApplicationUsage(LocalDate start, LocalDate end) {
         return orgService
-                .getOrganizations()
+                .findAll()
                 .flatMap(o -> getApplicationUsage(o.getId(), start, end));
     }
 
     public Flux<String> getServiceUsage(LocalDate start, LocalDate end) {
         return orgService
-                .getOrganizations()
+                .findAll()
                     .flatMap(o -> getServiceUsage(o.getId(), start, end));
     }
 
