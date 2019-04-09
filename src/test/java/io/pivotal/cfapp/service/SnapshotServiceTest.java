@@ -63,7 +63,7 @@ public class SnapshotServiceTest {
         StepVerifier.create(appService.deleteAll().then(appService.save(ad))).expectNext(ad).verifyComplete();
         ServiceInstanceDetail sid = ServiceInstanceDetail
                                     .builder()
-                                        .serviceId("bar-id")
+                                        .serviceInstanceId("bar-id")
                                         .name("bar")
                                         .service("MySQL")
                                         .description("The big kahuna")

@@ -36,10 +36,10 @@ public class R2dbcHistoricalRecordRepository {
 		} else {
 			spec = spec.nullValue("app_id", String.class);
 		}
-		if (entity.getServiceId() != null) {
-			spec = spec.value("service_id", entity.getServiceId());
+		if (entity.getServiceInstanceId() != null) {
+			spec = spec.value("service_instance_id", entity.getServiceInstanceId());
 		} else {
-			spec = spec.nullValue("service_id", String.class);
+			spec = spec.nullValue("service_instance_id", String.class);
 		}
 		spec = spec.value("type", entity.getType());
 		if (entity.getName() != null) {

@@ -27,7 +27,7 @@ public class HistoricalRecord {
 	private String organization;
 	private String space;
 	private String appId;
-	private String serviceId;
+	private String serviceInstanceId;
 	private String type;
 	private String name;
 
@@ -35,7 +35,7 @@ public class HistoricalRecord {
 		return String.join(",",
 				wrap(getTransactionDateTime() != null ? getTransactionDateTime().toString() : ""),
 				wrap(getActionTaken()), wrap(getOrganization()), wrap(getSpace()), wrap(getAppId()),
-				wrap(getServiceId()), wrap(getType()), wrap(getName()));
+				wrap(getServiceInstanceId()), wrap(getType()), wrap(getName()));
 	}
 
 	private String wrap(String value) {
@@ -44,7 +44,7 @@ public class HistoricalRecord {
 
 	public static String headers() {
         return String.join(",", "transaction date/time", "action taken", "organization", "space",
-                "application id", "service id", "type", "name");
+                "application id", "service instance id", "type", "name");
     }
 
 }

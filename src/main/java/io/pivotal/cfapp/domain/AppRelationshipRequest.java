@@ -14,7 +14,7 @@ public class AppRelationshipRequest {
 
     private String organization;
     private String space;
-    private String serviceId;
+    private String serviceInstanceId;
     private String serviceName;
     private String applicationId;
     private String applicationName;
@@ -24,7 +24,7 @@ public class AppRelationshipRequest {
                 .builder()
                     .organization(request.getOrganization())
                     .space(request.getSpace())
-                    .serviceId(request.getServiceId())
+                    .serviceInstanceId(request.getServiceInstanceId())
                     .serviceName(request.getServiceName())
                     .applicationId(request.getApplicationId())
                     .applicationName(request.getApplicationName());

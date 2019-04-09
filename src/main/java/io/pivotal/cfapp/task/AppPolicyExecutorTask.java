@@ -159,7 +159,7 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
 										.organization(relationship.getOrganization())
 										.space(relationship.getSpace())
 										.appId(relationship.getAppId())
-										.serviceId(relationship.getServiceId())
+										.serviceInstanceId(relationship.getServiceInstanceId())
 										.type("service-instance")
 										.name(serviceInstanceName(relationship))
 										.build()));
@@ -205,7 +205,7 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
 										.organization(relationship.getOrganization())
 										.space(relationship.getSpace())
 										.appId(relationship.getAppId())
-										.serviceId(relationship.getServiceId())
+										.serviceInstanceId(relationship.getServiceInstanceId())
 										.type("service-instance")
 										.name(serviceInstanceName(relationship))
 										.build()));

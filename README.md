@@ -497,7 +497,7 @@ Sample output
 Service inventory detail from api.sys.cf.zoo.labs.foo.org generated 2019-03-22T07:07:28.166022.
 
 
-organization,space,service id,name,service,description,plan,type,bound applications,last operation,last updated,dashboard url,requested state
+organization,space,service instance id,name,service,description,plan,type,bound applications,last operation,last updated,dashboard url,requested state
 "mvptime","default",,"reactive-cassy-secrets","credhub","Stores configuration parameters securely in CredHub","default","managed_service_instance","reactive-cassy","create","2018-11-20T00:00",,"succeeded"
 "planespotter","default",,"planespotter-vault","credhub","Stores configuration parameters securely in CredHub","default","managed_service_instance","planespotter-alpha","update","2019-03-21T00:00",,"succeeded"
 ```

@@ -36,7 +36,7 @@ public class R2dbcOrganizationRepository {
 	}
 
 	public Flux<Organization> findAll() {
-		String selectAll = "select id, org_name, from organizations order by org_name";
+		String selectAll = "select id, org_name from organizations order by org_name";
 		return client.execute().sql(selectAll).map((row, metadata) -> fromRow(row)).all();
 	}
 

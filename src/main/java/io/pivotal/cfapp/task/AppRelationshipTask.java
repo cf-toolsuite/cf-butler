@@ -74,7 +74,7 @@ public class AppRelationshipTask implements ApplicationListener<SpacesRetrievedE
                 .services()
                     .listInstances()
                     .map(ss -> AppRelationshipRequest.from(request)
-                    							.serviceId(ss.getId())
+                    							.serviceInstanceId(ss.getId())
                     							.serviceName(ss.getName() != null ? ss.getName(): "user_provided_service")
                     							.build());
     }
@@ -94,7 +94,7 @@ public class AppRelationshipTask implements ApplicationListener<SpacesRetrievedE
                                    .space(request.getSpace())
                                    .appId(request.getApplicationId())
                                    .appName(request.getApplicationName())
-                                   .serviceId(request.getServiceId())
+                                   .serviceInstanceId(request.getServiceInstanceId())
                                    .serviceName(request.getServiceName())
                                    .servicePlan(sd.getPlan())
                                    .serviceType(sd.getType() != null ? sd.getType().getValue(): "")
@@ -104,7 +104,7 @@ public class AppRelationshipTask implements ApplicationListener<SpacesRetrievedE
     protected Flux<AppRelationshipRequest> getServiceBoundApplicationIds(AppRelationshipRequest request) {
     	return cloudFoundryClient
 			.serviceBindingsV2()
-			.list(ListServiceBindingsRequest.builder().serviceInstanceId(request.getServiceId()).build())
+			.list(ListServiceBindingsRequest.builder().serviceInstanceId(request.getServiceInstanceId()).build())
 			.flux()
 			.flatMap(serviceBindingResponse -> Flux.fromIterable(serviceBindingResponse.getResources()))
 			.map(resource -> resource.getEntity())
