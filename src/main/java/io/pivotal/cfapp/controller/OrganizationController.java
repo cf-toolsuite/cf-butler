@@ -22,12 +22,12 @@ public class OrganizationController {
 
     @GetMapping("/organizations")
     public Flux<Organization> listAllOrganizations() {
-        return service.getOrganizations();
+        return service.findAll();
     }
 
     @GetMapping("/organizations/count")
     public Mono<Long> organizationsCount() {
-        return service.getOrganizations().count();
+        return service.findAll().count();
     }
 
 }

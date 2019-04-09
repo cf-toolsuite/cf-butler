@@ -1,26 +1,27 @@
 package io.pivotal.cfapp.task;
 
+import java.util.List;
+
 import org.cloudfoundry.client.v2.servicebindings.ListServiceBindingsRequest;
 import org.cloudfoundry.client.v3.applications.GetApplicationRequest;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.operations.services.GetServiceInstanceRequest;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 import io.pivotal.cfapp.domain.AppRelationship;
 import io.pivotal.cfapp.domain.AppRelationshipRequest;
+import io.pivotal.cfapp.domain.Space;
 import io.pivotal.cfapp.service.AppRelationshipService;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
 
 @Component
-public class AppRelationshipTask implements ApplicationRunner {
+public class AppRelationshipTask implements ApplicationListener<SpacesRetrievedEvent> {
 
     private DefaultCloudFoundryOperations opsClient;
     private ReactorCloudFoundryClient cloudFoundryClient;
@@ -41,16 +42,16 @@ public class AppRelationshipTask implements ApplicationRunner {
     }
 
     @Override
-    public void run(ApplicationArguments args) throws Exception {
-    	collect();
+    public void onApplicationEvent(SpacesRetrievedEvent event) {
+        collect(event.getSpaces());
     }
 
-    public void collect() {
+    public void collect(List<Space> spaces) {
     	Hooks.onOperatorDebug();
     	service
-	        .deleteAll()
-	        .thenMany(getOrganizations())
-	        .flatMap(spaceRequest -> getSpaces(spaceRequest))
+            .deleteAll()
+            .thenMany(Flux.fromIterable(spaces))
+            .map(s -> AppRelationshipRequest.builder().organization(s.getOrganization()).space(s.getSpace()).build())
 	        .flatMap(serviceSummaryRequest -> getServiceSummary(serviceSummaryRequest))
 	        .flatMap(serviceBoundAppIdsRequest -> getServiceBoundApplicationIds(serviceBoundAppIdsRequest))
 	        .flatMap(serviceBoundAppNamesRequest -> getServiceBoundApplicationNames(serviceBoundAppNamesRequest))
@@ -62,30 +63,6 @@ public class AppRelationshipTask implements ApplicationRunner {
 	                new AppRelationshipRetrievedEvent(this)
 	                    .relations(r)
 	        ));
-    }
-
-    @Scheduled(cron = "${cron.collection}")
-    protected void runTask() {
-        collect();
-    }
-
-	protected Flux<AppRelationshipRequest> getOrganizations() {
-        return DefaultCloudFoundryOperations.builder()
-            .from(opsClient)
-            .build()
-                .organizations()
-                    .list()
-                    .map(os -> AppRelationshipRequest.builder().organization(os.getName()).build());
-    }
-
-    protected Flux<AppRelationshipRequest> getSpaces(AppRelationshipRequest request) {
-        return DefaultCloudFoundryOperations.builder()
-            .from(opsClient)
-            .organization(request.getOrganization())
-            .build()
-                .spaces()
-                    .list()
-                    .map(s -> AppRelationshipRequest.from(request).space(s.getName()).build());
     }
 
     protected Flux<AppRelationshipRequest> getServiceSummary(AppRelationshipRequest request) {

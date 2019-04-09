@@ -6,30 +6,23 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.pivotal.cfapp.task.AppDetailTask;
-import io.pivotal.cfapp.task.ServiceInstanceDetailTask;
+import io.pivotal.cfapp.task.OrganizationsTask;
 import reactor.core.publisher.Mono;
 
 @Profile("test")
 @RestController
 public class OnDemandCollectorTriggerController {
 
-	private AppDetailTask appInfoCollector;
-	private ServiceInstanceDetailTask serviceInstanceInfoCollector;
+	private OrganizationsTask collector;
 
 	@Autowired
-	public OnDemandCollectorTriggerController(
-			AppDetailTask appInfoCollector,
-			ServiceInstanceDetailTask serviceInstanceInfoCollector
-			) {
-		this.appInfoCollector = appInfoCollector;
-		this.serviceInstanceInfoCollector = serviceInstanceInfoCollector;
+	public OnDemandCollectorTriggerController(OrganizationsTask collector) {
+		this.collector = collector;
 	}
 
 	@PostMapping("/collect")
 	public Mono<ResponseEntity<Void>> triggerCollection() {
-		appInfoCollector.collect();
-		serviceInstanceInfoCollector.collect();
+		collector.collect();
 		return Mono.just(ResponseEntity.accepted().build());
 	}
 

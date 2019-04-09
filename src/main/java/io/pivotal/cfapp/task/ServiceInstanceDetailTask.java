@@ -3,6 +3,7 @@ package io.pivotal.cfapp.task;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.cloudfoundry.client.v2.servicebindings.ListServiceBindingsRequest;
@@ -11,21 +12,20 @@ import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.operations.services.GetServiceInstanceRequest;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 import io.pivotal.cfapp.domain.ServiceInstanceDetail;
 import io.pivotal.cfapp.domain.ServiceRequest;
+import io.pivotal.cfapp.domain.Space;
 import io.pivotal.cfapp.service.ServiceInstanceDetailService;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
 
 @Component
-public class ServiceInstanceDetailTask implements ApplicationRunner {
+public class ServiceInstanceDetailTask implements ApplicationListener<SpacesRetrievedEvent> {
 
     private DefaultCloudFoundryOperations opsClient;
     private ReactorCloudFoundryClient cloudFoundryClient;
@@ -46,16 +46,16 @@ public class ServiceInstanceDetailTask implements ApplicationRunner {
     }
 
     @Override
-    public void run(ApplicationArguments args) throws Exception {
-    	collect();
+    public void onApplicationEvent(SpacesRetrievedEvent event) {
+        collect(event.getSpaces());
     }
 
-    public void collect() {
+    public void collect(List<Space> spaces) {
     	Hooks.onOperatorDebug();
     	service
-	        .deleteAll()
-	        .thenMany(getOrganizations())
-	        .flatMap(spaceRequest -> getSpaces(spaceRequest))
+            .deleteAll()
+            .thenMany(Flux.fromIterable(spaces))
+            .map(s -> ServiceRequest.builder().organization(s.getOrganization()).space(s.getSpace()).build())
 	        .flatMap(serviceSummaryRequest -> getServiceSummary(serviceSummaryRequest))
 	        .flatMap(serviceBoundAppIdsRequest -> getServiceBoundApplicationIds(serviceBoundAppIdsRequest))
 	        .flatMap(serviceBoundAppNamesRequest -> getServiceBoundApplicationNames(serviceBoundAppNamesRequest))
@@ -67,30 +67,6 @@ public class ServiceInstanceDetailTask implements ApplicationRunner {
 	                new ServiceInstanceDetailRetrievedEvent(this)
 	                    .detail(r)
         ));
-    }
-
-    @Scheduled(cron = "${cron.collection}")
-    protected void runTask() {
-        collect();
-    }
-
-    protected Flux<ServiceRequest> getOrganizations() {
-        return DefaultCloudFoundryOperations.builder()
-            .from(opsClient)
-            .build()
-                .organizations()
-                    .list()
-                    .map(os -> ServiceRequest.builder().organization(os.getName()).build());
-    }
-
-    protected Flux<ServiceRequest> getSpaces(ServiceRequest request) {
-        return DefaultCloudFoundryOperations.builder()
-            .from(opsClient)
-            .organization(request.getOrganization())
-            .build()
-                .spaces()
-                    .list()
-                    .map(s -> ServiceRequest.from(request).space(s.getName()).build());
     }
 
     protected Flux<ServiceRequest> getServiceSummary(ServiceRequest request) {
