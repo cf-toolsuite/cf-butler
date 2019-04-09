@@ -50,15 +50,15 @@ public class R2dbcSpaceUsersService implements SpaceUsersService {
 		final Set<String> usernames = new HashSet<>();
 		return repo
 				.findAll()
-				.map(su -> usernames.addAll(su.getUsers()))
-				.then(Mono.just(usernames))
-				.map(u -> usernames.size());
+					.map(su -> usernames.addAll(su.getUsers()))
+					.then(Mono.just(usernames))
+					.map(u -> usernames.size());
 	}
 
 	public Mono<Map<String, Integer>> countByOrganization() {
 		// a single user may belong to multiple orgs/spaces
 		// iterate spaces collecting unique usernames, ignore assigned roles
-		final Map<String,Set<String>> usernames = new HashMap<>();
+		final Map<String, Set<String>> usernames = new HashMap<>();
 		return repo
 				.findAll()
 					.map(su -> addOrgUsers(usernames, su.getOrganization(), su.getUsers()))
