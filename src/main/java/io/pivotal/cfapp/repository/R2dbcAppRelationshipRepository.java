@@ -38,7 +38,7 @@ public class R2dbcAppRelationshipRepository {
 		} else {
 			spec = spec.nullValue("app_name", String.class);
 		}
-		spec = spec.value("service_id", entity.getServiceId());
+		spec = spec.value("service_instance_id", entity.getServiceInstanceId());
 		if (entity.getServiceName() != null) {
 			spec = spec.value("service_name", entity.getServiceName());
 		} else {
@@ -67,7 +67,7 @@ public class R2dbcAppRelationshipRepository {
 
 	public Flux<AppRelationship> findByApplicationId(String applicationId) {
 		String index = settings.getBindPrefix() + 1;
-		String selectOne = "select pk, organization, space, app_id, app_name, service_id, service_name, service_plan, service_type from application_relationship where app_id = " + index + " order by organization, space, service_name";
+		String selectOne = "select pk, organization, space, app_id, app_name, service_instance_id, service_name, service_plan, service_type from application_relationship where app_id = " + index + " order by organization, space, service_name";
 		return client.execute().sql(selectOne)
 						.bind(index, applicationId)
 						.as(AppRelationship.class)

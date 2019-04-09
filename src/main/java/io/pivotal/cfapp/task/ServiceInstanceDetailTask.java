@@ -96,7 +96,7 @@ public class ServiceInstanceDetailTask implements ApplicationListener<SpacesRetr
                                .builder()
                                    .organization(request.getOrganization())
                                    .space(request.getSpace())
-                                   .serviceId(request.getId())
+                                   .serviceInstanceId(request.getId())
                                    .name(request.getServiceName())
                                    .service(sd.getService())
                                    .plan(sd.getPlan())

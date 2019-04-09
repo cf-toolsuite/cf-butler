@@ -36,7 +36,7 @@ public class R2dbcSpaceRepository {
 	}
 
 	public Flux<Space> findAll() {
-		String selectAll = "select org_name, space_name, from spaces order by org_name, space_name";
+		String selectAll = "select org_name, space_name from spaces order by org_name, space_name";
 		return client.execute().sql(selectAll).map((row, metadata) -> fromRow(row)).all();
 	}
 

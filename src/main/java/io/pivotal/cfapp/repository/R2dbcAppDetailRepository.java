@@ -176,13 +176,13 @@ public class R2dbcAppDetailRepository {
 
 	private Flux<Tuple2<AppDetail, ApplicationPolicy>> findApplicationsThatDoNotHaveServiceBindings(ApplicationPolicy policy) {
 		String select =
-				"select ad.pk, ad.organization, ad.space, ad.app_id, ad.app_name, ad.buildpack, ad.image, " + 
-				"ad.stack, ad.running_instances, ad.total_instances, ad.memory_used, ad.disk_used, ad.urls, ad.last_pushed, ad.last_event, " + 
+				"select ad.pk, ad.organization, ad.space, ad.app_id, ad.app_name, ad.buildpack, ad.image, " +
+				"ad.stack, ad.running_instances, ad.total_instances, ad.memory_used, ad.disk_used, ad.urls, ad.last_pushed, ad.last_event, " +
 				"ad.last_event_actor, ad.last_event_time, ad.requested_state";
 		String from = "from application_detail ad";
 		String leftJoin = "left join application_relationship ar on ad.app_id = ar.app_id";
 		StringBuilder where = new StringBuilder();
-		where.append("where ar.service_id is null and ad.requested_state = " + settings.getBindPrefix() + 1 + " ");
+		where.append("where ar.service_instance_id is null and ad.requested_state = " + settings.getBindPrefix() + 1 + " ");
 		Timestamp temporal = null;
 		if (policy.getFromDateTime() != null) {
 			where.append("and ad.last_event_time <= " + settings.getBindPrefix() + 2 + " ");

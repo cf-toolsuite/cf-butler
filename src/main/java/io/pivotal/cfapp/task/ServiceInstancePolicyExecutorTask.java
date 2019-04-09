@@ -86,7 +86,7 @@ public class ServiceInstancePolicyExecutorTask implements ApplicationRunner {
 										.actionTaken("delete")
 										.organization(sd.getOrganization())
 										.space(sd.getSpace())
-										.serviceId(sd.getServiceId())
+										.serviceInstanceId(sd.getServiceInstanceId())
 										.type("service-instance")
 										.name(String.join("__", sd.getName(), sd.getType(), sd.getPlan()))
 										.build()));
