@@ -14,7 +14,6 @@ import io.pivotal.cfapp.domain.SpaceUsers;
 import io.pivotal.cfapp.domain.UserRequest;
 import io.pivotal.cfapp.service.SpaceUsersService;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
 
 @Component
@@ -37,7 +36,6 @@ public class SpaceUsersTask implements ApplicationListener<SpacesRetrievedEvent>
     }
 
     public void collect(List<Space> spaces) {
-    	Hooks.onOperatorDebug();
     	service
             .deleteAll()
             .thenMany(Flux.fromIterable(spaces))

@@ -12,7 +12,6 @@ import io.pivotal.cfapp.domain.Organization;
 import io.pivotal.cfapp.domain.Space;
 import io.pivotal.cfapp.service.SpaceService;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Hooks;
 
 @Component
 public class SpacesTask implements ApplicationListener<OrganizationsRetrievedEvent> {
@@ -37,11 +36,10 @@ public class SpacesTask implements ApplicationListener<OrganizationsRetrievedEve
 	}
 
 	public void collect(List<Organization> organizations) {
-    	Hooks.onOperatorDebug();
         service
             .deleteAll()
 			.thenMany(Flux.fromIterable(organizations))
-			.flatMap(o -> getSpaces(o))
+            .flatMap(o -> getSpaces(o))
             .flatMap(service::save)
             .collectList()
             .subscribe(r ->

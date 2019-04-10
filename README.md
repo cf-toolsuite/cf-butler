@@ -264,6 +264,8 @@ Paste the value as the value for `CF_REFRESH-TOKEN` in your `config/secrets.json
 
 ### using scripts
 
+Please review the [manifest.yml](manifest.yml) before deploying.
+
 Deploy the app (w/ a user-provided service instance vending secrets)
 
 ```
@@ -282,10 +284,11 @@ Shutdown and destroy the app and service instances
 ./destroy.sh
 ```
 
+> Note: If you are seeing [OutOfMemory exceptions](https://dzone.com/articles/troubleshooting-problems-with-native-off-heap-memo) shortly after startup you may need to [cf scale](https://docs.run.pivotal.io/devguide/deploy-apps/cf-scale.html#vertical) the available memory for large foundations.
 
 ## Endpoints
 
-These REST endpoints have been exposed for administrative purposes.  
+These REST endpoints have been exposed for administrative purposes.
 
 ### Organization
 
@@ -503,6 +506,8 @@ organization,space,service instance id,name,service,description,plan,type,bound 
 ```
 
 ### Accounting
+
+> Note: `/accounting/**` endpoints below require a user with `cloud_controller.admin` or `usage_service.audit` scope.  See [Creating and Managing Users with the UAA CLI (UAAC)](https://docs.pivotal.io/pivotalcf/2-5/uaa/uaa-user-management.html).
 
 ```
 GET /accounting/applications

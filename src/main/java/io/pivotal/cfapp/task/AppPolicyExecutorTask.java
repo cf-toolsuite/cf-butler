@@ -26,7 +26,6 @@ import io.pivotal.cfapp.service.AppRelationshipService;
 import io.pivotal.cfapp.service.HistoricalRecordService;
 import io.pivotal.cfapp.service.PoliciesService;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
 
 @Component
@@ -62,7 +61,6 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
     }
 
     public void execute() {
-    	Hooks.onOperatorDebug();
     	deleteApplicationsWithNoServiceBindings()
 	    	.then(deleteApplicationsWithServiceBindingsButDoNotDeleteBoundServiceInstances())
 	    	.then(deleteApplicationsWithServiceBindingsAndDeleteBoundServiceInstances())

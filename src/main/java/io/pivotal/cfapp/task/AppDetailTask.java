@@ -1,5 +1,6 @@
 package io.pivotal.cfapp.task;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
@@ -8,6 +9,7 @@ import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.operations.applications.ApplicationDetail;
 import org.cloudfoundry.operations.applications.GetApplicationEventsRequest;
 import org.cloudfoundry.operations.applications.GetApplicationRequest;
+import org.cloudfoundry.operations.util.OperationsLogging;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
@@ -21,7 +23,6 @@ import io.pivotal.cfapp.domain.Buildpack;
 import io.pivotal.cfapp.domain.Space;
 import io.pivotal.cfapp.service.AppDetailService;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
 
 @Component
@@ -47,7 +48,6 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
     }
 
     public void collect(List<Space> spaces) {
-    	Hooks.onOperatorDebug();
         service
             .deleteAll()
             .thenMany(Flux.fromIterable(spaces))
@@ -56,7 +56,10 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
             .flatMap(appDetailRequest -> getApplicationDetail(appDetailRequest))
             .flatMap(withLastEventRequest -> enrichWithAppEvent(withLastEventRequest))
             .flatMap(service::save)
+            .onErrorContinue(Exception.class,
+                            (ex, data) -> OperationsLogging.log("Trouble processing application details >> " + ex.getMessage()))
             .collectList()
+            .timeout(Duration.ofMinutes(10))
             .subscribe(r ->
                 publisher.publishEvent(
                     new AppDetailRetrievedEvent(this)
@@ -76,9 +79,6 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
                     .map(as -> AppRequest.from(request).id(as.getId()).appName(as.getName()).build());
     }
 
-    // Added onErrorResume as per https://stackoverflow.com/questions/48243630/is-there-a-way-in-reactor-to-ignore-error-signals
-    // to address org.cloudfoundry.client.v2.ClientV2Exception: CF-NoAppDetectedError(170003): An app was not successfully detected by any available buildpack
-    // which results in some undesirable but tolerable data loss
     protected Mono<AppDetail> getApplicationDetail(AppRequest request) {
          return DefaultCloudFoundryOperations.builder()
             .from(opsClient)
@@ -87,7 +87,9 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
             .build()
                 .applications()
                     .get(GetApplicationRequest.builder().name(request.getAppName()).build())
-                    .onErrorResume(e -> Mono.empty())
+                    .onErrorContinue(
+                            Exception.class,
+                            (ex, data) -> OperationsLogging.log("Trouble fetching application details >> " + ex.getMessage()))
                     .map(a -> fromApplicationDetail(a, request));
     }
 

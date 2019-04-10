@@ -11,16 +11,16 @@ import org.springframework.data.annotation.Id;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Builder.Default;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
-import lombok.Builder.Default;
 
 @Builder
 @AllArgsConstructor(access=AccessLevel.PACKAGE)
 @NoArgsConstructor(access=AccessLevel.PACKAGE)
 @Getter
-@ToString
+@EqualsAndHashCode
 public class AppDetail {
 
 	@Id

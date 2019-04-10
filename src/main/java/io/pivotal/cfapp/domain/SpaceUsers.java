@@ -14,14 +14,14 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 @Data
 @Builder
 @AllArgsConstructor(access=AccessLevel.PACKAGE)
 @NoArgsConstructor(access=AccessLevel.PACKAGE)
-@ToString
+@EqualsAndHashCode
 @JsonPropertyOrder({"organization", "space", "auditors", "developers", "managers", "users", "user-count"})
 public class SpaceUsers {
 

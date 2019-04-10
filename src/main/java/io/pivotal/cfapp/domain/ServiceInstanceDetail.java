@@ -11,6 +11,7 @@ import org.springframework.data.annotation.Id;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -18,6 +19,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor(access=AccessLevel.PACKAGE)
 @NoArgsConstructor(access=AccessLevel.PACKAGE)
 @Getter
+@EqualsAndHashCode
 public class ServiceInstanceDetail {
 
 	@Id
