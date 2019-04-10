@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 import io.pivotal.cfapp.domain.Organization;
 import io.pivotal.cfapp.service.OrganizationService;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Hooks;
 
 @Component
 public class OrganizationsTask implements ApplicationRunner {
@@ -36,7 +35,6 @@ public class OrganizationsTask implements ApplicationRunner {
     }
 
     public void collect() {
-    	Hooks.onOperatorDebug();
         service
             .deleteAll()
             .thenMany(getOrganizations())

@@ -1,5 +1,6 @@
 package io.pivotal.cfapp.task;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -10,6 +11,7 @@ import org.cloudfoundry.client.v2.servicebindings.ListServiceBindingsRequest;
 import org.cloudfoundry.client.v3.applications.GetApplicationRequest;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.operations.services.GetServiceInstanceRequest;
+import org.cloudfoundry.operations.util.OperationsLogging;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -21,7 +23,6 @@ import io.pivotal.cfapp.domain.ServiceRequest;
 import io.pivotal.cfapp.domain.Space;
 import io.pivotal.cfapp.service.ServiceInstanceDetailService;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
 
 @Component
@@ -51,7 +52,6 @@ public class ServiceInstanceDetailTask implements ApplicationListener<SpacesRetr
     }
 
     public void collect(List<Space> spaces) {
-    	Hooks.onOperatorDebug();
     	service
             .deleteAll()
             .thenMany(Flux.fromIterable(spaces))
@@ -59,9 +59,12 @@ public class ServiceInstanceDetailTask implements ApplicationListener<SpacesRetr
 	        .flatMap(serviceSummaryRequest -> getServiceSummary(serviceSummaryRequest))
 	        .flatMap(serviceBoundAppIdsRequest -> getServiceBoundApplicationIds(serviceBoundAppIdsRequest))
 	        .flatMap(serviceBoundAppNamesRequest -> getServiceBoundApplicationNames(serviceBoundAppNamesRequest))
-	        .flatMap(serviceDetailRequest -> getServiceDetail(serviceDetailRequest))
-	        .flatMap(service::save)
-	        .collectList()
+            .flatMap(serviceDetailRequest -> getServiceDetail(serviceDetailRequest))
+            .flatMap(service::save)
+            .onErrorContinue(Exception.class,
+                            (ex, data) -> OperationsLogging.log("Trouble processing service instance details >> " + ex.getMessage()))
+            .collectList()
+            .timeout(Duration.ofMinutes(10))
 	        .subscribe(
 	            r -> publisher.publishEvent(
 	                new ServiceInstanceDetailRetrievedEvent(this)
@@ -71,57 +74,59 @@ public class ServiceInstanceDetailTask implements ApplicationListener<SpacesRetr
 
     protected Flux<ServiceRequest> getServiceSummary(ServiceRequest request) {
         return DefaultCloudFoundryOperations.builder()
-            .from(opsClient)
-            .organization(request.getOrganization())
-            .space(request.getSpace())
-            .build()
-                .services()
-                    .listInstances()
-                    .map(ss -> ServiceRequest.from(request)
-                    							.id(ss.getId())
-                    							.serviceName(ss.getName() != null ? ss.getName(): "user_provided_service")
-                    							.build());
+                .from(opsClient)
+                .organization(request.getOrganization())
+                .space(request.getSpace())
+                .build()
+                    .services()
+                        .listInstances()
+                        .map(ss -> ServiceRequest.from(request)
+                                                    .id(ss.getId())
+                                                    .serviceName(ss.getName() != null ? ss.getName(): "user_provided_service")
+                                                    .build());
     }
 
     protected Mono<ServiceInstanceDetail> getServiceDetail(ServiceRequest request) {
         return DefaultCloudFoundryOperations.builder()
-        	.from(opsClient)
-        	.organization(request.getOrganization())
-        	.space(request.getSpace())
-        	.build()
-               .services()
-                   .getInstance(GetServiceInstanceRequest.builder().name(request.getServiceName()).build())
-                   .onErrorResume(e -> Mono.empty())
-                   .map(sd -> ServiceInstanceDetail
-                               .builder()
-                                   .organization(request.getOrganization())
-                                   .space(request.getSpace())
-                                   .serviceInstanceId(request.getId())
-                                   .name(request.getServiceName())
-                                   .service(sd.getService())
-                                   .plan(sd.getPlan())
-                                   .description(sd.getDescription())
-                                   .type(sd.getType() != null ? sd.getType().getValue(): "")
-                                   .applications(request.getApplicationNames())
-                                   .lastOperation(sd.getLastOperation())
-                                   .lastUpdated(StringUtils.isNotBlank(sd.getUpdatedAt()) ? Instant.parse(sd.getUpdatedAt())
-                                               .atZone(ZoneId.systemDefault())
-                                               .toLocalDateTime() : LocalDateTime.MIN)
-                                   .dashboardUrl(sd.getDashboardUrl())
-                                   .requestedState(StringUtils.isNotBlank(sd.getUpdatedAt()) ? sd.getStatus().toLowerCase(): "")
-                                   .build());
+                .from(opsClient)
+                .organization(request.getOrganization())
+                .space(request.getSpace())
+                .build()
+                .services()
+                    .getInstance(GetServiceInstanceRequest.builder().name(request.getServiceName()).build())
+                    .onErrorContinue(
+                            Exception.class,
+                            (ex, data) -> OperationsLogging.log("Trouble fetching service instance details " + ex.getMessage()))
+                    .map(sd -> ServiceInstanceDetail
+                                .builder()
+                                    .organization(request.getOrganization())
+                                    .space(request.getSpace())
+                                    .serviceInstanceId(request.getId())
+                                    .name(sd.getName() != null ? sd.getName(): "user_provided_service")
+                                    .service(sd.getService())
+                                    .plan(sd.getPlan())
+                                    .description(sd.getDescription())
+                                    .type(sd.getType() != null ? sd.getType().getValue(): "")
+                                    .applications(request.getApplicationNames())
+                                    .lastOperation(sd.getLastOperation())
+                                    .lastUpdated(StringUtils.isNotBlank(sd.getUpdatedAt()) ? Instant.parse(sd.getUpdatedAt())
+                                                .atZone(ZoneId.systemDefault())
+                                                .toLocalDateTime() : LocalDateTime.MIN)
+                                    .dashboardUrl(sd.getDashboardUrl())
+                                    .requestedState(StringUtils.isNotBlank(sd.getUpdatedAt()) ? sd.getStatus().toLowerCase(): "")
+                                    .build());
     }
 
     protected Mono<ServiceRequest> getServiceBoundApplicationIds(ServiceRequest request) {
     	return cloudFoundryClient
-			.serviceBindingsV2()
-			.list(ListServiceBindingsRequest.builder().serviceInstanceId(request.getId()).build())
-			.flux()
-			.flatMap(serviceBindingResponse -> Flux.fromIterable(serviceBindingResponse.getResources()))
-			.map(resource -> resource.getEntity())
-			.map(entity -> entity.getApplicationId())
-    		.collectList()
-    		.map(i -> ServiceRequest.from(request).applicationIds(i).build());
+                .serviceBindingsV2()
+                    .list(ListServiceBindingsRequest.builder().serviceInstanceId(request.getId()).build())
+                    .flux()
+                    .flatMap(serviceBindingResponse -> Flux.fromIterable(serviceBindingResponse.getResources()))
+                    .map(resource -> resource.getEntity())
+                    .map(entity -> entity.getApplicationId())
+                    .collectList()
+                    .map(i -> ServiceRequest.from(request).applicationIds(i).build());
     }
 
     protected Mono<ServiceRequest> getServiceBoundApplicationNames(ServiceRequest request) {

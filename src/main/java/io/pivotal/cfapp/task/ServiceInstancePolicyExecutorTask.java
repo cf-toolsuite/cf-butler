@@ -21,7 +21,6 @@ import io.pivotal.cfapp.service.HistoricalRecordService;
 import io.pivotal.cfapp.service.PoliciesService;
 import io.pivotal.cfapp.service.ServiceInstanceDetailService;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
 
 @Component
@@ -54,7 +53,6 @@ public class ServiceInstancePolicyExecutorTask implements ApplicationRunner {
     }
 
     public void execute() {
-    	Hooks.onOperatorDebug();
     	policiesService
 	        .findAll()
 	        .flux()
