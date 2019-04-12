@@ -1,6 +1,6 @@
 package io.pivotal.cfapp.task;
 
-import java.time.Duration;
+import java.sql.SQLException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -22,9 +22,12 @@ import io.pivotal.cfapp.domain.ServiceInstanceDetail;
 import io.pivotal.cfapp.domain.ServiceRequest;
 import io.pivotal.cfapp.domain.Space;
 import io.pivotal.cfapp.service.ServiceInstanceDetailService;
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
+@Slf4j
 @Component
 public class ServiceInstanceDetailTask implements ApplicationListener<SpacesRetrievedEvent> {
 
@@ -48,7 +51,7 @@ public class ServiceInstanceDetailTask implements ApplicationListener<SpacesRetr
 
     @Override
     public void onApplicationEvent(SpacesRetrievedEvent event) {
-        collect(event.getSpaces());
+        collect(List.copyOf(event.getSpaces()));
     }
 
     public void collect(List<Space> spaces) {
@@ -60,15 +63,16 @@ public class ServiceInstanceDetailTask implements ApplicationListener<SpacesRetr
 	        .flatMap(serviceBoundAppIdsRequest -> getServiceBoundApplicationIds(serviceBoundAppIdsRequest))
 	        .flatMap(serviceBoundAppNamesRequest -> getServiceBoundApplicationNames(serviceBoundAppNamesRequest))
             .flatMap(serviceDetailRequest -> getServiceDetail(serviceDetailRequest))
+            .publishOn(Schedulers.parallel())
             .flatMap(service::save)
-            .onErrorContinue(Exception.class,
-                            (ex, data) -> OperationsLogging.log("Trouble processing service instance details >> " + ex.getMessage()))
-            .collectList()
-            .timeout(Duration.ofMinutes(10))
-	        .subscribe(
-	            r -> publisher.publishEvent(
-	                new ServiceInstanceDetailRetrievedEvent(this)
-	                    .detail(r)
+            .onErrorContinue(
+                (ex, data) -> log.error("Problem saving service instance {}.", data != null ? data.toString(): "<>", ex))
+            .thenMany(service.findAll().subscribeOn(Schedulers.elastic()))
+                .collectList()
+                .subscribe(
+                    r -> publisher.publishEvent(
+                        new ServiceInstanceDetailRetrievedEvent(this)
+                            .detail(r)
         ));
     }
 
@@ -126,7 +130,7 @@ public class ServiceInstanceDetailTask implements ApplicationListener<SpacesRetr
                     .map(resource -> resource.getEntity())
                     .map(entity -> entity.getApplicationId())
                     .collectList()
-                    .map(i -> ServiceRequest.from(request).applicationIds(i).build());
+                    .map(ids -> ServiceRequest.from(request).applicationIds(ids).build());
     }
 
     protected Mono<ServiceRequest> getServiceBoundApplicationNames(ServiceRequest request) {
@@ -138,7 +142,7 @@ public class ServiceInstanceDetailTask implements ApplicationListener<SpacesRetr
     					.get(GetApplicationRequest.builder().applicationId(appId).build())
     					.map(response -> response.getName()))
     					.collectList()
-    					.map(n -> ServiceRequest.from(request).applicationNames(n).build());
+    					.map(names -> ServiceRequest.from(request).applicationNames(names).build());
     }
 
 }
