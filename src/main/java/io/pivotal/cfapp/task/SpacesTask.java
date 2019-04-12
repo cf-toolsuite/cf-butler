@@ -12,6 +12,7 @@ import io.pivotal.cfapp.domain.Organization;
 import io.pivotal.cfapp.domain.Space;
 import io.pivotal.cfapp.service.SpaceService;
 import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Schedulers;
 
 @Component
 public class SpacesTask implements ApplicationListener<OrganizationsRetrievedEvent> {
@@ -32,7 +33,7 @@ public class SpacesTask implements ApplicationListener<OrganizationsRetrievedEve
 
 	@Override
 	public void onApplicationEvent(OrganizationsRetrievedEvent event) {
-		collect(event.getOrganizations());
+		collect(List.copyOf(event.getOrganizations()));
 	}
 
 	public void collect(List<Organization> organizations) {
@@ -40,14 +41,16 @@ public class SpacesTask implements ApplicationListener<OrganizationsRetrievedEve
             .deleteAll()
 			.thenMany(Flux.fromIterable(organizations))
             .flatMap(o -> getSpaces(o))
+            .publishOn(Schedulers.parallel())
             .flatMap(service::save)
-            .collectList()
-            .subscribe(r ->
-                publisher.publishEvent(
-                    new SpacesRetrievedEvent(this)
-                        .spaces(r)
-                )
-            );
+            .thenMany(service.findAll().subscribeOn(Schedulers.elastic()))
+                .collectList()
+                .subscribe(r ->
+                    publisher.publishEvent(
+                        new SpacesRetrievedEvent(this)
+                            .spaces(r)
+                    )
+                );
     }
 
     protected Flux<Space> getSpaces(Organization organization) {

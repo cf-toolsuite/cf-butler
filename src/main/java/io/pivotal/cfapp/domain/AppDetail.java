@@ -1,6 +1,7 @@
 package io.pivotal.cfapp.domain;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -15,12 +16,14 @@ import lombok.Builder.Default;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Builder
 @AllArgsConstructor(access=AccessLevel.PACKAGE)
 @NoArgsConstructor(access=AccessLevel.PACKAGE)
 @Getter
 @EqualsAndHashCode
+@ToString
 public class AppDetail {
 
 	@Id
@@ -51,8 +54,10 @@ public class AppDetail {
 	public String toCsv() {
 		return String.join(",", wrap(getOrganization()), wrap(getSpace()), wrap(getAppId()), wrap(getAppName()),
 				wrap(getBuildpack()), wrap(getImage()), wrap(getStack()), wrap(String.valueOf(getRunningInstances())),
-				wrap(String.valueOf(getTotalInstances())), wrap(Double.toString(toGigabytes(getMemoryUsage()))), wrap(Double.toString(toGigabytes(getDiskUsage()))), 
-				(wrap(String.join(",", getUrls()))), wrap(getLastPushed() != null ? getLastPushed().toString() : ""), wrap(getLastEvent()),
+				wrap(String.valueOf(getTotalInstances())), wrap(Double.toString(toGigabytes(getMemoryUsage()))),
+				wrap(Double.toString(toGigabytes(getDiskUsage()))),
+				(wrap(String.join(",", getUrls() != null ? getUrls(): Collections.emptyList()))),
+				wrap(getLastPushed() != null ? getLastPushed().toString() : ""), wrap(getLastEvent()),
 				wrap(getLastEventActor()), wrap(getLastEventTime() != null ? getLastEventTime().toString() : ""),
 				wrap(getRequestedState()));
 	}

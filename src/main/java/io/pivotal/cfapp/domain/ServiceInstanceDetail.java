@@ -1,6 +1,7 @@
 package io.pivotal.cfapp.domain;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -14,12 +15,14 @@ import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Builder
 @AllArgsConstructor(access=AccessLevel.PACKAGE)
 @NoArgsConstructor(access=AccessLevel.PACKAGE)
 @Getter
 @EqualsAndHashCode
+@ToString
 public class ServiceInstanceDetail {
 
 	@Id
@@ -42,7 +45,7 @@ public class ServiceInstanceDetail {
 	public String toCsv() {
 		return String.join(",", wrap(getOrganization()), wrap(getSpace()), wrap(getServiceInstanceId()), wrap(getName()),
 				wrap(getService()), wrap(getDescription()), wrap(getPlan()), wrap(getType()),
-				wrap(String.join(",", getApplications())), wrap(getLastOperation()),
+				wrap(String.join(",", getApplications() != null ? getApplications(): Collections.emptyList())), wrap(getLastOperation()),
 				wrap(getLastUpdated() != null ? getLastUpdated().toString() : ""), wrap(getDashboardUrl()),
 				wrap(getRequestedState()));
 	}

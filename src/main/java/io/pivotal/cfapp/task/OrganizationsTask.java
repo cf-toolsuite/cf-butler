@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import io.pivotal.cfapp.domain.Organization;
 import io.pivotal.cfapp.service.OrganizationService;
 import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Schedulers;
 
 @Component
 public class OrganizationsTask implements ApplicationRunner {
@@ -38,14 +39,16 @@ public class OrganizationsTask implements ApplicationRunner {
         service
             .deleteAll()
             .thenMany(getOrganizations())
+            .publishOn(Schedulers.parallel())
             .flatMap(service::save)
-            .collectList()
-            .subscribe(r ->
-                publisher.publishEvent(
-                    new OrganizationsRetrievedEvent(this)
-                        .organizations(r)
-                )
-            );
+            .thenMany(service.findAll().subscribeOn(Schedulers.elastic()))
+                .collectList()
+                .subscribe(r ->
+                    publisher.publishEvent(
+                        new OrganizationsRetrievedEvent(this)
+                            .organizations(r)
+                    )
+                );
     }
 
     @Scheduled(cron = "${cron.collection}")

@@ -1,6 +1,5 @@
 package io.pivotal.cfapp.task;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
@@ -9,7 +8,6 @@ import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.operations.applications.ApplicationDetail;
 import org.cloudfoundry.operations.applications.GetApplicationEventsRequest;
 import org.cloudfoundry.operations.applications.GetApplicationRequest;
-import org.cloudfoundry.operations.util.OperationsLogging;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
@@ -24,6 +22,7 @@ import io.pivotal.cfapp.domain.Space;
 import io.pivotal.cfapp.service.AppDetailService;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 @Component
 public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> {
@@ -44,7 +43,7 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
 
     @Override
     public void onApplicationEvent(SpacesRetrievedEvent event) {
-        collect(event.getSpaces());
+        collect(List.copyOf(event.getSpaces()));
     }
 
     public void collect(List<Space> spaces) {
@@ -55,17 +54,15 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
             .flatMap(appSummaryRequest -> getApplicationSummary(appSummaryRequest))
             .flatMap(appDetailRequest -> getApplicationDetail(appDetailRequest))
             .flatMap(withLastEventRequest -> enrichWithAppEvent(withLastEventRequest))
+            .publishOn(Schedulers.parallel())
             .flatMap(service::save)
-            .onErrorContinue(Exception.class,
-                            (ex, data) -> OperationsLogging.log("Trouble processing application details >> " + ex.getMessage()))
-            .collectList()
-            .timeout(Duration.ofMinutes(10))
-            .subscribe(r ->
-                publisher.publishEvent(
-                    new AppDetailRetrievedEvent(this)
-                        .detail(r)
-                )
-            );
+            .thenMany(service.findAll().subscribeOn(Schedulers.elastic()))
+                .collectList()
+                .subscribe(r ->
+                    publisher.publishEvent(
+                        new AppDetailRetrievedEvent(this)
+                            .detail(r)
+                ));
     }
 
     protected Flux<AppRequest> getApplicationSummary(AppRequest request) {
@@ -87,9 +84,7 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
             .build()
                 .applications()
                     .get(GetApplicationRequest.builder().name(request.getAppName()).build())
-                    .onErrorContinue(
-                            Exception.class,
-                            (ex, data) -> OperationsLogging.log("Trouble fetching application details >> " + ex.getMessage()))
+                    .onErrorResume(err -> Mono.empty())
                     .map(a -> fromApplicationDetail(a, request));
     }
 

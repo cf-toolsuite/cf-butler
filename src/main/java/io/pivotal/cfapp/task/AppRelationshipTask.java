@@ -6,7 +6,6 @@ import org.cloudfoundry.client.v2.servicebindings.ListServiceBindingsRequest;
 import org.cloudfoundry.client.v3.applications.GetApplicationRequest;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.operations.services.GetServiceInstanceRequest;
-import org.cloudfoundry.operations.util.OperationsLogging;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -19,6 +18,7 @@ import io.pivotal.cfapp.domain.Space;
 import io.pivotal.cfapp.service.AppRelationshipService;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 @Component
 public class AppRelationshipTask implements ApplicationListener<SpacesRetrievedEvent> {
@@ -43,7 +43,7 @@ public class AppRelationshipTask implements ApplicationListener<SpacesRetrievedE
 
     @Override
     public void onApplicationEvent(SpacesRetrievedEvent event) {
-        collect(event.getSpaces());
+        collect(List.copyOf(event.getSpaces()));
     }
 
     public void collect(List<Space> spaces) {
@@ -55,13 +55,15 @@ public class AppRelationshipTask implements ApplicationListener<SpacesRetrievedE
 	        .flatMap(serviceBoundAppIdsRequest -> getServiceBoundApplicationIds(serviceBoundAppIdsRequest))
 	        .flatMap(serviceBoundAppNamesRequest -> getServiceBoundApplicationNames(serviceBoundAppNamesRequest))
             .flatMap(appRelationshipRequest -> getAppRelationship(appRelationshipRequest))
-	        .flatMap(service::save)
-            .collectList()
-	        .subscribe(
-	            r -> publisher.publishEvent(
-	                new AppRelationshipRetrievedEvent(this)
-	                    .relations(r)
-	        ));
+            .publishOn(Schedulers.parallel())
+            .flatMap(service::save)
+            .thenMany(service.findAll().subscribeOn(Schedulers.elastic()))
+                .collectList()
+                .subscribe(
+                    r -> publisher.publishEvent(
+                        new AppRelationshipRetrievedEvent(this)
+                            .relations(r)
+                ));
     }
 
     protected Flux<AppRelationshipRequest> getServiceSummary(AppRelationshipRequest request) {
@@ -86,9 +88,6 @@ public class AppRelationshipTask implements ApplicationListener<SpacesRetrievedE
         	.build()
                .services()
                    .getInstance(GetServiceInstanceRequest.builder().name(request.getServiceName()).build())
-                   .onErrorContinue(
-                            Exception.class,
-                            (ex, data) -> OperationsLogging.log("Trouble fetching application/service instance relationship >> " + ex.getMessage()))
                    .map(sd -> AppRelationship
                                .builder()
                                    .organization(request.getOrganization())
