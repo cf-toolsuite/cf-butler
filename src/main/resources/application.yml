@@ -27,6 +27,35 @@ cf:
     #uri:
     #commit:
     #filePaths:
+  buildpacks: 
+    - apt
+    - binary
+    - clojure
+    - dotnet
+    - elixir
+    - emberjs
+    - erlang
+    - go
+    - haskell
+    - hwc
+    - java
+    - jboss
+    - jetty
+    - liberty
+    - meteor
+    - nginx
+    - nodejs
+    - php
+    - pyspark
+    - python
+    - ruby
+    - rust
+    - staticfile
+    - swift
+    - tc
+    - tomcat
+    - tomee
+    - weblogic
 
 # Set schedule for this task to adhere to
 # @see https://crontab.guru for help, first parameter is seconds
@@ -81,6 +110,7 @@ cf:
     uri: ${vcap.services.cf-butler-secrets.credentials.CF_POLICIES_URI}
     commit: ${vcap.services.cf-butler-secrets.credentials.CF_POLICIES_COMMIT}
     filePaths: ${vcap.services.cf-butler-secrets.credentials.CF_POLICIES_FILE-PATHS}
+  buildpacks: ${vcap.services.cf-butler-secrets.credentials.CF_BUILDPACKS}
 
 token:
   provider: ${vcap.services.cf-butler-secrets.credentials.TOKEN_PROVIDER}

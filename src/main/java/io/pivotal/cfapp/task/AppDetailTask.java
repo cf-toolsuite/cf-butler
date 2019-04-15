@@ -13,11 +13,10 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
+import io.pivotal.cfapp.config.ButlerSettings;
 import io.pivotal.cfapp.domain.AppDetail;
-import io.pivotal.cfapp.domain.AppDetail.AppDetailBuilder;
 import io.pivotal.cfapp.domain.AppEvent;
 import io.pivotal.cfapp.domain.AppRequest;
-import io.pivotal.cfapp.domain.Buildpack;
 import io.pivotal.cfapp.domain.Space;
 import io.pivotal.cfapp.service.AppDetailService;
 import reactor.core.publisher.Flux;
@@ -27,15 +26,18 @@ import reactor.core.scheduler.Schedulers;
 @Component
 public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> {
 
+    private ButlerSettings settings;
     private DefaultCloudFoundryOperations opsClient;
     private AppDetailService service;
     private ApplicationEventPublisher publisher;
 
     @Autowired
     public AppDetailTask(
+            ButlerSettings settings,
     		DefaultCloudFoundryOperations opsClient,
     		AppDetailService service,
     		ApplicationEventPublisher publisher) {
+        this.settings = settings;
         this.opsClient = opsClient;
         this.service = service;
         this.publisher = publisher;
@@ -104,7 +106,7 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
             .space(request.getSpace())
             .appId(request.getId())
             .appName(request.getAppName())
-            .buildpack(Buildpack.is(a.getBuildpack(), request.getImage()))
+            .buildpack(settings.getBuildpack(a.getBuildpack(), request.getImage()))
             .image(request.getImage())
             .stack(a.getStack())
             .runningInstances(nullSafeInteger(a.getRunningInstances()))
