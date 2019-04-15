@@ -52,6 +52,7 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
             .thenMany(Flux.fromIterable(spaces))
             .map(s -> AppRequest.builder().organization(s.getOrganization()).space(s.getSpace()).build())
             .flatMap(appSummaryRequest -> getApplicationSummary(appSummaryRequest))
+            .flatMap(appManifestRequest -> getDockerImage(appManifestRequest))
             .flatMap(appDetailRequest -> getApplicationDetail(appDetailRequest))
             .flatMap(withLastEventRequest -> enrichWithAppEvent(withLastEventRequest))
             .publishOn(Schedulers.parallel())
@@ -76,6 +77,15 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
                     .map(as -> AppRequest.from(request).id(as.getId()).appName(as.getName()).build());
     }
 
+    protected Mono<AppRequest> getDockerImage(AppRequest request) {
+        return opsClient
+                .getCloudFoundryClient()
+				.applicationsV2()
+					.get(org.cloudfoundry.client.v2.applications.GetApplicationRequest.builder().applicationId(request.getId()).build())
+	    			.onErrorResume(err -> Mono.empty())
+	    			.map(gar -> AppRequest.from(request).image(gar.getEntity().getDockerImage()).build());
+    }
+
     protected Mono<AppDetail> getApplicationDetail(AppRequest request) {
          return DefaultCloudFoundryOperations.builder()
             .from(opsClient)
@@ -89,17 +99,12 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
     }
 
     private AppDetail fromApplicationDetail(ApplicationDetail a, AppRequest request) {
-        AppDetailBuilder builder = AppDetail.builder();
-        builder
+        return AppDetail.builder()
             .organization(request.getOrganization())
             .space(request.getSpace())
             .appId(request.getId())
-            .appName(request.getAppName());
-        String buildpack = Buildpack.is(a.getBuildpack(), request.getImage());
-        if (buildpack != null)  {
-            builder.buildpack(buildpack);
-        }
-        return builder
+            .appName(request.getAppName())
+            .buildpack(Buildpack.is(a.getBuildpack(), request.getImage()))
             .image(request.getImage())
             .stack(a.getStack())
             .runningInstances(nullSafeInteger(a.getRunningInstances()))
