@@ -1,6 +1,5 @@
 package io.pivotal.cfapp.task;
 
-import java.sql.SQLException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -11,7 +10,6 @@ import org.cloudfoundry.client.v2.servicebindings.ListServiceBindingsRequest;
 import org.cloudfoundry.client.v3.applications.GetApplicationRequest;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.operations.services.GetServiceInstanceRequest;
-import org.cloudfoundry.operations.util.OperationsLogging;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -100,7 +98,7 @@ public class ServiceInstanceDetailTask implements ApplicationListener<SpacesRetr
                     .getInstance(GetServiceInstanceRequest.builder().name(request.getServiceName()).build())
                     .onErrorContinue(
                             Exception.class,
-                            (ex, data) -> OperationsLogging.log("Trouble fetching service instance details " + ex.getMessage()))
+                            (ex, data) -> log.error("Trouble fetching service instance details {}.", data != null ? data.toString(): "<>", ex))
                     .map(sd -> ServiceInstanceDetail
                                 .builder()
                                     .organization(request.getOrganization())
