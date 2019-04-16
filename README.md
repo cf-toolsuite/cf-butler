@@ -349,6 +349,7 @@ Sample output
 ```
 > `users` is the unique subset of all users from each role in the organization/space
 
+
 ```
 GET /space-users/{organization}/{space}
 ```
@@ -492,7 +493,7 @@ organization,space,application id,application name,buildpack,image,stack,running
 ```
 GET /snapshot/detail/si
 ```
-> Provides lists of all service instances in comma-separated value format
+> Provides a list of all service instances in comma-separated value format
 
 Sample output
 
@@ -503,6 +504,20 @@ Service inventory detail from api.sys.cf.zoo.labs.foo.org generated 2019-03-22T0
 organization,space,service instance id,name,service,description,plan,type,bound applications,last operation,last updated,dashboard url,requested state
 "mvptime","default",,"reactive-cassy-secrets","credhub","Stores configuration parameters securely in CredHub","default","managed_service_instance","reactive-cassy","create","2018-11-20T00:00",,"succeeded"
 "planespotter","default",,"planespotter-vault","credhub","Stores configuration parameters securely in CredHub","default","managed_service_instance","planespotter-alpha","update","2019-03-21T00:00",,"succeeded"
+```
+
+```
+GET /snapshot/detail/users
+```
+> Provides a list of all space users (ignoring role) in comma-separated value format by organization and space, where multiple users in each space are semicolon-separated and filtering out "service accounts".
+
+Sample output
+
+```
+[
+  "dum-e,default,cphillipson@pivotal.io;tony.stark@marvel.com;vmanoharan@pivotal.io",
+  "deathstar,default,darth.vader@sith.io;grandmoff.tarkin@sith.io"
+]
 ```
 
 ### Accounting
