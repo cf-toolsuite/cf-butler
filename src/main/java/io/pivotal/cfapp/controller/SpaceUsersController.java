@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -41,7 +40,7 @@ public class SpaceUsersController {
 							.defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
 	}
 
-	@GetMapping(value = { "/snapshot/detail/users" }, produces = MediaType.TEXT_PLAIN_VALUE)
+	@GetMapping(value = { "/snapshot/detail/users" })
 	public Mono<ResponseEntity<List<String>>> getUserList() {
 		return service
 					.findAll()
@@ -94,11 +93,11 @@ public class SpaceUsersController {
 	public class EmailValidator {
 
 		private final Pattern pattern;
-	
-		private static final String EMAIL_PATTERN = 
+
+		private static final String EMAIL_PATTERN =
 			"^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
 			+ "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
-	
+
 		public EmailValidator() {
 			pattern = Pattern.compile(EMAIL_PATTERN);
 		}
