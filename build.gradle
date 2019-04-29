@@ -89,7 +89,7 @@ dependencies {
     implementation('io.r2dbc:r2dbc-client:1.0.0.M7')
     implementation('io.r2dbc:r2dbc-h2:1.0.0.M7')
     implementation('io.r2dbc:r2dbc-postgresql:1.0.0.M7')
-    implementation('org.eclipse.jgit:org.eclipse.jgit:5.3.0.201903130848-r')
+    implementation('org.eclipse.jgit:org.eclipse.jgit:5.3.1.201904271842-r')
     implementation('org.cloudfoundry:cloudfoundry-client-reactor:3.15.0.RELEASE')
     implementation('org.cloudfoundry:cloudfoundry-operations:3.15.0.RELEASE')
     implementation('io.projectreactor:reactor-core:3.2.8.RELEASE')
