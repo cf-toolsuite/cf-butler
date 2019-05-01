@@ -19,7 +19,7 @@ import lombok.Builder.Default;
 @Getter
 @ToString
 @JsonPropertyOrder({ "by-organization", "by-buildpack", "by-stack", "by-dockerimage", "by-status",
-"total-applications", "total-running-application-instances", "total-stopped-application-instances", "total-anomalous-application-instances",
+"total-applications", "total-running-application-instances", "total-stopped-application-instances", "total-crashed-application-instances",
 "total-application-instances", "total-memory-used-in-mb", "total-disk-used-in-mb", "velocity"})
 public class ApplicationCounts {
 
@@ -51,8 +51,8 @@ public class ApplicationCounts {
     private Long totalStoppedApplicationInstances = 0L;
 
     @Default
-    @JsonProperty("total-anomalous-application-instances")
-    private Long totalAnomalousApplicationInstances = 0L;
+    @JsonProperty("total-crashed-application-instances")
+    private Long totalCrashedApplicationInstances = 0L;
 
     @Default
     @JsonProperty("total-application-instances")

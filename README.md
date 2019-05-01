@@ -400,7 +400,7 @@ Sample output
     "total-applications": 35,
     "total-running-application-instances": 21,
     "total-stopped-application-instances": 18,
-    "total-anomalous-application-instances": 3,
+    "total-crashed-application-instances": 3,
     "total-application-instances": 42,
     "velocity": {
       "between-two-days-and-one-week": 6,
