@@ -24,7 +24,7 @@ public interface AppMetricsService {
 
 	Mono<Long> totalStoppedApplicationInstances();
 
-	Mono<Long> totalAnomalousApplicationInstances();
+	Mono<Long> totalCrashedApplicationInstances();
 
 	Mono<Double> totalMemoryUsed();
 

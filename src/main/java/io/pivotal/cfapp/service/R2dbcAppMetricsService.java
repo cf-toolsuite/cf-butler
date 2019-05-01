@@ -73,8 +73,8 @@ public class R2dbcAppMetricsService implements AppMetricsService {
 	}
 
 	@Override
-	public Mono<Long> totalAnomalousApplicationInstances() {
-		return repo.totalAnomalousApplicationInstances();
+	public Mono<Long> totalCrashedApplicationInstances() {
+		return repo.totalCrashedApplicationInstances();
 	}
 
 	@Override

@@ -112,7 +112,7 @@ public class R2dbcAppMetricsRepository {
 				.defaultIfEmpty(0L);
 	}
 
-	public Mono<Long> totalAnomalousApplicationInstances() {
+	public Mono<Long> totalCrashedApplicationInstances() {
 		String sql = "select count(running_instances) as cnt from application_detail where requested_state = 'started' and running_instances = 0";
 		return client.execute().sql(sql)
 				.map((row, metadata) -> row.get("cnt", Long.class))
