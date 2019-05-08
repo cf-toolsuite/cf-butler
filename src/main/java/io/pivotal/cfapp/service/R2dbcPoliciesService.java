@@ -2,7 +2,7 @@ package io.pivotal.cfapp.service;
 
 import org.springframework.stereotype.Service;
 
-import io.pivotal.cfapp.config.ButlerSettings.PoliciesSettings;
+import io.pivotal.cfapp.config.PoliciesSettings;
 import io.pivotal.cfapp.domain.Policies;
 import io.pivotal.cfapp.repository.R2dbcPoliciesRepository;
 import reactor.core.publisher.Mono;
