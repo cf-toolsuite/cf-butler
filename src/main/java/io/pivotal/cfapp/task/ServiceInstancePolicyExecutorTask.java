@@ -20,9 +20,11 @@ import io.pivotal.cfapp.domain.ServiceInstancePolicy;
 import io.pivotal.cfapp.service.HistoricalRecordService;
 import io.pivotal.cfapp.service.PoliciesService;
 import io.pivotal.cfapp.service.ServiceInstanceDetailService;
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+@Slf4j
 @Component
 public class ServiceInstancePolicyExecutorTask implements ApplicationRunner {
 
@@ -53,6 +55,7 @@ public class ServiceInstancePolicyExecutorTask implements ApplicationRunner {
     }
 
     public void execute() {
+		log.info("ServiceInstancePolicyExecutorTask started");
     	policiesService
 	        .findAll()
 	        .flux()
@@ -62,7 +65,7 @@ public class ServiceInstancePolicyExecutorTask implements ApplicationRunner {
         	.filter(bl -> isBlacklisted(bl.getT1().getOrganization()))
 	    	.flatMap(ds -> deleteServiceInstance(ds.getT1()))
 	        .flatMap(historicalRecordService::save)
-	        .subscribe();
+	        .subscribe(e -> log.info("ServiceInstancePolicyExecutorTask completed"));
     }
 
     @Scheduled(cron = "${cron.execution}")

@@ -43,22 +43,18 @@ repositories {
 }
 
 ext {
-    set('h2.version', '1.4.197')
 	set('springCloudServicesVersion', '2.1.2.RELEASE')
 	set('springCloudVersion', 'Greenwich.SR1')
 	set('commons-lang3.version', '3.9')
 	set('jackson.version', '2.9.8')
 	set('junit-jupiter.version', '5.4.2')
 	set('mockito.version', '2.27.0')
-	set('resilience4jVersion', '0.14.1')
-	set('vaadinVersion', '13.0.4')
 }
 
 dependencyManagement {
 	imports {
 		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
 		mavenBom "io.pivotal.spring.cloud:spring-cloud-services-dependencies:${springCloudServicesVersion}"
-		mavenBom "com.vaadin:vaadin-bom:${vaadinVersion}"
 	}
 }
 
@@ -102,17 +98,21 @@ dependencies {
     implementation('org.springframework.boot:spring-boot-starter-actuator')
     implementation('org.springframework.boot:spring-boot-starter-webflux')
     implementation('org.springframework.boot:spring-boot-starter-log4j2')
-    //implementation('org.springframework.boot:spring-boot-starter-data-r2dbc:0.1.0.BUILD-SNAPSHOT')
-    implementation('org.springframework.data:spring-data-r2dbc:1.0.0.M1')
-    implementation('io.r2dbc:r2dbc-client:1.0.0.M7')
-    implementation('io.r2dbc:r2dbc-h2:1.0.0.M7')
-    implementation('io.r2dbc:r2dbc-postgresql:1.0.0.M7')
+    implementation('org.springframework.boot.experimental:spring-boot-starter-data-r2dbc:0.1.0.BUILD-SNAPSHOT')
+    implementation('org.springframework.data:spring-data-r2dbc:1.0.0.BUILD-SNAPSHOT')
+    //implementation('org.springframework.data:spring-data-r2dbc:1.0.0.gh-107-SNAPSHOT')
+    implementation('io.r2dbc:r2dbc-client:0.8.0.BUILD-SNAPSHOT')
+    implementation('io.r2dbc:r2dbc-pool:0.8.0.BUILD-SNAPSHOT')
+    // FIXME Seems like we shouldn't have a dependency on Spring JDBC
+    implementation('org.springframework:spring-jdbc')
+    implementation('io.r2dbc:r2dbc-h2:0.8.0.BUILD-SNAPSHOT')
+    implementation('io.r2dbc:r2dbc-postgresql:0.8.0.BUILD-SNAPSHOT')
     implementation('org.eclipse.jgit:org.eclipse.jgit:5.3.1.201904271842-r')
     implementation('org.cloudfoundry:cloudfoundry-client-reactor:3.15.0.RELEASE')
     implementation('org.cloudfoundry:cloudfoundry-operations:3.15.0.RELEASE')
-    implementation('io.projectreactor:reactor-core:3.2.8.RELEASE')
-    implementation('io.projectreactor.addons:reactor-extra:3.2.2.RELEASE')
-    implementation('io.projectreactor.netty:reactor-netty:0.8.6.RELEASE')
+    implementation('io.projectreactor:reactor-core:3.2.9.RELEASE')
+    implementation('io.projectreactor.addons:reactor-extra:3.2.3.RELEASE')
+    implementation('io.projectreactor.netty:reactor-netty:0.8.7.RELEASE')
     implementation('io.micrometer:micrometer-registry-prometheus')
     testImplementation('io.projectreactor:reactor-test')
     testImplementation('org.junit.jupiter:junit-jupiter-api')

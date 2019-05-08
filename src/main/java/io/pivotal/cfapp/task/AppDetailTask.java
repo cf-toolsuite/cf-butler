@@ -19,10 +19,12 @@ import io.pivotal.cfapp.domain.AppEvent;
 import io.pivotal.cfapp.domain.AppRequest;
 import io.pivotal.cfapp.domain.Space;
 import io.pivotal.cfapp.service.AppDetailService;
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
+@Slf4j
 @Component
 public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> {
 
@@ -49,6 +51,7 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
     }
 
     public void collect(List<Space> spaces) {
+        log.info("AppDetailTask started.");
         service
             .deleteAll()
             .thenMany(Flux.fromIterable(spaces))
@@ -61,11 +64,10 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
             .flatMap(service::save)
             .thenMany(service.findAll().subscribeOn(Schedulers.elastic()))
                 .collectList()
-                .subscribe(r ->
-                    publisher.publishEvent(
-                        new AppDetailRetrievedEvent(this)
-                            .detail(r)
-                ));
+                .subscribe(r -> {
+                    publisher.publishEvent(new AppDetailRetrievedEvent(this).detail(r));
+                    log.info("AppDetailTask completed.");
+                });
     }
 
     protected Flux<AppRequest> getApplicationSummary(AppRequest request) {

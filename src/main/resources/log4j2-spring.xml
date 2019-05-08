@@ -29,9 +29,11 @@
             <AppenderRef ref="RollingFile" />
         </Root>
 
+        <!--
         <Logger name="org.springframework" level="warn" />
-        <!-- <Logger name="reactor.core" level="debug" /> -->
-        <!-- <Logger name="io.r2dbc" level="debug" /> -->
+        <Logger name="reactor.core" level="debug" />
+        <Logger name="io.r2dbc" level="debug" />
+        -->
     </Loggers>
 
 </Configuration>

@@ -12,10 +12,12 @@ import io.pivotal.cfapp.domain.Space;
 import io.pivotal.cfapp.domain.SpaceUsers;
 import io.pivotal.cfapp.domain.UserRequest;
 import io.pivotal.cfapp.service.SpaceUsersService;
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
+@Slf4j
 @Component
 public class SpaceUsersTask implements ApplicationListener<SpacesRetrievedEvent> {
 
@@ -36,6 +38,7 @@ public class SpaceUsersTask implements ApplicationListener<SpacesRetrievedEvent>
     }
 
     public void collect(List<Space> spaces) {
+        log.info("SpaceUsersTask started");
     	service
             .deleteAll()
             .thenMany(Flux.fromIterable(spaces))
@@ -43,7 +46,7 @@ public class SpaceUsersTask implements ApplicationListener<SpacesRetrievedEvent>
             .flatMap(spaceUsersRequest -> getSpaceUsers(spaceUsersRequest))
             .publishOn(Schedulers.parallel())
             .flatMap(service::save)
-            .subscribe();
+            .subscribe(e -> log.info("SpaceUsersTask completed"));
     }
 
     protected Mono<SpaceUsers> getSpaceUsers(UserRequest request) {

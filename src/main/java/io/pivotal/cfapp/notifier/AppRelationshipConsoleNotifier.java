@@ -22,7 +22,7 @@ public class AppRelationshipConsoleNotifier implements ApplicationListener<AppRe
 
 	@Override
 	public void onApplicationEvent(AppRelationshipRetrievedEvent event) {
-		log.info(String.join("\n\n", report.generatePreamble(), report.generateDetail(event)));
+		log.trace(String.join("%n%n", report.generatePreamble(), report.generateDetail(event)));
 	}
 
 }

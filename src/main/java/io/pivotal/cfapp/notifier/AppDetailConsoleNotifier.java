@@ -22,7 +22,7 @@ public class AppDetailConsoleNotifier implements ApplicationListener<AppDetailRe
 
 	@Override
 	public void onApplicationEvent(AppDetailRetrievedEvent event) {
-		log.info(String.join("\n\n", report.generatePreamble(), report.generateDetail(event)));
+		log.trace(String.join("%n%n", report.generatePreamble(), report.generateDetail(event)));
 	}
 
 
