@@ -16,7 +16,7 @@ import org.springframework.data.r2dbc.function.DatabaseClient;
 import org.springframework.data.r2dbc.function.DatabaseClient.GenericInsertSpec;
 import org.springframework.stereotype.Repository;
 
-import io.pivotal.cfapp.config.ButlerSettings.PoliciesSettings;
+import io.pivotal.cfapp.config.PoliciesSettings;
 import io.pivotal.cfapp.config.DbmsSettings;
 import io.pivotal.cfapp.domain.ApplicationPolicy;
 import io.pivotal.cfapp.domain.Defaults;
