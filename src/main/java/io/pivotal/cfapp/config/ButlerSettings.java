@@ -23,14 +23,14 @@ public class ButlerSettings {
 	private static final Set<String> DEFAULT_BUILDPACKS = Set.of(KNOWN_BUILDPACKS);
 
 	private String apiHost;
-	private Set<String> buildpacks;
+	private Set<String> buildpacks = DEFAULT_BUILDPACKS;
 	private boolean sslValidationSkipped;
 	private Integer connectionPoolSize;
     private String username;
     private String password;
     // this is the value of RefreshToken within ~/.cf/config.json after one authenticates w/ cf login -a {api_endpoint} -sso
     private String refreshToken;
-	private Set<String> organizationBlackList;
+	private Set<String> organizationBlackList = DEFAULT_BLACKLIST;
 
     public Set<String> getOrganizationBlackList() {
     	while (organizationBlackList.remove(""));

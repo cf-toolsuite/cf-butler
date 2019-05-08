@@ -2,6 +2,7 @@ package io.pivotal.cfapp.repository;
 
 import java.sql.Timestamp;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -15,12 +16,12 @@ import org.springframework.data.r2dbc.function.DatabaseClient;
 import org.springframework.data.r2dbc.function.DatabaseClient.GenericInsertSpec;
 import org.springframework.stereotype.Repository;
 
-import io.pivotal.cfapp.config.DbmsSettings;
 import io.pivotal.cfapp.config.ButlerSettings.PoliciesSettings;
+import io.pivotal.cfapp.config.DbmsSettings;
 import io.pivotal.cfapp.domain.ApplicationPolicy;
+import io.pivotal.cfapp.domain.Defaults;
 import io.pivotal.cfapp.domain.Policies;
 import io.pivotal.cfapp.domain.ServiceInstancePolicy;
-
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -68,8 +69,8 @@ public class R2dbcPoliciesRepository {
 								.builder()
 									.pk(row.get("pk", Long.class))
 									.id(row.get("id", String.class))
-									.description(row.get("description", String.class))
-									.fromDateTime(row.get("from_datetime", Timestamp.class) != null ? row.get("from_datetime", Timestamp.class).toLocalDateTime() : null)
+									.description(Defaults.getValueOrDefault(row.get("description", String.class), ""))
+									.fromDateTime(Defaults.getValueOrDefault(row.get("from_datetime", Timestamp.class), Timestamp.valueOf(LocalDateTime.MIN)).toLocalDateTime())
 									.fromDuration(row.get("from_duration", String.class) != null ? Duration.parse(row.get("from_duration", String.class)): null)
 									.organizationWhiteList(row.get("organization_whitelist", String.class) != null ? new HashSet<String>(Arrays.asList(row.get("organization_whitelist", String.class).split("\\s*,\\s*"))): new HashSet<>())
 									.build())
@@ -92,11 +93,11 @@ public class R2dbcPoliciesRepository {
 								.builder()
 									.pk(row.get("pk", Long.class))
 									.id(row.get("id", String.class))
-									.description(row.get("description", String.class))
-									.fromDateTime(row.get("from_datetime", Timestamp.class) != null ? row.get("from_datetime", Timestamp.class).toLocalDateTime() : null)
+									.description(Defaults.getValueOrDefault(row.get("description", String.class), ""))
+									.fromDateTime(Defaults.getValueOrDefault(row.get("from_datetime", Timestamp.class), Timestamp.valueOf(LocalDateTime.MIN)).toLocalDateTime())
 									.fromDuration(row.get("from_duration", String.class) != null ? Duration.parse(row.get("from_duration", String.class)): null)
 									.organizationWhiteList(row.get("organization_whitelist", String.class) != null ? new HashSet<String>(Arrays.asList(row.get("organization_whitelist", String.class).split("\\s*,\\s*"))): new HashSet<>())
-									.state(row.get("state", String.class))
+									.state(Defaults.getValueOrDefault(row.get("state", String.class), ""))
 									.deleteServices(row.get("delete_services", Boolean.class))
 									.build())
 						.all())
@@ -120,7 +121,7 @@ public class R2dbcPoliciesRepository {
 										.pk(row.get("pk", Long.class))
 										.id(row.get("id", String.class))
 										.description(row.get("description", String.class))
-										.fromDateTime(row.get("from_datetime", Timestamp.class) != null ? row.get("from_datetime", Timestamp.class).toLocalDateTime() : null)
+										.fromDateTime(Defaults.getValueOrDefault(row.get("from_datetime", Timestamp.class), Timestamp.valueOf(LocalDateTime.MIN)).toLocalDateTime())
 										.fromDuration(row.get("from_duration", String.class) != null ? Duration.parse(row.get("from_duration", String.class)): null)
 										.organizationWhiteList(row.get("organization_whitelist", String.class) != null ? new HashSet<String>(Arrays.asList(row.get("organization_whitelist", String.class).split("\\s*,\\s*"))): new HashSet<>())
 										.state(row.get("state", String.class))
@@ -136,8 +137,8 @@ public class R2dbcPoliciesRepository {
 											.builder()
 												.pk(row.get("pk", Long.class))
 												.id(row.get("id", String.class))
-												.description(row.get("description", String.class))
-												.fromDateTime(row.get("from_datetime", Timestamp.class) != null ? row.get("from_datetime", Timestamp.class).toLocalDateTime() : null)
+												.description(Defaults.getValueOrDefault(row.get("description", String.class), ""))
+												.fromDateTime(Defaults.getValueOrDefault(row.get("from_datetime", Timestamp.class), Timestamp.valueOf(LocalDateTime.MIN)).toLocalDateTime())
 												.fromDuration(row.get("from_duration", String.class) != null ? Duration.parse(row.get("from_duration", String.class)): null)
 												.organizationWhiteList(row.get("organization_whitelist", String.class) != null ? new HashSet<String>(Arrays.asList(row.get("organization_whitelist", String.class).split("\\s*,\\s*"))): new HashSet<>())
 												.build())

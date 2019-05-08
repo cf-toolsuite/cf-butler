@@ -1,5 +1,6 @@
 package io.pivotal.cfapp.domain;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -21,8 +22,9 @@ import lombok.Builder.Default;
 @JsonPropertyOrder({ "by-organization", "total-users"})
 public class UserCounts {
 
+    @Default
     @JsonProperty("by-organization")
-    private Map<String, Integer> byOrganization;
+    private Map<String, Integer> byOrganization = new HashMap<>();
 
     @Default
     @JsonProperty("total-users")

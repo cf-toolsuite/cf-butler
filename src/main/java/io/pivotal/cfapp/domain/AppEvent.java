@@ -1,6 +1,6 @@
 package io.pivotal.cfapp.domain;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -9,12 +9,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Builder
+@Getter
 @AllArgsConstructor(access=AccessLevel.PACKAGE)
 @NoArgsConstructor(access=AccessLevel.PACKAGE)
-@Getter
 public class AppEvent {
 
     private String name;
     private String actor;
-    private Date time;
+    private LocalDateTime time;
 }

@@ -1,5 +1,6 @@
 package io.pivotal.cfapp.domain;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import lombok.AccessLevel;
@@ -7,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Builder.Default;
 
 @Builder
 @AllArgsConstructor(access=AccessLevel.PACKAGE)
@@ -18,8 +20,12 @@ public class ServiceRequest {
     private String organization;
     private String space;
     private String serviceName;
-    private List<String> applicationIds;
-    private List<String> applicationNames;
+
+    @Default
+    private List<String> applicationIds = new ArrayList<>();
+
+    @Default
+    private List<String> applicationNames = new ArrayList<>();
 
     public static ServiceRequestBuilder from(ServiceRequest request) {
         return ServiceRequest

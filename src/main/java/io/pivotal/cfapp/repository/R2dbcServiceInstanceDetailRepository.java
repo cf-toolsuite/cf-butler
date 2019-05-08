@@ -14,6 +14,7 @@ import org.springframework.data.r2dbc.function.DatabaseClient.GenericInsertSpec;
 import org.springframework.stereotype.Repository;
 
 import io.pivotal.cfapp.config.DbmsSettings;
+import io.pivotal.cfapp.domain.Defaults;
 import io.pivotal.cfapp.domain.ServiceInstanceDetail;
 import io.pivotal.cfapp.domain.ServiceInstancePolicy;
 import io.r2dbc.spi.Row;
@@ -109,22 +110,20 @@ public class R2dbcServiceInstanceDetailRepository {
 		return ServiceInstanceDetail
 				.builder()
 					.pk(row.get("pk", Long.class))
-					.organization(row.get("organization", String.class))
-					.space(row.get("space", String.class))
-					.serviceInstanceId(row.get("service_instance_id", String.class))
-					.name(row.get("service_name", String.class))
-					.service(row.get("service", String.class))
-					.description(row.get("description", String.class)).type(row.get("type", String.class))
-					.plan(row.get("plan", String.class))
-					.applications(row.get("bound_applications", String.class) != null
-							? Arrays.asList(row.get("bound_applications", String.class).split("\\s*,\\s*"))
-							: null)
-					.lastOperation(row.get("last_operation", String.class))
-					.lastUpdated(row.get("last_updated", Timestamp.class) != null
-							? row.get("last_updated", Timestamp.class).toLocalDateTime()
-							: null)
-					.dashboardUrl(row.get("dashboard_url", String.class))
-					.requestedState(row.get("requested_state", String.class))
+					.organization(Defaults.getValueOrDefault(row.get("organization", String.class), ""))
+					.space(Defaults.getValueOrDefault(row.get("space", String.class), ""))
+					.serviceInstanceId(Defaults.getValueOrDefault(row.get("service_instance_id", String.class), ""))
+					.name(Defaults.getValueOrDefault(row.get("service_name", String.class), ""))
+					.service(Defaults.getValueOrDefault(row.get("service", String.class), ""))
+					.description(Defaults.getValueOrDefault(row.get("description", String.class), ""))
+					.type(Defaults.getValueOrDefault(row.get("type", String.class), ""))
+					.plan(Defaults.getValueOrDefault(row.get("plan", String.class), ""))
+					.applications(
+						Arrays.asList(Defaults.getValueOrDefault(row.get("bound_applications", String.class), "").split("\\s*,\\s*")))
+					.lastOperation(Defaults.getValueOrDefault(row.get("last_operation", String.class), ""))
+					.lastUpdated(Defaults.getValueOrDefault(row.get("last_updated", Timestamp.class), Timestamp.valueOf(LocalDateTime.MIN)).toLocalDateTime())
+					.dashboardUrl(Defaults.getValueOrDefault(row.get("dashboard_url", String.class), ""))
+					.requestedState(Defaults.getValueOrDefault(row.get("requested_state", String.class), ""))
 					.build();
 	}
 

@@ -1,5 +1,6 @@
 package io.pivotal.cfapp.domain;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -17,6 +18,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import lombok.Builder.Default;
 
 @Data
 @Builder
@@ -32,9 +34,15 @@ public class SpaceUsers {
 	private Long pk;
 	private String organization;
 	private String space;
-	private List<String> auditors;
-	private List<String> developers;
-	private List<String> managers;
+
+	@Default
+	private List<String> auditors = new ArrayList<>();
+
+	@Default
+	private List<String> developers = new ArrayList<>();
+
+	@Default
+	private List<String> managers = new ArrayList<>();
 
 	@JsonProperty("users")
 	public Set<String> getUsers() {

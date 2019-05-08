@@ -2,6 +2,7 @@ package io.pivotal.cfapp.domain;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -44,7 +45,8 @@ public class AppDetail {
 	private Long memoryUsage = 0L;
 	@Default
 	private Long diskUsage = 0L;
-	private List<String> urls;
+	@Default
+	private List<String> urls = new ArrayList<>();
 	private LocalDateTime lastPushed;
 	private String lastEvent;
 	private String lastEventActor;

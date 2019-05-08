@@ -5,11 +5,31 @@ plugins {
     id 'com.github.ben-manes.versions' version '0.21.0'
 	id 'java'
     id 'jacoco'
+    id 'com.github.spotbugs' version '1.7.1'
 }
 
 gitProperties {
     dateFormat = "yyyy-MM-dd'T'HH:mmZ"
     dateFormatTimeZone = "UTC"
+}
+
+spotbugs {
+    toolVersion = '4.0.0-beta1'
+    ignoreFailures = true
+    effort = 'max'
+    reportLevel = 'low'
+    showProgress = true
+}
+
+tasks.withType(com.github.spotbugs.SpotBugsTask) {
+    reports {
+        html {
+            enabled = true
+        }
+        xml {
+            enabled = false
+        }
+    }
 }
 
 group = 'io.pivotal'
