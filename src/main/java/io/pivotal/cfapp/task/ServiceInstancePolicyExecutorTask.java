@@ -58,14 +58,15 @@ public class ServiceInstancePolicyExecutorTask implements ApplicationRunner {
 		log.info("ServiceInstancePolicyExecutorTask started");
     	policiesService
 	        .findAll()
-	        .flux()
-	        .flatMap(p -> Flux.fromIterable(p.getServiceInstancePolicies()))
-	    	.flatMap(sp -> serviceInfoService.findByServiceInstancePolicy(sp))
-	    	.filter(wl -> isWhitelisted(wl.getT2(), wl.getT1().getOrganization()))
-        	.filter(bl -> isBlacklisted(bl.getT1().getOrganization()))
-	    	.flatMap(ds -> deleteServiceInstance(ds.getT1()))
-	        .flatMap(historicalRecordService::save)
-	        .subscribe(e -> log.info("ServiceInstancePolicyExecutorTask completed"));
+				.flux()
+				.flatMap(p -> Flux.fromIterable(p.getServiceInstancePolicies()))
+				.flatMap(sp -> serviceInfoService.findByServiceInstancePolicy(sp))
+				.filter(wl -> isWhitelisted(wl.getT2(), wl.getT1().getOrganization()))
+				.filter(bl -> isBlacklisted(bl.getT1().getOrganization()))
+				.flatMap(ds -> deleteServiceInstance(ds.getT1()))
+				.flatMap(historicalRecordService::save)
+					.collectList()
+					.subscribe(e -> log.info("ServiceInstancePolicyExecutorTask completed"));
     }
 
     @Scheduled(cron = "${cron.execution}")

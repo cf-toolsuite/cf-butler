@@ -46,7 +46,8 @@ public class SpaceUsersTask implements ApplicationListener<SpacesRetrievedEvent>
             .flatMap(spaceUsersRequest -> getSpaceUsers(spaceUsersRequest))
             .publishOn(Schedulers.parallel())
             .flatMap(service::save)
-            .subscribe(e -> log.info("SpaceUsersTask completed"));
+                .collectList()
+                .subscribe(e -> log.info("SpaceUsersTask completed"));
     }
 
     protected Mono<SpaceUsers> getSpaceUsers(UserRequest request) {
