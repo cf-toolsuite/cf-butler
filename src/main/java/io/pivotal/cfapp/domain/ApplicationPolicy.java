@@ -17,6 +17,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.util.CollectionUtils;
 
 import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.Getter;
 
 @Builder
@@ -30,7 +31,7 @@ public class ApplicationPolicy {
 	@JsonIgnore
 	private Long pk;
 
-	@Builder.Default
+	@Default
 	@JsonProperty("id")
 	private String id = Generators.timeBasedGenerator().generate().toString();
 
@@ -49,8 +50,9 @@ public class ApplicationPolicy {
 	@JsonProperty("delete-services")
 	private boolean deleteServices;
 
+	@Default
 	@JsonProperty("organization-whitelist")
-	private Set<String> organizationWhiteList;
+	private Set<String> organizationWhiteList = new HashSet<>();
 
 	@JsonCreator
 	ApplicationPolicy(

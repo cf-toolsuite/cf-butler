@@ -10,6 +10,7 @@ import org.springframework.data.r2dbc.function.DatabaseClient;
 import org.springframework.stereotype.Repository;
 
 import io.pivotal.cfapp.config.DbmsSettings;
+import io.pivotal.cfapp.domain.Defaults;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
@@ -33,7 +34,7 @@ public class R2dbcServiceInstanceMetricsRepository {
 		String sql = "select " + columnName + ", count(" + columnName + ") as cnt from service_instance_detail group by " + columnName;
 		return client.execute().sql(sql)
 					.map((row, metadata)
-							-> Tuples.of(row.get(columnName, String.class) != null ? row.get(columnName, String.class): "--", row.get("cnt", Long.class)))
+							-> Tuples.of(Defaults.getValueOrDefault(row.get(columnName, String.class), "--"), Defaults.getValueOrDefault(row.get("cnt", Long.class), 0L)))
 					.all()
 					.defaultIfEmpty(Tuples.of("--", 0L));
 	}
@@ -43,7 +44,7 @@ public class R2dbcServiceInstanceMetricsRepository {
 		return client.execute().sql(sql)
 				.bind(settings.getBindPrefix() + 1, Timestamp.valueOf(LocalDateTime.of(end, LocalTime.MAX)))
 				.bind(settings.getBindPrefix() + 2, Timestamp.valueOf(LocalDateTime.of(start, LocalTime.MIDNIGHT)))
-				.map((row, metadata) -> row.get("cnt", Long.class))
+				.map((row, metadata) -> Defaults.getValueOrDefault(row.get("cnt", Long.class), 0L))
 				.one()
 				.defaultIfEmpty(0L);
 	}
@@ -52,7 +53,7 @@ public class R2dbcServiceInstanceMetricsRepository {
 		String sql = "select count(last_updated) as cnt from service_instance_detail where last_updated < " + settings.getBindPrefix() + 1;
 		return client.execute().sql(sql)
 				.bind(settings.getBindPrefix() + 1, Timestamp.valueOf(LocalDateTime.of(end, LocalTime.MIDNIGHT)))
-				.map((row, metadata) -> row.get("cnt", Long.class))
+				.map((row, metadata) -> Defaults.getValueOrDefault(row.get("cnt", Long.class), 0L))
 				.one()
 				.defaultIfEmpty(0L);
 	}
@@ -65,13 +66,13 @@ public class R2dbcServiceInstanceMetricsRepository {
 		String sqlup = "select type, count(type) as cnt from service_instance_detail where type = 'user_provided_service_instance' group by service";
 		Flux<Tuple2<String, Long>> ups = client.execute().sql(sqlup)
 					.map((row, metadata)
-							-> Tuples.of("user-provided", row.get("cnt", Long.class)))
+							-> Tuples.of("user-provided", Defaults.getValueOrDefault(row.get("cnt", Long.class), 0L)))
 					.all()
 					.defaultIfEmpty(Tuples.of("user-provided", 0L));
 		String sqlms = "select service, count(service) as cnt from service_instance_detail where type = 'managed_service_instance' group by service";
 		Flux<Tuple2<String, Long>> ms = client.execute().sql(sqlms)
 					.map((row, metadata)
-							-> Tuples.of(row.get("service", String.class) != null ? row.get("service", String.class): "managed", row.get("cnt", Long.class)))
+							-> Tuples.of(Defaults.getValueOrDefault(row.get("service", String.class), "managed"), Defaults.getValueOrDefault(row.get("cnt", Long.class), 0L)))
 					.all()
 					.defaultIfEmpty(Tuples.of("managed", 0L));
 		return ups.concatWith(ms);
@@ -84,10 +85,10 @@ public class R2dbcServiceInstanceMetricsRepository {
 							-> Tuples.of(
 									String.join(
 										"/",
-										row.get("service", String.class) != null ? row.get("service", String.class): "unknown",
-										row.get("plan", String.class) != null ? row.get("plan", String.class): "unknown"
+										Defaults.getValueOrDefault(row.get("service", String.class), "unknown"),
+										Defaults.getValueOrDefault(row.get("plan", String.class), "unknown")
 									),
-									row.get("cnt", Long.class)))
+									Defaults.getValueOrDefault(row.get("cnt", Long.class),0L)))
 					.all()
 					.defaultIfEmpty(Tuples.of("unknown", 0L));
 	}
@@ -95,7 +96,7 @@ public class R2dbcServiceInstanceMetricsRepository {
 	public Mono<Long> totalServiceInstances() {
 		String sql = "select count(*) as cnt from service_instance_detail";
 		return client.execute().sql(sql)
-				.map((row, metadata) -> row.get("cnt", Long.class))
+				.map((row, metadata) -> Defaults.getValueOrDefault(row.get("cnt", Long.class), 0L))
 				.one()
 				.defaultIfEmpty(0L);
 	}

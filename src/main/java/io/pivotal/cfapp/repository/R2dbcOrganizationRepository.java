@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.r2dbc.function.DatabaseClient;
 import org.springframework.stereotype.Repository;
 
+import io.pivotal.cfapp.domain.Defaults;
 import io.pivotal.cfapp.domain.Organization;
 import io.r2dbc.spi.Row;
 import reactor.core.publisher.Flux;
@@ -41,7 +42,7 @@ public class R2dbcOrganizationRepository {
 	}
 
 	private Organization fromRow(Row row) {
-		return new Organization(row.get("id", String.class), row.get("org_name", String.class));
+		return new Organization(row.get("id", String.class), Defaults.getValueOrDefault(row.get("org_name", String.class), ""));
 	}
 
 }

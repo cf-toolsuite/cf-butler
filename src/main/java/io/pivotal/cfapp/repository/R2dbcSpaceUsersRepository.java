@@ -14,6 +14,7 @@ import org.springframework.data.r2dbc.function.DatabaseClient.GenericInsertSpec;
 import org.springframework.stereotype.Repository;
 
 import io.pivotal.cfapp.config.DbmsSettings;
+import io.pivotal.cfapp.domain.Defaults;
 import io.pivotal.cfapp.domain.SpaceUsers;
 import io.r2dbc.spi.Row;
 import reactor.core.publisher.Flux;
@@ -75,11 +76,11 @@ public class R2dbcSpaceUsersRepository {
 	private SpaceUsers fromRow(Row row) {
 		return SpaceUsers.builder()
 				.pk(row.get("pk", Long.class))
-				.organization(row.get("organization", String.class))
-				.space(row.get("space", String.class))
-				.auditors(row.get("auditors", String.class) != null ? toList(row.get("auditors", String.class)): null)
-				.developers(row.get("developers", String.class) != null ? toList(row.get("developers", String.class)): null)
-				.managers(row.get("managers", String.class) != null ? toList(row.get("managers", String.class)): null)
+				.organization(Defaults.getValueOrDefault(row.get("organization", String.class), ""))
+				.space(Defaults.getValueOrDefault(row.get("space", String.class), ""))
+				.auditors(toList(Defaults.getValueOrDefault(row.get("auditors", String.class), "")))
+				.developers(toList(Defaults.getValueOrDefault(row.get("developers", String.class), "")))
+				.managers(toList(Defaults.getValueOrDefault(row.get("managers", String.class), "")))
 				.build();
 	}
 

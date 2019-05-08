@@ -16,6 +16,7 @@ import org.springframework.stereotype.Repository;
 import io.pivotal.cfapp.config.DbmsSettings;
 import io.pivotal.cfapp.domain.AppDetail;
 import io.pivotal.cfapp.domain.ApplicationPolicy;
+import io.pivotal.cfapp.domain.Defaults;
 import io.r2dbc.spi.Row;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -207,29 +208,23 @@ public class R2dbcAppDetailRepository {
 		return AppDetail
 				.builder()
 					.pk(row.get("pk", Long.class))
-					.organization(row.get("organization", String.class))
-					.space(row.get("space", String.class))
-					.appId(row.get("app_id", String.class))
-					.appName(row.get("app_name", String.class))
-					.buildpack(row.get("buildpack", String.class))
-					.runningInstances(row.get("running_instances", Integer.class))
-					.totalInstances(row.get("total_instances", Integer.class))
-					.memoryUsage(row.get("memory_used", Long.class))
-					.diskUsage(row.get("disk_used", Long.class))
-					.image(row.get("image", String.class))
-					.stack(row.get("stack", String.class))
-					.urls(row.get("urls", String.class) != null
-							? Arrays.asList(row.get("urls", String.class).split("\\s*,\\s*"))
-							: null)
-					.lastEvent(row.get("last_event", String.class))
-					.lastEventActor(row.get("last_event_actor", String.class))
-					.lastEventTime(row.get("last_event_time", Timestamp.class) != null
-							? row.get("last_event_time", Timestamp.class).toLocalDateTime()
-							: null)
-					.lastPushed(row.get("last_pushed", Timestamp.class) != null
-							? row.get("last_pushed", Timestamp.class).toLocalDateTime()
-							: null)
-					.requestedState(row.get("requested_state", String.class))
+					.organization(Defaults.getValueOrDefault(row.get("organization", String.class), ""))
+					.space(Defaults.getValueOrDefault(row.get("space", String.class), ""))
+					.appId(Defaults.getValueOrDefault(row.get("app_id", String.class), ""))
+					.appName(Defaults.getValueOrDefault(row.get("app_name", String.class), ""))
+					.buildpack(Defaults.getValueOrDefault(row.get("buildpack", String.class), ""))
+					.runningInstances(Defaults.getValueOrDefault(row.get("running_instances", Integer.class), 0))
+					.totalInstances(Defaults.getValueOrDefault(row.get("total_instances", Integer.class), 0))
+					.memoryUsage(Defaults.getValueOrDefault(row.get("memory_used", Long.class), 0L))
+					.diskUsage(Defaults.getValueOrDefault(row.get("disk_used", Long.class), 0L))
+					.image(Defaults.getValueOrDefault(row.get("image", String.class), ""))
+					.stack(Defaults.getValueOrDefault(row.get("stack", String.class), ""))
+					.urls(Arrays.asList(Defaults.getValueOrDefault(row.get("urls", String.class), "").split("\\s*,\\s*")))
+					.lastEvent(Defaults.getValueOrDefault(row.get("last_event", String.class), ""))
+					.lastEventActor(Defaults.getValueOrDefault(row.get("last_event_actor", String.class), ""))
+					.lastEventTime(Defaults.getValueOrDefault(row.get("last_event_time", Timestamp.class), Timestamp.valueOf(LocalDateTime.MIN)).toLocalDateTime())
+					.lastPushed(Defaults.getValueOrDefault(row.get("last_pushed", Timestamp.class), Timestamp.valueOf(LocalDateTime.MIN)).toLocalDateTime())
+					.requestedState(Defaults.getValueOrDefault(row.get("requested_state", String.class), ""))
 					.build();
 	}
 

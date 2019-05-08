@@ -1,6 +1,7 @@
 package io.pivotal.cfapp.domain;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -12,6 +13,7 @@ import org.springframework.data.annotation.Id;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -36,7 +38,10 @@ public class ServiceInstanceDetail {
 	private String description;
 	private String plan;
 	private String type;
-	private List<String> applications;
+
+	@Default
+	private List<String> applications = new ArrayList<>();
+
 	private String lastOperation;
 	private LocalDateTime lastUpdated;
 	private String dashboardUrl;

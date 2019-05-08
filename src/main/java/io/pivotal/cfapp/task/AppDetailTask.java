@@ -134,14 +134,16 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
                                    .builder()
                                        .name(e.getEvent())
                                        .actor(e.getActor())
-                                       .time(e.getTime())
+                                       .time(
+                                           e.getTime().toInstant().atZone(ZoneId.systemDefault())
+                                            .toLocalDateTime())
                                        .build())
                        .next()
                        .map(e ->
                                AppDetail.from(detail)
                                            .lastEvent(e.getName())
                                            .lastEventActor(e.getActor())
-                                           .lastEventTime(e.getTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime())
+                                           .lastEventTime(e.getTime())
                                            .build()
                            )
                        .switchIfEmpty(Mono.just(detail));

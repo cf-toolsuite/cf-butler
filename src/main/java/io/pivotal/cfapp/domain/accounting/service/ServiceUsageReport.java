@@ -1,5 +1,6 @@
 package io.pivotal.cfapp.domain.accounting.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -15,9 +16,9 @@ public class ServiceUsageReport {
     public String reportTime;
 
     @JsonProperty("monthly_service_reports")
-    public List<ServiceUsageMonthlyAggregate> monthlyServiceReports;
+    public List<ServiceUsageMonthlyAggregate> monthlyServiceReports = new ArrayList<>();
 
     @JsonProperty("yearly_service_report")
-    public List<ServiceUsageYearlyAggregate> yearlyServiceReport;
+    public List<ServiceUsageYearlyAggregate> yearlyServiceReport = new ArrayList<>();
 
 }
