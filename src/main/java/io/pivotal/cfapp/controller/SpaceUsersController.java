@@ -2,8 +2,6 @@ package io.pivotal.cfapp.controller;
 
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.pivotal.cfapp.domain.SpaceUsers;
+import io.pivotal.cfapp.service.EmailValidator;
 import io.pivotal.cfapp.service.SpaceUsersService;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -26,9 +25,10 @@ public class SpaceUsersController {
 
 	@Autowired
 	public SpaceUsersController(
-		SpaceUsersService service) {
+		SpaceUsersService service,
+		EmailValidator validator) {
 		this.service = service;
-		this.validator = new EmailValidator();
+		this.validator = validator;
 	}
 
 	@GetMapping(value = { "/space-users" })
@@ -90,21 +90,4 @@ public class SpaceUsersController {
 						.defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
 	}
 
-	public class EmailValidator {
-
-		private final Pattern pattern;
-
-		private static final String EMAIL_PATTERN =
-			"^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
-			+ "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
-
-		public EmailValidator() {
-			pattern = Pattern.compile(EMAIL_PATTERN);
-		}
-
-		public boolean validate(final String hex) {
-			Matcher matcher = pattern.matcher(hex);
-			return matcher.matches();
-		}
-	}
 }
