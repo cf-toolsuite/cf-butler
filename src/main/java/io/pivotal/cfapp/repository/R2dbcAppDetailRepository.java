@@ -8,7 +8,6 @@ import java.util.Arrays;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.r2dbc.function.DatabaseClient;
 import org.springframework.data.r2dbc.function.DatabaseClient.GenericInsertSpec;
 import org.springframework.stereotype.Repository;
@@ -47,74 +46,74 @@ public class R2dbcAppDetailRepository {
 		if (entity.getBuildpack() != null) {
 			spec = spec.value("buildpack", entity.getBuildpack());
 		} else {
-			spec = spec.nullValue("buildpack", String.class);
+			spec = spec.nullValue("buildpack");
 		}
 		if (entity.getImage() != null) {
 			spec = spec.value("image", entity.getImage());
 		} else {
-			spec = spec.nullValue("image", String.class);
+			spec = spec.nullValue("image");
 		}
 		if (entity.getStack() != null) {
 			spec = spec.value("stack", entity.getStack());
 		} else {
-			spec = spec.nullValue("stack", String.class);
+			spec = spec.nullValue("stack");
 		}
 		if (entity.getRunningInstances() != null) {
 			spec = spec.value("running_instances",entity.getRunningInstances());
 		} else {
-			spec = spec.nullValue("running_instances", Integer.class);
+			spec = spec.nullValue("running_instances");
 		}
 		if (entity.getTotalInstances() != null) {
 			spec = spec.value("total_instances", entity.getTotalInstances());
 		} else {
-			spec = spec.nullValue("total_instances", Integer.class);
+			spec = spec.nullValue("total_instances");
 		}
 		if (entity.getMemoryUsage() != null) {
 			spec = spec.value("memory_used", entity.getMemoryUsage());
 		} else {
-			spec = spec.nullValue("memory_used", Long.class);
+			spec = spec.nullValue("memory_used");
 		}
 		if (entity.getDiskUsage() != null) {
 			spec = spec.value("disk_used", entity.getDiskUsage());
 		} else {
-			spec = spec.nullValue("disk_used", Long.class);
+			spec = spec.nullValue("disk_used");
 		}
 		if (entity.getUrls() != null) {
 			spec = spec.value("urls", String.join(",", entity.getUrls()));
 		} else {
-			spec = spec.nullValue("urls", String.class);
+			spec = spec.nullValue("urls");
 		}
 		if (entity.getLastPushed() != null) {
 			spec = spec.value("last_pushed", Timestamp.valueOf(entity.getLastPushed()));
 		} else {
-			spec = spec.nullValue("last_pushed", Timestamp.class);
+			spec = spec.nullValue("last_pushed");
 		}
 		if (entity.getLastEvent() != null) {
 			spec = spec.value("last_event", entity.getLastEvent());
 		} else {
-			spec = spec.nullValue("last_event", String.class);
+			spec = spec.nullValue("last_event");
 		}
 		if (entity.getLastEventActor() != null) {
 			spec = spec.value("last_event_actor", entity.getLastEventActor());
 		} else {
-			spec = spec.nullValue("last_event_actor", String.class);
+			spec = spec.nullValue("last_event_actor");
 		}
 		if (entity.getLastEventTime() != null) {
 			spec = spec.value("last_event_time", Timestamp.valueOf(entity.getLastEventTime()));
 		} else {
-			spec = spec.nullValue("last_event_time", Timestamp.class);
+			spec = spec.nullValue("last_event_time");
 		}
 		if (entity.getRequestedState() != null) {
 			spec = spec.value("requested_state", entity.getRequestedState());
 		} else {
-			spec = spec.nullValue("requested_state", String.class);
+			spec = spec.nullValue("requested_state");
 		}
 		return spec.fetch().rowsUpdated().then(Mono.just(entity));
 	}
 
 	public Flux<AppDetail> findAll() {
-		return client.select().from("application_detail")
-						.orderBy(Sort.by("organization", "space", "app_name"))
+		String select = "select pk, organization, space, app_id, app_name, buildpack, image, stack, running_instances, total_instances, memory_used, disk_used, urls, last_pushed, last_event, last_event_actor, last_event_time, requested_state from application_detail order by organization, space, app_name";
+		return client.execute().sql(select)
 						.map((row, metadata) -> fromRow(row))
 						.all();
 	}
