@@ -203,22 +203,22 @@ public class R2dbcPoliciesRepository {
 		if (ap.getDescription() != null) {
 			spec = spec.value("description", ap.getDescription());
 		} else {
-			spec = spec.nullValue("description", String.class);
+			spec = spec.nullValue("description");
 		}
 		if (ap.getState() != null) {
 			spec = spec.value("state", ap.getState());
 		} else {
-			spec = spec.nullValue("state", String.class);
+			spec = spec.nullValue("state");
 		}
 		if (ap.getFromDateTime() != null) {
 			spec = spec.value("from_datetime", Timestamp.valueOf(ap.getFromDateTime()));
 		} else {
-			spec = spec.nullValue("from_datetime", Timestamp.class);
+			spec = spec.nullValue("from_datetime");
 		}
 		if (ap.getFromDuration() != null) {
 			spec = spec.value("from_duration", ap.getFromDuration().toString());
 		} else {
-			spec = spec.nullValue("from_duration", String.class);
+			spec = spec.nullValue("from_duration");
 		}
 		spec = spec.value("delete_services", ap.isDeleteServices());
 		spec = spec.value("organization_whitelist", String.join(",", ap.getOrganizationWhiteList()));
@@ -232,17 +232,17 @@ public class R2dbcPoliciesRepository {
 		if (sip.getDescription() != null) {
 			spec = spec.value("description", sip.getDescription());
 		} else {
-			spec = spec.nullValue("description", String.class);
+			spec = spec.nullValue("description");
 		}
 		if (sip.getFromDateTime() != null) {
 			spec = spec.value("from_datetime", Timestamp.valueOf(sip.getFromDateTime()));
 		} else {
-			spec = spec.nullValue("from_datetime", Timestamp.class);
+			spec = spec.nullValue("from_datetime");
 		}
 		if (sip.getFromDuration() != null) {
 			spec = spec.value("from_duration", sip.getFromDuration().toString());
 		} else {
-			spec = spec.nullValue("from_duration", String.class);
+			spec = spec.nullValue("from_duration");
 		}
 		spec = spec.value("organization_whitelist", String.join(",", sip.getOrganizationWhiteList()));
 		return spec.fetch().rowsUpdated();

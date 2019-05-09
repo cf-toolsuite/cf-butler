@@ -7,9 +7,11 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import org.springframework.data.annotation.Id;
 
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
-@JsonPropertyOrder({ "id", "name"})
+@Getter
 @EqualsAndHashCode
+@JsonPropertyOrder({ "id", "name"})
 public class Organization {
 
     @Id
@@ -28,11 +30,4 @@ public class Organization {
             this.name = name;
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
 }
