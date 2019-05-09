@@ -46,17 +46,17 @@ public class R2dbcSpaceUsersRepository {
 		if (entity.getManagers() != null) {
 			spec = spec.value("managers", toJson(entity.getManagers()));
 		} else {
-			spec = spec.nullValue("managers", String.class);
+			spec = spec.nullValue("managers");
 		}
 		if (entity.getAuditors() != null) {
 			spec = spec.value("auditors", toJson(entity.getAuditors()));
 		} else {
-			spec = spec.nullValue("auditors", String.class);
+			spec = spec.nullValue("auditors");
 		}
 		if (entity.getManagers() != null) {
 			spec = spec.value("developers", toJson(entity.getDevelopers()));
 		} else {
-			spec = spec.nullValue("developers", String.class);
+			spec = spec.nullValue("developers");
 		}
 		return spec.fetch().rowsUpdated().then(Mono.just(entity));
 	}
