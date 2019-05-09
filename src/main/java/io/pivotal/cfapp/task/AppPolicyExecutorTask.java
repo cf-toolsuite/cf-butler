@@ -25,9 +25,11 @@ import io.pivotal.cfapp.service.AppDetailService;
 import io.pivotal.cfapp.service.AppRelationshipService;
 import io.pivotal.cfapp.service.HistoricalRecordService;
 import io.pivotal.cfapp.service.PoliciesService;
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+@Slf4j
 @Component
 public class AppPolicyExecutorTask implements ApplicationRunner {
 
@@ -61,10 +63,11 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
     }
 
     public void execute() {
+		log.info("AppPolicyExecutorTask started");
     	deleteApplicationsWithNoServiceBindings()
 	    	.then(deleteApplicationsWithServiceBindingsButDoNotDeleteBoundServiceInstances())
 	    	.then(deleteApplicationsWithServiceBindingsAndDeleteBoundServiceInstances())
-	    	.subscribe();
+	    	.subscribe(e -> log.info("AppPolicyExecutorTask completed"));
     }
 
     @Scheduled(cron = "${cron.execution}")

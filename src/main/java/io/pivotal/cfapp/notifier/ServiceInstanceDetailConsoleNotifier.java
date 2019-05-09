@@ -22,7 +22,7 @@ public class ServiceInstanceDetailConsoleNotifier implements ApplicationListener
 
 	@Override
 	public void onApplicationEvent(ServiceInstanceDetailRetrievedEvent event) {
-		log.info(String.join("\n\n", report.generatePreamble(), report.generateDetail(event)));
+		log.trace(String.join("%n%n", report.generatePreamble(), report.generateDetail(event)));
 	}
 
 }

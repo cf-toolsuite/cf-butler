@@ -44,64 +44,64 @@ public class R2dbcServiceInstanceDetailRepository {
 		if (entity.getServiceInstanceId() != null) {
 			spec = spec.value("service_instance_id", entity.getServiceInstanceId());
 		} else {
-			spec = spec.nullValue("service_instance_id", String.class);
+			spec = spec.nullValue("service_instance_id");
 		}
 		if (entity.getName() != null) {
 			spec = spec.value("service_name", entity.getName());
 		} else {
-			spec = spec.nullValue("service_name", String.class);
+			spec = spec.nullValue("service_name");
 		}
 		if (entity.getService() != null) {
 			spec = spec.value("service", entity.getService());
 		} else {
-			spec = spec.nullValue("service", String.class);
+			spec = spec.nullValue("service");
 		}
 		if (entity.getDescription() != null) {
 			spec = spec.value("description", entity.getDescription());
 		} else {
-			spec = spec.nullValue("description", String.class);
+			spec = spec.nullValue("description");
 		}
 		if (entity.getPlan() != null) {
 			spec = spec.value("plan", entity.getPlan());
 		} else {
-			spec = spec.nullValue("plan", String.class);
+			spec = spec.nullValue("plan");
 		}
 		if (entity.getType() != null) {
 			spec = spec.value("type", entity.getType());
 		} else {
-			spec = spec.nullValue("type", String.class);
+			spec = spec.nullValue("type");
 		}
 		if (entity.getApplications() != null) {
 			spec = spec.value("bound_applications", String.join(",", entity.getApplications()));
 		} else {
-			spec = spec.nullValue("bound_applications", String.class);
+			spec = spec.nullValue("bound_applications");
 		}
 		if (entity.getLastOperation() != null) {
 			spec = spec.value("last_operation", entity.getLastOperation());
 		} else {
-			spec = spec.nullValue("last_operation", String.class);
+			spec = spec.nullValue("last_operation");
 		}
 		if (entity.getLastUpdated() != null) {
 			spec = spec.value("last_updated", Timestamp.valueOf(entity.getLastUpdated()));
 		} else {
-			spec = spec.nullValue("last_updated", Timestamp.class);
+			spec = spec.nullValue("last_updated");
 		}
 		if (entity.getDashboardUrl() != null) {
 			spec = spec.value("dashboard_url", entity.getDashboardUrl());
 		} else {
-			spec = spec.nullValue("dashboard_url", String.class);
+			spec = spec.nullValue("dashboard_url");
 		}
 		if (entity.getRequestedState() != null) {
 			spec = spec.value("requested_state", entity.getRequestedState());
 		} else {
-			spec = spec.nullValue("requested_state", String.class);
+			spec = spec.nullValue("requested_state");
 		}
 		return spec.fetch().rowsUpdated().then(Mono.just(entity));
 	}
 
 	public Flux<ServiceInstanceDetail> findAll() {
-		return client.select().from("service_instance_detail")
-				.orderBy(Sort.by("organization", "space", "service", "service_name"))
+		String select = "select pk, organization, space, service_instance_id, service_name, service, description, plan, type, bound_applications, last_operation, last_updated, dashboard_url, requested_state from service_instance_detail order by organization, space, service, service_name";
+		return client.execute().sql(select)
 				.map((row, metadata) -> fromRow(row))
 				.all();
 	}
