@@ -4,8 +4,6 @@ import java.sql.Timestamp;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.r2dbc.function.DatabaseClient;
 import org.springframework.data.r2dbc.function.DatabaseClient.GenericInsertSpec;
 import org.springframework.stereotype.Repository;
@@ -34,25 +32,25 @@ public class R2dbcHistoricalRecordRepository {
 		if (entity.getAppId() != null) {
 			spec = spec.value("app_id", entity.getAppId());
 		} else {
-			spec = spec.nullValue("app_id", String.class);
+			spec = spec.nullValue("app_id");
 		}
 		if (entity.getServiceInstanceId() != null) {
 			spec = spec.value("service_instance_id", entity.getServiceInstanceId());
 		} else {
-			spec = spec.nullValue("service_instance_id", String.class);
+			spec = spec.nullValue("service_instance_id");
 		}
 		spec = spec.value("type", entity.getType());
 		if (entity.getName() != null) {
 			spec = spec.value("name", entity.getName());
 		} else {
-			spec = spec.nullValue("name", String.class);
+			spec = spec.nullValue("name");
 		}
 		return spec.fetch().rowsUpdated().then(Mono.just(entity));
 	}
 
 	public Flux<HistoricalRecord> findAll() {
-		return client.select().from("historical_record")
-						.orderBy(Sort.by(Direction.DESC, "transaction_datetime"))
+		String select = "select pk, transaction_date_time, action_taken, organization, space, app_id, service_instance_id, type, name from historical_record order by transaction_datetime desc";
+		return client.execute().sql(select)
 						.as(HistoricalRecord.class)
 						.fetch()
 						.all();

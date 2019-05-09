@@ -16,10 +16,12 @@ import io.pivotal.cfapp.domain.AppRelationship;
 import io.pivotal.cfapp.domain.AppRelationshipRequest;
 import io.pivotal.cfapp.domain.Space;
 import io.pivotal.cfapp.service.AppRelationshipService;
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
+@Slf4j
 @Component
 public class AppRelationshipTask implements ApplicationListener<SpacesRetrievedEvent> {
 
@@ -47,6 +49,7 @@ public class AppRelationshipTask implements ApplicationListener<SpacesRetrievedE
     }
 
     public void collect(List<Space> spaces) {
+        log.info("AppRelationshipTask started");
     	service
             .deleteAll()
             .thenMany(Flux.fromIterable(spaces))
@@ -60,10 +63,11 @@ public class AppRelationshipTask implements ApplicationListener<SpacesRetrievedE
             .thenMany(service.findAll().subscribeOn(Schedulers.elastic()))
                 .collectList()
                 .subscribe(
-                    r -> publisher.publishEvent(
-                        new AppRelationshipRetrievedEvent(this)
-                            .relations(r)
-                ));
+                    r -> {
+                        publisher.publishEvent(new AppRelationshipRetrievedEvent(this).relations(r));
+                        log.info("AppRelationshipTask completed");
+                    }
+                );
     }
 
     protected Flux<AppRelationshipRequest> getServiceSummary(AppRelationshipRequest request) {

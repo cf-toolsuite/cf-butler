@@ -53,6 +53,7 @@ public class ServiceInstanceDetailTask implements ApplicationListener<SpacesRetr
     }
 
     public void collect(List<Space> spaces) {
+        log.info("ServiceInstanceDetailTask started");
     	service
             .deleteAll()
             .thenMany(Flux.fromIterable(spaces))
@@ -68,10 +69,11 @@ public class ServiceInstanceDetailTask implements ApplicationListener<SpacesRetr
             .thenMany(service.findAll().subscribeOn(Schedulers.elastic()))
                 .collectList()
                 .subscribe(
-                    r -> publisher.publishEvent(
-                        new ServiceInstanceDetailRetrievedEvent(this)
-                            .detail(r)
-        ));
+                    r -> {
+                        publisher.publishEvent(new ServiceInstanceDetailRetrievedEvent(this).detail(r));
+                        log.info("ServiceInstanceDetailTask completed");
+                    }
+                );
     }
 
     protected Flux<ServiceRequest> getServiceSummary(ServiceRequest request) {

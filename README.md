@@ -176,8 +176,6 @@ Within each [ApplicationPolicy](https://github.com/pacphi/cf-butler/blob/master/
 ./gradlew build
 ```
 
-> **Note**: as of 2019-03-08 currently embedding implementation borrowed directly from [r2dbc-spi](https://github.com/r2dbc/r2dbc-spi) ([url-parser](https://github.com/r2dbc/r2dbc-spi/tree/url-parser) branch) and [spring-boot-r2dbc](https://github.com/spring-projects-experimental/spring-boot-r2dbc) projects until updated releases of these artifacts are made publicly available. See this open [issue](https://github.com/r2dbc/r2dbc-spi/issues/37) and [pull-request](https://github.com/r2dbc/r2dbc-spi/pull/48).
-
 ## How to Run with Gradle
 
 ```

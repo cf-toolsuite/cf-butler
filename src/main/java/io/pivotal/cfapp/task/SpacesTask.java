@@ -11,9 +11,11 @@ import org.springframework.stereotype.Component;
 import io.pivotal.cfapp.domain.Organization;
 import io.pivotal.cfapp.domain.Space;
 import io.pivotal.cfapp.service.SpaceService;
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
 
+@Slf4j
 @Component
 public class SpacesTask implements ApplicationListener<OrganizationsRetrievedEvent> {
 
@@ -37,6 +39,7 @@ public class SpacesTask implements ApplicationListener<OrganizationsRetrievedEve
 	}
 
 	public void collect(List<Organization> organizations) {
+        log.info("SpacesTask started");
         service
             .deleteAll()
 			.thenMany(Flux.fromIterable(organizations))
@@ -45,11 +48,11 @@ public class SpacesTask implements ApplicationListener<OrganizationsRetrievedEve
             .flatMap(service::save)
             .thenMany(service.findAll().subscribeOn(Schedulers.elastic()))
                 .collectList()
-                .subscribe(r ->
-                    publisher.publishEvent(
-                        new SpacesRetrievedEvent(this)
-                            .spaces(r)
-                    )
+                .subscribe(
+                    r -> {
+                        publisher.publishEvent(new SpacesRetrievedEvent(this).spaces(r));
+                        log.info("SpacesTask completed");
+                    }
                 );
     }
 
