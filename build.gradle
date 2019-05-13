@@ -103,7 +103,7 @@ dependencies {
     // We want a prior version of spring-data-r2dbc b/c https://github.com/spring-projects/spring-data-r2dbc/commit/79e32941b51fb74d5356a050a0a66717e3e5da1c requires a dependency on Spring Framework 5.2
     implementation('org.springframework.data:spring-data-r2dbc:1.0.0.BUILD-20190508.084637-64')
     implementation('io.r2dbc:r2dbc-client:0.8.0.M8')
-    implementation('io.r2dbc:r2dbc-pool:0.8.0.M8')
+    implementation('io.r2dbc:r2dbc-pool:1.0.0.BUILD-SNAPSHOT')
     // FIXME Seems like we shouldn't have a dependency on Spring JDBC
     implementation('org.springframework:spring-jdbc')
     implementation('io.r2dbc:r2dbc-h2:0.8.0.M8')
