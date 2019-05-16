@@ -1,10 +1,10 @@
 # Pivotal Application Service > Butler
- 
+
 [![Build Status](https://travis-ci.org/pacphi/cf-butler.svg?branch=master)](https://travis-ci.org/pacphi/cf-butler) [![Known Vulnerabilities](https://snyk.io/test/github/pacphi/cf-butler/badge.svg)](https://snyk.io/test/github/pacphi/cf-butler)
 
 > Status: Incubating
 
-You are a platform operator working for a Fortune 500 enterprise.  You've witnessed first-hand how the product development teams your team supports are super productive; happily invoking `cf push`, `cf cs` and `cf bs` many times per day to deploy applications, create services and bind them to those applications.  
+You are a platform operator working for a Fortune 500 enterprise.  You've witnessed first-hand how the product development teams your team supports are super productive; happily invoking `cf push`, `cf cs` and `cf bs` many times per day to deploy applications, create services and bind them to those applications.
 
 This is great, except that over time, on your non-production foundations, as you've browsed organizations and spaces, you have noticed a large number of stopped application instances and orphaned services (i.e., those not bound to any applications).
 
@@ -17,7 +17,7 @@ This is where `cf-butler` has your back.
 Please take 5-10 mintues to view this short video demonstration to get a sense of what `cf-butler` can do.
 
 [![Youtube screenshot](cf-butler-demo.jpg)](https://youtu.be/IyLJfC6N60Q)
- 
+
 
 ## Prerequisites
 
@@ -82,7 +82,7 @@ Based on choice the authorization token provider
 
 ### General configuration notes
 
-If you copied and appended a suffix to the original `application.yml` then you would set `spring.profiles.active` to be that suffix 
+If you copied and appended a suffix to the original `application.yml` then you would set `spring.profiles.active` to be that suffix
 
 E.g., if you had a configuration file named `application-pws.yml`
 
@@ -94,7 +94,7 @@ E.g., if you had a configuration file named `application-pws.yml`
 
 ### Using an external database
 
-By default `cf-butler` employs an in-memory [H2](http://www.h2database.com) instance.  
+By default `cf-butler` employs an in-memory [H2](http://www.h2database.com) instance.
 
 If you wish to configure an external database you must set set `spring.r2dbc.*` properties as described [here](https://github.com/spring-projects-experimental/spring-boot-r2dbc).
 
@@ -137,7 +137,7 @@ On startup `cf-butler` will read files from the repo and cache in a database.  E
 
 ### To set the operations schedule
 
-Update the value of the `cron` properties in `application.yml`.  Consult this [article](https://www.baeldung.com/spring-scheduled-tasks) and the [Javadoc](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/scheduling/annotation/Scheduled.html#cron--) to understand how to tune it for your purposes.  
+Update the value of the `cron` properties in `application.yml`.  Consult this [article](https://www.baeldung.com/spring-scheduled-tasks) and the [Javadoc](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/scheduling/annotation/Scheduled.html#cron--) to understand how to tune it for your purposes.
 
 > `cron` has two sub-properties: `collection` and `execution`.  Make sure `execution` is scheduled to trigger after `collection`.
 
@@ -517,6 +517,22 @@ Sample output
   "deathstar,default,darth.vader@sith.io;grandmoff.tarkin@sith.io"
 ]
 ```
+
+```
+GET /snapshot/demographics
+```
+> Yields organization, space and user totals on the foundation
+
+Sample output
+
+```
+{
+  "total-organizations": 4,
+  "total-spaces": 11,
+  "total-users": 6
+}
+```
+
 
 ### Accounting
 

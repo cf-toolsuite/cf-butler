@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -47,12 +48,8 @@ public class R2dbcSpaceUsersService implements SpaceUsersService {
 	public Mono<Integer> count() {
 		// a single user may belong to multiple orgs/spaces
 		// iterate spaces collecting unique usernames, ignore assigned roles
-		final Set<String> usernames = new HashSet<>();
-		return repo
-				.findAll()
-					.map(su -> usernames.addAll(su.getUsers()))
-					.then(Mono.just(usernames))
-					.map(u -> usernames.size());
+		return obtainUniqueUsernames()
+				.map(u -> u.size());
 	}
 
 	public Mono<Map<String, Integer>> countByOrganization() {
@@ -88,11 +85,10 @@ public class R2dbcSpaceUsersService implements SpaceUsersService {
 	public Mono<Set<String>> obtainUniqueUsernames() {
 		// a single user may belong to multiple orgs/spaces
 		// iterate spaces collecting unique usernames
-		final Set<String> usernames = new HashSet<>();
 		return repo
 				.findAll()
-					.map(su -> usernames.addAll(su.getUsers()))
-					.then(Mono.justOrEmpty(usernames));
+					.flatMap(su -> Flux.fromIterable(su.getUsers()))
+					.collect(Collectors.toSet());
 	}
 
 }

@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.cloudfoundry.client.v2.servicebindings.ListServiceBindingsRequest;
@@ -62,6 +63,8 @@ public class ServiceInstanceDetailTask implements ApplicationListener<SpacesRetr
 	        .flatMap(serviceBoundAppIdsRequest -> getServiceBoundApplicationIds(serviceBoundAppIdsRequest))
 	        .flatMap(serviceBoundAppNamesRequest -> getServiceBoundApplicationNames(serviceBoundAppNamesRequest))
             .flatMap(serviceDetailRequest -> getServiceDetail(serviceDetailRequest))
+            .collect(Collectors.toSet())
+            .flatMapMany(s -> Flux.fromIterable(s))
             .publishOn(Schedulers.parallel())
             .flatMap(service::save)
             .onErrorContinue(

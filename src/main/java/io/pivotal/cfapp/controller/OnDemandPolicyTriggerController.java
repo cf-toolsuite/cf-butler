@@ -10,7 +10,7 @@ import io.pivotal.cfapp.task.AppPolicyExecutorTask;
 import io.pivotal.cfapp.task.ServiceInstancePolicyExecutorTask;
 import reactor.core.publisher.Mono;
 
-@Profile("test")
+@Profile("on-demand")
 @RestController
 public class OnDemandPolicyTriggerController {
 
