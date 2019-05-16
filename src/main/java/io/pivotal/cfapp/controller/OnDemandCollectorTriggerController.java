@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import io.pivotal.cfapp.task.OrganizationsTask;
 import reactor.core.publisher.Mono;
 
-@Profile("test")
+@Profile("on-demand")
 @RestController
 public class OnDemandCollectorTriggerController {
 

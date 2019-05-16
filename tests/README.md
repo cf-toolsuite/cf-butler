@@ -6,10 +6,10 @@ In order to test definition and execution of application and service instance po
 
 ### Start the app
 
-You should activate the `test` profile in addition to a profile that allows you to appropriately connect to a target foundation
+You should activate the `on-demand` profile in addition to a profile that allows you to appropriately connect to a target foundation
 
 ```
-./gradlew bootRun -Dspring.profiles.active=test,{target_foundation_profile}
+./gradlew bootRun -Dspring.profiles.active=on-demand,{target_foundation_profile}
 ```
 where `{target_foundation_profile}` is something like `pws` or `pcfone`
 
