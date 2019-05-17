@@ -1,27 +1,33 @@
 package io.pivotal.cfapp.service;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import io.pivotal.cfapp.domain.SpaceUsers;
+import io.pivotal.cfapp.domain.UserAccounts;
 import io.pivotal.cfapp.repository.R2dbcSpaceUsersRepository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuples;
 
 @Service
 public class R2dbcSpaceUsersService implements SpaceUsersService {
 
-	private R2dbcSpaceUsersRepository repo;
+	private final R2dbcSpaceUsersRepository repo;
+	private final AccountMatcher matcher;
 
 	@Autowired
-	public R2dbcSpaceUsersService(R2dbcSpaceUsersRepository repo) {
+	public R2dbcSpaceUsersService(
+		R2dbcSpaceUsersRepository repo,
+		AccountMatcher matcher) {
 		this.repo = repo;
+		this.matcher = matcher;
 	}
 
 	@Override
@@ -45,13 +51,6 @@ public class R2dbcSpaceUsersService implements SpaceUsersService {
 	}
 
 	@Override
-	public Mono<Integer> count() {
-		// a single user may belong to multiple orgs/spaces
-		// iterate spaces collecting unique usernames, ignore assigned roles
-		return obtainUniqueUsernames()
-				.map(u -> u.size());
-	}
-
 	public Mono<Map<String, Integer>> countByOrganization() {
 		// a single user may belong to multiple orgs/spaces
 		// iterate spaces collecting unique usernames, ignore assigned roles
@@ -82,13 +81,58 @@ public class R2dbcSpaceUsersService implements SpaceUsersService {
 	}
 
 	@Override
-	public Mono<Set<String>> obtainUniqueUsernames() {
+	public Mono<Long> totalUserAccounts() {
+		return obtainUserAccountNames().count();
+	}
+
+	@Override
+	public Mono<Long> totalServiceAccounts() {
+		return obtainServiceAccountNames().count();
+	}
+
+	@Override
+	public Flux<String> obtainUserAccountNames() {
 		// a single user may belong to multiple orgs/spaces
 		// iterate spaces collecting unique usernames
-		return repo
+		return
+			repo
 				.findAll()
-					.flatMap(su -> Flux.fromIterable(su.getUsers()))
-					.collect(Collectors.toSet());
+				.flatMap(su -> Flux.fromIterable(su.getUsers()))
+				.collect(Collectors.toCollection(TreeSet::new))
+				.flatMapMany(n -> Flux.fromIterable(n))
+				.filter(m -> matcher.matches(m));
+	}
+
+	@Override
+	public Flux<String> obtainServiceAccountNames() {
+		return
+			repo
+				.findAll()
+				.flatMap(su -> Flux.fromIterable(su.getUsers()))
+				.collect(Collectors.toCollection(TreeSet::new))
+				.flatMapMany(n -> Flux.fromIterable(n))
+				.filter(m -> !matcher.matches(m));
+	}
+
+	@Override
+	public Flux<String> obtainAccountNames() {
+		return Flux.concat(obtainUserAccountNames(), obtainServiceAccountNames());
+	}
+
+	@Override
+	public Flux<UserAccounts> obtainUserAccounts() {
+		return
+			repo
+				.findAll()
+				.map(su -> UserAccounts
+								.builder()
+									.organization(su.getOrganization())
+									.space(su.getSpace())
+									.accounts(su.getUsers()
+													.stream()
+													.filter(u -> matcher.matches(u))
+													.collect(Collectors.toSet()))
+									.build());
 	}
 
 }

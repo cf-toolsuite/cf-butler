@@ -21,6 +21,7 @@ cf:
   connectionPoolSize: 8
   organizationBlackList:
     - system
+  accountRegex: "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$"
   policies:
     provider: dbms
     #provider: git
@@ -105,6 +106,7 @@ cf:
   connectionPoolSize: ${vcap.services.cf-butler-secrets.credentials.CF_CONNECTION_POOLSIZE:8}
   refreshToken: ${vcap.services.cf-butler-secrets.credentials.CF_REFRESH-TOKEN}
   organizationBlackList: ${vcap.services.cf-butler-secrets.credentials.CF_ORGANIZATION-BLACK-LIST}
+  accountRegex: ${vcap.services.cf-butler-secrets.credentials.CF_ACCOUNT-REGEX}
   policies:
     provider: ${vcap.services.cf-butler-secrets.credentials.CF_POLICIES_PROVIDER}
     uri: ${vcap.services.cf-butler-secrets.credentials.CF_POLICIES_URI}

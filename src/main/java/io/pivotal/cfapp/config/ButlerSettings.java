@@ -29,7 +29,8 @@ public class ButlerSettings {
     private String username;
     private String password;
     // this is the value of RefreshToken within ~/.cf/config.json after one authenticates w/ cf login -a {api_endpoint} -sso
-    private String refreshToken;
+	private String refreshToken;
+	private String accountRegex;
 	private Set<String> organizationBlackList = DEFAULT_BLACKLIST;
 
     public Set<String> getOrganizationBlackList() {
@@ -56,7 +57,7 @@ public class ButlerSettings {
         } else if (StringUtils.isBlank(input)) {
             return "anomalous";
         } else {
-			Optional<String> buildpack = 
+			Optional<String> buildpack =
 				getBuildpacks()
 					.stream()
 					.filter(b -> input.contains(b))

@@ -10,7 +10,7 @@ import lombok.Builder.Default;
 
 @Builder
 @Getter
-@JsonPropertyOrder({ "total-organizations", "total-spaces", "total-users" })
+@JsonPropertyOrder({ "total-organizations", "total-spaces", "total-user-accounts", "total-service-accounts" })
 public class Demographics {
 
     @Default
@@ -22,17 +22,23 @@ public class Demographics {
     private Long spaces = 0L;
 
     @Default
-    @JsonProperty("total-users")
-    private Integer users = 0;
+    @JsonProperty("total-user-accounts")
+    private Long userAccounts = 0L;
+
+    @Default
+    @JsonProperty("total-service-accounts")
+    private Long serviceAccounts = 0L;
 
     @JsonCreator
     public Demographics(
         @JsonProperty("total-organizations") Long organizations,
         @JsonProperty("total-spaces") Long spaces,
-        @JsonProperty("total-users") Integer users
+        @JsonProperty("total-user-accounts") Long userAccounts,
+        @JsonProperty("total-service-accounts") Long serviceAccounts
     ) {
         this.organizations = organizations;
         this.spaces = spaces;
-        this.users = users;
+        this.userAccounts = userAccounts;
+        this.serviceAccounts = serviceAccounts;
     }
 }

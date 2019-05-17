@@ -30,6 +30,7 @@
         </Root>
 
         <!--
+        <Logger name="io.pivotal.cfapp.service" level="trace" />
         <Logger name="org.springframework" level="warn" />
         <Logger name="reactor.core" level="debug" />
         <Logger name="io.r2dbc" level="debug" />

@@ -1,5 +1,7 @@
 package io.pivotal.cfapp.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -9,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.pivotal.cfapp.domain.SnapshotDetail;
 import io.pivotal.cfapp.domain.SnapshotSummary;
+import io.pivotal.cfapp.domain.UserAccounts;
 import io.pivotal.cfapp.service.SnapshotService;
 import reactor.core.publisher.Mono;
 
@@ -50,6 +53,13 @@ public class SnapshotController {
 	public Mono<ResponseEntity<String>> getApplicationInstanceCsvReport() {
 		return service
 					.assembleCsvAIReport()
+					.map(r -> ResponseEntity.ok(r));
+	}
+
+	@GetMapping(value = { "/snapshot/detail/users" }, produces = MediaType.TEXT_PLAIN_VALUE )
+	public Mono<ResponseEntity<String>> getUserAccountCsvReport() {
+		return service
+					.assembleCsvUserAccountReport()
 					.map(r -> ResponseEntity.ok(r));
 	}
 
