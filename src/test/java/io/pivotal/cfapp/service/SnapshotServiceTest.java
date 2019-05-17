@@ -91,7 +91,8 @@ public class SnapshotServiceTest {
     @Test
     public void testAssembleUserCounts() {
         Mono<UserCounts> input = snapService.assembleUserCounts();
-        StepVerifier.create(input).assertNext(uc -> assertEquals(3, uc.getTotalUsers())).verifyComplete();
+        StepVerifier.create(input).assertNext(uc -> assertEquals(3, uc.getTotalUserAccounts())).verifyComplete();
+        StepVerifier.create(input).assertNext(uc -> assertEquals(0, uc.getTotalServiceAccounts())).verifyComplete();
     }
 
     @Test

@@ -21,7 +21,7 @@ import lombok.Builder.Default;
 @NoArgsConstructor(access=AccessLevel.PACKAGE)
 @Getter
 @ToString
-@JsonPropertyOrder({ "applications", "service-instances", "application-relationships", "users"})
+@JsonPropertyOrder({ "applications", "service-instances", "application-relationships", "accounts"})
 public class SnapshotDetail {
 
     @Default
@@ -37,7 +37,7 @@ public class SnapshotDetail {
     private List<AppRelationship> applicationRelationships = new ArrayList<>();
 
     @Default
-    @JsonProperty("users")
-    private Set<String> users = new HashSet<>();
+    @JsonProperty("accounts")
+    private Set<String> accounts = new HashSet<>();
 
 }

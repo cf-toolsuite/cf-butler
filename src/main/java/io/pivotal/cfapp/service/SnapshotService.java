@@ -13,8 +13,10 @@ import io.pivotal.cfapp.domain.SnapshotSummary;
 import io.pivotal.cfapp.domain.UserCounts;
 import io.pivotal.cfapp.report.AppDetailCsvReport;
 import io.pivotal.cfapp.report.ServiceInstanceDetailCsvReport;
+import io.pivotal.cfapp.report.UserAccountsCsvReport;
 import io.pivotal.cfapp.task.AppDetailRetrievedEvent;
 import io.pivotal.cfapp.task.ServiceInstanceDetailRetrievedEvent;
+import io.pivotal.cfapp.task.UserAccountsRetrievedEvent;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 
@@ -29,6 +31,7 @@ public class SnapshotService {
     private final ServiceInstanceMetricsService siMetricsService;
     private final AppDetailCsvReport appDetailCsvReport;
     private final ServiceInstanceDetailCsvReport siDetailCsvReport;
+    private final UserAccountsCsvReport uaCsvReport;
 
     @Autowired
     public SnapshotService(
@@ -48,6 +51,7 @@ public class SnapshotService {
         this.siMetricsService = siMetricsService;
         this.appDetailCsvReport = new AppDetailCsvReport(settings);
         this.siDetailCsvReport = new ServiceInstanceDetailCsvReport(settings);
+        this.uaCsvReport = new UserAccountsCsvReport(settings);
     }
 
     public Mono<String> assembleCsvAIReport() {
@@ -62,6 +66,20 @@ public class SnapshotService {
 		        			"\n\n",
 		        			appDetailCsvReport.generatePreamble(),
 		        			appDetailCsvReport.generateDetail(event)));
+    }
+
+    public Mono<String> assembleCsvUserAccountReport() {
+        return spaceUsersService
+				.obtainUserAccounts()
+				.collectList()
+		        .map(r -> new UserAccountsRetrievedEvent(this)
+							.detail(r)
+				)
+		        .map(event ->
+		        	String.join(
+		        			"\n\n",
+		        			uaCsvReport.generatePreamble(),
+		        			uaCsvReport.generateDetail(event)));
     }
 
     public Mono<String> assembleCsvSIReport() {
@@ -92,8 +110,9 @@ public class SnapshotService {
                                             .collectList()
                                                 .map(ar -> b.applicationRelationships(ar)))
                         .flatMap(b -> spaceUsersService
-                                        .obtainUniqueUsernames()
-                                            .map(u -> b.users(u).build()));
+                                        .obtainAccountNames()
+                                            .collect(Collectors.toSet())
+                                            .map(u -> b.accounts(u).build()));
     }
 
     public Mono<SnapshotSummary> assembleSnapshotSummary() {
@@ -107,7 +126,8 @@ public class SnapshotService {
         return spaceUsersService
                 .countByOrganization()
                     .map(cbo -> UserCounts.builder().byOrganization(cbo))
-                    .flatMap(b -> spaceUsersService.count().map(c -> b.totalUsers(c).build()));
+                    .flatMap(b -> spaceUsersService.totalUserAccounts().map(c -> b.totalUserAccounts(c)))
+                    .flatMap(b -> spaceUsersService.totalServiceAccounts().map(c -> b.totalServiceAccounts(c).build()));
     }
 
     protected Mono<ApplicationCounts> assembleApplicationCounts() {

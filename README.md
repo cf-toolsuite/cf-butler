@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/pacphi/cf-butler.svg?branch=master)](https://travis-ci.org/pacphi/cf-butler) [![Known Vulnerabilities](https://snyk.io/test/github/pacphi/cf-butler/badge.svg)](https://snyk.io/test/github/pacphi/cf-butler)
 
-> Status: Incubating
+> Status: Beta
 
 You are a platform operator working for a Fortune 500 enterprise.  You've witnessed first-hand how the product development teams your team supports are super productive; happily invoking `cf push`, `cf cs` and `cf bs` many times per day to deploy applications, create services and bind them to those applications.
 
@@ -507,21 +507,23 @@ organization,space,service instance id,name,service,description,plan,type,bound 
 ```
 GET /snapshot/detail/users
 ```
-> Provides a list of all space users (ignoring role) in comma-separated value format by organization and space, where multiple users in each space are semicolon-separated and filtering out "service accounts".
+> Provides a list of all space users (ignoring role) in comma-separated value format by organization and space, where multiple users in each space are comma-separated. Service accounts are filtered.
 
 Sample output
 
 ```
-[
-  "dum-e,default,cphillipson@pivotal.io;tony.stark@marvel.com;vmanoharan@pivotal.io",
-  "deathstar,default,darth.vader@sith.io;grandmoff.tarkin@sith.io"
-]
+User accounts from api.sys.cf.zoo.labs.foo.org generated 2019-05-17T00:19:45.932764.
+
+
+organization,space,user accounts
+"mvptime","default","cphillipson@pivotal.io,bruce.lee@kungfulegends.com,vmanoharan@pivotal.io"
+"planespotter","default","stan.lee@marvel.com,vmanoharan@pivotal.io"
 ```
 
 ```
 GET /snapshot/demographics
 ```
-> Yields organization, space and user totals on the foundation
+> Yields organization, space user account, and service account totals on the foundation
 
 Sample output
 
@@ -529,7 +531,8 @@ Sample output
 {
   "total-organizations": 4,
   "total-spaces": 11,
-  "total-users": 6
+  "total-user-accounts": 3,
+  "total-service-accounts": 3
 }
 ```
 

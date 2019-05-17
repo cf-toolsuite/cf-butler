@@ -25,8 +25,10 @@ public class DemographicsService {
     }
 
     public Mono<Demographics> getDemographics() {
-        return totalUsers()
-                    .map(u -> Demographics.builder().users(u))
+        return totalUserAccounts()
+                    .map(ua -> Demographics.builder().userAccounts(ua))
+                    .flatMap(b -> totalServiceAccounts()
+                                .map(sa -> b.serviceAccounts(sa)))
                     .flatMap(b -> totalSpaces()
                                 .map(s -> b.spaces(s)))
                     .flatMap(b -> totalOrganizations()
@@ -41,7 +43,11 @@ public class DemographicsService {
         return spaceService.findAll().count();
     }
 
-    private Mono<Integer> totalUsers() {
-        return spaceUsersService.count();
+    private Mono<Long> totalUserAccounts() {
+        return spaceUsersService.totalUserAccounts();
+    }
+
+    private Mono<Long> totalServiceAccounts() {
+        return spaceUsersService.totalServiceAccounts();
     }
 }
