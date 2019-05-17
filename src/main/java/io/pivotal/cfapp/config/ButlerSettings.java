@@ -21,6 +21,8 @@ public class ButlerSettings {
 	private static final Set<String> DEFAULT_BLACKLIST = Set.of(SYSTEM_ORG);
 	private static final String[] KNOWN_BUILDPACKS = "apt,binary,clojure,dotnet,elixir,emberjs,erlang,go,haskell,hwc,java,jboss,jetty,liberty,meteor,nginx,nodejs,php,pyspark,python,ruby,rust,staticfile,swift,tc,tomcat,tomee,weblogic".split(",");
 	private static final Set<String> DEFAULT_BUILDPACKS = Set.of(KNOWN_BUILDPACKS);
+	// user accounts are typically email addresses, so we'll define a regex to match on recognizable email pattern
+	private static final String DEFAULT_ACCOUNT_REGEX = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
 
 	private String apiHost;
 	private Set<String> buildpacks = DEFAULT_BUILDPACKS;
@@ -38,6 +40,10 @@ public class ButlerSettings {
     	Set<String> nonEmptyBlacklist = CollectionUtils.isEmpty(organizationBlackList) ?
     			DEFAULT_BLACKLIST: organizationBlackList;
     	return merge(nonEmptyBlacklist, DEFAULT_BLACKLIST);
+	}
+
+	public String getAccountRegex() {
+		return StringUtils.isNotBlank(accountRegex) ? accountRegex: DEFAULT_ACCOUNT_REGEX;
 	}
 
 	public String getUsageDomain() {
