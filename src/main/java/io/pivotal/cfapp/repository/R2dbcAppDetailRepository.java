@@ -221,10 +221,14 @@ public class R2dbcAppDetailRepository {
 					.urls(Arrays.asList(Defaults.getValueOrDefault(row.get("urls", String.class), "").split("\\s*,\\s*")))
 					.lastEvent(Defaults.getValueOrDefault(row.get("last_event", String.class), ""))
 					.lastEventActor(Defaults.getValueOrDefault(row.get("last_event_actor", String.class), ""))
-					.lastEventTime(Defaults.getValueOrDefault(row.get("last_event_time", Timestamp.class), Timestamp.valueOf(LocalDateTime.MIN)).toLocalDateTime())
-					.lastPushed(Defaults.getValueOrDefault(row.get("last_pushed", Timestamp.class), Timestamp.valueOf(LocalDateTime.MIN)).toLocalDateTime())
+					.lastEventTime(toLocalDateTime(Defaults.getValueOrDefault(row.get("last_event_time", Timestamp.class), null)))
+					.lastPushed(toLocalDateTime(Defaults.getValueOrDefault(row.get("last_pushed", Timestamp.class), null)))
 					.requestedState(Defaults.getValueOrDefault(row.get("requested_state", String.class), ""))
 					.build();
+	}
+
+	private LocalDateTime toLocalDateTime(Timestamp t) {
+		return t != null ? t.toLocalDateTime(): null;
 	}
 
 	private Tuple2<AppDetail, ApplicationPolicy> toTuple(AppDetail detail, ApplicationPolicy policy) {

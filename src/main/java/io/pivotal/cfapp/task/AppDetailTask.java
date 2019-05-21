@@ -119,7 +119,7 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
             .lastPushed(a.getLastUploaded() != null ? a.getLastUploaded()
                         .toInstant()
                         .atZone(ZoneId.systemDefault())
-                        .toLocalDateTime(): LocalDateTime.MIN)
+                        .toLocalDateTime(): null)
             .requestedState(a.getRequestedState().toLowerCase())
             .build();
     }
@@ -137,8 +137,7 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
                                        .name(e.getEvent())
                                        .actor(e.getActor())
                                        .time(
-                                           e.getTime().toInstant().atZone(ZoneId.systemDefault())
-                                            .toLocalDateTime())
+                                           e.getTime() != null ? e.getTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime(): null)
                                        .build())
                        .next()
                        .map(e ->
