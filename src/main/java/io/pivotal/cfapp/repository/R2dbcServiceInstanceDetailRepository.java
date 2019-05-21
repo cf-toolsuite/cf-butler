@@ -120,7 +120,7 @@ public class R2dbcServiceInstanceDetailRepository {
 					.applications(
 						Arrays.asList(Defaults.getValueOrDefault(row.get("bound_applications", String.class), "").split("\\s*,\\s*")))
 					.lastOperation(Defaults.getValueOrDefault(row.get("last_operation", String.class), ""))
-					.lastUpdated(Defaults.getValueOrDefault(row.get("last_updated", Timestamp.class), Timestamp.valueOf(LocalDateTime.MIN)).toLocalDateTime())
+					.lastUpdated(toLocalDateTime(Defaults.getValueOrDefault(row.get("last_updated", Timestamp.class), null)))
 					.dashboardUrl(Defaults.getValueOrDefault(row.get("dashboard_url", String.class), ""))
 					.requestedState(Defaults.getValueOrDefault(row.get("requested_state", String.class), ""))
 					.build();
@@ -170,6 +170,10 @@ public class R2dbcServiceInstanceDetailRepository {
 
 	private Tuple2<ServiceInstanceDetail, ServiceInstancePolicy> toTuple(ServiceInstanceDetail detail, ServiceInstancePolicy policy) {
 		return Tuples.of(detail, policy);
+	}
+
+	private LocalDateTime toLocalDateTime(Timestamp t) {
+		return t != null ? t.toLocalDateTime(): null;
 	}
 
 }
