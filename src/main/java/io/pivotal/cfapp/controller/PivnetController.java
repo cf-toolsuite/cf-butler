@@ -8,27 +8,28 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.pivotal.cfapp.client.PivnetClient;
+import io.pivotal.cfapp.domain.product.PivnetCache;
+import io.pivotal.cfapp.domain.product.Products;
 import io.pivotal.cfapp.domain.product.Release;
-import reactor.core.publisher.Mono;
 
 @RestController
 public class PivnetController {
 
-    private final PivnetClient client;
+    private final PivnetCache cache;
 
     @Autowired
-    public PivnetController(PivnetClient client) {
-        this.client = client;
+    public PivnetController(PivnetCache cache) {
+        this.cache = cache;
+    }
+
+    @GetMapping("/product/list")
+    public ResponseEntity<Products> getProductList() {
+        return ResponseEntity.ok(cache.getProducts());
     }
 
     @GetMapping("/product/releases")
-    public Mono<ResponseEntity<List<Release>>> getLatestAvailableProductReleases(@RequestParam("latest") boolean latest) {
-        return client
-                .getLatestProductReleases()
-                .collectList()
-                    .map(l -> ResponseEntity.ok(l))
-                    .defaultIfEmpty(ResponseEntity.notFound().build());
+    public ResponseEntity<List<Release>> getLatestAvailableProductReleases(@RequestParam("latest") boolean latest) {
+        return ResponseEntity.ok(cache.getLatestProductReleases());
     }
 
 }

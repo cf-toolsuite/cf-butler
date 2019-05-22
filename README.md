@@ -636,6 +636,11 @@ GET /policies/report
 ### Product Info
 
 ```
+GET /product/list
+```
+> Fetches full complement of products from [Pivnet](https://network.pivotal.io)
+
+```
 GET /product/releases?latest=true
 ```
 > Fetches a list of the latest available releases of products from [Pivnet](https://network.pivotal.io) (e.g., tiles, buildpacks and stemcells)

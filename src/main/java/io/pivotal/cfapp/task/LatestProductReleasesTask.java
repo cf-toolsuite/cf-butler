@@ -8,6 +8,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import io.pivotal.cfapp.client.PivnetClient;
+import io.pivotal.cfapp.domain.product.PivnetCache;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -15,13 +16,16 @@ import lombok.extern.slf4j.Slf4j;
 public class LatestProductReleasesTask implements ApplicationRunner {
 
     private final PivnetClient client;
+    private final PivnetCache cache;
     private final ApplicationEventPublisher publisher;
 
     @Autowired
     public LatestProductReleasesTask(
-    		PivnetClient client,
+            PivnetClient client,
+            PivnetCache cache,
     		ApplicationEventPublisher publisher) {
         this.client = client;
+        this.cache = cache;
         this.publisher = publisher;
     }
 
@@ -37,6 +41,7 @@ public class LatestProductReleasesTask implements ApplicationRunner {
                 .collectList()
                 .subscribe(
                     r -> {
+                        cache.setLatestProductReleases(r);
                         publisher.publishEvent(new LatestProductReleasesRetrievedEvent(this).latestReleases(r));
                         log.info("LatestProductReleasesTask completed");
                     }
