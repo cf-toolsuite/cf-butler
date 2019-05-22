@@ -634,6 +634,14 @@ GET /policies/report
 > Produces `text/plain` historical output detailing what applications and service instances have been removed
 
 
+### Product Info
+
+```
+GET /product/releases?latest=true
+```
+> Fetches a list of the latest available releases of products from [Pivnet](https://network.pivotal.io) (e.g., tiles, buildpacks and stemcells)
+
+
 ## Credits
 
 * [Peter Royal](https://github.com/osi) for [assistance](https://gitter.im/reactor/reactor?at=5c38c24966f3433023afceb2) troubleshooting some method implementation in [ApplicationPolicyExecutorTask](https://github.com/pacphi/cf-butler/blob/master/src/main/java/io/pivotal/cfapp/task/AppPolicyExecutorTask.java)
