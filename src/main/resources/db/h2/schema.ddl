@@ -7,3 +7,4 @@ CREATE TABLE IF NOT EXISTS service_instance_policy ( pk BIGINT IDENTITY PRIMARY 
 CREATE TABLE IF NOT EXISTS application_relationship ( pk BIGINT IDENTITY PRIMARY KEY, organization VARCHAR(100), space VARCHAR(100), app_id VARCHAR(50), app_name VARCHAR(100), service_instance_id VARCHAR(50), service_name VARCHAR(100), service_plan VARCHAR(50), service_type VARCHAR(30) );
 CREATE TABLE IF NOT EXISTS historical_record ( pk BIGINT IDENTITY PRIMARY KEY, transaction_datetime TIMESTAMP, action_taken VARCHAR(20), organization VARCHAR(100), space VARCHAR(100), app_id VARCHAR(50), service_instance_id VARCHAR(50), type VARCHAR(20), name VARCHAR(300) );
 CREATE TABLE IF NOT EXISTS space_users ( pk BIGINT IDENTITY PRIMARY KEY, organization varchar(100), space varchar(100), auditors VARCHAR(512000), managers VARCHAR(512000), developers VARCHAR(512000) );
+CREATE TABLE IF NOT EXISTS time_keeper ( collection_time TIMESTAMP );

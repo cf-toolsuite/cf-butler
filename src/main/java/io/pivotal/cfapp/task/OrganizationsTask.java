@@ -2,9 +2,8 @@ package io.pivotal.cfapp.task;
 
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -16,35 +15,35 @@ import reactor.core.scheduler.Schedulers;
 
 @Slf4j
 @Component
-public class OrganizationsTask implements ApplicationRunner {
+public class OrganizationsTask implements ApplicationListener<TkRetrievedEvent> {
 
-    private DefaultCloudFoundryOperations opsClient;
-    private OrganizationService service;
+    private final DefaultCloudFoundryOperations opsClient;
+    private final OrganizationService organizationService;
     private ApplicationEventPublisher publisher;
 
     @Autowired
     public OrganizationsTask(
     		DefaultCloudFoundryOperations opsClient,
-    		OrganizationService service,
+            OrganizationService organizationService,
     		ApplicationEventPublisher publisher) {
         this.opsClient = opsClient;
-        this.service = service;
+        this.organizationService = organizationService;
         this.publisher = publisher;
     }
 
     @Override
-    public void run(ApplicationArguments args) throws Exception {
+    public void onApplicationEvent(TkRetrievedEvent event) {
         collect();
     }
 
     public void collect() {
         log.info("OrganizationTask started");
-        service
+        organizationService
             .deleteAll()
             .thenMany(getOrganizations())
             .publishOn(Schedulers.parallel())
-            .flatMap(service::save)
-            .thenMany(service.findAll().subscribeOn(Schedulers.elastic()))
+            .flatMap(organizationService::save)
+            .thenMany(organizationService.findAll().subscribeOn(Schedulers.elastic()))
                 .collectList()
                 .subscribe(
                     r -> {

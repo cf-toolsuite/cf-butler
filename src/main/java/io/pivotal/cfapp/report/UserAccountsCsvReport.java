@@ -14,10 +14,15 @@ public class UserAccountsCsvReport  {
 		this.appSettings = appSettings;
 	}
 
-    public String generatePreamble() {
+    public String generatePreamble(LocalDateTime collectionTime) {
         StringBuffer preamble = new StringBuffer();
         preamble.append("User accounts from ");
         preamble.append(appSettings.getApiHost());
+        if (collectionTime != null) {
+            preamble.append(" collected ");
+            preamble.append(collectionTime);
+            preamble.append(" and");
+        }
         preamble.append(" generated ");
         preamble.append(LocalDateTime.now());
         preamble.append(".");

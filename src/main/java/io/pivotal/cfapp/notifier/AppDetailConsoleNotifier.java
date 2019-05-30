@@ -6,6 +6,8 @@ import org.springframework.stereotype.Component;
 
 import io.pivotal.cfapp.config.ButlerSettings;
 import io.pivotal.cfapp.report.AppDetailCsvReport;
+import io.pivotal.cfapp.service.TkService;
+import io.pivotal.cfapp.service.TkServiceUtil;
 import io.pivotal.cfapp.task.AppDetailRetrievedEvent;
 import lombok.extern.slf4j.Slf4j;
 
@@ -14,16 +16,22 @@ import lombok.extern.slf4j.Slf4j;
 public class AppDetailConsoleNotifier implements ApplicationListener<AppDetailRetrievedEvent> {
 
 	private final AppDetailCsvReport report;
+	private final TkServiceUtil util;
 
     @Autowired
-    public AppDetailConsoleNotifier(ButlerSettings appSettings) {
-        this.report = new AppDetailCsvReport(appSettings);
+    public AppDetailConsoleNotifier(
+		    ButlerSettings appSettings,
+		    TkService tkService) {
+		    this.report = new AppDetailCsvReport(appSettings);
+		    this.util = new TkServiceUtil(tkService);
     }
 
 	@Override
 	public void onApplicationEvent(AppDetailRetrievedEvent event) {
-		log.trace(String.join("%n%n", report.generatePreamble(), report.generateDetail(event)));
-	}
+			util
+			    .getTimeCollected()
+          		.subscribe(tc -> log.trace(String.join("%n%n", report.generatePreamble(tc), report.generateDetail(event))));
 
+	}
 
 }
