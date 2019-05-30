@@ -317,7 +317,7 @@ These REST endpoints have been exposed for administrative purposes.
 
 ### Operations Manager
 
-These endpoints are only available when the `om.enabled` property is set to `true`.  They mimic a reduced set of the [Operations Manager API](https://docs.pivotal.io/pivotalcf/2-5/opsman-api/).  For each request, the Request header must contain an Authorization bearer token.  To obtain a token, consult the (Authentication)[https://docs.pivotal.io/pivotalcf/2-5/opsman-api/?shell#authentication] section of the Operations Manager API.
+These endpoints are only available when the `om.enabled` property is set to `true`.  They mimic a reduced set of the [Operations Manager API](https://docs.pivotal.io/pivotalcf/2-5/opsman-api/).  For each request, the Request header must contain an Authorization bearer token.  To obtain a token, consult the [Authentication](https://docs.pivotal.io/pivotalcf/2-5/opsman-api/?shell#authentication) section of the Operations Manager API.
 
 ```
 GET /products/deployed
