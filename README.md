@@ -151,6 +151,27 @@ Update the value of the `cron` properties in `application.yml`.  Consult this [a
 
 > `cron` has two sub-properties: `collection` and `execution`.  Make sure `execution` is scheduled to trigger after `collection`.
 
+### To discriminate user from service accounts
+
+Consult [ButlerSettings.java](https://github.com/pacphi/cf-butler/blob/master/src/main/java/io/pivotal/cfapp/config/ButlerSettings.java#L25) for the default pattern value used to discriminate between user and service accounts.  You may override the default by adding to
+
+* application.yml
+
+  ```
+  cf:
+    accountRegex: "some other pattern"
+  ```
+
+or
+
+* config/secrets.json
+
+  ```
+  {
+    "CF_ACCOUNT-REGEX": "some other pattern"
+  }
+  ```
+
 ### Filtering organizations
 
 #### Blacklist
@@ -199,9 +220,18 @@ Add entries in your `config/secrets.json` like
 
 ## How to Build
 
+**Important:** If you pulled the source for cf-butler after May 8, 2019, please consult and execute the [fetch-legacy-dependencies.sh](fetch-legacy-dependencies.sh) script.
+
+```
+./fetch-legacy-dependencies.sh
+```
+
+and/or
+
 ```
 ./gradlew build
 ```
+
 
 ## How to Run with Gradle
 
