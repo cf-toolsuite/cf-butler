@@ -55,8 +55,11 @@ public class Release {
     @JsonProperty("description")
     private String description;
 
-    @JsonProperty
+    @JsonProperty("eula")
     private Eula eula;
+
+    @JsonProperty("end_of_support_date")
+    private LocalDate endOfSupportDate;
 
     @JsonProperty("eccn")
     private String eccn;
@@ -83,6 +86,7 @@ public class Release {
         @JsonProperty("availability") String availability,
         @JsonProperty("description") String description,
         @JsonProperty("eula") Eula eula,
+        @JsonProperty("end_of_support_date") LocalDate endOfSupportDate,
         @JsonProperty("eccn") String eccn,
         @JsonProperty("license_exception") String licenseException,
         @JsonProperty("updated_at") Instant updatedAt,
@@ -97,6 +101,7 @@ public class Release {
         this.availability = availability;
         this.description = description;
         this.eula = eula;
+        this.endOfSupportDate = endOfSupportDate;
         this.eccn = eccn;
         this.licenseException = licenseException;
         this.updatedAt = updatedAt;

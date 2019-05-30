@@ -14,10 +14,15 @@ public class ServiceInstanceDetailCsvReport {
 		this.settings = settings;
 	}
 
-    public String generatePreamble() {
+    public String generatePreamble(LocalDateTime collectionTime) {
     	StringBuffer preamble = new StringBuffer();
         preamble.append("Service inventory detail from ");
         preamble.append(settings.getApiHost());
+        if (collectionTime != null) {
+            preamble.append(" collected ");
+            preamble.append(collectionTime);
+            preamble.append(" and");
+        }
         preamble.append(" generated ");
         preamble.append(LocalDateTime.now());
         preamble.append(".");

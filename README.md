@@ -17,12 +17,20 @@ Please take 5-10 mintues to view this short video demonstration to get a sense o
 
 [![Youtube screenshot](cf-butler-demo.jpg)](https://youtu.be/IyLJfC6N60Q)
 
+### tl;dr
+
+Cf-butler exposes a number of self-service endpoints that perform house-keeping for your foundation.  You define policies and an execution schedule.  Then applications and service instances are removed based on policy crtieria.  Cf-butler also provides detail and summary snapshot reporting on all applications, service instances, user accounts, organizations and spaces.  Lastly, cf-butler aspires to provide operators insight into freshness of installed tiles, stemcells and buildpacks.
 
 ## Prerequisites
 
 Required
 
-* [Pivotal Application Service](https://pivotal.io/platform/pivotal-application-service) account
+* [Pivotal Network](https://network.pivotal.io) account
+* [Pivotal Application Service](https://pivotal.io/platform/pivotal-application-service) admin account
+
+Optional
+
+* [Pivotal Operations Manager](https://pivotal.io/platform/pcf-components/pcf-ops-manager) admin account
 
 
 ## Tools
@@ -30,6 +38,7 @@ Required
 * [git](https://git-scm.com/downloads) 2.20.1 or better
 * [JDK](http://openjdk.java.net/install/) 11 or better
 * [cf](https://docs.cloudfoundry.org/cf-cli/install-go-cli.html) CLI 6.41.0 or better
+* [uaac](https://github.com/cloudfoundry/cf-uaac) 4.1.0 or better
 
 
 ## Clone
@@ -51,9 +60,10 @@ Place secrets in `config/secrets.json`, e.g.,
 
 ```
 {
+  "PIVNET_API-TOKEN": "xxxxx"
 	"CF_API-HOST": "xxxxx",
 	"CF_USERNAME": "xxxxx",
-	"CF_PASSWORD": "xxxxx"
+	"CF_PASSWORD": "xxxxx",
 }
 ```
 
@@ -66,9 +76,10 @@ We'll use this file later as input configuration for the creation of either a [c
 At a minimum you should supply values for the following keys
 
 * `cf.apiHost` - a Pivotal Application Service API endpoint
-* `token.provider` - Authorization token provider, options are: `userpass` or `sso`
+* `token.provider` - Pivotal Application Service authorization token provider, options are: `userpass` or `sso`
+* `pivnet.apiToken` - a Pivotal Network legacy API Token, visit your [profile](https://network.pivotal.io/users/dashboard/edit-profile)
 
-Based on choice the authorization token provider
+Based on choice of the authorization token provider
 
 #### Username and password
 
@@ -168,6 +179,23 @@ Within each [ApplicationPolicy](https://github.com/pacphi/cf-butler/blob/master/
 
 > If the organization whitelist is not specified in a policy then that policy's execution applies to all organizations on the foundation (except for those in the organization blacklist).
 
+### Integration w/ Operations Manager
+
+You must add the following configuration properties to `application-{env}.yml` if you want to enable integration with an operations manager instance
+
+* `om.apiHost` - a Pivotal Operations Manager API endpoint
+* `om.enabled` - a boolean property that must be set to `true`
+
+> the `{env}` filename suffix above denotes the Spring Profile you would activate for your environment
+
+or
+
+Add entries in your `config/secrets.json` like
+
+```
+  "OM_API-HOST": "xxxxxx",
+  "OM_ENABLED": true
+```
 
 ## How to Build
 
@@ -287,22 +315,53 @@ Shutdown and destroy the app and service instances
 
 These REST endpoints have been exposed for administrative purposes.
 
-### Organization
+### Operations Manager
+
+These endpoints are only available when the `om.enabled` property is set to `true`.  They mimic a reduced set of the [Operations Manager API](https://docs.pivotal.io/pivotalcf/2-5/opsman-api/).  For each request, the Request header must contain an Authorization bearer token.  To obtain a token, consult the (Authentication)[https://docs.pivotal.io/pivotalcf/2-5/opsman-api/?shell#authentication] section of the Operations Manager API.
 
 ```
-GET /organizations
+GET /products/deployed
+```
+> List of all tiles installed on foundation.
+
+```
+GET /products/stemcell/assignments
+```
+> Lists all stemcells associated with installed tiles (includes staged and available stemcell versions).
+
+```
+GET /products/om/info
+```
+> Returns the current version of the Operations Manager instance
+
+### Pivotal Network
+
+Mimics a reduced set of the [Pivotal Network API](https://network.pivotal.io/docs/api).
+
+```
+GET /store/product/catalog
+```
+> Retrieves a list of all products from Pivotal Network (includes buildpacks, stemcells and tiles)
+
+```
+GET /store/product/releases?latest=true
+```
+> Returns a list of the latest available releases for all products on Pivotal Network (includes buildpacks, stemcells and tiles)
+
+### Snapshot
+
+```
+GET /snapshot/organizations
 ```
 > Lists organizations
 
 ```
-GET /orgnizations/count
+GET /snapshot/orgnizations/count
 ```
 > Counts the number of organizations on a foundation
 
-### User
-
 ```
-GET /space-users
+GET /snapshot/spaces/users
 ```
 > Provides details and light metrics for users by role within all organizations and spaces on a foundation
 
@@ -346,23 +405,20 @@ Sample output
 ```
 > `users` is the unique subset of all users from each role in the organization/space
 
-
 ```
-GET /space-users/{organization}/{space}
+GET /snapshot/{organization}/{space}/users
 ```
 > Provides details and light metrics for users by role within a targeted organization and space
 
 ```
-GET /users
+GET /snapshot/users
 ```
 > Lists all unique user accounts on a foundation
 
 ```
-GET /users/count
+GET /snapshot/users/count
 ```
 > Counts the number of user accounts on a foundation
-
-### Snapshot
 
 ```
 GET /snapshot/summary
@@ -535,7 +591,6 @@ Sample output
 }
 ```
 
-
 ### Accounting
 
 > Note: `/accounting/**` endpoints below require a user with `cloud_controller.admin` or `usage_service.audit` scope.  See [Creating and Managing Users with the UAA CLI (UAAC)](https://docs.pivotal.io/pivotalcf/2-5/uaa/uaa-user-management.html).
@@ -558,6 +613,7 @@ GET /accounting/services
 GET /accounting/tasks
 ```
 > Produces a system-wide account report of [task usage](https://docs.pivotal.io/pivotalcf/2-4/opsguide/accounting-report.html#task-usage)
+
 
 ### Policies
 
@@ -631,19 +687,6 @@ DELETE /policies/serviceInstance/{id}
 GET /policies/report
 ```
 > Produces `text/plain` historical output detailing what applications and service instances have been removed
-
-
-### Product Info
-
-```
-GET /product/list
-```
-> Fetches full complement of products from [Pivnet](https://network.pivotal.io)
-
-```
-GET /product/releases?latest=true
-```
-> Fetches a list of the latest available releases of products from [Pivnet](https://network.pivotal.io) (e.g., tiles, buildpacks and stemcells)
 
 
 ## Credits

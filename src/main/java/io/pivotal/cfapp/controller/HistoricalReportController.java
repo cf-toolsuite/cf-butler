@@ -42,7 +42,8 @@ public class HistoricalReportController {
 		        	String.join(
 		        			"\n\n",
 		        			report.generatePreamble(),
-		        			report.generateDetail(event))));
+							report.generateDetail(event))))
+				.defaultIfEmpty(ResponseEntity.notFound().build());
 	}
 
 }

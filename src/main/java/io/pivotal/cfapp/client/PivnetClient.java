@@ -58,6 +58,14 @@ public class PivnetClient {
     public Flux<Release> getLatestProductReleases() {
         return getProducts()
                 .flatMapMany(list -> Flux.fromIterable(list.getProducts()))
-                .concatMap(p -> getLatestProductRelease(p.getSlug()));
+                .flatMap(p -> getLatestProductRelease(p.getSlug()));
+    }
+
+    public Flux<Release> getAllProductReleases() {
+        return getProducts()
+                .flatMapMany(list -> Flux.fromIterable(list.getProducts()))
+                .flatMap(l -> getProductReleases(l.getSlug()))
+                .onErrorContinue(
+                    (ex, data) -> log.warn("Problem obtaining releases for product [{}] .", data, ex));
     }
 }

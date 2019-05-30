@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import io.pivotal.cfapp.client.PivnetClient;
 import io.pivotal.cfapp.domain.product.PivnetCache;
 import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Mono;
 
 @Slf4j
 @Component
@@ -38,13 +39,27 @@ public class ProductsTask implements ApplicationRunner {
         log.info("ProductsTask started");
         client
             .getProducts()
-                .subscribe(
-                    r -> {
-                        cache.setProducts(r);
-                        publisher.publishEvent(new ProductsRetrievedEvent(this).products(r));
-                        log.info("ProductsTask completed");
-                    }
-                );
+            .flatMap(products -> {
+                cache.setProducts(products);
+                return Mono.empty(); })
+            .then(
+                client
+                    .getAllProductReleases()
+                    .collectList()
+                    .flatMap(releases -> {
+                        cache.setAllReleases(releases);
+                        return Mono.empty(); }))
+            .then(
+                client
+                    .getLatestProductReleases()
+                    .collectList()
+                    .flatMap(releases -> { cache.setLatestProductReleases(releases); return Mono.empty(); }))
+            .subscribe(
+                r -> {
+                    publisher.publishEvent(new ProductsRetrievedEvent(this).products(cache.getProducts()));
+                    log.info("ProductsTask completed");
+                }
+            );
     }
 
     @Scheduled(cron = "${cron.collection}")

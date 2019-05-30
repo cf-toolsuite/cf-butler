@@ -36,7 +36,7 @@ public class ReleaseLinks {
 
     public ReleaseLinks(
         @JsonProperty("self") Self self,
-        @JsonProperty("releases") EulaAcceptance eulaAcceptance,
+        @JsonProperty("eula_acceptance") EulaAcceptance eulaAcceptance,
         @JsonProperty("product_files") ProductFiles productFiles,
         @JsonProperty("file_groups") FileGroups fileGroups,
         @JsonProperty("user_groups") UserGroups userGroups
