@@ -61,9 +61,9 @@ Place secrets in `config/secrets.json`, e.g.,
 ```
 {
   "PIVNET_API-TOKEN": "xxxxx"
-	"CF_API-HOST": "xxxxx",
-	"CF_USERNAME": "xxxxx",
-	"CF_PASSWORD": "xxxxx",
+  "CF_API-HOST": "xxxxx",
+  "CF_USERNAME": "xxxxx",
+  "CF_PASSWORD": "xxxxx",
 }
 ```
 
