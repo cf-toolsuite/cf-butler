@@ -104,14 +104,21 @@ cf:
   sslValidationSkipped: ${vcap.services.cf-butler-secrets.credentials.CF_SKIP_SSL_VALIDATION:false}
   connectionPoolSize: ${vcap.services.cf-butler-secrets.credentials.CF_CONNECTION_POOLSIZE:8}
   refreshToken: ${vcap.services.cf-butler-secrets.credentials.CF_REFRESH-TOKEN}
-  organizationBlackList: ${vcap.services.cf-butler-secrets.credentials.CF_ORGANIZATION-BLACK-LIST}
-  accountRegex: ${vcap.services.cf-butler-secrets.credentials.CF_ACCOUNT-REGEX}
+  organizationBlackList: ${vcap.services.cf-butler-secrets.credentials.CF_ORGANIZATION-BLACK-LIST:}
+  accountRegex: ${vcap.services.cf-butler-secrets.credentials.CF_ACCOUNT-REGEX:}
   policies:
     provider: ${vcap.services.cf-butler-secrets.credentials.CF_POLICIES_PROVIDER}
     uri: ${vcap.services.cf-butler-secrets.credentials.CF_POLICIES_URI}
     commit: ${vcap.services.cf-butler-secrets.credentials.CF_POLICIES_COMMIT}
     filePaths: ${vcap.services.cf-butler-secrets.credentials.CF_POLICIES_FILE-PATHS}
-  buildpacks: ${vcap.services.cf-butler-secrets.credentials.CF_BUILDPACKS}
+  buildpacks: ${vcap.services.cf-butler-secrets.credentials.CF_BUILDPACKS:}
+
+om:
+  apiHost: ${vcap.services.cf-butler-secrets.credentials.OM_API-HOST}
+  enabled: $vcap.services.cf-butler-secrets.credentials.OM_ENABLED:false}
+
+pivnet:
+  apiToken: ${vcap.services.cf-butler-secrets.credentials.PIVNET_API-TOKEN}
 
 token:
   provider: ${vcap.services.cf-butler-secrets.credentials.TOKEN_PROVIDER}

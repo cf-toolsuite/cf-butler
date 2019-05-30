@@ -11,49 +11,62 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.pivotal.cfapp.domain.SpaceUsers;
 import io.pivotal.cfapp.service.SpaceUsersService;
+import io.pivotal.cfapp.service.TkService;
+import io.pivotal.cfapp.service.TkServiceUtil;
 import reactor.core.publisher.Mono;
 
 @RestController
 public class SpaceUsersController {
 
 	private final SpaceUsersService service;
+	private final TkServiceUtil util;
 
 	@Autowired
-	public SpaceUsersController(SpaceUsersService service) {
+	public SpaceUsersController(
+		SpaceUsersService service,
+		TkService tkService) {
 		this.service = service;
+		this.util = new TkServiceUtil(tkService);
 	}
 
-	@GetMapping(value = { "/space-users" })
-	public Mono<ResponseEntity<List<SpaceUsers>>> getAllUsers() {
-		return service
-					.findAll()
-						.collectList()
-							.map(users -> ResponseEntity.ok(users))
-							.defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+	@GetMapping(value = { "/snapshot/spaces/users" })
+	public Mono<ResponseEntity<List<SpaceUsers>>> getAllSpaceUsers() {
+		return util.getHeaders()
+				.flatMap(h -> service
+								.findAll()
+								.collectList()
+								.map(users -> new ResponseEntity<>(users, h, HttpStatus.OK)))
+								.defaultIfEmpty(ResponseEntity.notFound().build());
 	}
 
-	@GetMapping("/space-users/{organization}/{space}")
+	@GetMapping("/snapshot/{organization}/{space}/users")
 	public Mono<ResponseEntity<SpaceUsers>> getUsersInOrganizationAndSpace(
 		@PathVariable("organization") String organization,
 		@PathVariable("space") String space) {
-		return service
-					.findByOrganizationAndSpace(organization, space)
-					.map(users -> ResponseEntity.ok(users))
-					.defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+		return util.getHeaders()
+				.flatMap(h -> service
+								.findByOrganizationAndSpace(organization, space)
+								.map(users -> new ResponseEntity<>(users, h, HttpStatus.OK)))
+								.defaultIfEmpty(ResponseEntity.notFound().build());
 	}
 
-	@GetMapping("/users/count")
+	@GetMapping("/snapshot/users/count")
 	public Mono<ResponseEntity<Long>> totalAccounts() {
-		return service.obtainAccountNames().count()
-						.map(c -> ResponseEntity.ok(c));
+		return util.getHeaders()
+				.flatMap(h -> service
+								.obtainAccountNames()
+								.count()
+								.map(c -> new ResponseEntity<>(c, h, HttpStatus.OK)))
+								.defaultIfEmpty(ResponseEntity.ok(0L));
 	}
 
-	@GetMapping("/users")
+	@GetMapping("/snapshot/users")
 	public Mono<ResponseEntity<List<String>>> allAccountNames() {
-		return service.obtainAccountNames()
-						.collectList()
-						.map(o -> ResponseEntity.ok(o))
-						.defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+		return util.getHeaders()
+				.flatMap(h -> service.obtainAccountNames()
+								.collectList()
+								.map(names -> new ResponseEntity<>(names, h, HttpStatus.OK)))
+								.defaultIfEmpty(ResponseEntity.notFound().build());
 	}
 
 }

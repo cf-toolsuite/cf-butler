@@ -14,10 +14,15 @@ public class AppDetailCsvReport  {
 		this.appSettings = appSettings;
 	}
 
-    public String generatePreamble() {
+    public String generatePreamble(LocalDateTime collectionTime) {
         StringBuffer preamble = new StringBuffer();
         preamble.append("Application inventory detail from ");
         preamble.append(appSettings.getApiHost());
+        if (collectionTime != null) {
+            preamble.append(" collected ");
+            preamble.append(collectionTime);
+            preamble.append(" and");
+        }
         preamble.append(" generated ");
         preamble.append(LocalDateTime.now());
         preamble.append(".");

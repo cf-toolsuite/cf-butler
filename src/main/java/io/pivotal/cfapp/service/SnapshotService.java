@@ -1,5 +1,6 @@
 package io.pivotal.cfapp.service;
 
+import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +55,7 @@ public class SnapshotService {
         this.uaCsvReport = new UserAccountsCsvReport(settings);
     }
 
-    public Mono<String> assembleCsvAIReport() {
+    public Mono<String> assembleCsvAIReport(LocalDateTime collectionTime) {
         return appDetailService
 				.findAll()
 				.collectList()
@@ -64,11 +65,11 @@ public class SnapshotService {
 		        .map(event ->
 		        	String.join(
 		        			"\n\n",
-		        			appDetailCsvReport.generatePreamble(),
+		        			appDetailCsvReport.generatePreamble(collectionTime),
 		        			appDetailCsvReport.generateDetail(event)));
     }
 
-    public Mono<String> assembleCsvUserAccountReport() {
+    public Mono<String> assembleCsvUserAccountReport(LocalDateTime collectionTime) {
         return spaceUsersService
 				.obtainUserAccounts()
 				.collectList()
@@ -78,11 +79,11 @@ public class SnapshotService {
 		        .map(event ->
 		        	String.join(
 		        			"\n\n",
-		        			uaCsvReport.generatePreamble(),
+		        			uaCsvReport.generatePreamble(collectionTime),
 		        			uaCsvReport.generateDetail(event)));
     }
 
-    public Mono<String> assembleCsvSIReport() {
+    public Mono<String> assembleCsvSIReport(LocalDateTime collectionTime) {
         return siDetailService
 				.findAll()
 				.collectList()
@@ -92,7 +93,7 @@ public class SnapshotService {
 		        .map(event ->
 		        	String.join(
 		        			"\n\n",
-		        			siDetailCsvReport.generatePreamble(),
+		        			siDetailCsvReport.generatePreamble(collectionTime),
 		        			siDetailCsvReport.generateDetail(event)));
     }
 
