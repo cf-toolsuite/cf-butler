@@ -17,9 +17,9 @@ Please take 5-10 mintues to view this short video demonstration to get a sense o
 
 [![Youtube screenshot](cf-butler-demo.jpg)](https://youtu.be/IyLJfC6N60Q)
 
-### tl;dr
+### Tell me, don't show me
 
-Cf-butler exposes a number of self-service endpoints that perform house-keeping for your foundation.  You define policies and an execution schedule.  Then applications and service instances are removed based on policy crtieria.  Cf-butler also provides detail and summary snapshot reporting on all applications, service instances, user accounts, organizations and spaces.  Lastly, cf-butler aspires to provide operators insight into freshness of installed tiles, stemcells and buildpacks.
+Cf-butler exposes a number of self-service endpoints that perform house-keeping for your foundation.  You define policies and an execution schedule.  Then applications and service instances are removed based on policy crtieria.  Cf-butler also provides detail and summary snapshot reporting on all applications, service instances, user accounts, organizations and spaces.  Lastly, cf-butler aspires to provide operators insight into the "freshness" of installed tiles, stemcells and buildpacks.
 
 ## Prerequisites
 
@@ -220,7 +220,7 @@ Add entries in your `config/secrets.json` like
 
 ## How to Build
 
-**Important:** If you pulled the source for cf-butler after May 8, 2019, please consult and execute the [fetch-legacy-dependencies.sh](fetch-legacy-dependencies.sh) script.
+**Important:** If you pulled the source for cf-butler after May 8, 2019, please consult and execute the [fetch-legacy-dependencies.sh](fetch-legacy-dependencies.sh) script.  Also, see [refreshing](https://stackoverflow.com/questions/13565082/how-can-i-force-gradle-to-redownload-dependencies) dependencies.
 
 ```
 ./fetch-legacy-dependencies.sh
@@ -231,6 +231,7 @@ and/or
 ```
 ./gradlew build
 ```
+
 
 
 ## How to Run with Gradle
