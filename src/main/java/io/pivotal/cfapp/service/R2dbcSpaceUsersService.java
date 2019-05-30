@@ -1,5 +1,7 @@
 package io.pivotal.cfapp.service;
 
+import static io.pivotal.cfapp.config.ButlerSettings.SYSTEM_ORG;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -123,6 +125,7 @@ public class R2dbcSpaceUsersService implements SpaceUsersService {
 		return
 			repo
 				.findAll()
+				.filter(ua -> !ua.getOrganization().equalsIgnoreCase(SYSTEM_ORG))
 				.map(su -> UserAccounts
 								.builder()
 									.organization(su.getOrganization())

@@ -2,6 +2,7 @@
 
 # Fetch legacy dependencies script
 # Stop-gap measure until Spring Cloud Hoxton and Spring Boot 2.2 go GA
+# @see https://github.com/pacphi/cf-butler/issues/36
 
 # Useful for those attempting to
 #  a) resolve dependencies for the first time after May 8, 2019
@@ -21,6 +22,9 @@ jar xvf cf-butler-0.1-SNAPSHOT.jar
 
 mkdir -p $HOME/.m2/repository/org/springframework/data/spring-data-r2dbc/1.0.0.BUILD-SNAPSHOT
 cp BOOT-INF/lib/spring-data-r2dbc-1.0.0.BUILD-20190508.084637-64.jar $HOME/.m2/repository/org/springframework/data/spring-data-r2dbc/1.0.0.BUILD-SNAPSHOT/spring-data-r2dbc-1.0.0.BUILD-20190508.084637-64.jar
+
+mkdir -p $HOME/.m2/repository/org/springframework/data/spring-data-relational/1.1.0.BUILD-SNAPSHOT
+cp BOOT-INF/lib/spring-data-relational-1.1.0.BUILD-SNAPSHOT.jar $HOME/.m2/repository/org/springframework/data/spring-data-relational/1.1.0.BUILD-SNAPSHOT/spring-data-relational-1.1.0.BUILD-SNAPSHOT.jar
 
 mkdir -p $HOME/.m2/repository/org/springframework/boot/experimental/spring-boot-autoconfigure-r2dbc/0.1.0.BUILD-SNAPSHOT
 cp BOOT-INF/lib/spring-boot-autoconfigure-r2dbc-0.1.0.BUILD-SNAPSHOT.jar $HOME/.m2/repository/org/springframework/boot/experimental/spring-boot-autoconfigure-r2dbc/0.1.0.BUILD-SNAPSHOT/spring-boot-autoconfigure-r2dbc-0.1.0.BUILD-20190507.184651-3.jar
