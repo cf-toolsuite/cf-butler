@@ -11,6 +11,6 @@ import lombok.Data;
 public class PivnetCache {
 
     private Products products;
-    private List<Release> allReleases;
+    private List<Release> allProductReleases;
     private List<Release> latestProductReleases;
 }

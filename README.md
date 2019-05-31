@@ -375,9 +375,14 @@ GET /store/product/catalog
 > Retrieves a list of all products from Pivotal Network (includes buildpacks, stemcells and tiles)
 
 ```
-GET /store/product/releases?latest=true
+GET /store/product/releases?q=latest
 ```
 > Returns a list of the latest available releases for all products on Pivotal Network (includes buildpacks, stemcells and tiles)
+
+```
+GET /store/product/releases?q=all
+```
+> Returns a list of all available releases for all products on Pivotal Network (includes buildpacks, stemcells and tiles)
 
 ### Snapshot
 

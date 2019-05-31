@@ -14,14 +14,14 @@ import reactor.core.publisher.Mono;
 
 @Slf4j
 @Component
-public class ProductsTask implements ApplicationRunner {
+public class ProductsAndReleasesTask implements ApplicationRunner {
 
     private final PivnetClient client;
     private final PivnetCache cache;
     private final ApplicationEventPublisher publisher;
 
     @Autowired
-    public ProductsTask(
+    public ProductsAndReleasesTask(
             PivnetClient client,
             PivnetCache cache,
     		ApplicationEventPublisher publisher) {
@@ -36,7 +36,7 @@ public class ProductsTask implements ApplicationRunner {
     }
 
     public void collect() {
-        log.info("ProductsTask started");
+        log.info("ProductsAndReleasesTask started");
         client
             .getProducts()
             .flatMap(products -> {
@@ -47,7 +47,7 @@ public class ProductsTask implements ApplicationRunner {
                     .getAllProductReleases()
                     .collectList()
                     .flatMap(releases -> {
-                        cache.setAllReleases(releases);
+                        cache.setAllProductReleases(releases);
                         return Mono.empty(); }))
             .then(
                 client
@@ -56,8 +56,12 @@ public class ProductsTask implements ApplicationRunner {
                     .flatMap(releases -> { cache.setLatestProductReleases(releases); return Mono.empty(); }))
             .subscribe(
                 r -> {
-                    publisher.publishEvent(new ProductsRetrievedEvent(this).products(cache.getProducts()));
-                    log.info("ProductsTask completed");
+                    publisher.publishEvent(
+                        new ProductsAndReleasesRetrievedEvent(this)
+                                .products(cache.getProducts())
+                                .allReleases(cache.getAllProductReleases())
+                                .latestReleases(cache.getLatestProductReleases()));
+                    log.info("ProductsAndReleasesTask completed");
                 }
             );
     }
