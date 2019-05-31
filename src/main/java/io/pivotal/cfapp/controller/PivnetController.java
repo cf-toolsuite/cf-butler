@@ -39,10 +39,18 @@ public class PivnetController {
 
     @GetMapping("/store/product/releases")
     public Mono<ResponseEntity<List<Release>>> getLatestAvailableProductReleases(
-        @RequestParam(name = "latest", defaultValue = "true") boolean latest) {
-        return util.getHeaders()
-                .map(h -> new ResponseEntity<>(cache.getLatestProductReleases(), h, HttpStatus.OK))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+        @RequestParam(name = "q", defaultValue = "latest") String option) {
+            if (option.equalsIgnoreCase("latest")) {
+                return util.getHeaders()
+                        .map(h -> new ResponseEntity<>(cache.getLatestProductReleases(), h, HttpStatus.OK))
+                        .defaultIfEmpty(ResponseEntity.notFound().build());
+            } else if (option.equalsIgnoreCase("all")) {
+                return util.getHeaders()
+                        .map(h -> new ResponseEntity<>(cache.getAllProductReleases(), h, HttpStatus.OK))
+                        .defaultIfEmpty(ResponseEntity.notFound().build());
+            } else {
+                return Mono.just(ResponseEntity.badRequest().build());
+            }
     }
 
 }
