@@ -20,6 +20,7 @@ import io.pivotal.cfapp.domain.ServiceInstanceDetail;
 import io.pivotal.cfapp.domain.ServiceRequest;
 import io.pivotal.cfapp.domain.Space;
 import io.pivotal.cfapp.service.ServiceInstanceDetailService;
+import io.r2dbc.spi.R2dbcException;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -66,7 +67,7 @@ public class ServiceInstanceDetailTask implements ApplicationListener<SpacesRetr
             .flatMapMany(s -> Flux.fromIterable(s))
             .publishOn(Schedulers.parallel())
             .flatMap(service::save)
-            .onErrorContinue(
+            .onErrorContinue(R2dbcException.class,
                 (ex, data) -> log.error("Problem saving service instance {}.", data != null ? data.toString(): "<>", ex))
             .thenMany(service.findAll().subscribeOn(Schedulers.elastic()))
                 .collectList()

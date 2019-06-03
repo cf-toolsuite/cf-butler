@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import io.pivotal.cfapp.domain.Organization;
 import io.pivotal.cfapp.domain.Space;
 import io.pivotal.cfapp.service.SpaceService;
+import io.r2dbc.spi.R2dbcException;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
@@ -46,7 +47,7 @@ public class SpacesTask implements ApplicationListener<OrganizationsRetrievedEve
             .flatMap(o -> getSpaces(o))
             .publishOn(Schedulers.parallel())
             .flatMap(service::save)
-            .onErrorContinue(
+            .onErrorContinue(R2dbcException.class,
                 (ex, data) -> log.error("Problem saving space {}.", data != null ? data.toString(): "<>", ex))
             .thenMany(service.findAll().subscribeOn(Schedulers.elastic()))
                 .collectList()

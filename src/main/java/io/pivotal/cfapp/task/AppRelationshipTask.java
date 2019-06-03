@@ -16,6 +16,7 @@ import io.pivotal.cfapp.domain.AppRelationship;
 import io.pivotal.cfapp.domain.AppRelationshipRequest;
 import io.pivotal.cfapp.domain.Space;
 import io.pivotal.cfapp.service.AppRelationshipService;
+import io.r2dbc.spi.R2dbcException;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -60,7 +61,7 @@ public class AppRelationshipTask implements ApplicationListener<SpacesRetrievedE
             .flatMap(appRelationshipRequest -> getAppRelationship(appRelationshipRequest))
             .publishOn(Schedulers.parallel())
             .flatMap(service::save)
-            .onErrorContinue(
+            .onErrorContinue(R2dbcException.class,
                 (ex, data) -> log.error("Problem saving application releationship {}.", data != null ? data.toString(): "<>", ex))
             .thenMany(service.findAll().subscribeOn(Schedulers.elastic()))
                 .collectList()
