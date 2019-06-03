@@ -1,5 +1,6 @@
 package io.pivotal.cfapp.task;
 
+import java.sql.SQLException;
 import java.time.ZoneId;
 import java.util.List;
 
@@ -18,6 +19,7 @@ import io.pivotal.cfapp.domain.AppEvent;
 import io.pivotal.cfapp.domain.AppRequest;
 import io.pivotal.cfapp.domain.Space;
 import io.pivotal.cfapp.service.AppDetailService;
+import io.r2dbc.spi.R2dbcException;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -61,7 +63,7 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
             .flatMap(withLastEventRequest -> enrichWithAppEvent(withLastEventRequest))
             .publishOn(Schedulers.parallel())
             .flatMap(service::save)
-            .onErrorContinue(
+            .onErrorContinue(R2dbcException.class,
                 (ex, data) -> log.error("Problem saving application {}.", data != null ? data.toString(): "<>", ex))
             .thenMany(service.findAll().subscribeOn(Schedulers.elastic()))
                 .collectList()

@@ -12,6 +12,7 @@ import io.pivotal.cfapp.domain.Space;
 import io.pivotal.cfapp.domain.SpaceUsers;
 import io.pivotal.cfapp.domain.UserRequest;
 import io.pivotal.cfapp.service.SpaceUsersService;
+import io.r2dbc.spi.R2dbcException;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -46,7 +47,7 @@ public class SpaceUsersTask implements ApplicationListener<SpacesRetrievedEvent>
             .flatMap(spaceUsersRequest -> getSpaceUsers(spaceUsersRequest))
             .publishOn(Schedulers.parallel())
             .flatMap(service::save)
-            .onErrorContinue(
+            .onErrorContinue(R2dbcException.class,
                 (ex, data) -> log.error("Problem saving space user {}.", data != null ? data.toString(): "<>", ex))
                 .collectList()
                 .subscribe(e -> log.info("SpaceUsersTask completed"));

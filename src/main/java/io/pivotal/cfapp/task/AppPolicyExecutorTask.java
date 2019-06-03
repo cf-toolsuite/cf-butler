@@ -25,6 +25,7 @@ import io.pivotal.cfapp.service.AppDetailService;
 import io.pivotal.cfapp.service.AppRelationshipService;
 import io.pivotal.cfapp.service.HistoricalRecordService;
 import io.pivotal.cfapp.service.PoliciesService;
+import io.r2dbc.spi.R2dbcException;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -86,7 +87,9 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
 						.filter(wl -> isWhitelisted(wl.getT2(), wl.getT1().getOrganization()))
 			        	.filter(bl -> isBlacklisted(bl.getT1().getOrganization()))
 			        	.flatMap(ad -> deleteApplication(ad.getT1()))
-			            .flatMap(historicalRecordService::save)
+						.flatMap(historicalRecordService::save)
+						.onErrorContinue(R2dbcException.class,
+                			(ex, data) -> log.error("Problem saving historical record {}.", data != null ? data.toString(): "<>", ex))
 			            .then();
     }
 
@@ -105,11 +108,15 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
 						.flatMap(ar -> appRelationshipService.findByApplicationId(ar.getT1().getAppId()))
 						.flatMap(this::unbindServiceInstance)
 						.flatMap(historicalRecordService::save)
+						.onErrorContinue(R2dbcException.class,
+                			(ex, data) -> log.error("Problem saving historical record {}.", data != null ? data.toString(): "<>", ex))
 						.collect(Collectors.toSet())
 			            .flatMapIterable(it -> it)
 			            .flatMap(ad -> appInfoService.findByAppId(ad.getAppId()))
 						.flatMap(this::deleteApplication)
 						.flatMap(historicalRecordService::save)
+						.onErrorContinue(R2dbcException.class,
+                			(ex, data) -> log.error("Problem saving historical record {}.", data != null ? data.toString(): "<>", ex))
 						.then();
 	}
 
@@ -128,7 +135,9 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
 			        	.filter(bl -> isBlacklisted(bl.getT1().getOrganization()))
 						.flatMap(ar -> appRelationshipService.findByApplicationId(ar.getT1().getAppId()))
 			            .flatMap(this::unbindServiceInstance)
-			            .flatMap(historicalRecordService::save)
+						.flatMap(historicalRecordService::save)
+						.onErrorContinue(R2dbcException.class,
+                			(ex, data) -> log.error("Problem saving historical record {}.", data != null ? data.toString(): "<>", ex))
 			            .collect(Collectors.toSet())
 			            .flatMapIterable(it -> it)
 			            .flatMap(ad -> appInfoService.findByAppId(ad.getAppId()))
@@ -136,7 +145,9 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
 						.flatMap(historicalRecordService::save)
 			            .flatMap(dad -> appRelationshipService.findByApplicationId(dad.getAppId()))
 			            .flatMap(this::deleteServiceInstance)
-			            .flatMap(historicalRecordService::save)
+						.flatMap(historicalRecordService::save)
+						.onErrorContinue(R2dbcException.class,
+                			(ex, data) -> log.error("Problem saving historical record {}.", data != null ? data.toString(): "<>", ex))
 			            .then();
 	}
 
