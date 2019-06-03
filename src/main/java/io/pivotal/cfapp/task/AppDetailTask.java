@@ -61,6 +61,8 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
             .flatMap(withLastEventRequest -> enrichWithAppEvent(withLastEventRequest))
             .publishOn(Schedulers.parallel())
             .flatMap(service::save)
+            .onErrorContinue(
+                (ex, data) -> log.error("Problem saving application {}.", data != null ? data.toString(): "<>", ex))
             .thenMany(service.findAll().subscribeOn(Schedulers.elastic()))
                 .collectList()
                 .subscribe(r -> {

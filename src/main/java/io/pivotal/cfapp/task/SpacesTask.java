@@ -46,6 +46,8 @@ public class SpacesTask implements ApplicationListener<OrganizationsRetrievedEve
             .flatMap(o -> getSpaces(o))
             .publishOn(Schedulers.parallel())
             .flatMap(service::save)
+            .onErrorContinue(
+                (ex, data) -> log.error("Problem saving space {}.", data != null ? data.toString(): "<>", ex))
             .thenMany(service.findAll().subscribeOn(Schedulers.elastic()))
                 .collectList()
                 .subscribe(
