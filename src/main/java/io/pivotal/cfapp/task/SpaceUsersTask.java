@@ -46,6 +46,8 @@ public class SpaceUsersTask implements ApplicationListener<SpacesRetrievedEvent>
             .flatMap(spaceUsersRequest -> getSpaceUsers(spaceUsersRequest))
             .publishOn(Schedulers.parallel())
             .flatMap(service::save)
+            .onErrorContinue(
+                (ex, data) -> log.error("Problem saving space user {}.", data != null ? data.toString(): "<>", ex))
                 .collectList()
                 .subscribe(e -> log.info("SpaceUsersTask completed"));
     }

@@ -1,5 +1,7 @@
 package io.pivotal.cfapp.task;
 
+import java.util.stream.Collectors;
+
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -41,8 +43,12 @@ public class OrganizationsTask implements ApplicationListener<TkRetrievedEvent> 
         organizationService
             .deleteAll()
             .thenMany(getOrganizations())
+            .collect(Collectors.toSet())
+            .flatMapMany(s -> Flux.fromIterable(s))
             .publishOn(Schedulers.parallel())
             .flatMap(organizationService::save)
+            .onErrorContinue(
+                (ex, data) -> log.error("Problem saving organization {}.", data != null ? data.toString(): "<>", ex))
             .thenMany(organizationService.findAll().subscribeOn(Schedulers.elastic()))
                 .collectList()
                 .subscribe(
