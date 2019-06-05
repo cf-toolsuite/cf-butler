@@ -1,6 +1,5 @@
 package io.pivotal.cfapp.repository;
 
-import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -84,7 +83,7 @@ public class R2dbcAppDetailRepository {
 			spec = spec.nullValue("urls");
 		}
 		if (entity.getLastPushed() != null) {
-			spec = spec.value("last_pushed", Timestamp.valueOf(entity.getLastPushed()));
+			spec = spec.value("last_pushed", entity.getLastPushed());
 		} else {
 			spec = spec.nullValue("last_pushed");
 		}
@@ -99,7 +98,7 @@ public class R2dbcAppDetailRepository {
 			spec = spec.nullValue("last_event_actor");
 		}
 		if (entity.getLastEventTime() != null) {
-			spec = spec.value("last_event_time", Timestamp.valueOf(entity.getLastEventTime()));
+			spec = spec.value("last_event_time", entity.getLastEventTime());
 		} else {
 			spec = spec.nullValue("last_event_time");
 		}
@@ -128,8 +127,8 @@ public class R2dbcAppDetailRepository {
 	public Flux<AppDetail> findByDateRange(LocalDate start, LocalDate end) {
 		String sql = "select pk, organization, space, app_id, app_name, buildpack, image, stack, running_instances, total_instances, memory_used, disk_used, urls, last_pushed, last_event, last_event_actor, last_event_time, requested_state from application_detail where last_pushed <= " + settings.getBindPrefix() + 2 + " and last_pushed > " + settings.getBindPrefix() + 1 + " order by last_pushed desc";
 		return client.execute().sql(sql)
-				.bind(settings.getBindPrefix() + 1, Timestamp.valueOf(LocalDateTime.of(end, LocalTime.MAX)))
-				.bind(settings.getBindPrefix() + 2, Timestamp.valueOf(LocalDateTime.of(start, LocalTime.MIDNIGHT)))
+				.bind(settings.getBindPrefix() + 1, LocalDateTime.of(end, LocalTime.MAX))
+				.bind(settings.getBindPrefix() + 2, LocalDateTime.of(start, LocalTime.MIDNIGHT))
 				.map((row, metadata) -> fromRow(row))
 				.all();
 	}
@@ -154,15 +153,15 @@ public class R2dbcAppDetailRepository {
 		String from = "from application_detail";
 		StringBuilder where = new StringBuilder();
 		where.append("where requested_state = " + settings.getBindPrefix() + 1 + " ");
-		Timestamp temporal = null;
+		LocalDateTime temporal = null;
 		if (policy.getFromDateTime() != null) {
 			where.append("and last_event_time <= " + settings.getBindPrefix() + 2 + " ");
-			temporal = Timestamp.valueOf(policy.getFromDateTime());
+			temporal = policy.getFromDateTime();
 		}
 		if (policy.getFromDuration() != null) {
 			where.append("and last_event_time <= " + settings.getBindPrefix() + 2 + " ");
 			LocalDateTime eventTime = LocalDateTime.now().minus(policy.getFromDuration());
-			temporal = Timestamp.valueOf(eventTime);
+			temporal = eventTime;
 		}
 		String orderBy = "order by organization, space, app_name";
 		String sql = String.join(" ", select, from, where, orderBy);
@@ -183,15 +182,15 @@ public class R2dbcAppDetailRepository {
 		String leftJoin = "left join application_relationship ar on ad.app_id = ar.app_id";
 		StringBuilder where = new StringBuilder();
 		where.append("where ar.service_instance_id is null and ad.requested_state = " + settings.getBindPrefix() + 1 + " ");
-		Timestamp temporal = null;
+		LocalDateTime temporal = null;
 		if (policy.getFromDateTime() != null) {
 			where.append("and ad.last_event_time <= " + settings.getBindPrefix() + 2 + " ");
-			temporal = Timestamp.valueOf(policy.getFromDateTime());
+			temporal = policy.getFromDateTime();
 		}
 		if (policy.getFromDuration() != null) {
 			where.append("and ad.last_event_time <= " + settings.getBindPrefix() + 2 + " ");
 			LocalDateTime eventTime = LocalDateTime.now().minus(policy.getFromDuration());
-			temporal = Timestamp.valueOf(eventTime);
+			temporal = eventTime;
 		}
 		String orderBy = "order by ad.organization, ad.space, ad.app_name";
 		String sql = String.join(" ", select, from, leftJoin, where, orderBy);
@@ -221,14 +220,10 @@ public class R2dbcAppDetailRepository {
 					.urls(Arrays.asList(Defaults.getValueOrDefault(row.get("urls", String.class), "").split("\\s*,\\s*")))
 					.lastEvent(Defaults.getValueOrDefault(row.get("last_event", String.class), ""))
 					.lastEventActor(Defaults.getValueOrDefault(row.get("last_event_actor", String.class), ""))
-					.lastEventTime(toLocalDateTime(Defaults.getValueOrDefault(row.get("last_event_time", Timestamp.class), null)))
-					.lastPushed(toLocalDateTime(Defaults.getValueOrDefault(row.get("last_pushed", Timestamp.class), null)))
+					.lastEventTime(Defaults.getValueOrDefault(row.get("last_event_time", LocalDateTime.class), null))
+					.lastPushed(Defaults.getValueOrDefault(row.get("last_pushed", LocalDateTime.class), null))
 					.requestedState(Defaults.getValueOrDefault(row.get("requested_state", String.class), ""))
 					.build();
-	}
-
-	private LocalDateTime toLocalDateTime(Timestamp t) {
-		return t != null ? t.toLocalDateTime(): null;
 	}
 
 	private Tuple2<AppDetail, ApplicationPolicy> toTuple(AppDetail detail, ApplicationPolicy policy) {

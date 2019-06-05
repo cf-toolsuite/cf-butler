@@ -1,6 +1,5 @@
 package io.pivotal.cfapp.repository;
 
-import java.sql.Timestamp;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +24,7 @@ public class R2dbcHistoricalRecordRepository {
 	public Mono<HistoricalRecord> save(HistoricalRecord entity) {
 		GenericInsertSpec<Map<String, Object>> spec =
 			client.insert().into("historical_record")
-				.value("transaction_datetime", Timestamp.valueOf(entity.getTransactionDateTime()));
+				.value("transaction_datetime", entity.getTransactionDateTime());
 		spec = spec.value("action_taken", entity.getActionTaken());
 		spec = spec.value("organization", entity.getOrganization());
 		spec = spec.value("space", entity.getSpace());

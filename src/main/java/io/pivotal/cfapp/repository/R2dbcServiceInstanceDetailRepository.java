@@ -1,6 +1,5 @@
 package io.pivotal.cfapp.repository;
 
-import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -81,7 +80,7 @@ public class R2dbcServiceInstanceDetailRepository {
 			spec = spec.nullValue("last_operation");
 		}
 		if (entity.getLastUpdated() != null) {
-			spec = spec.value("last_updated", Timestamp.valueOf(entity.getLastUpdated()));
+			spec = spec.value("last_updated", entity.getLastUpdated());
 		} else {
 			spec = spec.nullValue("last_updated");
 		}
@@ -120,7 +119,7 @@ public class R2dbcServiceInstanceDetailRepository {
 					.applications(
 						Arrays.asList(Defaults.getValueOrDefault(row.get("bound_applications", String.class), "").split("\\s*,\\s*")))
 					.lastOperation(Defaults.getValueOrDefault(row.get("last_operation", String.class), ""))
-					.lastUpdated(toLocalDateTime(Defaults.getValueOrDefault(row.get("last_updated", Timestamp.class), null)))
+					.lastUpdated(Defaults.getValueOrDefault(row.get("last_updated", LocalDateTime.class), null))
 					.dashboardUrl(Defaults.getValueOrDefault(row.get("dashboard_url", String.class), ""))
 					.requestedState(Defaults.getValueOrDefault(row.get("requested_state", String.class), ""))
 					.build();
@@ -138,16 +137,16 @@ public class R2dbcServiceInstanceDetailRepository {
 		String select = "select pk, organization, space, service_instance_id, service_name, service, description, plan, type, bound_applications, last_operation, last_updated, dashboard_url, requested_state";
 		String from = "from service_instance_detail";
 		StringBuilder where = new StringBuilder();
-		Timestamp temporal = null;
+		LocalDateTime temporal = null;
 		where.append("where bound_applications is null "); // orphans only
 		if (policy.getFromDateTime() != null) {
 			where.append("and last_updated <= " + index + " ");
-			temporal = Timestamp.valueOf(policy.getFromDateTime());
+			temporal = policy.getFromDateTime();
 		}
 		if (policy.getFromDuration() != null) {
 			where.append("and last_updated <= " + index + " ");
 			LocalDateTime eventTime = LocalDateTime.now().minus(policy.getFromDuration());
-			temporal = Timestamp.valueOf(eventTime);
+			temporal = eventTime;
 		}
 		String orderBy = "order by organization, space, service_name";
 		String sql = String.join(" ", select, from, where, orderBy);
@@ -161,8 +160,8 @@ public class R2dbcServiceInstanceDetailRepository {
 	public Flux<ServiceInstanceDetail> findByDateRange(LocalDate start, LocalDate end) {
 		String sql = "select pk, organization, space, service_instance_id, service_name, service, description, plan, type, bound_applications, last_operation, last_updated, dashboard_url, requested_state from service_instance_detail where last_updated <= " + settings.getBindPrefix() + 2 + " and last_updated > " + settings.getBindPrefix() + 1 + " order by last_updated desc";
 		return client.execute().sql(sql)
-				.bind(settings.getBindPrefix() + 1, Timestamp.valueOf(LocalDateTime.of(end, LocalTime.MAX)))
-				.bind(settings.getBindPrefix() + 2, Timestamp.valueOf(LocalDateTime.of(start, LocalTime.MIDNIGHT)))
+				.bind(settings.getBindPrefix() + 1, LocalDateTime.of(end, LocalTime.MAX))
+				.bind(settings.getBindPrefix() + 2, LocalDateTime.of(start, LocalTime.MIDNIGHT))
 				.as(ServiceInstanceDetail.class)
 				.fetch()
 				.all();
@@ -170,10 +169,6 @@ public class R2dbcServiceInstanceDetailRepository {
 
 	private Tuple2<ServiceInstanceDetail, ServiceInstancePolicy> toTuple(ServiceInstanceDetail detail, ServiceInstancePolicy policy) {
 		return Tuples.of(detail, policy);
-	}
-
-	private LocalDateTime toLocalDateTime(Timestamp t) {
-		return t != null ? t.toLocalDateTime(): null;
 	}
 
 }
