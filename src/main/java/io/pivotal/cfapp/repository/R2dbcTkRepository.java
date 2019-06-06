@@ -41,7 +41,7 @@ public class R2dbcTkRepository {
     }
 
     private LocalDateTime fromRow(Row row) {
-        return Defaults.getValueOrDefault(row.get("collection_time", LocalDateTime.class), null);
+        return row.get("collection_time", LocalDateTime.class);
     }
 
 }

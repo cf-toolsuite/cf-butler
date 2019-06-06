@@ -203,7 +203,8 @@ public class R2dbcAppDetailRepository {
 	}
 
 	private AppDetail fromRow(Row row) {
-		return AppDetail
+		AppDetail partial =
+			AppDetail
 				.builder()
 					.pk(row.get("pk", Long.class))
 					.organization(Defaults.getValueOrDefault(row.get("organization", String.class), ""))
@@ -220,10 +221,20 @@ public class R2dbcAppDetailRepository {
 					.urls(Arrays.asList(Defaults.getValueOrDefault(row.get("urls", String.class), "").split("\\s*,\\s*")))
 					.lastEvent(Defaults.getValueOrDefault(row.get("last_event", String.class), ""))
 					.lastEventActor(Defaults.getValueOrDefault(row.get("last_event_actor", String.class), ""))
-					.lastEventTime(Defaults.getValueOrDefault(row.get("last_event_time", LocalDateTime.class), null))
-					.lastPushed(Defaults.getValueOrDefault(row.get("last_pushed", LocalDateTime.class), null))
 					.requestedState(Defaults.getValueOrDefault(row.get("requested_state", String.class), ""))
 					.build();
+		// FIXME Dirty hack! We can remove this bit of code when https://github.com/r2dbc/r2dbc-spi/issues/97 is addressed.
+		AppDetail partialWithEventTime = null;
+		try {
+			partialWithEventTime = AppDetail.from(partial).lastEventTime(row.get("last_event_time", LocalDateTime.class)).build();
+		} catch (ClassCastException cce) {
+			partialWithEventTime = partial;
+		}
+		try {
+			return AppDetail.from(partialWithEventTime).lastPushed(row.get("last_pushed", LocalDateTime.class)).build();
+		} catch (ClassCastException cce) {
+			return partialWithEventTime;
+		}
 	}
 
 	private Tuple2<AppDetail, ApplicationPolicy> toTuple(AppDetail detail, ApplicationPolicy policy) {
