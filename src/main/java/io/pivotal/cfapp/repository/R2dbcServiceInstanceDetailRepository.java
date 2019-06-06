@@ -105,7 +105,7 @@ public class R2dbcServiceInstanceDetailRepository {
 	}
 
 	private ServiceInstanceDetail fromRow(Row row) {
-		return ServiceInstanceDetail
+		ServiceInstanceDetail partial = ServiceInstanceDetail
 				.builder()
 					.pk(row.get("pk", Long.class))
 					.organization(Defaults.getValueOrDefault(row.get("organization", String.class), ""))
@@ -119,10 +119,16 @@ public class R2dbcServiceInstanceDetailRepository {
 					.applications(
 						Arrays.asList(Defaults.getValueOrDefault(row.get("bound_applications", String.class), "").split("\\s*,\\s*")))
 					.lastOperation(Defaults.getValueOrDefault(row.get("last_operation", String.class), ""))
-					.lastUpdated(Defaults.getValueOrDefault(row.get("last_updated", LocalDateTime.class), null))
 					.dashboardUrl(Defaults.getValueOrDefault(row.get("dashboard_url", String.class), ""))
 					.requestedState(Defaults.getValueOrDefault(row.get("requested_state", String.class), ""))
 					.build();
+		// FIXME Dirty hack! We can remove this bit of code when https://github.com/r2dbc/r2dbc-h2/issues/78 is addressed.
+		try {
+			return ServiceInstanceDetail.from(partial).lastUpdated(row.get("last_updated", LocalDateTime.class)).build();
+		} catch (ClassCastException cce) {
+			return partial;
+		}
+
 	}
 
 	public Mono<Void> deleteAll() {
