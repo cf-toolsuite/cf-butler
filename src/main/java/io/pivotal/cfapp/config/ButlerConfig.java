@@ -1,5 +1,7 @@
 package io.pivotal.cfapp.config;
 
+import java.time.Duration;
+
 import javax.net.ssl.SSLException;
 
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
@@ -38,6 +40,7 @@ public class ButlerConfig {
                     .apiHost(settings.getApiHost())
                     .skipSslValidation(settings.isSslValidationSkipped())
                     .connectionPoolSize(settings.getConnectionPoolSize())
+                    .connectTimeout(Duration.ofMinutes(3))
                     .build();
     }
 
