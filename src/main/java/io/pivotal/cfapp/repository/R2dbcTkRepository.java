@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import org.springframework.data.r2dbc.function.DatabaseClient;
 import org.springframework.stereotype.Repository;
 
-import io.pivotal.cfapp.domain.Defaults;
 import io.r2dbc.spi.Row;
 import reactor.core.publisher.Mono;
 
