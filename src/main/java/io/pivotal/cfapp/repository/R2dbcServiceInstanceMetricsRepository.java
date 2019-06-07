@@ -62,7 +62,7 @@ public class R2dbcServiceInstanceMetricsRepository {
 	}
 
 	public Flux<Tuple2<String, Long>> byService() {
-		String sqlup = "select type, count(type) as cnt from service_instance_detail where type = 'user_provided_service_instance' group by service";
+		String sqlup = "select type, count(type) as cnt from service_instance_detail where type = 'user_provided_service_instance' group by type";
 		Flux<Tuple2<String, Long>> ups = client.execute().sql(sqlup)
 					.map((row, metadata)
 							-> Tuples.of("user-provided", Defaults.getValueOrDefault(row.get("cnt", Long.class), 0L)))
