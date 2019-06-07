@@ -1,6 +1,7 @@
 package io.pivotal.cfapp.service;
 
 import java.time.LocalDateTime;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,9 +112,13 @@ public class SnapshotService {
                                             .collectList()
                                                 .map(ar -> b.applicationRelationships(ar)))
                         .flatMap(b -> spaceUsersService
-                                        .obtainAccountNames()
-                                            .collect(Collectors.toSet())
-                                            .map(u -> b.accounts(u).build()));
+                                        .obtainUserAccountNames()
+                                            .collect(Collectors.toCollection(TreeSet::new))
+                                            .map(u -> b.userAccounts(u)))
+                        .flatMap(b -> spaceUsersService
+                                        .obtainServiceAccountNames()
+                                            .collect(Collectors.toCollection(TreeSet::new))
+                                            .map(u -> b.serviceAccounts(u).build()));
     }
 
     public Mono<SnapshotSummary> assembleSnapshotSummary() {

@@ -554,7 +554,7 @@ Sample output
 ```
 GET /snapshot/detail
 ```
-> Provides lists of all applications, service instances, and users (by organization and space) on a foundation
+> Provides lists of all applications and service instances (by organization and space) and accounts (split into sets of user and service names) on the foundation
 
 > **Note**: this detail report does not take the place of an official foundation Accounting Report. However, it does provide a much more detailed snapshot of all the applications that were currently running at the time of collection.
 
