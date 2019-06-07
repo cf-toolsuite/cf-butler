@@ -1,6 +1,5 @@
 package io.pivotal.cfapp.repository;
 
-import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -42,8 +41,8 @@ public class R2dbcServiceInstanceMetricsRepository {
 	protected Mono<Long> countByDateRange(LocalDate start, LocalDate end) {
 		String sql = "select count(last_updated) as cnt from service_instance_detail where last_updated <= " + settings.getBindPrefix() + 1 + " and last_updated > " + settings.getBindPrefix() + 2;
 		return client.execute().sql(sql)
-				.bind(settings.getBindPrefix() + 1, Timestamp.valueOf(LocalDateTime.of(end, LocalTime.MAX)))
-				.bind(settings.getBindPrefix() + 2, Timestamp.valueOf(LocalDateTime.of(start, LocalTime.MIDNIGHT)))
+				.bind(settings.getBindPrefix() + 1, LocalDateTime.of(end, LocalTime.MAX))
+				.bind(settings.getBindPrefix() + 2, LocalDateTime.of(start, LocalTime.MIDNIGHT))
 				.map((row, metadata) -> Defaults.getValueOrDefault(row.get("cnt", Long.class), 0L))
 				.one()
 				.defaultIfEmpty(0L);
@@ -52,7 +51,7 @@ public class R2dbcServiceInstanceMetricsRepository {
 	protected Mono<Long> countStagnant(LocalDate end) {
 		String sql = "select count(last_updated) as cnt from service_instance_detail where last_updated < " + settings.getBindPrefix() + 1;
 		return client.execute().sql(sql)
-				.bind(settings.getBindPrefix() + 1, Timestamp.valueOf(LocalDateTime.of(end, LocalTime.MIDNIGHT)))
+				.bind(settings.getBindPrefix() + 1, LocalDateTime.of(end, LocalTime.MIDNIGHT))
 				.map((row, metadata) -> Defaults.getValueOrDefault(row.get("cnt", Long.class), 0L))
 				.one()
 				.defaultIfEmpty(0L);
@@ -63,7 +62,7 @@ public class R2dbcServiceInstanceMetricsRepository {
 	}
 
 	public Flux<Tuple2<String, Long>> byService() {
-		String sqlup = "select type, count(type) as cnt from service_instance_detail where type = 'user_provided_service_instance' group by service";
+		String sqlup = "select type, count(type) as cnt from service_instance_detail where type = 'user_provided_service_instance' group by type";
 		Flux<Tuple2<String, Long>> ups = client.execute().sql(sqlup)
 					.map((row, metadata)
 							-> Tuples.of("user-provided", Defaults.getValueOrDefault(row.get("cnt", Long.class), 0L)))
