@@ -1,6 +1,5 @@
 package io.pivotal.cfapp.repository;
 
-import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -16,8 +15,8 @@ import org.springframework.data.r2dbc.function.DatabaseClient;
 import org.springframework.data.r2dbc.function.DatabaseClient.GenericInsertSpec;
 import org.springframework.stereotype.Repository;
 
-import io.pivotal.cfapp.config.PoliciesSettings;
 import io.pivotal.cfapp.config.DbmsSettings;
+import io.pivotal.cfapp.config.PoliciesSettings;
 import io.pivotal.cfapp.domain.ApplicationPolicy;
 import io.pivotal.cfapp.domain.Defaults;
 import io.pivotal.cfapp.domain.Policies;
@@ -70,7 +69,7 @@ public class R2dbcPoliciesRepository {
 									.pk(row.get("pk", Long.class))
 									.id(row.get("id", String.class))
 									.description(Defaults.getValueOrDefault(row.get("description", String.class), ""))
-									.fromDateTime(toLocalDateTime(Defaults.getValueOrDefault(row.get("from_datetime", Timestamp.class), null)))
+									.fromDateTime(Defaults.getValueOrDefault(row.get("from_datetime", LocalDateTime.class), null))
 									.fromDuration(row.get("from_duration", String.class) != null ? Duration.parse(row.get("from_duration", String.class)): null)
 									.organizationWhiteList(row.get("organization_whitelist", String.class) != null ? new HashSet<String>(Arrays.asList(row.get("organization_whitelist", String.class).split("\\s*,\\s*"))): new HashSet<>())
 									.build())
@@ -94,7 +93,7 @@ public class R2dbcPoliciesRepository {
 									.pk(row.get("pk", Long.class))
 									.id(row.get("id", String.class))
 									.description(Defaults.getValueOrDefault(row.get("description", String.class), ""))
-									.fromDateTime(toLocalDateTime(Defaults.getValueOrDefault(row.get("from_datetime", Timestamp.class), null)))
+									.fromDateTime(Defaults.getValueOrDefault(row.get("from_datetime", LocalDateTime.class), null))
 									.fromDuration(row.get("from_duration", String.class) != null ? Duration.parse(row.get("from_duration", String.class)): null)
 									.organizationWhiteList(row.get("organization_whitelist", String.class) != null ? new HashSet<String>(Arrays.asList(row.get("organization_whitelist", String.class).split("\\s*,\\s*"))): new HashSet<>())
 									.state(Defaults.getValueOrDefault(row.get("state", String.class), ""))
@@ -121,7 +120,7 @@ public class R2dbcPoliciesRepository {
 										.pk(row.get("pk", Long.class))
 										.id(row.get("id", String.class))
 										.description(row.get("description", String.class))
-										.fromDateTime(toLocalDateTime(Defaults.getValueOrDefault(row.get("from_datetime", Timestamp.class), null)))
+										.fromDateTime(Defaults.getValueOrDefault(row.get("from_datetime", LocalDateTime.class), null))
 										.fromDuration(row.get("from_duration", String.class) != null ? Duration.parse(row.get("from_duration", String.class)): null)
 										.organizationWhiteList(row.get("organization_whitelist", String.class) != null ? new HashSet<String>(Arrays.asList(row.get("organization_whitelist", String.class).split("\\s*,\\s*"))): new HashSet<>())
 										.state(row.get("state", String.class))
@@ -138,7 +137,7 @@ public class R2dbcPoliciesRepository {
 												.pk(row.get("pk", Long.class))
 												.id(row.get("id", String.class))
 												.description(Defaults.getValueOrDefault(row.get("description", String.class), ""))
-												.fromDateTime(toLocalDateTime(Defaults.getValueOrDefault(row.get("from_datetime", Timestamp.class), null)))
+												.fromDateTime(Defaults.getValueOrDefault(row.get("from_datetime", LocalDateTime.class), null))
 												.fromDuration(row.get("from_duration", String.class) != null ? Duration.parse(row.get("from_duration", String.class)): null)
 												.organizationWhiteList(row.get("organization_whitelist", String.class) != null ? new HashSet<String>(Arrays.asList(row.get("organization_whitelist", String.class).split("\\s*,\\s*"))): new HashSet<>())
 												.build())
@@ -211,7 +210,7 @@ public class R2dbcPoliciesRepository {
 			spec = spec.nullValue("state");
 		}
 		if (ap.getFromDateTime() != null) {
-			spec = spec.value("from_datetime", Timestamp.valueOf(ap.getFromDateTime()));
+			spec = spec.value("from_datetime", ap.getFromDateTime());
 		} else {
 			spec = spec.nullValue("from_datetime");
 		}
@@ -235,7 +234,7 @@ public class R2dbcPoliciesRepository {
 			spec = spec.nullValue("description");
 		}
 		if (sip.getFromDateTime() != null) {
-			spec = spec.value("from_datetime", Timestamp.valueOf(sip.getFromDateTime()));
+			spec = spec.value("from_datetime", sip.getFromDateTime());
 		} else {
 			spec = spec.nullValue("from_datetime");
 		}
@@ -248,7 +247,4 @@ public class R2dbcPoliciesRepository {
 		return spec.fetch().rowsUpdated();
 	}
 
-	private LocalDateTime toLocalDateTime(Timestamp t) {
-		return t != null ? t.toLocalDateTime(): null;
-	}
 }

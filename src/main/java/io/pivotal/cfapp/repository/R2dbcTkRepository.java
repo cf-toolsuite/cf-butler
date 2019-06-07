@@ -1,12 +1,10 @@
 package io.pivotal.cfapp.repository;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 import org.springframework.data.r2dbc.function.DatabaseClient;
 import org.springframework.stereotype.Repository;
 
-import io.pivotal.cfapp.domain.Defaults;
 import io.r2dbc.spi.Row;
 import reactor.core.publisher.Mono;
 
@@ -23,7 +21,7 @@ public class R2dbcTkRepository {
         LocalDateTime collectionTime = LocalDateTime.now();
         return client
                 .insert().into("time_keeper")
-                .value("collection_time", Timestamp.valueOf(collectionTime))
+                .value("collection_time", collectionTime)
                 .fetch().rowsUpdated();
     }
 
@@ -42,10 +40,7 @@ public class R2dbcTkRepository {
     }
 
     private LocalDateTime fromRow(Row row) {
-        return toLocalDateTime(Defaults.getValueOrDefault(row.get("collection_time", Timestamp.class), null));
+        return row.get("collection_time", LocalDateTime.class);
     }
 
-    private LocalDateTime toLocalDateTime(Timestamp t) {
-		return t != null ? t.toLocalDateTime(): null;
-	}
 }
