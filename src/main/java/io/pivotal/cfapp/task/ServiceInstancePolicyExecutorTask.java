@@ -1,5 +1,6 @@
 package io.pivotal.cfapp.task;
 
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -67,9 +68,11 @@ public class ServiceInstancePolicyExecutorTask implements ApplicationRunner {
 				.flatMap(ds -> deleteServiceInstance(ds.getT1()))
 				.flatMap(historicalRecordService::save)
 				.onErrorContinue(R2dbcException.class,
-                			(ex, data) -> log.error("Problem saving historical record {}.", data != null ? data.toString(): "<>", ex))
-					.collectList()
-					.subscribe(e -> log.info("ServiceInstancePolicyExecutorTask completed"));
+					(ex, data) -> log.error("Problem saving historical record {}.", data != null ? data.toString(): "<>", ex))
+				.onErrorContinue(SQLException.class,
+                	(ex, data) -> log.error("Problem saving historical record {}.", data != null ? data.toString(): "<>", ex))
+				.collectList()
+				.subscribe(e -> log.info("ServiceInstancePolicyExecutorTask completed"));
     }
 
     @Scheduled(cron = "${cron.execution}")
