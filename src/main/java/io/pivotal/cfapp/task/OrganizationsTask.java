@@ -1,6 +1,6 @@
 package io.pivotal.cfapp.task;
 
-import java.util.stream.Collectors;
+import java.sql.SQLException;
 
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +14,6 @@ import io.pivotal.cfapp.service.OrganizationService;
 import io.r2dbc.spi.R2dbcException;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
-import reactor.core.scheduler.Schedulers;
 
 @Slf4j
 @Component
@@ -44,13 +43,13 @@ public class OrganizationsTask implements ApplicationListener<TkRetrievedEvent> 
         organizationService
             .deleteAll()
             .thenMany(getOrganizations())
-            .collect(Collectors.toSet())
-            .flatMapMany(s -> Flux.fromIterable(s))
-            .publishOn(Schedulers.parallel())
+            .distinct()
             .flatMap(organizationService::save)
             .onErrorContinue(R2dbcException.class,
                 (ex, data) -> log.error("Problem saving organization {}.", data != null ? data.toString(): "<>", ex))
-            .thenMany(organizationService.findAll().subscribeOn(Schedulers.elastic()))
+            .onErrorContinue(SQLException.class,
+                (ex, data) -> log.error("Problem saving organization {}.", data != null ? data.toString(): "<>", ex))
+            .thenMany(organizationService.findAll())
                 .collectList()
                 .subscribe(
                     r -> {

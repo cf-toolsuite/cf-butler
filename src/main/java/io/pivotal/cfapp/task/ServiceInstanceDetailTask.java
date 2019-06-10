@@ -1,9 +1,9 @@
 package io.pivotal.cfapp.task;
 
+import java.sql.SQLException;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.cloudfoundry.client.v2.servicebindings.ListServiceBindingsRequest;
@@ -24,7 +24,6 @@ import io.r2dbc.spi.R2dbcException;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 @Slf4j
 @Component
@@ -63,13 +62,13 @@ public class ServiceInstanceDetailTask implements ApplicationListener<SpacesRetr
 	        .flatMap(serviceBoundAppIdsRequest -> getServiceBoundApplicationIds(serviceBoundAppIdsRequest))
 	        .flatMap(serviceBoundAppNamesRequest -> getServiceBoundApplicationNames(serviceBoundAppNamesRequest))
             .flatMap(serviceDetailRequest -> getServiceDetail(serviceDetailRequest))
-            .collect(Collectors.toSet())
-            .flatMapMany(s -> Flux.fromIterable(s))
-            .publishOn(Schedulers.parallel())
+            .distinct()
             .flatMap(service::save)
             .onErrorContinue(R2dbcException.class,
                 (ex, data) -> log.error("Problem saving service instance {}.", data != null ? data.toString(): "<>", ex))
-            .thenMany(service.findAll().subscribeOn(Schedulers.elastic()))
+            .onErrorContinue(SQLException.class,
+                (ex, data) -> log.error("Problem saving service instance {}.", data != null ? data.toString(): "<>", ex))
+            .thenMany(service.findAll())
                 .collectList()
                 .subscribe(
                     r -> {

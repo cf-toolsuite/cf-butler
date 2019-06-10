@@ -1,9 +1,9 @@
 package io.pivotal.cfapp.task;
 
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.operations.applications.DeleteApplicationRequest;
@@ -89,6 +89,8 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
 			        	.flatMap(ad -> deleteApplication(ad.getT1()))
 						.flatMap(historicalRecordService::save)
 						.onErrorContinue(R2dbcException.class,
+							(ex, data) -> log.error("Problem saving historical record {}.", data != null ? data.toString(): "<>", ex))
+						.onErrorContinue(SQLException.class,
                 			(ex, data) -> log.error("Problem saving historical record {}.", data != null ? data.toString(): "<>", ex))
 			            .then();
     }
@@ -109,21 +111,24 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
 						.flatMap(this::unbindServiceInstance)
 						.flatMap(historicalRecordService::save)
 						.onErrorContinue(R2dbcException.class,
-                			(ex, data) -> log.error("Problem saving historical record {}.", data != null ? data.toString(): "<>", ex))
-						.collect(Collectors.toSet())
-			            .flatMapIterable(it -> it)
-			            .flatMap(ad -> appInfoService.findByAppId(ad.getAppId()))
+							(ex, data) -> log.error("Problem saving historical record {}.", data != null ? data.toString(): "<>", ex))
+						.onErrorContinue(SQLException.class,
+							(ex, data) -> log.error("Problem saving historical record {}.", data != null ? data.toString(): "<>", ex))
+						.flatMap(ad -> appInfoService.findByAppId(ad.getAppId()))
+						.distinct()
 						.flatMap(this::deleteApplication)
 						.flatMap(historicalRecordService::save)
 						.onErrorContinue(R2dbcException.class,
-                			(ex, data) -> log.error("Problem saving historical record {}.", data != null ? data.toString(): "<>", ex))
+							(ex, data) -> log.error("Problem saving historical record {}.", data != null ? data.toString(): "<>", ex))
+						.onErrorContinue(SQLException.class,
+							(ex, data) -> log.error("Problem saving historical record {}.", data != null ? data.toString(): "<>", ex))
 						.then();
 	}
 
 	protected Mono<Void> deleteApplicationsWithServiceBindingsAndDeleteBoundServiceInstances() {
 		// these are the applications with service bindings
 		// in this case the application policy has been configured with delete-services = true
-		// so we:  a) unbind one or more service instances from each application, b) delete each application, 
+		// so we:  a) unbind one or more service instances from each application, b) delete each application,
 		// and c) delete each formerly bound service instance
 		return policiesService
 	                .findAll()
@@ -138,9 +143,10 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
 						.flatMap(historicalRecordService::save)
 						.onErrorContinue(R2dbcException.class,
                 			(ex, data) -> log.error("Problem saving historical record {}.", data != null ? data.toString(): "<>", ex))
-			            .collect(Collectors.toSet())
-			            .flatMapIterable(it -> it)
-			            .flatMap(ad -> appInfoService.findByAppId(ad.getAppId()))
+						.onErrorContinue(SQLException.class,
+							(ex, data) -> log.error("Problem saving historical record {}.", data != null ? data.toString(): "<>", ex))
+						.flatMap(ad -> appInfoService.findByAppId(ad.getAppId()))
+						.distinct()
 						.flatMap(this::deleteApplication)
 						.flatMap(historicalRecordService::save)
 			            .flatMap(dad -> appRelationshipService.findByApplicationId(dad.getAppId()))
@@ -148,7 +154,9 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
 						.flatMap(historicalRecordService::save)
 						.onErrorContinue(R2dbcException.class,
                 			(ex, data) -> log.error("Problem saving historical record {}.", data != null ? data.toString(): "<>", ex))
-			            .then();
+						.onErrorContinue(SQLException.class,
+							(ex, data) -> log.error("Problem saving historical record {}.", data != null ? data.toString(): "<>", ex))
+						.then();
 	}
 
 	protected Mono<HistoricalRecord> unbindServiceInstance(AppRelationship relationship) {

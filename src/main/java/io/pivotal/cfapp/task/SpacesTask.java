@@ -1,5 +1,6 @@
 package io.pivotal.cfapp.task;
 
+import java.sql.SQLException;
 import java.util.List;
 
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
@@ -45,11 +46,12 @@ public class SpacesTask implements ApplicationListener<OrganizationsRetrievedEve
             .deleteAll()
 			.thenMany(Flux.fromIterable(organizations))
             .flatMap(o -> getSpaces(o))
-            .publishOn(Schedulers.parallel())
             .flatMap(service::save)
             .onErrorContinue(R2dbcException.class,
                 (ex, data) -> log.error("Problem saving space {}.", data != null ? data.toString(): "<>", ex))
-            .thenMany(service.findAll().subscribeOn(Schedulers.elastic()))
+            .onErrorContinue(SQLException.class,
+                (ex, data) -> log.error("Problem saving space {}.", data != null ? data.toString(): "<>", ex))
+            .thenMany(service.findAll())
                 .collectList()
                 .subscribe(
                     r -> {
