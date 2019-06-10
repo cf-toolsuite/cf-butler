@@ -344,11 +344,11 @@ Shutdown and destroy the app and service instances
 
 ## Endpoints
 
-These REST endpoints have been exposed for administrative purposes.
+These REST endpoints have been exposed for reporting and administrative purposes.
 
 ### Operations Manager
 
-These endpoints are only available when the `om.enabled` property is set to `true`.  They mimic a reduced set of the [Operations Manager API](https://docs.pivotal.io/pivotalcf/2-5/opsman-api/).  For each request, the Request header must contain an Authorization bearer token.  To obtain a token, consult the [Authentication](https://docs.pivotal.io/pivotalcf/2-5/opsman-api/?shell#authentication) section of the Operations Manager API.
+These endpoints are only available when the `om.enabled` property is set to `true`.  A valid `om.apiHost` property must also have been defined.  Mimics a reduced set of the [Operations Manager API](https://docs.pivotal.io/pivotalcf/2-5/opsman-api/).  For each request, the Request header must contain an Authorization bearer token.  To obtain a token, consult the [Authentication](https://docs.pivotal.io/pivotalcf/2-5/opsman-api/?shell#authentication) section of the Operations Manager API.
 
 ```
 GET /products/deployed
@@ -367,7 +367,7 @@ GET /products/om/info
 
 ### Pivotal Network
 
-Mimics a reduced set of the [Pivotal Network API](https://network.pivotal.io/docs/api).
+These endpoints are only available when the `pivnet.enabled` property is set to `true`. A valid `pivnet.apiToken` property must also have been defined.  Mimics a reduced set of the [Pivotal Network API](https://network.pivotal.io/docs/api).
 
 ```
 GET /store/product/catalog
