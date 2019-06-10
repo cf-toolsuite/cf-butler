@@ -11,4 +11,5 @@ import lombok.Data;
 public class PivnetSettings {
 
     private String apiToken;
+    private boolean enabled;
 }
