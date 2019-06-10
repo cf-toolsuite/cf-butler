@@ -11,4 +11,5 @@ import lombok.Data;
 public class OpsmanSettings {
 
     private String apiHost;
+    private boolean enabled;
 }

@@ -14,21 +14,18 @@ import reactor.core.publisher.Mono;
 @RestController
 public class OnDemandCollectorTriggerController {
 
-	private OrganizationsTask orgCollector;
-	private ProductsAndReleasesTask productsAndReleasesCollector;
-
 	@Autowired
-	public OnDemandCollectorTriggerController(
-		OrganizationsTask orgCollector,
-		ProductsAndReleasesTask productsAndReleasesCollector) {
-		this.orgCollector = orgCollector;
-		this.productsAndReleasesCollector = productsAndReleasesCollector;
-	}
+	private OrganizationsTask orgCollector;
+
+	@Autowired(required = false)
+	private ProductsAndReleasesTask productsAndReleasesCollector;
 
 	@PostMapping("/collect")
 	public Mono<ResponseEntity<Void>> triggerCollection() {
 		orgCollector.collect();
-		productsAndReleasesCollector.collect();
+		if (productsAndReleasesCollector != null) {
+			productsAndReleasesCollector.collect();
+		}
 		return Mono.just(ResponseEntity.accepted().build());
 	}
 

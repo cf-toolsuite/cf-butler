@@ -115,10 +115,11 @@ cf:
 
 om:
   apiHost: ${vcap.services.cf-butler-secrets.credentials.OM_API-HOST}
-  enabled: $vcap.services.cf-butler-secrets.credentials.OM_ENABLED:false}
+  enabled: ${vcap.services.cf-butler-secrets.credentials.OM_ENABLED:false}
 
 pivnet:
   apiToken: ${vcap.services.cf-butler-secrets.credentials.PIVNET_API-TOKEN}
+  enabled: ${vcap.services.cf-butler-secrets.credentials.PIVNET_ENABLED:false}
 
 token:
   provider: ${vcap.services.cf-butler-secrets.credentials.TOKEN_PROVIDER}

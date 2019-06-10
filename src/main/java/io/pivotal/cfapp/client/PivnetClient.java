@@ -1,6 +1,7 @@
 package io.pivotal.cfapp.client;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -15,6 +16,7 @@ import reactor.core.publisher.Mono;
 
 @Slf4j
 @Component
+@ConditionalOnProperty(name = "pivnet.enabled", havingValue = "true")
 public class PivnetClient {
 
     private static final String BASE_URL = "https://network.pivotal.io/api";

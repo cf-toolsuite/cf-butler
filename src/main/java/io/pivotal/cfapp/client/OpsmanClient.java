@@ -3,6 +3,7 @@ package io.pivotal.cfapp.client;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -14,6 +15,7 @@ import io.pivotal.cfapp.domain.product.StemcellAssignments;
 import reactor.core.publisher.Mono;
 
 @Component
+@ConditionalOnProperty(name = "om.enabled", havingValue = "true")
 public class OpsmanClient {
 
     private static final String URI_TEMPLATE = "https://%s%s";
