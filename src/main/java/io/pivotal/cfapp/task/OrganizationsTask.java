@@ -14,6 +14,7 @@ import io.pivotal.cfapp.service.OrganizationService;
 import io.r2dbc.spi.R2dbcException;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Schedulers;
 
 @Slf4j
 @Component
@@ -44,12 +45,13 @@ public class OrganizationsTask implements ApplicationListener<TkRetrievedEvent> 
             .deleteAll()
             .thenMany(getOrganizations())
             .distinct()
+            .publishOn(Schedulers.parallel())
             .flatMap(organizationService::save)
             .onErrorContinue(R2dbcException.class,
                 (ex, data) -> log.error("Problem saving organization {}.", data != null ? data.toString(): "<>", ex))
             .onErrorContinue(SQLException.class,
                 (ex, data) -> log.error("Problem saving organization {}.", data != null ? data.toString(): "<>", ex))
-            .thenMany(organizationService.findAll())
+            .thenMany(organizationService.findAll().subscribeOn(Schedulers.elastic()))
                 .collectList()
                 .subscribe(
                     r -> {

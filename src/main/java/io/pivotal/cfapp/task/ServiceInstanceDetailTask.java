@@ -24,6 +24,7 @@ import io.r2dbc.spi.R2dbcException;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 @Slf4j
 @Component
@@ -63,12 +64,13 @@ public class ServiceInstanceDetailTask implements ApplicationListener<SpacesRetr
 	        .flatMap(serviceBoundAppNamesRequest -> getServiceBoundApplicationNames(serviceBoundAppNamesRequest))
             .flatMap(serviceDetailRequest -> getServiceDetail(serviceDetailRequest))
             .distinct()
+            .publishOn(Schedulers.parallel())
             .flatMap(service::save)
             .onErrorContinue(R2dbcException.class,
                 (ex, data) -> log.error("Problem saving service instance {}.", data != null ? data.toString(): "<>", ex))
             .onErrorContinue(SQLException.class,
                 (ex, data) -> log.error("Problem saving service instance {}.", data != null ? data.toString(): "<>", ex))
-            .thenMany(service.findAll())
+            .thenMany(service.findAll().subscribeOn(Schedulers.elastic()))
                 .collectList()
                 .subscribe(
                     r -> {

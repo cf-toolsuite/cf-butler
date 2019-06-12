@@ -17,6 +17,7 @@ import io.r2dbc.spi.R2dbcException;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 @Slf4j
 @Component
@@ -45,11 +46,13 @@ public class SpaceUsersTask implements ApplicationListener<SpacesRetrievedEvent>
             .thenMany(Flux.fromIterable(spaces))
             .map(s -> UserRequest.builder().organization(s.getOrganization()).spaceName(s.getSpace()).build())
             .flatMap(spaceUsersRequest -> getSpaceUsers(spaceUsersRequest))
+            .publishOn(Schedulers.parallel())
             .flatMap(service::save)
             .onErrorContinue(R2dbcException.class,
                 (ex, data) -> log.error("Problem saving space user {}.", data != null ? data.toString(): "<>", ex))
             .onErrorContinue(SQLException.class,
                 (ex, data) -> log.error("Problem saving space user {}.", data != null ? data.toString(): "<>", ex))
+            .thenMany(service.findAll().subscribeOn(Schedulers.elastic()))
                 .collectList()
                 .subscribe(e -> log.info("SpaceUsersTask completed"));
     }
