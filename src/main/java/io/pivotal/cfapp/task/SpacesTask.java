@@ -46,12 +46,13 @@ public class SpacesTask implements ApplicationListener<OrganizationsRetrievedEve
             .deleteAll()
 			.thenMany(Flux.fromIterable(organizations))
             .flatMap(o -> getSpaces(o))
+            .publishOn(Schedulers.parallel())
             .flatMap(service::save)
             .onErrorContinue(R2dbcException.class,
                 (ex, data) -> log.error("Problem saving space {}.", data != null ? data.toString(): "<>", ex))
             .onErrorContinue(SQLException.class,
                 (ex, data) -> log.error("Problem saving space {}.", data != null ? data.toString(): "<>", ex))
-            .thenMany(service.findAll())
+            .thenMany(service.findAll().subscribeOn(Schedulers.elastic()))
                 .collectList()
                 .subscribe(
                     r -> {
