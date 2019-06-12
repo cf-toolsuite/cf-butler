@@ -1,6 +1,7 @@
 package io.pivotal.cfapp.task;
 
 import java.sql.SQLException;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.List;
@@ -102,6 +103,7 @@ public class ServiceInstanceDetailTask implements ApplicationListener<SpacesRetr
                 .build()
                 .services()
                     .getInstance(GetServiceInstanceRequest.builder().name(request.getServiceName()).build())
+                    .retryBackoff(5, Duration.ofSeconds(1), Duration.ofSeconds(10))
                     .onErrorContinue(
                             Exception.class,
                             (ex, data) -> log.error("Trouble fetching service instance details {}.", data != null ? data.toString(): "<>", ex))

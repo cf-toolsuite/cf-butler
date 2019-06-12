@@ -1,6 +1,7 @@
 package io.pivotal.cfapp.task;
 
 import java.sql.SQLException;
+import java.time.Duration;
 import java.time.ZoneId;
 import java.util.List;
 
@@ -104,7 +105,10 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
             .build()
                 .applications()
                     .get(GetApplicationRequest.builder().name(request.getAppName()).build())
-                    .onErrorResume(err -> Mono.empty())
+                    .retryBackoff(5, Duration.ofSeconds(1), Duration.ofSeconds(10))
+                    .onErrorContinue(
+                            Exception.class,
+                            (ex, data) -> log.error("Trouble fetching application details {}.", data != null ? data.toString(): "<>", ex))
                     .map(a -> fromApplicationDetail(a, request));
     }
 
