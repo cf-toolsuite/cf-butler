@@ -42,12 +42,15 @@ cf:
     - jboss
     - jetty
     - liberty
+    - markdown
+    - mendix
     - meteor
     - nginx
     - nodejs
     - php
     - pyspark
     - python
+    - r_buildpack
     - ruby
     - rust
     - staticfile
