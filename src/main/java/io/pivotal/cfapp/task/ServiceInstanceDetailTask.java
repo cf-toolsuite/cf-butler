@@ -97,7 +97,6 @@ public class ServiceInstanceDetailTask implements ApplicationListener<SpacesRetr
                     .getInstance(GetServiceInstanceRequest.builder().name(request.getServiceName()).build())
                     .retryBackoff(5, Duration.ofSeconds(1), Duration.ofSeconds(10))
                     .onErrorContinue(
-                            Exception.class,
                             (ex, data) -> log.error("Trouble fetching service instance details with {}.", request, ex))
                     .map(sd -> ServiceInstanceDetail
                                 .builder()

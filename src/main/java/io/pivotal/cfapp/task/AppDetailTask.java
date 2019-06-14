@@ -99,7 +99,6 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
                     .get(GetApplicationRequest.builder().name(request.getAppName()).build())
                     .retryBackoff(5, Duration.ofSeconds(1), Duration.ofSeconds(10))
                     .onErrorContinue(
-                            Exception.class,
                             (ex, data) -> log.error("Trouble fetching application details with {}.", request, ex))
                     .map(a -> fromApplicationDetail(a, request));
     }
