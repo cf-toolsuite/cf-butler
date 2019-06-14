@@ -1,6 +1,5 @@
 package io.pivotal.cfapp.task;
 
-import java.sql.SQLException;
 import java.time.Duration;
 import java.time.ZoneId;
 import java.util.List;
@@ -20,11 +19,9 @@ import io.pivotal.cfapp.domain.AppEvent;
 import io.pivotal.cfapp.domain.AppRequest;
 import io.pivotal.cfapp.domain.Space;
 import io.pivotal.cfapp.service.AppDetailService;
-import io.r2dbc.spi.R2dbcException;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 @Slf4j
 @Component
@@ -63,13 +60,8 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
             .flatMap(appDetailRequest -> getApplicationDetail(appDetailRequest))
             .flatMap(withLastEventRequest -> enrichWithAppEvent(withLastEventRequest))
             .distinct()
-            .publishOn(Schedulers.parallel())
             .flatMap(service::save)
-            .onErrorContinue(R2dbcException.class,
-                (ex, data) -> log.error("Problem saving application {}.", data != null ? data.toString(): "<>", ex))
-            .onErrorContinue(SQLException.class,
-                (ex, data) -> log.error("Problem saving application {}.", data != null ? data.toString(): "<>", ex))
-            .thenMany(service.findAll().subscribeOn(Schedulers.elastic()))
+            .thenMany(service.findAll())
                 .collectList()
                 .subscribe(r -> {
                     publisher.publishEvent(new AppDetailRetrievedEvent(this).detail(r));
@@ -108,7 +100,7 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
                     .retryBackoff(5, Duration.ofSeconds(1), Duration.ofSeconds(10))
                     .onErrorContinue(
                             Exception.class,
-                            (ex, data) -> log.error("Trouble fetching application details {}.", data != null ? data.toString(): "<>", ex))
+                            (ex, data) -> log.error("Trouble fetching application details with {}.", request, ex))
                     .map(a -> fromApplicationDetail(a, request));
     }
 

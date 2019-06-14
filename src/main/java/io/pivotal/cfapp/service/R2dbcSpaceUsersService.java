@@ -2,6 +2,7 @@ package io.pivotal.cfapp.service;
 
 import static io.pivotal.cfapp.config.ButlerSettings.SYSTEM_ORG;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -14,9 +15,12 @@ import org.springframework.stereotype.Service;
 import io.pivotal.cfapp.domain.SpaceUsers;
 import io.pivotal.cfapp.domain.UserAccounts;
 import io.pivotal.cfapp.repository.R2dbcSpaceUsersRepository;
+import io.r2dbc.spi.R2dbcException;
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+@Slf4j
 @Service
 public class R2dbcSpaceUsersService implements SpaceUsersService {
 
@@ -38,7 +42,12 @@ public class R2dbcSpaceUsersService implements SpaceUsersService {
 
 	@Override
 	public Mono<SpaceUsers> save(SpaceUsers entity) {
-		return repo.save(entity);
+		return repo
+				.save(entity)
+				.onErrorContinue(R2dbcException.class,
+					(ex, data) -> log.error("Problem saving space user {}.", entity, ex))
+				.onErrorContinue(SQLException.class,
+					(ex, data) -> log.error("Problem saving space user {}.", entity, ex));
 	}
 
 	@Override

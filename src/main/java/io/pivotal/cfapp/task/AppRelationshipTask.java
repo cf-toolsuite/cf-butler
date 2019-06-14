@@ -60,13 +60,8 @@ public class AppRelationshipTask implements ApplicationListener<SpacesRetrievedE
 	        .flatMap(serviceBoundAppIdsRequest -> getServiceBoundApplicationIds(serviceBoundAppIdsRequest))
 	        .flatMap(serviceBoundAppNamesRequest -> getServiceBoundApplicationNames(serviceBoundAppNamesRequest))
             .flatMap(appRelationshipRequest -> getAppRelationship(appRelationshipRequest))
-            .publishOn(Schedulers.parallel())
             .flatMap(service::save)
-            .onErrorContinue(R2dbcException.class,
-                (ex, data) -> log.error("Problem saving application releationship {}.", data != null ? data.toString(): "<>", ex))
-            .onErrorContinue(SQLException.class,
-                (ex, data) -> log.error("Problem saving application releationship {}.", data != null ? data.toString(): "<>", ex))
-            .thenMany(service.findAll().subscribeOn(Schedulers.elastic()))
+            .thenMany(service.findAll())
                 .collectList()
                 .subscribe(
                     r -> {

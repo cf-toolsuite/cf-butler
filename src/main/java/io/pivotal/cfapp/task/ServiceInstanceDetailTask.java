@@ -1,6 +1,5 @@
 package io.pivotal.cfapp.task;
 
-import java.sql.SQLException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -21,11 +20,9 @@ import io.pivotal.cfapp.domain.ServiceInstanceDetail;
 import io.pivotal.cfapp.domain.ServiceRequest;
 import io.pivotal.cfapp.domain.Space;
 import io.pivotal.cfapp.service.ServiceInstanceDetailService;
-import io.r2dbc.spi.R2dbcException;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 @Slf4j
 @Component
@@ -65,13 +62,8 @@ public class ServiceInstanceDetailTask implements ApplicationListener<SpacesRetr
 	        .flatMap(serviceBoundAppNamesRequest -> getServiceBoundApplicationNames(serviceBoundAppNamesRequest))
             .flatMap(serviceDetailRequest -> getServiceDetail(serviceDetailRequest))
             .distinct()
-            .publishOn(Schedulers.parallel())
             .flatMap(service::save)
-            .onErrorContinue(R2dbcException.class,
-                (ex, data) -> log.error("Problem saving service instance {}.", data != null ? data.toString(): "<>", ex))
-            .onErrorContinue(SQLException.class,
-                (ex, data) -> log.error("Problem saving service instance {}.", data != null ? data.toString(): "<>", ex))
-            .thenMany(service.findAll().subscribeOn(Schedulers.elastic()))
+            .thenMany(service.findAll())
                 .collectList()
                 .subscribe(
                     r -> {
@@ -106,7 +98,7 @@ public class ServiceInstanceDetailTask implements ApplicationListener<SpacesRetr
                     .retryBackoff(5, Duration.ofSeconds(1), Duration.ofSeconds(10))
                     .onErrorContinue(
                             Exception.class,
-                            (ex, data) -> log.error("Trouble fetching service instance details {}.", data != null ? data.toString(): "<>", ex))
+                            (ex, data) -> log.error("Trouble fetching service instance details with {}.", request, ex))
                     .map(sd -> ServiceInstanceDetail
                                 .builder()
                                     .organization(request.getOrganization())
