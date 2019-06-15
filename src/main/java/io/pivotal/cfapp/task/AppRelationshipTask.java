@@ -53,9 +53,12 @@ public class AppRelationshipTask implements ApplicationListener<ServiceInstanceD
             .thenMany(service.findAll())
                 .collectList()
                 .subscribe(
-                    r -> {
-                        publisher.publishEvent(new AppRelationshipRetrievedEvent(this).relations(r));
+                    result -> {
+                        publisher.publishEvent(new AppRelationshipRetrievedEvent(this).relations(result));
                         log.info("AppRelationshipTask completed");
+                    },
+                    error -> {
+                        log.error("AppRelationshipTask completed with error", error);
                     }
                 );
     }

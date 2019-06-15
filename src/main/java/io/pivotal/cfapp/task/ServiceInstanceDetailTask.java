@@ -1,6 +1,5 @@
 package io.pivotal.cfapp.task;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.List;
@@ -65,9 +64,12 @@ public class ServiceInstanceDetailTask implements ApplicationListener<SpacesRetr
             .thenMany(service.findAll())
                 .collectList()
                 .subscribe(
-                    r -> {
-                        publisher.publishEvent(new ServiceInstanceDetailRetrievedEvent(this).detail(r));
+                    result -> {
+                        publisher.publishEvent(new ServiceInstanceDetailRetrievedEvent(this).detail(result));
                         log.info("ServiceInstanceDetailTask completed");
+                    },
+                    error -> {
+                        log.error("ServiceInstanceDetailTask completed with error", error);
                     }
                 );
     }
@@ -94,9 +96,6 @@ public class ServiceInstanceDetailTask implements ApplicationListener<SpacesRetr
                 .build()
                 .services()
                     .getInstance(GetServiceInstanceRequest.builder().name(request.getServiceName()).build())
-                    .retryBackoff(5, Duration.ofSeconds(1), Duration.ofSeconds(10))
-                    .onErrorContinue(
-                            (ex, data) -> log.error(String.format("Trouble fetching service instance details with %s.", request), ex))
                     .map(sd -> ServiceInstanceDetail
                                 .builder()
                                     .organization(request.getOrganization())

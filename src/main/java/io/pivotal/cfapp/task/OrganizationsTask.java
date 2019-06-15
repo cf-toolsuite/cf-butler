@@ -45,9 +45,12 @@ public class OrganizationsTask implements ApplicationListener<TkRetrievedEvent> 
             .thenMany(organizationService.findAll())
                 .collectList()
                 .subscribe(
-                    r -> {
-                        publisher.publishEvent(new OrganizationsRetrievedEvent(this).organizations(r));
+                    result -> {
+                        publisher.publishEvent(new OrganizationsRetrievedEvent(this).organizations(result));
                         log.info("OrganizationTask completed");
+                    },
+                    error -> {
+                        log.error("OrganizationTask completed with error", error);
                     }
                 );
     }

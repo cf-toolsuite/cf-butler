@@ -66,7 +66,14 @@ public class ServiceInstancePolicyExecutorTask implements ApplicationRunner {
 				.flatMap(ds -> deleteServiceInstance(ds.getT1()))
 				.flatMap(historicalRecordService::save)
 				.collectList()
-				.subscribe(e -> log.info("ServiceInstancePolicyExecutorTask completed"));
+				.subscribe(
+					result -> {
+						log.info("ServiceInstancePolicyExecutorTask completed");
+					},
+					error -> {
+						log.error("ProductsAndReleasesTask completed with error", error);
+					}
+				);
     }
 
     @Scheduled(cron = "${cron.execution}")

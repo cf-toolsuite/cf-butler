@@ -37,9 +37,12 @@ public class TkTask implements ApplicationRunner {
             .then(tkService.save())
             .then(tkService.findOne())
                 .subscribe(
-                    r -> {
-                        publisher.publishEvent(new TkRetrievedEvent(this).lastCollected(r));
+                    result -> {
+                        publisher.publishEvent(new TkRetrievedEvent(this).lastCollected(result));
                         log.info("TkTask completed");
+                    },
+                    error -> {
+                        log.error("TkTask completed with error", error);
                     }
                 );
     }

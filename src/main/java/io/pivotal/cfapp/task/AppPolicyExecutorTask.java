@@ -66,7 +66,14 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
     	deleteApplicationsWithNoServiceBindings()
 	    	.then(deleteApplicationsWithServiceBindingsButDoNotDeleteBoundServiceInstances())
 	    	.then(deleteApplicationsWithServiceBindingsAndDeleteBoundServiceInstances())
-	    	.subscribe(e -> log.info("AppPolicyExecutorTask completed"));
+	    	.subscribe(
+				result -> {
+					log.info("AppPolicyExecutorTask completed");
+				},
+				error -> {
+					log.error("AppPolicyExecutorTask completed with error", error);
+				}
+			);
     }
 
     @Scheduled(cron = "${cron.execution}")

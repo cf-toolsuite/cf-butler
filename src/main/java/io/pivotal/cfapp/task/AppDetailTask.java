@@ -1,6 +1,5 @@
 package io.pivotal.cfapp.task;
 
-import java.time.Duration;
 import java.time.ZoneId;
 import java.util.List;
 
@@ -63,10 +62,15 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
             .flatMap(service::save)
             .thenMany(service.findAll())
                 .collectList()
-                .subscribe(r -> {
-                    publisher.publishEvent(new AppDetailRetrievedEvent(this).detail(r));
-                    log.info("AppDetailTask completed.");
-                });
+                .subscribe(
+                    result -> {
+                        publisher.publishEvent(new AppDetailRetrievedEvent(this).detail(result));
+                        log.info("AppDetailTask completed.");
+                    },
+                    error -> {
+                        log.error("AppDetailTask completed with error", error);
+                    }
+                );
     }
 
     protected Flux<AppRequest> getApplicationSummary(AppRequest request) {
@@ -97,9 +101,8 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
             .build()
                 .applications()
                     .get(GetApplicationRequest.builder().name(request.getAppName()).build())
-                    .retryBackoff(5, Duration.ofSeconds(1), Duration.ofSeconds(10))
                     .onErrorContinue(
-                            (ex, data) -> log.error(String.format("Trouble fetching application details with %s.", request), ex))
+                        (ex, data) -> log.error(String.format("Trouble fetching application detail with %s.", request), ex))
                     .map(a -> fromApplicationDetail(a, request));
     }
 
@@ -133,9 +136,6 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
             .build()
                 .applications()
                     .getEvents(GetApplicationEventsRequest.builder().name(detail.getAppName()).build())
-                    .retryBackoff(5, Duration.ofSeconds(1), Duration.ofSeconds(10))
-                    .onErrorContinue(
-                        (ex, data) -> log.error(String.format("Trouble fetching application events with %s.", detail), ex))
                     .map(e -> AppEvent
                                    .builder()
                                        .name(e.getEvent())

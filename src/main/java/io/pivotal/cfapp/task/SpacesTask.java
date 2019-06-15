@@ -47,9 +47,12 @@ public class SpacesTask implements ApplicationListener<OrganizationsRetrievedEve
             .thenMany(service.findAll())
                 .collectList()
                 .subscribe(
-                    r -> {
-                        publisher.publishEvent(new SpacesRetrievedEvent(this).spaces(r));
+                    result -> {
+                        publisher.publishEvent(new SpacesRetrievedEvent(this).spaces(result));
                         log.info("SpacesTask completed");
+                    },
+                    error -> {
+                        log.error("SpacesTask completed with error", error);
                     }
                 );
     }

@@ -46,7 +46,14 @@ public class SpaceUsersTask implements ApplicationListener<SpacesRetrievedEvent>
             .flatMap(service::save)
             .thenMany(service.findAll())
                 .collectList()
-                .subscribe(e -> log.info("SpaceUsersTask completed"));
+                .subscribe(
+                    e -> {
+                        log.info("SpaceUsersTask completed");
+                    },
+                    error -> {
+                        log.error("SpaceUsersTask completed with error", error);
+                    }
+                );
     }
 
     protected Mono<SpaceUsers> getSpaceUsers(UserRequest request) {
