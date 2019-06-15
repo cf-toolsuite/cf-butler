@@ -25,7 +25,7 @@ public class R2dbcHistoricalRecordService implements HistoricalRecordService {
 		return repo
 				.save(entity)
 				.onErrorContinue(
-					(ex, data) -> log.error("Problem saving historical record {}.", entity, ex));
+					(ex, data) -> log.error(String.format("Problem saving historical record %s.", entity), ex));
 	}
 
 	@Override

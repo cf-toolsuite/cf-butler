@@ -25,7 +25,7 @@ public class TkService {
         return repo
                 .save(collectionTime)
                 .onErrorContinue(
-					(ex, data) -> log.error("Problem saving collectime time {}.", collectionTime, ex));
+					(ex, data) -> log.error(String.format("Problem saving collectime time %s.", collectionTime), ex));
     }
 
     public Mono<Void> deleteOne() {

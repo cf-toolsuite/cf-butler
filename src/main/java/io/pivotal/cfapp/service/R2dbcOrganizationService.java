@@ -30,7 +30,7 @@ public class R2dbcOrganizationService implements OrganizationService {
         return repo
                 .save(entity)
                 .onErrorContinue(
-                    (ex, data) -> log.error("Problem saving organization {}.", entity, ex));
+                    (ex, data) -> log.error(String.format("Problem saving organization %s.", entity), ex));
     }
 
     @Override

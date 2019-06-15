@@ -99,7 +99,7 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
                     .get(GetApplicationRequest.builder().name(request.getAppName()).build())
                     .retryBackoff(5, Duration.ofSeconds(1), Duration.ofSeconds(10))
                     .onErrorContinue(
-                            (ex, data) -> log.error("Trouble fetching application details with {}.", request, ex))
+                            (ex, data) -> log.error(String.format("Trouble fetching application details with %s.", request), ex))
                     .map(a -> fromApplicationDetail(a, request));
     }
 
@@ -127,28 +127,30 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
 
     protected Mono<AppDetail> enrichWithAppEvent(AppDetail detail) {
         return DefaultCloudFoundryOperations.builder()
-           .from(opsClient)
-           .organization(detail.getOrganization())
-           .space(detail.getSpace())
-           .build()
-               .applications()
-                   .getEvents(GetApplicationEventsRequest.builder().name(detail.getAppName()).build())
-                       .map(e -> AppEvent
+            .from(opsClient)
+            .organization(detail.getOrganization())
+            .space(detail.getSpace())
+            .build()
+                .applications()
+                    .getEvents(GetApplicationEventsRequest.builder().name(detail.getAppName()).build())
+                    .retryBackoff(5, Duration.ofSeconds(1), Duration.ofSeconds(10))
+                    .onErrorContinue(
+                        (ex, data) -> log.error(String.format("Trouble fetching application events with %s.", detail), ex))
+                    .map(e -> AppEvent
                                    .builder()
                                        .name(e.getEvent())
                                        .actor(e.getActor())
                                        .time(
                                            e.getTime() != null ? e.getTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime(): null)
                                        .build())
-                       .next()
-                       .map(e ->
-                               AppDetail.from(detail)
+                    .next()
+                    .map(e -> AppDetail.from(detail)
                                            .lastEvent(e.getName())
                                            .lastEventActor(e.getActor())
                                            .lastEventTime(e.getTime())
                                            .build()
                            )
-                       .switchIfEmpty(Mono.just(detail));
+                    .switchIfEmpty(Mono.just(detail));
     }
 
     private Long nullSafeLong(Long input) {

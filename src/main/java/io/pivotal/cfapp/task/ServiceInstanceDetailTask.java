@@ -61,7 +61,6 @@ public class ServiceInstanceDetailTask implements ApplicationListener<SpacesRetr
 	        .flatMap(serviceBoundAppIdsRequest -> getServiceBoundApplicationIds(serviceBoundAppIdsRequest))
 	        .flatMap(serviceBoundAppNamesRequest -> getServiceBoundApplicationNames(serviceBoundAppNamesRequest))
             .flatMap(serviceDetailRequest -> getServiceDetail(serviceDetailRequest))
-            .distinct()
             .flatMap(service::save)
             .thenMany(service.findAll())
                 .collectList()
@@ -97,7 +96,7 @@ public class ServiceInstanceDetailTask implements ApplicationListener<SpacesRetr
                     .getInstance(GetServiceInstanceRequest.builder().name(request.getServiceName()).build())
                     .retryBackoff(5, Duration.ofSeconds(1), Duration.ofSeconds(10))
                     .onErrorContinue(
-                            (ex, data) -> log.error("Trouble fetching service instance details with {}.", request, ex))
+                            (ex, data) -> log.error(String.format("Trouble fetching service instance details with %s.", request), ex))
                     .map(sd -> ServiceInstanceDetail
                                 .builder()
                                     .organization(request.getOrganization())
@@ -132,14 +131,14 @@ public class ServiceInstanceDetailTask implements ApplicationListener<SpacesRetr
 
     protected Mono<ServiceRequest> getServiceBoundApplicationNames(ServiceRequest request) {
     	return Flux
-    		.fromIterable(request.getApplicationIds())
-    		.flatMap(appId ->
-    			cloudFoundryClient
-    				.applicationsV3()
-    					.get(GetApplicationRequest.builder().applicationId(appId).build())
-    					.map(response -> response.getName()))
-    					.collectList()
-    					.map(names -> ServiceRequest.from(request).applicationNames(names).build());
+                .fromIterable(request.getApplicationIds())
+                .flatMap(appId ->
+                    cloudFoundryClient
+                        .applicationsV3()
+                            .get(GetApplicationRequest.builder().applicationId(appId).build())
+                            .map(response -> response.getName()))
+                            .collectList()
+                            .map(names -> ServiceRequest.from(request).applicationNames(names).build());
     }
 
 }

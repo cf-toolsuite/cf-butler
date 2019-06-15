@@ -34,7 +34,7 @@ public class R2dbcAppDetailService implements AppDetailService {
 		return repo
 				.save(entity)
 				.onErrorContinue(
-					(ex, data) -> log.error("Problem saving application {}.", entity, ex));
+					(ex, data) -> log.error(String.format("Problem saving application %s.", entity), ex));
 	}
 
 	@Override

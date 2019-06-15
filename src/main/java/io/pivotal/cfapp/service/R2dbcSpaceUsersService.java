@@ -43,7 +43,7 @@ public class R2dbcSpaceUsersService implements SpaceUsersService {
 		return repo
 				.save(entity)
 				.onErrorContinue(
-					(ex, data) -> log.error("Problem saving space user {}.", entity, ex));
+					(ex, data) -> log.error(String.format("Problem saving space user %s.", entity), ex));
 	}
 
 	@Override

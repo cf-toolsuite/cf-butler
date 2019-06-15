@@ -30,7 +30,7 @@ public class R2dbcAppRelationshipService implements AppRelationshipService {
 		return repo
 				.save(entity)
 				.onErrorContinue(
-					(ex, data) -> log.error("Problem saving application releationship {}.", entity, ex));
+					(ex, data) -> log.error(String.format("Problem saving application releationship %s.", entity), ex));
 	}
 
 	@Override

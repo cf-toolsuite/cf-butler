@@ -30,7 +30,7 @@ public class R2dbcSpaceService implements SpaceService {
         return repo
                 .save(entity)
                 .onErrorContinue(
-                    (ex, data) -> log.error("Problem saving space {}.", entity, ex));
+                    (ex, data) -> log.error(String.format("Problem saving space %s.", entity), ex));
     }
 
     @Override

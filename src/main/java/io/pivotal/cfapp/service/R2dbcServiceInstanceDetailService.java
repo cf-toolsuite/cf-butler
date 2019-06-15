@@ -27,7 +27,7 @@ public class R2dbcServiceInstanceDetailService implements ServiceInstanceDetailS
 		return repo
 				.save(entity)
 				.onErrorContinue(
-					(ex, data) -> log.error("Problem saving service instance {}.", entity, ex));
+					(ex, data) -> log.error(String.format("Problem saving service instance %s.", entity), ex));
 	}
 
 	@Override
