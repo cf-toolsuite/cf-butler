@@ -3,6 +3,7 @@ package io.pivotal.cfapp.task;
 import java.time.ZoneId;
 import java.util.List;
 
+import org.cloudfoundry.client.v2.ClientV2Exception;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.operations.applications.ApplicationDetail;
 import org.cloudfoundry.operations.applications.GetApplicationEventsRequest;
@@ -20,6 +21,7 @@ import io.pivotal.cfapp.domain.Space;
 import io.pivotal.cfapp.service.AppDetailService;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
 
 @Slf4j
@@ -49,6 +51,7 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
     }
 
     public void collect(List<Space> spaces) {
+        Hooks.onOperatorDebug();
         log.info("AppDetailTask started.");
         service
             .deleteAll()
@@ -81,6 +84,7 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
             .build()
                 .applications()
                     .list()
+                    //.onErrorContinue((ex, data) -> log.error(String.format("Could not fetch application summary record(s) with %s", request), ex))
                     .map(as -> AppRequest.from(request).id(as.getId()).appName(as.getName()).build());
     }
 
@@ -89,8 +93,8 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
                 .getCloudFoundryClient()
 				.applicationsV2()
 					.get(org.cloudfoundry.client.v2.applications.GetApplicationRequest.builder().applicationId(request.getId()).build())
-	    			.onErrorResume(err -> Mono.empty())
-	    			.map(gar -> AppRequest.from(request).image(gar.getEntity().getDockerImage()).build());
+                    .map(gar -> AppRequest.from(request).image(gar.getEntity().getDockerImage()).build())
+                    .switchIfEmpty(Mono.just(request));
     }
 
     protected Mono<AppDetail> getApplicationDetail(AppRequest request) {
@@ -101,9 +105,9 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
             .build()
                 .applications()
                     .get(GetApplicationRequest.builder().name(request.getAppName()).build())
+                    .map(a -> fromApplicationDetail(a, request))
                     .onErrorContinue(
-                        (ex, data) -> log.error(String.format("Trouble fetching application detail with %s.", request), ex))
-                    .map(a -> fromApplicationDetail(a, request));
+                        (ex, data) -> log.warn("Trouble fetching application detail {}", request.toString(), ex));
     }
 
     private AppDetail fromApplicationDetail(ApplicationDetail a, AppRequest request) {
@@ -117,14 +121,14 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
             .stack(a.getStack())
             .runningInstances(nullSafeInteger(a.getRunningInstances()))
             .totalInstances(nullSafeInteger(a.getInstances()))
-            .diskUsage(a.getInstanceDetails().stream().mapToLong(id -> nullSafeLong(id.getDiskUsage())).sum())
-            .memoryUsage(a.getInstanceDetails().stream().mapToLong(id -> nullSafeLong(id.getMemoryUsage())).sum())
+            .diskUsage(a.getInstanceDetails() == null ? 0L : a.getInstanceDetails().stream().mapToLong(id -> nullSafeLong(id.getDiskUsage())).sum())
+            .memoryUsage(a.getInstanceDetails() == null ? 0L : a.getInstanceDetails().stream().mapToLong(id -> nullSafeLong(id.getMemoryUsage())).sum())
             .urls(a.getUrls())
             .lastPushed(a.getLastUploaded() != null ? a.getLastUploaded()
                         .toInstant()
                         .atZone(ZoneId.systemDefault())
                         .toLocalDateTime(): null)
-            .requestedState(a.getRequestedState().toLowerCase())
+            .requestedState(a.getRequestedState() == null ? "": a.getRequestedState().toLowerCase())
             .build();
     }
 
