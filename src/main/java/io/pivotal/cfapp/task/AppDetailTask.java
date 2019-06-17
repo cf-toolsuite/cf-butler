@@ -49,6 +49,9 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
         collect(List.copyOf(event.getSpaces()));
     }
 
+    // We use Flux#concatMap below when retrieving application detail records because we do not want to
+    // abrubtly terminate on an exception. But this comes with a hefty performance penalty.
+    // @see https://github.com/reactor/reactor-core/issues/74
     public void collect(List<Space> spaces) {
         Hooks.onOperatorDebug();
         log.info("AppDetailTask started.");
@@ -58,7 +61,6 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
             .map(s -> AppRequest.builder().organization(s.getOrganization()).space(s.getSpace()).build())
             .flatMap(appSummaryRequest -> getApplicationSummary(appSummaryRequest))
             .flatMap(appManifestRequest -> getDockerImage(appManifestRequest))
-            // @see https://github.com/reactor/reactor-core/issues/74
             .concatMap(appDetailRequest -> getApplicationDetail(appDetailRequest))
             .flatMap(withLastEventRequest -> enrichWithAppEvent(withLastEventRequest))
             .distinct()
@@ -84,7 +86,6 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
             .build()
                 .applications()
                     .list()
-                    //.onErrorContinue((ex, data) -> log.error(String.format("Could not fetch application summary record(s) with %s", request), ex))
                     .map(as -> AppRequest.from(request).id(as.getId()).appName(as.getName()).build());
     }
 
