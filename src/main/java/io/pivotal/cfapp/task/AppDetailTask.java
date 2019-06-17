@@ -3,7 +3,6 @@ package io.pivotal.cfapp.task;
 import java.time.ZoneId;
 import java.util.List;
 
-import org.cloudfoundry.client.v2.ClientV2Exception;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.operations.applications.ApplicationDetail;
 import org.cloudfoundry.operations.applications.GetApplicationEventsRequest;
@@ -94,8 +93,7 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
                 .getCloudFoundryClient()
 				.applicationsV2()
 					.get(org.cloudfoundry.client.v2.applications.GetApplicationRequest.builder().applicationId(request.getId()).build())
-                    .map(gar -> AppRequest.from(request).image(gar.getEntity().getDockerImage()).build())
-                    .switchIfEmpty(Mono.just(request));
+                    .map(gar -> AppRequest.from(request).image(gar.getEntity().getDockerImage()).build());
     }
 
     protected Mono<AppDetail> getApplicationDetail(AppRequest request) {
@@ -155,9 +153,7 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
                                            .lastEvent(e.getName())
                                            .lastEventActor(e.getActor())
                                            .lastEventTime(e.getTime())
-                                           .build()
-                           )
-                    .switchIfEmpty(Mono.just(detail));
+                                           .build());
     }
 
     private Long nullSafeLong(Long input) {
