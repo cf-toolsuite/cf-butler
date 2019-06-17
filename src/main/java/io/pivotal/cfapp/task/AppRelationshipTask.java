@@ -58,7 +58,7 @@ public class AppRelationshipTask implements ApplicationListener<ServiceInstanceD
                         log.info("AppRelationshipTask completed");
                     },
                     error -> {
-                        log.error("AppRelationshipTask completed with error", error);
+                        log.error("AppRelationshipTask terminated with error", error);
                     }
                 );
     }

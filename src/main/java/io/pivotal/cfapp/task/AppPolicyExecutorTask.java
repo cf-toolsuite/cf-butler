@@ -71,7 +71,7 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
 					log.info("AppPolicyExecutorTask completed");
 				},
 				error -> {
-					log.error("AppPolicyExecutorTask completed with error", error);
+					log.error("AppPolicyExecutorTask terminated with error", error);
 				}
 			);
     }

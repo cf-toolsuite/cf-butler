@@ -66,7 +66,7 @@ public class ProductsAndReleasesTask implements ApplicationRunner {
                     log.info("ProductsAndReleasesTask completed");
                 },
                 error -> {
-                    log.error("ProductsAndReleasesTask completed with error", error);
+                    log.error("ProductsAndReleasesTask terminated with error", error);
                 }
             );
     }

@@ -42,7 +42,7 @@ public class TkTask implements ApplicationRunner {
                         log.info("TkTask completed");
                     },
                     error -> {
-                        log.error("TkTask completed with error", error);
+                        log.error("TkTask terminated with error", error);
                     }
                 );
     }

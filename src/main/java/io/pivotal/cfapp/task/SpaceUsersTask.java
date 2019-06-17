@@ -51,7 +51,7 @@ public class SpaceUsersTask implements ApplicationListener<SpacesRetrievedEvent>
                         log.info("SpaceUsersTask completed");
                     },
                     error -> {
-                        log.error("SpaceUsersTask completed with error", error);
+                        log.error("SpaceUsersTask terminated with error", error);
                     }
                 );
     }

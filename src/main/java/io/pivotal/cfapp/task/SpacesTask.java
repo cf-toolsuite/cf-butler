@@ -52,7 +52,7 @@ public class SpacesTask implements ApplicationListener<OrganizationsRetrievedEve
                         log.info("SpacesTask completed");
                     },
                     error -> {
-                        log.error("SpacesTask completed with error", error);
+                        log.error("SpacesTask terminated with error", error);
                     }
                 );
     }

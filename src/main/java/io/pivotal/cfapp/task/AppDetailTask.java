@@ -59,7 +59,8 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
             .map(s -> AppRequest.builder().organization(s.getOrganization()).space(s.getSpace()).build())
             .flatMap(appSummaryRequest -> getApplicationSummary(appSummaryRequest))
             .flatMap(appManifestRequest -> getDockerImage(appManifestRequest))
-            .flatMap(appDetailRequest -> getApplicationDetail(appDetailRequest))
+            // @see https://github.com/reactor/reactor-core/issues/74
+            .concatMap(appDetailRequest -> getApplicationDetail(appDetailRequest))
             .flatMap(withLastEventRequest -> enrichWithAppEvent(withLastEventRequest))
             .distinct()
             .flatMap(service::save)
@@ -71,7 +72,7 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
                         log.info("AppDetailTask completed.");
                     },
                     error -> {
-                        log.error("AppDetailTask completed with error", error);
+                        log.error("AppDetailTask terminated with error", error);
                     }
                 );
     }
@@ -105,9 +106,11 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
             .build()
                 .applications()
                     .get(GetApplicationRequest.builder().name(request.getAppName()).build())
-                    .map(a -> fromApplicationDetail(a, request))
-                    .onErrorContinue(
-                        (ex, data) -> log.warn("Trouble fetching application detail {}", request.toString(), ex));
+                    .onErrorResume(err -> {
+                        log.warn(String.format("Trouble fetching application detail with %s", request.toString()), err);
+                        return Mono.empty();
+                    })
+                    .map(a -> fromApplicationDetail(a, request));
     }
 
     private AppDetail fromApplicationDetail(ApplicationDetail a, AppRequest request) {

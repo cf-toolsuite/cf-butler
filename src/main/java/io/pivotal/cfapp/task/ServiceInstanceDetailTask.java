@@ -69,7 +69,7 @@ public class ServiceInstanceDetailTask implements ApplicationListener<SpacesRetr
                         log.info("ServiceInstanceDetailTask completed");
                     },
                     error -> {
-                        log.error("ServiceInstanceDetailTask completed with error", error);
+                        log.error("ServiceInstanceDetailTask terminated with error", error);
                     }
                 );
     }

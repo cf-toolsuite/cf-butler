@@ -50,7 +50,7 @@ public class OrganizationsTask implements ApplicationListener<TkRetrievedEvent> 
                         log.info("OrganizationTask completed");
                     },
                     error -> {
-                        log.error("OrganizationTask completed with error", error);
+                        log.error("OrganizationTask terminated with error", error);
                     }
                 );
     }
