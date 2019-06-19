@@ -1,5 +1,8 @@
 package io.pivotal.cfapp.domain;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,15 +21,23 @@ public class AppRelationshipRequest {
     private String serviceName;
     private String applicationId;
     private String applicationName;
+    private String serviceType;
+    private String servicePlan;
 
-    public static AppRelationshipRequestBuilder from(AppRelationshipRequest request) {
-        return AppRelationshipRequest
-                .builder()
-                    .organization(request.getOrganization())
-                    .space(request.getSpace())
-                    .serviceInstanceId(request.getServiceInstanceId())
-                    .serviceName(request.getServiceName())
-                    .applicationId(request.getApplicationId())
-                    .applicationName(request.getApplicationName());
+    public static List<AppRelationshipRequest> listOf(ServiceInstanceDetail detail) {
+        List<AppRelationshipRequest> result = new ArrayList<>();
+        detail.getApplications().forEach(a -> {
+            result.add(AppRelationshipRequest
+                        .builder()
+                        .organization(detail.getOrganization())
+                        .space(detail.getSpace())
+                        .applicationName(a)
+                        .serviceInstanceId(detail.getServiceInstanceId())
+                        .serviceName(detail.getName())
+                        .serviceType(detail.getType())
+                        .servicePlan(detail.getPlan())
+                        .build());
+        });
+        return result;
     }
 }

@@ -17,8 +17,7 @@ public class R2dbcTkRepository {
         this.client = client;
     }
 
-    public Mono<Integer> save() {
-        LocalDateTime collectionTime = LocalDateTime.now();
+    public Mono<Integer> save(LocalDateTime collectionTime) {
         return client
                 .insert().into("time_keeper")
                 .value("collection_time", collectionTime)

@@ -5,9 +5,11 @@ import org.springframework.stereotype.Service;
 
 import io.pivotal.cfapp.domain.HistoricalRecord;
 import io.pivotal.cfapp.repository.R2dbcHistoricalRecordRepository;
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+@Slf4j
 @Service
 public class R2dbcHistoricalRecordService implements HistoricalRecordService {
 
@@ -20,7 +22,10 @@ public class R2dbcHistoricalRecordService implements HistoricalRecordService {
 
 	@Override
 	public Mono<HistoricalRecord> save(HistoricalRecord entity) {
-		return repo.save(entity);
+		return repo
+				.save(entity)
+				.onErrorContinue(
+					(ex, data) -> log.error(String.format("Problem saving historical record %s.", entity), ex));
 	}
 
 	@Override

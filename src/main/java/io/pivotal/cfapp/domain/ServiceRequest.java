@@ -8,12 +8,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.Builder.Default;
 
 @Builder
 @AllArgsConstructor(access=AccessLevel.PACKAGE)
 @NoArgsConstructor(access=AccessLevel.PACKAGE)
 @Getter
+@ToString
 public class ServiceRequest {
 
 	private String id;

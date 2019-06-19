@@ -54,7 +54,7 @@ public class PivnetClient {
         return getProductReleases(slug)
                 .next()
                 .onErrorContinue(
-                    (ex, data) -> log.warn("Problem obtaining releases for product [{}] .", slug, ex));
+                    (ex, data) -> log.warn("Problem obtaining releases for product [{}].", slug, ex));
     }
 
     public Flux<Release> getLatestProductReleases() {
@@ -68,6 +68,6 @@ public class PivnetClient {
                 .flatMapMany(list -> Flux.fromIterable(list.getProducts()))
                 .flatMap(l -> getProductReleases(l.getSlug()))
                 .onErrorContinue(
-                    (ex, data) -> log.warn("Problem obtaining releases for product [{}] .", data, ex));
+                    (ex, data) -> log.warn("Problem obtaining releases for product [{}].", data, ex));
     }
 }

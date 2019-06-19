@@ -8,10 +8,12 @@ import org.springframework.data.annotation.Id;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.ToString;
 
 @Getter
 @EqualsAndHashCode
 @JsonPropertyOrder({ "id", "name"})
+@ToString
 public class Organization {
 
     @Id
