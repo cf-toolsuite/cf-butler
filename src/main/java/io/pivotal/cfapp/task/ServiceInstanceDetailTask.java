@@ -1,7 +1,5 @@
 package io.pivotal.cfapp.task;
 
-import java.sql.SQLException;
-import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.List;
@@ -21,11 +19,9 @@ import io.pivotal.cfapp.domain.ServiceInstanceDetail;
 import io.pivotal.cfapp.domain.ServiceRequest;
 import io.pivotal.cfapp.domain.Space;
 import io.pivotal.cfapp.service.ServiceInstanceDetailService;
-import io.r2dbc.spi.R2dbcException;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 @Slf4j
 @Component
@@ -64,19 +60,16 @@ public class ServiceInstanceDetailTask implements ApplicationListener<SpacesRetr
 	        .flatMap(serviceBoundAppIdsRequest -> getServiceBoundApplicationIds(serviceBoundAppIdsRequest))
 	        .flatMap(serviceBoundAppNamesRequest -> getServiceBoundApplicationNames(serviceBoundAppNamesRequest))
             .flatMap(serviceDetailRequest -> getServiceDetail(serviceDetailRequest))
-            .distinct()
-            .publishOn(Schedulers.parallel())
             .flatMap(service::save)
-            .onErrorContinue(R2dbcException.class,
-                (ex, data) -> log.error("Problem saving service instance {}.", data != null ? data.toString(): "<>", ex))
-            .onErrorContinue(SQLException.class,
-                (ex, data) -> log.error("Problem saving service instance {}.", data != null ? data.toString(): "<>", ex))
-            .thenMany(service.findAll().subscribeOn(Schedulers.elastic()))
+            .thenMany(service.findAll())
                 .collectList()
                 .subscribe(
-                    r -> {
-                        publisher.publishEvent(new ServiceInstanceDetailRetrievedEvent(this).detail(r));
+                    result -> {
+                        publisher.publishEvent(new ServiceInstanceDetailRetrievedEvent(this).detail(result));
                         log.info("ServiceInstanceDetailTask completed");
+                    },
+                    error -> {
+                        log.error("ServiceInstanceDetailTask terminated with error", error);
                     }
                 );
     }
@@ -103,10 +96,6 @@ public class ServiceInstanceDetailTask implements ApplicationListener<SpacesRetr
                 .build()
                 .services()
                     .getInstance(GetServiceInstanceRequest.builder().name(request.getServiceName()).build())
-                    .retryBackoff(5, Duration.ofSeconds(1), Duration.ofSeconds(10))
-                    .onErrorContinue(
-                            Exception.class,
-                            (ex, data) -> log.error("Trouble fetching service instance details {}.", data != null ? data.toString(): "<>", ex))
                     .map(sd -> ServiceInstanceDetail
                                 .builder()
                                     .organization(request.getOrganization())
@@ -141,14 +130,14 @@ public class ServiceInstanceDetailTask implements ApplicationListener<SpacesRetr
 
     protected Mono<ServiceRequest> getServiceBoundApplicationNames(ServiceRequest request) {
     	return Flux
-    		.fromIterable(request.getApplicationIds())
-    		.flatMap(appId ->
-    			cloudFoundryClient
-    				.applicationsV3()
-    					.get(GetApplicationRequest.builder().applicationId(appId).build())
-    					.map(response -> response.getName()))
-    					.collectList()
-    					.map(names -> ServiceRequest.from(request).applicationNames(names).build());
+                .fromIterable(request.getApplicationIds())
+                .flatMap(appId ->
+                    cloudFoundryClient
+                        .applicationsV3()
+                            .get(GetApplicationRequest.builder().applicationId(appId).build())
+                            .map(response -> response.getName()))
+                            .collectList()
+                            .map(names -> ServiceRequest.from(request).applicationNames(names).build());
     }
 
 }

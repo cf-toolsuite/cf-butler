@@ -7,10 +7,12 @@ import org.springframework.stereotype.Service;
 import io.pivotal.cfapp.domain.ServiceInstanceDetail;
 import io.pivotal.cfapp.domain.ServiceInstancePolicy;
 import io.pivotal.cfapp.repository.R2dbcServiceInstanceDetailRepository;
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 
+@Slf4j
 @Service
 public class R2dbcServiceInstanceDetailService implements ServiceInstanceDetailService {
 
@@ -22,7 +24,10 @@ public class R2dbcServiceInstanceDetailService implements ServiceInstanceDetailS
 
 	@Override
 	public Mono<ServiceInstanceDetail> save(ServiceInstanceDetail entity) {
-		return repo.save(entity);
+		return repo
+				.save(entity)
+				.onErrorContinue(
+					(ex, data) -> log.error(String.format("Problem saving service instance %s.", entity), ex));
 	}
 
 	@Override

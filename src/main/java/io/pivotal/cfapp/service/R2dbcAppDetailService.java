@@ -8,10 +8,12 @@ import org.springframework.stereotype.Service;
 import io.pivotal.cfapp.domain.AppDetail;
 import io.pivotal.cfapp.domain.ApplicationPolicy;
 import io.pivotal.cfapp.repository.R2dbcAppDetailRepository;
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 
+@Slf4j
 @Service
 public class R2dbcAppDetailService implements AppDetailService {
 
@@ -29,7 +31,10 @@ public class R2dbcAppDetailService implements AppDetailService {
 
 	@Override
 	public Mono<AppDetail> save(AppDetail entity) {
-		return repo.save(entity);
+		return repo
+				.save(entity)
+				.onErrorContinue(
+					(ex, data) -> log.error(String.format("Problem saving application %s.", entity), ex));
 	}
 
 	@Override

@@ -5,9 +5,11 @@ import org.springframework.stereotype.Service;
 
 import io.pivotal.cfapp.domain.Space;
 import io.pivotal.cfapp.repository.R2dbcSpaceRepository;
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+@Slf4j
 @Service
 public class R2dbcSpaceService implements SpaceService {
 
@@ -25,7 +27,10 @@ public class R2dbcSpaceService implements SpaceService {
 
     @Override
     public Mono<Space> save(Space entity) {
-        return repo.save(entity);
+        return repo
+                .save(entity)
+                .onErrorContinue(
+                    (ex, data) -> log.error(String.format("Problem saving space %s.", entity), ex));
     }
 
     @Override

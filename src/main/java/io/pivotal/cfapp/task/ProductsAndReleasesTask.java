@@ -57,13 +57,16 @@ public class ProductsAndReleasesTask implements ApplicationRunner {
                     .collectList()
                     .flatMap(releases -> { cache.setLatestProductReleases(releases); return Mono.empty(); }))
             .subscribe(
-                r -> {
+                result -> {
                     publisher.publishEvent(
                         new ProductsAndReleasesRetrievedEvent(this)
                                 .products(cache.getProducts())
                                 .allReleases(cache.getAllProductReleases())
                                 .latestReleases(cache.getLatestProductReleases()));
                     log.info("ProductsAndReleasesTask completed");
+                },
+                error -> {
+                    log.error("ProductsAndReleasesTask terminated with error", error);
                 }
             );
     }

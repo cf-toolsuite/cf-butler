@@ -1,133 +1,90 @@
 package io.pivotal.cfapp.task;
 
-import java.sql.SQLException;
 import java.util.List;
 
-import org.cloudfoundry.client.v2.servicebindings.ListServiceBindingsRequest;
-import org.cloudfoundry.client.v3.applications.GetApplicationRequest;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
-import org.cloudfoundry.operations.services.GetServiceInstanceRequest;
-import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import io.pivotal.cfapp.domain.AppRelationship;
 import io.pivotal.cfapp.domain.AppRelationshipRequest;
-import io.pivotal.cfapp.domain.Space;
+import io.pivotal.cfapp.domain.ServiceInstanceDetail;
 import io.pivotal.cfapp.service.AppRelationshipService;
-import io.r2dbc.spi.R2dbcException;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 @Slf4j
 @Component
-public class AppRelationshipTask implements ApplicationListener<SpacesRetrievedEvent> {
+public class AppRelationshipTask implements ApplicationListener<ServiceInstanceDetailRetrievedEvent> {
 
     private DefaultCloudFoundryOperations opsClient;
-    private ReactorCloudFoundryClient cloudFoundryClient;
     private AppRelationshipService service;
     private ApplicationEventPublisher publisher;
 
     @Autowired
     public AppRelationshipTask(
     		DefaultCloudFoundryOperations opsClient,
-    		ReactorCloudFoundryClient cloudFoundryClient,
     		AppRelationshipService service,
     		ApplicationEventPublisher publisher
     		) {
         this.opsClient = opsClient;
-        this.cloudFoundryClient = cloudFoundryClient;
         this.service = service;
         this.publisher = publisher;
     }
 
     @Override
-    public void onApplicationEvent(SpacesRetrievedEvent event) {
-        collect(List.copyOf(event.getSpaces()));
+    public void onApplicationEvent(ServiceInstanceDetailRetrievedEvent event) {
+        collect(List.copyOf(event.getDetail()));
     }
 
-    public void collect(List<Space> spaces) {
+    public void collect(List<ServiceInstanceDetail> serviceInstances) {
         log.info("AppRelationshipTask started");
     	service
             .deleteAll()
-            .thenMany(Flux.fromIterable(spaces))
-            .map(s -> AppRelationshipRequest.builder().organization(s.getOrganization()).space(s.getSpace()).build())
-	        .flatMap(serviceSummaryRequest -> getServiceSummary(serviceSummaryRequest))
-	        .flatMap(serviceBoundAppIdsRequest -> getServiceBoundApplicationIds(serviceBoundAppIdsRequest))
-	        .flatMap(serviceBoundAppNamesRequest -> getServiceBoundApplicationNames(serviceBoundAppNamesRequest))
-            .flatMap(appRelationshipRequest -> getAppRelationship(appRelationshipRequest))
-            .publishOn(Schedulers.parallel())
+            .thenMany(Flux.fromIterable(serviceInstances))
+            .filter(sid -> !CollectionUtils.isEmpty(sid.getApplications()))
+            .flatMap(si -> Flux.fromIterable(AppRelationshipRequest.listOf(si)))
+            .flatMap(si -> getAppRelationship(si))
             .flatMap(service::save)
-            .onErrorContinue(R2dbcException.class,
-                (ex, data) -> log.error("Problem saving application releationship {}.", data != null ? data.toString(): "<>", ex))
-            .onErrorContinue(SQLException.class,
-                (ex, data) -> log.error("Problem saving application releationship {}.", data != null ? data.toString(): "<>", ex))
-            .thenMany(service.findAll().subscribeOn(Schedulers.elastic()))
+            .thenMany(service.findAll())
                 .collectList()
                 .subscribe(
-                    r -> {
-                        publisher.publishEvent(new AppRelationshipRetrievedEvent(this).relations(r));
+                    result -> {
+                        publisher.publishEvent(new AppRelationshipRetrievedEvent(this).relations(result));
                         log.info("AppRelationshipTask completed");
+                    },
+                    error -> {
+                        log.error("AppRelationshipTask terminated with error", error);
                     }
                 );
     }
 
-    protected Flux<AppRelationshipRequest> getServiceSummary(AppRelationshipRequest request) {
-        return DefaultCloudFoundryOperations.builder()
-            .from(opsClient)
-            .organization(request.getOrganization())
-            .space(request.getSpace())
-            .build()
-                .services()
-                    .listInstances()
-                    .map(ss -> AppRelationshipRequest.from(request)
-                    							.serviceInstanceId(ss.getId())
-                    							.serviceName(ss.getName() != null ? ss.getName(): "user_provided_service")
-                    							.build());
-    }
-
     protected Mono<AppRelationship> getAppRelationship(AppRelationshipRequest request) {
-        return DefaultCloudFoundryOperations.builder()
-        	.from(opsClient)
-        	.organization(request.getOrganization())
-        	.space(request.getSpace())
-        	.build()
-               .services()
-                   .getInstance(GetServiceInstanceRequest.builder().name(request.getServiceName()).build())
-                   .map(sd -> AppRelationship
-                               .builder()
-                                   .organization(request.getOrganization())
-                                   .space(request.getSpace())
-                                   .appId(request.getApplicationId())
-                                   .appName(request.getApplicationName())
-                                   .serviceInstanceId(request.getServiceInstanceId())
-                                   .serviceName(request.getServiceName())
-                                   .servicePlan(sd.getPlan())
-                                   .serviceType(sd.getType() != null ? sd.getType().getValue(): "")
-                                   .build());
-    }
-
-    protected Flux<AppRelationshipRequest> getServiceBoundApplicationIds(AppRelationshipRequest request) {
-    	return cloudFoundryClient
-			.serviceBindingsV2()
-			.list(ListServiceBindingsRequest.builder().serviceInstanceId(request.getServiceInstanceId()).build())
-			.flux()
-			.flatMap(serviceBindingResponse -> Flux.fromIterable(serviceBindingResponse.getResources()))
-			.map(resource -> resource.getEntity())
-    		.map(i -> AppRelationshipRequest.from(request).applicationId(i.getApplicationId()).build());
-    }
-
-    protected Mono<AppRelationshipRequest> getServiceBoundApplicationNames(AppRelationshipRequest request) {
-    	return Mono.just(request.getApplicationId())
-    		.flatMap(appId ->
-    			cloudFoundryClient
-    				.applicationsV3()
-    					.get(GetApplicationRequest.builder().applicationId(appId).build())
-    					.map(response -> AppRelationshipRequest.from(request).applicationName(response.getName()).build()));
+        return DefaultCloudFoundryOperations
+                .builder()
+                    .from(opsClient)
+                    .organization(request.getOrganization())
+                    .space(request.getSpace())
+                    .build()
+                    .applications()
+                        .list()
+                        .filter(as -> as.getName().equals(request.getApplicationName()))
+                        .next()
+                        .map(as -> AppRelationship
+                                    .builder()
+                                        .organization(request.getOrganization())
+                                        .space(request.getSpace())
+                                        .appId(as.getId())
+                                        .appName(request.getApplicationName())
+                                        .serviceInstanceId(request.getServiceInstanceId())
+                                        .serviceName(request.getServiceName())
+                                        .servicePlan(request.getServicePlan())
+                                        .serviceType(request.getServiceType())
+                                        .build());
     }
 
 }

@@ -5,9 +5,11 @@ import org.springframework.stereotype.Service;
 
 import io.pivotal.cfapp.domain.Organization;
 import io.pivotal.cfapp.repository.R2dbcOrganizationRepository;
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+@Slf4j
 @Service
 public class R2dbcOrganizationService implements OrganizationService {
 
@@ -25,7 +27,10 @@ public class R2dbcOrganizationService implements OrganizationService {
 
     @Override
     public Mono<Organization> save(Organization entity) {
-        return repo.save(entity);
+        return repo
+                .save(entity)
+                .onErrorContinue(
+                    (ex, data) -> log.error(String.format("Problem saving organization %s.", entity), ex));
     }
 
     @Override
