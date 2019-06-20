@@ -4,8 +4,10 @@ import java.time.ZoneId;
 import java.util.List;
 
 import org.cloudfoundry.client.v2.applications.SummaryApplicationRequest;
+import org.cloudfoundry.client.v2.applications.SummaryApplicationResponse;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.operations.applications.ApplicationDetail;
+import org.cloudfoundry.operations.applications.ApplicationSummary;
 import org.cloudfoundry.operations.applications.GetApplicationEventsRequest;
 import org.cloudfoundry.operations.applications.GetApplicationRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,13 +18,16 @@ import org.springframework.stereotype.Component;
 import io.pivotal.cfapp.config.ButlerSettings;
 import io.pivotal.cfapp.domain.AppDetail;
 import io.pivotal.cfapp.domain.AppEvent;
-import io.pivotal.cfapp.domain.AppRequest;
 import io.pivotal.cfapp.domain.Space;
 import io.pivotal.cfapp.service.AppDetailService;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
+import reactor.util.function.Tuple5;
+
+import static org.cloudfoundry.util.tuple.TupleUtils.function;
 
 @Slf4j
 @Component
@@ -56,16 +61,14 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
         service
             .deleteAll()
             .thenMany(Flux.fromIterable(spaces))
-            .map(s -> AppRequest.builder().organization(s.getOrganization()).space(s.getSpace()).build())
-            .flatMap(appSummaryRequest -> getApplicationSummary(appSummaryRequest))
-            .flatMap(appDetailRequest -> getApplicationDetail(appDetailRequest)
-                                            .onErrorResume(ex -> {
-                                                log.warn(String.format("Trouble fetching application detail with %s", appDetailRequest.toString()), ex);
-                                                return Mono.empty();
-                                            })
-            )
-            .flatMap(withLastEventRequest -> enrichWithAppEvent(withLastEventRequest))
-            .flatMap(appManifestRequest -> getDockerImage(appManifestRequest))
+            .map(s -> DefaultCloudFoundryOperations.builder()
+                        .from(opsClient)
+                        .organization(s.getOrganization())
+                        .space(s.getSpace())
+                        .build())
+            .flatMap(opsClient -> getApplicationSummary(opsClient))
+            .flatMap(tuple -> getAuxiliaryContent(tuple))
+            .map(function(this::toAppDetail))
             .flatMap(service::save)
             .thenMany(service.findAll())
                 .collectList()
@@ -80,79 +83,84 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
                 );
     }
 
-    protected Flux<AppRequest> getApplicationSummary(AppRequest request) {
-        return DefaultCloudFoundryOperations.builder()
-                .from(opsClient)
-                .organization(request.getOrganization())
-                .space(request.getSpace())
-                .build()
-                    .applications()
-                        .list()
-                        .map(as -> AppRequest.from(request).id(as.getId()).appName(as.getName()).build());
+    protected Mono<Tuple5<DefaultCloudFoundryOperations, ApplicationSummary, ApplicationDetail, AppEvent, SummaryApplicationResponse>> getAuxiliaryContent(
+        Tuple2<DefaultCloudFoundryOperations, ApplicationSummary> tuple
+    ) {
+        DefaultCloudFoundryOperations opsClient = tuple.getT1();
+        ApplicationSummary summary = tuple.getT2();
+        return Mono.zip(
+            Mono.just(opsClient),
+            Mono.just(summary),
+            getApplicationDetail(opsClient, summary)
+                .onErrorResume(ex -> {
+                    log.warn(String.format("Trouble fetching application detail with org=%s, space=%s, summary=%s", opsClient.getOrganization(), opsClient.getSpace(), summary.toString()), ex);
+                    return Mono.empty();
+                }),
+            getAppEvent(opsClient, summary),
+            getSummaryApplicationResponse(opsClient, summary))
     }
 
-    protected Mono<AppDetail> getApplicationDetail(AppRequest request) {
-        return DefaultCloudFoundryOperations.builder()
-                .from(opsClient)
-                .organization(request.getOrganization())
-                .space(request.getSpace())
-                .build()
+    protected Flux<Tuple2<DefaultCloudFoundryOperations, ApplicationSummary>> getApplicationSummary(DefaultCloudFoundryOperations opsClient) {
+        return
+            Flux.zip(
+                Mono.just(opsClient),
+                opsClient
                     .applications()
-                        .get(GetApplicationRequest.builder().name(request.getAppName()).build())
-                        .map(a -> fromApplicationDetail(a, request));
+                        .list());
     }
 
-    protected Mono<AppDetail> getDockerImage(AppDetail detail) {
+    protected Mono<ApplicationDetail> getApplicationDetail(DefaultCloudFoundryOperations opsClient, ApplicationSummary summary) {
+        return opsClient
+                .applications()
+                    .get(GetApplicationRequest.builder().name(summary.getName()).build());
+    }
+
+    protected Mono<SummaryApplicationResponse> getSummaryApplicationResponse(DefaultCloudFoundryOperations opsClient, ApplicationSummary summary) {
         return opsClient
                 .getCloudFoundryClient()
                 .applicationsV2()
-                    .summary(SummaryApplicationRequest.builder().applicationId(detail.getAppId()).build())
-                    .map(sar -> AppDetail.from(detail).image(sar.getDockerImage()).build());
+                    .summary(SummaryApplicationRequest.builder().applicationId(summary.getId()).build());
     }
 
-    protected Mono<AppDetail> enrichWithAppEvent(AppDetail detail) {
-        return DefaultCloudFoundryOperations.builder()
-                .from(opsClient)
-                .organization(detail.getOrganization())
-                .space(detail.getSpace())
-                .build()
+    protected Mono<AppEvent> getAppEvent(DefaultCloudFoundryOperations opsClient, ApplicationSummary summary) {
+        return opsClient
                     .applications()
-                        .getEvents(GetApplicationEventsRequest.builder().name(detail.getAppName()).build())
+                        .getEvents(GetApplicationEventsRequest.builder().name(summary.getName()).build())
                         .map(e -> AppEvent
                                     .builder()
                                         .name(e.getEvent())
                                         .actor(e.getActor())
                                         .time(
-                                            e.getTime() != null ? e.getTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime(): null)
+                                            e.getTime() != null ?
+                                                e.getTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime() :
+                                                null)
                                         .build())
-                        .next()
-                        .map(e -> AppDetail.from(detail)
-                                            .lastEvent(e.getName())
-                                            .lastEventActor(e.getActor())
-                                            .lastEventTime(e.getTime())
-                                            .build());
+                        .next();
     }
 
-    private AppDetail fromApplicationDetail(ApplicationDetail a, AppRequest request) {
+    protected AppDetail toAppDetail(
+        DefaultCloudFoundryOperations opsClient,
+        ApplicationSummary summary, ApplicationDetail detail,
+        AppEvent event, SummaryApplicationResponse response) {
         return AppDetail
                 .builder()
-                    .organization(request.getOrganization())
-                    .space(request.getSpace())
-                    .appId(request.getId())
-                    .appName(request.getAppName())
-                    .buildpack(settings.getBuildpack(a.getBuildpack(), request.getImage()))
-                    .image(request.getImage())
-                    .stack(a.getStack())
-                    .runningInstances(nullSafeInteger(a.getRunningInstances()))
-                    .totalInstances(nullSafeInteger(a.getInstances()))
-                    .diskUsage(a.getInstanceDetails() == null ? 0L : a.getInstanceDetails().stream().mapToLong(id -> nullSafeLong(id.getDiskUsage())).sum())
-                    .memoryUsage(a.getInstanceDetails() == null ? 0L : a.getInstanceDetails().stream().mapToLong(id -> nullSafeLong(id.getMemoryUsage())).sum())
-                    .urls(a.getUrls())
-                    .lastPushed(a.getLastUploaded() != null ? a.getLastUploaded()
+                    .organization(opsClient.getOrganization())
+                    .space(opsClient.getSpace())
+                    .appId(summary.getId())
+                    .appName(summary.getName())
+                    .buildpack(settings.getBuildpack(detail.getBuildpack(), response.getDockerImage()))
+                    .image(response.getDockerImage())
+                    .stack(detail.getStack())
+                    .runningInstances(nullSafeInteger(detail.getRunningInstances()))
+                    .totalInstances(nullSafeInteger(detail.getInstances()))
+                    .diskUsage(detail.getInstanceDetails() == null ? 0L : detail.getInstanceDetails().stream().mapToLong(id -> nullSafeLong(id.getDiskUsage())).sum())
+                    .memoryUsage(detail.getInstanceDetails() == null ? 0L : detail.getInstanceDetails().stream().mapToLong(id -> nullSafeLong(id.getMemoryUsage())).sum())
+                    .urls(detail.getUrls())
+                    .lastPushed(detail.getLastUploaded() != null ? detail.getLastUploaded()
                                 .toInstant()
                                 .atZone(ZoneId.systemDefault())
                                 .toLocalDateTime(): null)
-                    .requestedState(a.getRequestedState() == null ? "": a.getRequestedState().toLowerCase())
+                    .requestedState(detail.getRequestedState() == null ? "": detail.getRequestedState().toLowerCase())
                 .build();
     }
 
