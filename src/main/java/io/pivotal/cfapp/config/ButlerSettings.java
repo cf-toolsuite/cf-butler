@@ -35,6 +35,8 @@ public class ButlerSettings {
 	private String refreshToken;
 	private String accountRegex;
 	private Set<String> organizationBlackList = DEFAULT_BLACKLIST;
+	private boolean applicationStatisticsEnabled;
+	private boolean applicationEventsEnabled;
 
     public Set<String> getOrganizationBlackList() {
     	while (organizationBlackList.remove(""));

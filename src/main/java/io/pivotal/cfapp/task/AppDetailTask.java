@@ -119,10 +119,12 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
                 Mono.just(opsClient),
                 Mono.just(summary),
                 getSummaryApplicationResponse(opsClient, summary.getId()),
-                summary.getRequestedState().equalsIgnoreCase("running")
+                settings.isApplicationStatisticsEnabled() && summary.getRequestedState().equalsIgnoreCase("running")
                     ? getApplicationStatistics(opsClient, summary.getId())
                     : Mono.just(ApplicationStatisticsResponse.builder().build()),
-                getLastAppEvent(getAppEvents(opsClient, summary.getName()))
+                settings.isApplicationEventsEnabled()
+                    ? getLastAppEvent(getAppEvents(opsClient, summary.getName()))
+                    : Mono.just(AppEvent.builder().build())
             )
             .onErrorResume(ex -> {
                 log.warn(
