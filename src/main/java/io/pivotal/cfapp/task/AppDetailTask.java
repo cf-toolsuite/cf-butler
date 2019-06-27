@@ -113,31 +113,28 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
     ) {
         DefaultCloudFoundryOperations opsClient = tuple.getT1();
         ApplicationSummary summary = tuple.getT2();
-
         log.trace("Fetching application details for id={}, name={}", summary.getId(), summary.getName());
-
-        Mono<DefaultCloudFoundryOperations> client = Mono.just(opsClient);
-        Mono<ApplicationSummary> appSummary = Mono.just(summary);
-        Mono<SummaryApplicationResponse> appDetails = getSummaryApplicationResponse(opsClient, summary.getId());
-        Mono<ApplicationStatisticsResponse> appStatistics =
-            summary.getRequestedState().equalsIgnoreCase("running")
-                ? getApplicationStatistics(opsClient, summary.getId())
-                : Mono.just(ApplicationStatisticsResponse.builder().build());
-        Mono<AppEvent> appEvent = getLastAppEvent(getAppEvents(opsClient, summary.getName()));
-
         return
             Mono.zipDelayError(
-                client,
-                appSummary,
-                appDetails,
-                appStatistics,
-                appEvent
+                Mono.just(opsClient),
+                Mono.just(summary),
+                getSummaryApplicationResponse(opsClient, summary.getId()),
+                summary.getRequestedState().equalsIgnoreCase("running")
+                    ? getApplicationStatistics(opsClient, summary.getId())
+                    : Mono.just(ApplicationStatisticsResponse.builder().build()),
+                getLastAppEvent(getAppEvents(opsClient, summary.getName()))
             )
             .onErrorResume(ex -> {
                 log.warn(
                     String.format("Could not obtain application details for organization=%s, space=%s, and applicationName=%s",
                         opsClient.getOrganization(), opsClient.getSpace(), summary.getName()), ex);
-                return Mono.zip(client, appSummary, appDetails, Mono.just(ApplicationStatisticsResponse.builder().build()), Mono.just(AppEvent.builder().build()));
+                return
+                    Mono.zip(
+                        Mono.just(opsClient),
+                        Mono.just(summary),
+                        getSummaryApplicationResponse(opsClient, summary.getId()),
+                        Mono.just(ApplicationStatisticsResponse.builder().build()),
+                        Mono.just(AppEvent.builder().build()));
             })
             .map(function(this::toAppDetail));
     }
