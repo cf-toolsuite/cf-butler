@@ -60,16 +60,16 @@ public class ButlerSettings {
 
 	public String getBuildpack(String input, String image) {
         if (!StringUtils.isBlank(image)) {
-            return null;
+            return null;  // use Docker image
         } else if (StringUtils.isBlank(input)) {
-            return "anomalous";
-        } else {
+            return "none";  // no Buildpack
+        } else {  // detect and standardize reporting of Buildpack, otherwise use input
 			Optional<String> buildpack =
 				getBuildpacks()
 					.stream()
 					.filter(b -> input.contains(b))
 					.collect(Collectors.reducing((a, b) -> null));
-            return buildpack.orElse("unknown");
+            return buildpack.orElse(input);
         }
     }
 

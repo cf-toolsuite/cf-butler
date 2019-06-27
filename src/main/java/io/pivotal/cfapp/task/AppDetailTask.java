@@ -1,15 +1,25 @@
 package io.pivotal.cfapp.task;
 
+import static org.cloudfoundry.util.tuple.TupleUtils.function;
+
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+import org.cloudfoundry.client.v2.applications.ApplicationStatisticsRequest;
+import org.cloudfoundry.client.v2.applications.ApplicationStatisticsResponse;
+import org.cloudfoundry.client.v2.applications.InstanceStatistics;
+import org.cloudfoundry.client.v2.applications.Statistics;
 import org.cloudfoundry.client.v2.applications.SummaryApplicationRequest;
 import org.cloudfoundry.client.v2.applications.SummaryApplicationResponse;
+import org.cloudfoundry.client.v2.applications.Usage;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
-import org.cloudfoundry.operations.applications.ApplicationDetail;
+import org.cloudfoundry.operations.applications.ApplicationEvent;
 import org.cloudfoundry.operations.applications.ApplicationSummary;
 import org.cloudfoundry.operations.applications.GetApplicationEventsRequest;
-import org.cloudfoundry.operations.applications.GetApplicationRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
@@ -19,15 +29,14 @@ import io.pivotal.cfapp.config.ButlerSettings;
 import io.pivotal.cfapp.domain.AppDetail;
 import io.pivotal.cfapp.domain.AppEvent;
 import io.pivotal.cfapp.domain.Space;
+import io.pivotal.cfapp.domain.Stack;
+import io.pivotal.cfapp.repository.StacksCache;
 import io.pivotal.cfapp.service.AppDetailService;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
-import reactor.util.function.Tuple5;
-
-import static org.cloudfoundry.util.tuple.TupleUtils.function;
+import reactor.util.function.Tuples;
 
 @Slf4j
 @Component
@@ -36,17 +45,20 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
     private ButlerSettings settings;
     private DefaultCloudFoundryOperations opsClient;
     private AppDetailService service;
+    private StacksCache stacksCache;
     private ApplicationEventPublisher publisher;
 
     @Autowired
     public AppDetailTask(
             ButlerSettings settings,
     		DefaultCloudFoundryOperations opsClient,
-    		AppDetailService service,
+            AppDetailService service,
+            StacksCache stacksCache,
     		ApplicationEventPublisher publisher) {
         this.settings = settings;
         this.opsClient = opsClient;
         this.service = service;
+        this.stacksCache = stacksCache;
         this.publisher = publisher;
     }
 
@@ -56,26 +68,20 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
     }
 
     public void collect(List<Space> spaces) {
-        Hooks.onOperatorDebug();
-        log.info("AppDetailTask started.");
+        log.info("AppDetailTask started");
         service
             .deleteAll()
             .thenMany(Flux.fromIterable(spaces))
-            .map(s -> DefaultCloudFoundryOperations.builder()
-                        .from(opsClient)
-                        .organization(s.getOrganization())
-                        .space(s.getSpace())
-                        .build())
-            .flatMap(opsClient -> getApplicationSummary(opsClient))
-            .flatMap(tuple -> getAuxiliaryContent(tuple))
-            .map(function(this::toAppDetail))
+            .flatMap(space -> buildClient(space))
+            .flatMap(client -> getApplicationSummary(client))
+            .flatMap(tuple -> getApplicationDetail(tuple))
             .flatMap(service::save)
             .thenMany(service.findAll())
                 .collectList()
                 .subscribe(
                     result -> {
                         publisher.publishEvent(new AppDetailRetrievedEvent(this).detail(result));
-                        log.info("AppDetailTask completed.");
+                        log.info("AppDetailTask completed");
                     },
                     error -> {
                         log.error("AppDetailTask terminated with error", error);
@@ -83,93 +89,170 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
                 );
     }
 
-    protected Mono<Tuple5<DefaultCloudFoundryOperations, ApplicationSummary, ApplicationDetail, AppEvent, SummaryApplicationResponse>> getAuxiliaryContent(
-        Tuple2<DefaultCloudFoundryOperations, ApplicationSummary> tuple
-    ) {
-        DefaultCloudFoundryOperations opsClient = tuple.getT1();
-        ApplicationSummary summary = tuple.getT2();
-        return Mono.zip(
-            Mono.just(opsClient),
-            Mono.just(summary),
-            getApplicationDetail(opsClient, summary)
-                .onErrorResume(ex -> {
-                    log.warn(String.format("Trouble fetching application detail with org=%s, space=%s, summary=%s", opsClient.getOrganization(), opsClient.getSpace(), summary.toString()), ex);
-                    return Mono.empty();
-                }),
-            getAppEvent(opsClient, summary),
-            getSummaryApplicationResponse(opsClient, summary))
+	private Mono<DefaultCloudFoundryOperations> buildClient(Space target) {
+        log.trace("Targeting org={} and space={}", target.getOrganization(), target.getSpace());
+        return Mono
+                .just(DefaultCloudFoundryOperations
+                        .builder()
+                        .from(opsClient)
+                        .organization(target.getOrganization())
+		                .space(target.getSpace())
+		                .build());
     }
 
     protected Flux<Tuple2<DefaultCloudFoundryOperations, ApplicationSummary>> getApplicationSummary(DefaultCloudFoundryOperations opsClient) {
         return
-            Flux.zip(
-                Mono.just(opsClient),
-                opsClient
-                    .applications()
-                        .list());
-    }
-
-    protected Mono<ApplicationDetail> getApplicationDetail(DefaultCloudFoundryOperations opsClient, ApplicationSummary summary) {
-        return opsClient
+            opsClient
                 .applications()
-                    .get(GetApplicationRequest.builder().name(summary.getName()).build());
+                    .list()
+                    .map(a -> Tuples.of(opsClient, a));
     }
 
-    protected Mono<SummaryApplicationResponse> getSummaryApplicationResponse(DefaultCloudFoundryOperations opsClient, ApplicationSummary summary) {
+    protected Mono<AppDetail> getApplicationDetail(
+        Tuple2<DefaultCloudFoundryOperations, ApplicationSummary> tuple
+    ) {
+        DefaultCloudFoundryOperations opsClient = tuple.getT1();
+        ApplicationSummary summary = tuple.getT2();
+
+        log.trace("Fetching application details for id={}, name={}", summary.getId(), summary.getName());
+
+        Mono<DefaultCloudFoundryOperations> client = Mono.just(opsClient);
+        Mono<ApplicationSummary> appSummary = Mono.just(summary);
+        Mono<SummaryApplicationResponse> appDetails = getSummaryApplicationResponse(opsClient, summary.getId());
+        Mono<ApplicationStatisticsResponse> appStatistics =
+            summary.getRequestedState().equalsIgnoreCase("running")
+                ? getApplicationStatistics(opsClient, summary.getId())
+                : Mono.just(ApplicationStatisticsResponse.builder().build());
+        Mono<AppEvent> appEvent = getLastAppEvent(getAppEvents(opsClient, summary.getName()));
+
+        return
+            Mono.zipDelayError(
+                client,
+                appSummary,
+                appDetails,
+                appStatistics,
+                appEvent
+            )
+            .onErrorResume(ex -> {
+                log.warn(
+                    String.format("Could not obtain application details for organization=%s, space=%s, and applicationName=%s",
+                        opsClient.getOrganization(), opsClient.getSpace(), summary.getName()), ex);
+                return Mono.zip(client, appSummary, appDetails, Mono.just(ApplicationStatisticsResponse.builder().build()), Mono.just(AppEvent.builder().build()));
+            })
+            .map(function(this::toAppDetail));
+    }
+
+    protected Mono<SummaryApplicationResponse> getSummaryApplicationResponse(DefaultCloudFoundryOperations opsClient, String applicationId) {
         return opsClient
                 .getCloudFoundryClient()
                 .applicationsV2()
-                    .summary(SummaryApplicationRequest.builder().applicationId(summary.getId()).build());
+                    .summary(SummaryApplicationRequest.builder().applicationId(applicationId).build());
     }
 
-    protected Mono<AppEvent> getAppEvent(DefaultCloudFoundryOperations opsClient, ApplicationSummary summary) {
+    protected Mono<ApplicationStatisticsResponse> getApplicationStatistics(DefaultCloudFoundryOperations opsClient, String applicationId) {
         return opsClient
-                    .applications()
-                        .getEvents(GetApplicationEventsRequest.builder().name(summary.getName()).build())
-                        .map(e -> AppEvent
-                                    .builder()
-                                        .name(e.getEvent())
-                                        .actor(e.getActor())
-                                        .time(
-                                            e.getTime() != null ?
-                                                e.getTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime() :
-                                                null)
-                                        .build())
-                        .next();
+                .getCloudFoundryClient()
+                .applicationsV2()
+                    .statistics(ApplicationStatisticsRequest.builder().applicationId(applicationId).build());
     }
 
-    protected AppDetail toAppDetail(
+    protected Flux<ApplicationEvent> getAppEvents(DefaultCloudFoundryOperations opsClient, String applicationName) {
+        return opsClient
+                .applications()
+                    .getEvents(GetApplicationEventsRequest.builder().name(applicationName).maxNumberOfEvents(5).build());
+    }
+
+    protected Mono<AppEvent> getLastAppEvent(Flux<ApplicationEvent> events) {
+        return events
+                .next()
+                .flatMap(
+                    e -> Mono.just(
+                        AppEvent.builder().name(e.getEvent()).actor(e.getActor())
+                            .time(e.getTime() != null ? e.getTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime() : null)
+                            .build()));
+    }
+
+    private AppDetail toAppDetail(
         DefaultCloudFoundryOperations opsClient,
-        ApplicationSummary summary, ApplicationDetail detail,
-        AppEvent event, SummaryApplicationResponse response) {
+        ApplicationSummary summary, SummaryApplicationResponse detail,
+        ApplicationStatisticsResponse stats, AppEvent event) {
         return AppDetail
                 .builder()
                     .organization(opsClient.getOrganization())
                     .space(opsClient.getSpace())
                     .appId(summary.getId())
                     .appName(summary.getName())
-                    .buildpack(settings.getBuildpack(detail.getBuildpack(), response.getDockerImage()))
-                    .image(response.getDockerImage())
-                    .stack(detail.getStack())
+                    .buildpack(settings.getBuildpack(detail.getBuildpack(), detail.getDockerImage()))
+                    .image(detail.getDockerImage())
+                    .stack(nullSafeStack(detail.getStackId()))
                     .runningInstances(nullSafeInteger(detail.getRunningInstances()))
                     .totalInstances(nullSafeInteger(detail.getInstances()))
-                    .diskUsage(detail.getInstanceDetails() == null ? 0L : detail.getInstanceDetails().stream().mapToLong(id -> nullSafeLong(id.getDiskUsage())).sum())
-                    .memoryUsage(detail.getInstanceDetails() == null ? 0L : detail.getInstanceDetails().stream().mapToLong(id -> nullSafeLong(id.getMemoryUsage())).sum())
-                    .urls(detail.getUrls())
-                    .lastPushed(detail.getLastUploaded() != null ? detail.getLastUploaded()
-                                .toInstant()
-                                .atZone(ZoneId.systemDefault())
-                                .toLocalDateTime(): null)
-                    .requestedState(detail.getRequestedState() == null ? "": detail.getRequestedState().toLowerCase())
+                    .diskUsage(nullSafeDiskUsage(stats))
+                    .memoryUsage(nullSafeMemoryUsage(stats))
+                    .urls(summary.getUrls())
+                    .lastPushed(nullSafeLocalDateTime(detail.getPackageUpdatedAt()))
+                    .requestedState(nullSafeString(summary.getRequestedState()).toLowerCase())
                 .build();
     }
 
-    private Long nullSafeLong(Long input) {
-        return input != null ? input: 0L;
+	private LocalDateTime nullSafeLocalDateTime(String value) {
+        return StringUtils.isNotBlank(value) ? Instant.parse(value)
+                                    .atZone(ZoneId.systemDefault())
+                                    .toLocalDateTime() : null;
     }
 
-    private Integer nullSafeInteger(Integer input) {
-        return input != null ? input: 0;
+    private String nullSafeString(String value) {
+        return value == null ? "": value;
     }
+
+    private Integer nullSafeInteger(Integer value) {
+        return value != null ? value: 0;
+    }
+
+    private String nullSafeStack(String stackId) {
+        Stack stack = stacksCache.getStack(stackId);
+        if (stack != null) {
+            return stack.getName();
+        }
+        return "unknown";
+    }
+
+    private Long nullSafeMemoryUsage(ApplicationStatisticsResponse stats) {
+        Long result = 0L;
+        Map<String, InstanceStatistics> instances = stats.getInstances();
+        if (instances != null) {
+            Statistics innerStats;
+            for (InstanceStatistics is: instances.values()) {
+                innerStats = is.getStatistics();
+                Usage usage;
+                if (innerStats != null) {
+                    usage = innerStats.getUsage();
+                    if (usage != null && usage.getMemory() != null) {
+                        result += usage.getMemory();
+                    }
+                }
+            }
+        }
+        return result;
+	}
+
+	private Long nullSafeDiskUsage(ApplicationStatisticsResponse stats) {
+        Long result = 0L;
+        Map<String, InstanceStatistics> instances = stats.getInstances();
+        if (instances != null) {
+            Statistics innerStats;
+            for (InstanceStatistics is: instances.values()) {
+                innerStats = is.getStatistics();
+                Usage usage;
+                if (innerStats != null) {
+                    usage = innerStats.getUsage();
+                    if (usage != null && usage.getDisk() != null) {
+                        result += usage.getDisk();
+                    }
+                }
+            }
+        }
+        return result;
+	}
 
 }

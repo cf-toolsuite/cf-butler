@@ -41,7 +41,7 @@ public class SpacesTask implements ApplicationListener<OrganizationsRetrievedEve
         log.info("SpacesTask started");
         service
             .deleteAll()
-			.thenMany(Flux.fromIterable(organizations))
+            .thenMany(Flux.fromIterable(organizations))
             .flatMap(o -> getSpaces(o))
             .flatMap(service::save)
             .thenMany(service.findAll())
@@ -50,6 +50,7 @@ public class SpacesTask implements ApplicationListener<OrganizationsRetrievedEve
                     result -> {
                         publisher.publishEvent(new SpacesRetrievedEvent(this).spaces(result));
                         log.info("SpacesTask completed");
+                        log.trace("Retrieved {} spaces", result.size());
                     },
                     error -> {
                         log.error("SpacesTask terminated with error", error);

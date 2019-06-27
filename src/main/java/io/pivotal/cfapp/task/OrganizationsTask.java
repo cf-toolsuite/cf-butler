@@ -4,7 +4,6 @@ import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import io.pivotal.cfapp.domain.Organization;
@@ -40,7 +39,6 @@ public class OrganizationsTask implements ApplicationListener<TkRetrievedEvent> 
         organizationService
             .deleteAll()
             .thenMany(getOrganizations())
-            .distinct()
             .flatMap(organizationService::save)
             .thenMany(organizationService.findAll())
                 .collectList()
@@ -48,16 +46,12 @@ public class OrganizationsTask implements ApplicationListener<TkRetrievedEvent> 
                     result -> {
                         publisher.publishEvent(new OrganizationsRetrievedEvent(this).organizations(result));
                         log.info("OrganizationTask completed");
+                        log.trace("Retrieved {} organizations", result.size());
                     },
                     error -> {
                         log.error("OrganizationTask terminated with error", error);
                     }
                 );
-    }
-
-    @Scheduled(cron = "${cron.collection}")
-    protected void runTask() {
-        collect();
     }
 
     protected Flux<Organization> getOrganizations() {

@@ -1,46 +1,45 @@
 package io.pivotal.cfapp.task;
 
+import static org.cloudfoundry.util.tuple.TupleUtils.function;
+
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.cloudfoundry.client.v2.servicebindings.ListServiceBindingsRequest;
-import org.cloudfoundry.client.v3.applications.GetApplicationRequest;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.operations.services.GetServiceInstanceRequest;
-import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
+import org.cloudfoundry.operations.services.ServiceInstance;
+import org.cloudfoundry.operations.services.ServiceInstanceSummary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 import io.pivotal.cfapp.domain.ServiceInstanceDetail;
-import io.pivotal.cfapp.domain.ServiceRequest;
 import io.pivotal.cfapp.domain.Space;
 import io.pivotal.cfapp.service.ServiceInstanceDetailService;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
+import reactor.util.function.Tuples;
 
 @Slf4j
 @Component
 public class ServiceInstanceDetailTask implements ApplicationListener<SpacesRetrievedEvent> {
 
     private DefaultCloudFoundryOperations opsClient;
-    private ReactorCloudFoundryClient cloudFoundryClient;
     private ServiceInstanceDetailService service;
     private ApplicationEventPublisher publisher;
 
     @Autowired
     public ServiceInstanceDetailTask(
     		DefaultCloudFoundryOperations opsClient,
-    		ReactorCloudFoundryClient cloudFoundryClient,
     		ServiceInstanceDetailService service,
     		ApplicationEventPublisher publisher
     		) {
         this.opsClient = opsClient;
-        this.cloudFoundryClient = cloudFoundryClient;
         this.service = service;
         this.publisher = publisher;
     }
@@ -55,11 +54,9 @@ public class ServiceInstanceDetailTask implements ApplicationListener<SpacesRetr
     	service
             .deleteAll()
             .thenMany(Flux.fromIterable(spaces))
-            .map(s -> ServiceRequest.builder().organization(s.getOrganization()).space(s.getSpace()).build())
-	        .flatMap(serviceSummaryRequest -> getServiceSummary(serviceSummaryRequest))
-	        .flatMap(serviceBoundAppIdsRequest -> getServiceBoundApplicationIds(serviceBoundAppIdsRequest))
-	        .flatMap(serviceBoundAppNamesRequest -> getServiceBoundApplicationNames(serviceBoundAppNamesRequest))
-            .flatMap(serviceDetailRequest -> getServiceDetail(serviceDetailRequest))
+            .flatMap(space -> buildClient(space))
+            .flatMap(client -> getServiceInstanceSummary(client))
+            .flatMap(tuple -> getServiceInstanceDetail(tuple))
             .flatMap(service::save)
             .thenMany(service.findAll())
                 .collectList()
@@ -74,70 +71,67 @@ public class ServiceInstanceDetailTask implements ApplicationListener<SpacesRetr
                 );
     }
 
-    protected Flux<ServiceRequest> getServiceSummary(ServiceRequest request) {
-        return DefaultCloudFoundryOperations.builder()
-                .from(opsClient)
-                .organization(request.getOrganization())
-                .space(request.getSpace())
-                .build()
-                    .services()
-                        .listInstances()
-                        .map(ss -> ServiceRequest.from(request)
-                                                    .id(ss.getId())
-                                                    .serviceName(ss.getName() != null ? ss.getName(): "user_provided_service")
-                                                    .build());
-    }
+    private Mono<DefaultCloudFoundryOperations> buildClient(Space target) {
+        log.trace("Targeting org={} and space={}", target.getOrganization(), target.getSpace());
+        return Mono
+                .just(DefaultCloudFoundryOperations
+                        .builder()
+                        .from(opsClient)
+                        .organization(target.getOrganization())
+		                .space(target.getSpace())
+		                .build());
+	}
 
-    protected Mono<ServiceInstanceDetail> getServiceDetail(ServiceRequest request) {
-        return DefaultCloudFoundryOperations.builder()
-                .from(opsClient)
-                .organization(request.getOrganization())
-                .space(request.getSpace())
-                .build()
+    protected Flux<Tuple2<DefaultCloudFoundryOperations, ServiceInstanceSummary>> getServiceInstanceSummary(DefaultCloudFoundryOperations opsClient) {
+        return
+            opsClient
                 .services()
-                    .getInstance(GetServiceInstanceRequest.builder().name(request.getServiceName()).build())
-                    .map(sd -> ServiceInstanceDetail
-                                .builder()
-                                    .organization(request.getOrganization())
-                                    .space(request.getSpace())
-                                    .serviceInstanceId(request.getId())
-                                    .name(sd.getName() != null ? sd.getName(): "user_provided_service")
-                                    .service(sd.getService())
-                                    .plan(sd.getPlan())
-                                    .description(sd.getDescription())
-                                    .type(sd.getType() != null ? sd.getType().getValue(): "")
-                                    .applications(request.getApplicationNames())
-                                    .lastOperation(sd.getLastOperation())
-                                    .lastUpdated(StringUtils.isNotBlank(sd.getUpdatedAt()) ? Instant.parse(sd.getUpdatedAt())
-                                                .atZone(ZoneId.systemDefault())
-                                                .toLocalDateTime() : null)
-                                    .dashboardUrl(sd.getDashboardUrl())
-                                    .requestedState(StringUtils.isNotBlank(sd.getUpdatedAt()) ? sd.getStatus().toLowerCase(): "")
-                                    .build());
+                    .listInstances()
+                    .map(s -> Tuples.of(opsClient, s));
     }
 
-    protected Mono<ServiceRequest> getServiceBoundApplicationIds(ServiceRequest request) {
-    	return cloudFoundryClient
-                .serviceBindingsV2()
-                    .list(ListServiceBindingsRequest.builder().serviceInstanceId(request.getId()).build())
-                    .flux()
-                    .flatMap(serviceBindingResponse -> Flux.fromIterable(serviceBindingResponse.getResources()))
-                    .map(resource -> resource.getEntity())
-                    .map(entity -> entity.getApplicationId())
-                    .collectList()
-                    .map(ids -> ServiceRequest.from(request).applicationIds(ids).build());
+    protected Mono<ServiceInstance> getServiceInstanceDetail(DefaultCloudFoundryOperations opsClient, String serviceName) {
+        return opsClient
+                .services()
+                    .getInstance(GetServiceInstanceRequest.builder().name(serviceName).build());
     }
 
-    protected Mono<ServiceRequest> getServiceBoundApplicationNames(ServiceRequest request) {
-    	return Flux
-                .fromIterable(request.getApplicationIds())
-                .flatMap(appId ->
-                    cloudFoundryClient
-                        .applicationsV3()
-                            .get(GetApplicationRequest.builder().applicationId(appId).build())
-                            .map(response -> response.getName()))
-                            .collectList()
-                            .map(names -> ServiceRequest.from(request).applicationNames(names).build());
+    protected Mono<ServiceInstanceDetail> getServiceInstanceDetail(
+        Tuple2<DefaultCloudFoundryOperations, ServiceInstanceSummary> tuple
+    ) {
+        DefaultCloudFoundryOperations opsClient = tuple.getT1();
+        ServiceInstanceSummary summary = tuple.getT2();
+        log.trace("Fetching service instance details for id={}, name={}", summary.getId(), summary.getName());
+        return
+            Mono.zip(
+                Mono.just(opsClient),
+                Mono.just(summary),
+                getServiceInstanceDetail(opsClient, summary.getName())
+            )
+            .map(function(this::toServiceInstanceDetail));
+    }
+
+    private ServiceInstanceDetail toServiceInstanceDetail(
+        DefaultCloudFoundryOperations opsClient, ServiceInstanceSummary summary, ServiceInstance instance
+    ) {
+        return ServiceInstanceDetail
+                .builder()
+                    .organization(opsClient.getOrganization())
+                    .space(opsClient.getSpace())
+                    .serviceInstanceId(summary.getId())
+                    .name(summary.getName() != null ? summary.getName(): "user_provided_service")
+                    .service(summary.getService())
+                    .plan(summary.getPlan())
+                    .description(instance.getDescription())
+                    .type(instance.getType() != null ? instance.getType().getValue(): "")
+                    .applications(summary.getApplications())
+                    .lastOperation(instance.getLastOperation())
+                    .lastUpdated(StringUtils.isNotBlank(instance.getUpdatedAt()) ? Instant.parse(instance.getUpdatedAt())
+                                .atZone(ZoneId.systemDefault())
+                                .toLocalDateTime() : null)
+                    .dashboardUrl(instance.getDashboardUrl())
+                    .requestedState(StringUtils.isNotBlank(instance.getStatus()) ? instance.getStatus().toLowerCase(): "")
+                    .build();
     }
 
 }

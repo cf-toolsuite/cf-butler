@@ -40,6 +40,7 @@ public class TkTask implements ApplicationRunner {
                     result -> {
                         publisher.publishEvent(new TkRetrievedEvent(this).lastCollected(result));
                         log.info("TkTask completed");
+                        log.trace("Last collected time was set to {}", result);
                     },
                     error -> {
                         log.error("TkTask terminated with error", error);
