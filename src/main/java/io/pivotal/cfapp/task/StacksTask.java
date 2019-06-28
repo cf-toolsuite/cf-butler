@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
-import io.pivotal.cfapp.repository.StacksCache;
+import io.pivotal.cfapp.service.StacksCache;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 
