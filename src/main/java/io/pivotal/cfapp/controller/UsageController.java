@@ -8,36 +8,36 @@ import org.springframework.web.bind.annotation.RestController;
 import io.pivotal.cfapp.domain.accounting.application.AppUsageReport;
 import io.pivotal.cfapp.domain.accounting.service.ServiceUsageReport;
 import io.pivotal.cfapp.domain.accounting.task.TaskUsageReport;
-import io.pivotal.cfapp.service.UsageService;
+import io.pivotal.cfapp.service.UsageCache;
 import reactor.core.publisher.Mono;
 
 @RestController
 public class UsageController {
 
-    private final UsageService service;
+    private final UsageCache cache;
 
     @Autowired
-    public UsageController(UsageService service) {
-        this.service = service;
+    public UsageController(UsageCache cache) {
+        this.cache = cache;
     }
 
     @GetMapping(value = "/accounting/tasks")
     public Mono<ResponseEntity<TaskUsageReport>> getTaskReport() {
-        return service.getTaskReport()
+        return Mono.justOrEmpty(cache.getTaskReport())
                 .map(r -> ResponseEntity.ok(r))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @GetMapping(value = "/accounting/applications")
     public Mono<ResponseEntity<AppUsageReport>> getApplicationReport() {
-        return service.getApplicationReport()
+        return Mono.justOrEmpty(cache.getApplicationReport())
                 .map(r -> ResponseEntity.ok(r))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @GetMapping(value = "/accounting/services")
-    public Mono<ResponseEntity<ServiceUsageReport>> getServiceReport() {
-        return service.getServiceReport()
+    @GetMapping(value = "/accounting/caches")
+    public Mono<ResponseEntity<ServiceUsageReport>> getcacheReport() {
+        return Mono.justOrEmpty(cache.getServiceReport())
                 .map(r -> ResponseEntity.ok(r))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
