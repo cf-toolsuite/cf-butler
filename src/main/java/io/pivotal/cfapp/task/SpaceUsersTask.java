@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import io.pivotal.cfapp.domain.Space;
 import io.pivotal.cfapp.domain.SpaceUsers;
-import io.pivotal.cfapp.domain.UserRequest;
 import io.pivotal.cfapp.service.SpaceUsersService;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
@@ -41,14 +40,15 @@ public class SpaceUsersTask implements ApplicationListener<SpacesRetrievedEvent>
     	service
             .deleteAll()
             .thenMany(Flux.fromIterable(spaces))
-            .map(s -> UserRequest.builder().organization(s.getOrganization()).spaceName(s.getSpace()).build())
-            .flatMap(spaceUsersRequest -> getSpaceUsers(spaceUsersRequest))
+            .flatMap(space -> buildClient(space))
+            .flatMap(client -> getSpaceUsers(client))
             .flatMap(service::save)
             .thenMany(service.findAll())
                 .collectList()
                 .subscribe(
-                    e -> {
+                    result -> {
                         log.info("SpaceUsersTask completed");
+                        log.trace("Retrieved {} space user records", result.size());
                     },
                     error -> {
                         log.error("SpaceUsersTask terminated with error", error);
@@ -56,27 +56,34 @@ public class SpaceUsersTask implements ApplicationListener<SpacesRetrievedEvent>
                 );
     }
 
-    protected Mono<SpaceUsers> getSpaceUsers(UserRequest request) {
-        return DefaultCloudFoundryOperations.builder()
-                .from(opsClient)
-                .organization(request.getOrganization())
-                .space(request.getSpaceName())
-                .build()
+    private Mono<DefaultCloudFoundryOperations> buildClient(Space target) {
+        log.trace("Targeting org={} and space={}", target.getOrganization(), target.getSpace());
+        return Mono.just(DefaultCloudFoundryOperations
+                            .builder()
+                            .from(opsClient)
+                            .organization(target.getOrganization())
+                            .space(target.getSpace())
+                            .build());
+    }
+
+    protected Mono<SpaceUsers> getSpaceUsers(DefaultCloudFoundryOperations opsClient) {
+        return opsClient
                 	.userAdmin()
                 		.listSpaceUsers(
                 				ListSpaceUsersRequest
                 					.builder()
-                						.organizationName(request.getOrganization())
-                						.spaceName(request.getSpaceName()).build()
+                						.organizationName(opsClient.getOrganization())
+                                        .spaceName(opsClient.getSpace())
+                                        .build()
                         )
-                		.map(su -> SpaceUsers
+                		.flatMap(su -> Mono.just(SpaceUsers
                                         .builder()
-                                            .organization(request.getOrganization())
-                							.space(request.getSpaceName())
+                                            .organization(opsClient.getOrganization())
+                							.space(opsClient.getSpace())
                 							.auditors(su.getAuditors())
                 							.managers(su.getManagers())
                 							.developers(su.getDevelopers())
-                							.build()
+                							.build())
                         );
     }
 

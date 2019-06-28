@@ -1,7 +1,6 @@
 dist: xenial
 language: java
 jdk:
-- oraclejdk11
 - openjdk11
 script:
 - "./gradlew clean build"

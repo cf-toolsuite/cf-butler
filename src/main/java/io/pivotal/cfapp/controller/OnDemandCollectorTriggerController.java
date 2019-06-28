@@ -6,8 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.pivotal.cfapp.task.OrganizationsTask;
 import io.pivotal.cfapp.task.ProductsAndReleasesTask;
+import io.pivotal.cfapp.task.TkTask;
 import reactor.core.publisher.Mono;
 
 @Profile("on-demand")
@@ -15,14 +15,14 @@ import reactor.core.publisher.Mono;
 public class OnDemandCollectorTriggerController {
 
 	@Autowired
-	private OrganizationsTask orgCollector;
+	private TkTask tkCollector;
 
 	@Autowired(required = false)
 	private ProductsAndReleasesTask productsAndReleasesCollector;
 
 	@PostMapping("/collect")
 	public Mono<ResponseEntity<Void>> triggerCollection() {
-		orgCollector.collect();
+		tkCollector.collect();
 		if (productsAndReleasesCollector != null) {
 			productsAndReleasesCollector.collect();
 		}

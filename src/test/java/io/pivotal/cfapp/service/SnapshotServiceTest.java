@@ -118,4 +118,5 @@ public class SnapshotServiceTest {
                 assertEquals(1L, ac.getByServiceAndPlan().get("MySQL/large"));
             }).verifyComplete();
     }
+
 }
