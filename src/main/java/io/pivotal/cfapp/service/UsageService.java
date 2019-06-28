@@ -34,7 +34,8 @@ public class UsageService {
         WebClient webClient,
         DefaultConnectionContext connectionContext,
         TokenProvider tokenProvider,
-        ButlerSettings settings) {
+        ButlerSettings settings,
+        UsageCache cache) {
         this.orgService = orgService;
         this.webClient = webClient;
         this.connectionContext = connectionContext;
