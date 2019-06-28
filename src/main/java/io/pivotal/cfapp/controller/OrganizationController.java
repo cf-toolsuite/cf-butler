@@ -1,5 +1,7 @@
 package io.pivotal.cfapp.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,7 +12,6 @@ import io.pivotal.cfapp.domain.Organization;
 import io.pivotal.cfapp.service.OrganizationService;
 import io.pivotal.cfapp.service.TkService;
 import io.pivotal.cfapp.service.TkServiceUtil;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 
@@ -29,10 +30,11 @@ public class OrganizationController {
     }
 
     @GetMapping("/snapshot/organizations")
-    public Flux<ResponseEntity<Organization>> listAllOrganizations() {
+    public Mono<ResponseEntity<List<Organization>>> listAllOrganizations() {
         return util.getHeaders()
-                .flatMapMany(h -> organizationService
+                .flatMap(h -> organizationService
                                     .findAll()
+                                    .collectList()
                                     .map(orgs -> new ResponseEntity<>(orgs, h, HttpStatus.OK)))
                                     .defaultIfEmpty(ResponseEntity.notFound().build());
     }
