@@ -392,7 +392,7 @@ GET /snapshot/organizations
 > Lists organizations
 
 ```
-GET /snapshot/orgnizations/count
+GET /snapshot/organizations/count
 ```
 > Counts the number of organizations on a foundation
 
