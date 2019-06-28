@@ -1,4 +1,4 @@
-package io.pivotal.cfapp.repository;
+package io.pivotal.cfapp.service;
 
 import java.util.List;
 import java.util.Map;
