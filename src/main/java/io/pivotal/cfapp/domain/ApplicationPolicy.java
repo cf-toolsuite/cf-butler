@@ -3,7 +3,6 @@ package io.pivotal.cfapp.domain;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -22,7 +21,7 @@ import lombok.Getter;
 
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({ "id", "description", "state", "from-datetime", "from-duration", 
+@JsonPropertyOrder({ "id", "description", "state", "from-datetime", "from-duration",
 	"delete-services", "organization-whitelist" })
 @Getter
 public class ApplicationPolicy {
@@ -39,7 +38,7 @@ public class ApplicationPolicy {
 	private String description;
 
 	@JsonProperty("state")
-	private String state;
+	private ApplicationState state;
 
 	@JsonProperty("from-datetime")
 	private LocalDateTime fromDateTime;
@@ -59,7 +58,7 @@ public class ApplicationPolicy {
 			@JsonProperty("pk") Long pk,
 			@JsonProperty("id") String id,
 			@JsonProperty("description") String description,
-			@JsonProperty("state") String state,
+			@JsonProperty("state") ApplicationState state,
 			@JsonProperty("from-datetime") LocalDateTime fromDateTime,
 			@JsonProperty("from-duration") Duration fromDuration,
 			@JsonProperty("delete-services") boolean deleteServices,
@@ -72,14 +71,6 @@ public class ApplicationPolicy {
 		this.fromDuration = fromDuration;
 		this.deleteServices = deleteServices;
 		this.organizationWhiteList = organizationWhiteList;
-	}
-
-	@JsonIgnore
-	public boolean isInvalid() {
-		return Optional.ofNullable(id).isPresent() || !Optional.ofNullable(state).isPresent()
-				|| (Optional.ofNullable(fromDateTime).isPresent() && Optional.ofNullable(fromDuration).isPresent())
-				|| (!Optional.ofNullable(fromDateTime).isPresent()
-						&& !Optional.ofNullable(fromDuration).isPresent());
 	}
 
 	@JsonIgnore

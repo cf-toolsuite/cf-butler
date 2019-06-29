@@ -119,7 +119,7 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
                 Mono.just(opsClient),
                 Mono.just(summary),
                 getSummaryApplicationResponse(opsClient, summary.getId()),
-                settings.isApplicationStatisticsEnabled() && summary.getRequestedState().equalsIgnoreCase("running")
+                settings.isApplicationStatisticsEnabled() && summary.getRequestedState().equalsIgnoreCase("started")
                     ? getApplicationStatistics(opsClient, summary.getId())
                     : Mono.just(ApplicationStatisticsResponse.builder().build()),
                 settings.isApplicationEventsEnabled()
@@ -189,6 +189,9 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
                     .diskUsage(nullSafeDiskUsage(stats))
                     .memoryUsage(nullSafeMemoryUsage(stats))
                     .urls(summary.getUrls())
+                    .lastEvent(event.getName())
+                    .lastEventActor(event.getActor())
+                    .lastEventTime(event.getTime())
                     .lastPushed(nullSafeLocalDateTime(detail.getPackageUpdatedAt()))
                     .requestedState(nullSafeString(summary.getRequestedState()).toLowerCase())
                 .build();

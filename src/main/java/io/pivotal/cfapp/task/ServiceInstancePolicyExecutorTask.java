@@ -71,7 +71,7 @@ public class ServiceInstancePolicyExecutorTask implements ApplicationRunner {
 						log.info("ServiceInstancePolicyExecutorTask completed");
 					},
 					error -> {
-						log.error("ProductsAndReleasesTask terminated with error", error);
+						log.error("ServiceInstancePolicyExecutorTask terminated with error", error);
 					}
 				);
     }
