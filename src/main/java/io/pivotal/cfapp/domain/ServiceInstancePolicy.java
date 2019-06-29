@@ -3,7 +3,6 @@ package io.pivotal.cfapp.domain;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -58,13 +57,6 @@ public class ServiceInstancePolicy {
 		this.fromDateTime = fromDateTime;
 		this.fromDuration = fromDuration;
 		this.organizationWhiteList = organizationWhiteList;
-	}
-
-	@JsonIgnore
-	public boolean isInvalid() {
-		return Optional.ofNullable(id).isPresent() ||
-			(Optional.ofNullable(fromDateTime).isPresent() && Optional.ofNullable(fromDuration).isPresent())
-			|| (!Optional.ofNullable(fromDateTime).isPresent() && !Optional.ofNullable(fromDuration).isPresent());
 	}
 
 	@JsonIgnore

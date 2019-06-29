@@ -18,8 +18,10 @@ import org.springframework.stereotype.Repository;
 import io.pivotal.cfapp.config.DbmsSettings;
 import io.pivotal.cfapp.config.PoliciesSettings;
 import io.pivotal.cfapp.domain.ApplicationPolicy;
+import io.pivotal.cfapp.domain.ApplicationState;
 import io.pivotal.cfapp.domain.Defaults;
 import io.pivotal.cfapp.domain.Policies;
+import io.pivotal.cfapp.domain.PoliciesValidator;
 import io.pivotal.cfapp.domain.ServiceInstancePolicy;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -43,10 +45,10 @@ public class R2dbcPoliciesRepository {
 
 	public Mono<Policies> save(Policies entity) {
 		List<ApplicationPolicy> applicationPolicies = entity.getApplicationPolicies().stream()
-				.filter(ap -> !ap.isInvalid()).map(p -> seedApplicationPolicy(p)).collect(Collectors.toList());
+				.filter(ap -> PoliciesValidator.validate(ap)).map(p -> seedApplicationPolicy(p)).collect(Collectors.toList());
 
 		List<ServiceInstancePolicy> serviceInstancePolicies = entity.getServiceInstancePolicies().stream()
-				.filter(sip -> !sip.isInvalid()).map(p -> seedServiceInstancePolicy(p)).collect(Collectors.toList());
+				.filter(sip -> PoliciesValidator.validate(sip)).map(p -> seedServiceInstancePolicy(p)).collect(Collectors.toList());
 
 		return Flux.fromIterable(applicationPolicies)
 					.flatMap(ap -> saveApplicationPolicy(ap))
@@ -96,7 +98,7 @@ public class R2dbcPoliciesRepository {
 									.fromDateTime(Defaults.getValueOrDefault(row.get("from_datetime", LocalDateTime.class), null))
 									.fromDuration(row.get("from_duration", String.class) != null ? Duration.parse(row.get("from_duration", String.class)): null)
 									.organizationWhiteList(row.get("organization_whitelist", String.class) != null ? new HashSet<String>(Arrays.asList(row.get("organization_whitelist", String.class).split("\\s*,\\s*"))): new HashSet<>())
-									.state(Defaults.getValueOrDefault(row.get("state", String.class), ""))
+									.state(ApplicationState.from(row.get("state", String.class)))
 									.deleteServices(row.get("delete_services", Boolean.class))
 									.build())
 						.all())
@@ -123,7 +125,7 @@ public class R2dbcPoliciesRepository {
 										.fromDateTime(Defaults.getValueOrDefault(row.get("from_datetime", LocalDateTime.class), null))
 										.fromDuration(row.get("from_duration", String.class) != null ? Duration.parse(row.get("from_duration", String.class)): null)
 										.organizationWhiteList(row.get("organization_whitelist", String.class) != null ? new HashSet<String>(Arrays.asList(row.get("organization_whitelist", String.class).split("\\s*,\\s*"))): new HashSet<>())
-										.state(row.get("state", String.class))
+										.state(ApplicationState.from(row.get("state", String.class)))
 										.deleteServices(row.get("delete_services", Boolean.class))
 										.build())
 							.all())
