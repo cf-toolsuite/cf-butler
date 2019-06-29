@@ -10,7 +10,6 @@ import org.cloudfoundry.operations.services.DeleteServiceInstanceRequest;
 import org.cloudfoundry.operations.services.UnbindServiceInstanceRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -30,7 +29,7 @@ import reactor.core.publisher.Mono;
 
 @Slf4j
 @Component
-public class AppPolicyExecutorTask implements ApplicationRunner {
+public class AppPolicyExecutorTask implements PolicyExecutorTask {
 
 	private ButlerSettings settings;
 	private DefaultCloudFoundryOperations opsClient;
@@ -61,6 +60,7 @@ public class AppPolicyExecutorTask implements ApplicationRunner {
     	// do nothing at startup
     }
 
+	@Override
     public void execute() {
 		log.info("AppPolicyExecutorTask started");
     	deleteApplicationsWithNoServiceBindings()

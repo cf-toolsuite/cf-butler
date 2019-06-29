@@ -8,7 +8,6 @@ import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.operations.services.DeleteServiceInstanceRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -26,7 +25,7 @@ import reactor.core.publisher.Mono;
 
 @Slf4j
 @Component
-public class ServiceInstancePolicyExecutorTask implements ApplicationRunner {
+public class ServiceInstancePolicyExecutorTask implements PolicyExecutorTask {
 
 	private ButlerSettings settings;
 	private DefaultCloudFoundryOperations opsClient;
@@ -54,6 +53,7 @@ public class ServiceInstancePolicyExecutorTask implements ApplicationRunner {
     	// do nothing at startup
     }
 
+	@Override
     public void execute() {
 		log.info("ServiceInstancePolicyExecutorTask started");
     	policiesService
