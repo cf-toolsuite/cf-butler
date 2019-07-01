@@ -35,8 +35,8 @@ public class UsageController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @GetMapping(value = "/accounting/caches")
-    public Mono<ResponseEntity<ServiceUsageReport>> getcacheReport() {
+    @GetMapping(value = "/accounting/services")
+    public Mono<ResponseEntity<ServiceUsageReport>> getServiceReport() {
         return Mono.justOrEmpty(cache.getServiceReport())
                 .map(r -> ResponseEntity.ok(r))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
