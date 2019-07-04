@@ -1,8 +1,9 @@
 package io.pivotal.cfapp.domain;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -16,46 +17,50 @@ import org.springframework.data.annotation.Id;
 import org.springframework.util.CollectionUtils;
 
 import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.Getter;
 
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({ "id", "description", "from-datetime", "from-duration", "organization-whitelist" })
+@JsonPropertyOrder({ "id", "operation", "description", "options", "organization-whitelist" })
 @Getter
 public class ServiceInstancePolicy {
 
 	@Id
+	@JsonIgnore
 	private Long pk;
 
-	@Builder.Default
+	@Default
 	@JsonProperty("id")
 	private String id = Generators.timeBasedGenerator().generate().toString();
+
+	@JsonProperty("operation")
+	private String operation;
 
 	@JsonProperty("description")
 	private String description;
 
-	@JsonProperty("from-datetime")
-	private LocalDateTime fromDateTime;
+	@Default
+	@JsonProperty("options")
+	private Map<String, Object> options = new HashMap<>();
 
-	@JsonProperty("from-duration")
-	private Duration fromDuration;
-
+	@Default
 	@JsonProperty("organization-whitelist")
-	private Set<String> organizationWhiteList;
+	private Set<String> organizationWhiteList = new HashSet<>();
 
 	@JsonCreator
 	ServiceInstancePolicy(
 			@JsonProperty("pk") Long pk,
 			@JsonProperty("id") String id,
+			@JsonProperty("operation") String operation,
 			@JsonProperty("description") String description,
-			@JsonProperty("from-datetime") LocalDateTime fromDateTime,
-			@JsonProperty("from-duration") Duration fromDuration,
+			@JsonProperty("options") Map<String, Object> options,
 			@JsonProperty("organization-whitelist") Set<String> organizationWhiteList) {
 		this.pk = pk;
 		this.id = id;
+		this.operation = operation;
 		this.description = description;
-		this.fromDateTime = fromDateTime;
-		this.fromDuration = fromDuration;
+		this.options = options;
 		this.organizationWhiteList = organizationWhiteList;
 	}
 
@@ -65,15 +70,24 @@ public class ServiceInstancePolicy {
 	}
 
 	public Set<String> getOrganizationWhiteList() {
-		return CollectionUtils.isEmpty(organizationWhiteList) ? new HashSet<>() : organizationWhiteList;
+		return CollectionUtils.isEmpty(organizationWhiteList) ? new HashSet<>() : Collections.unmodifiableSet(organizationWhiteList);
+	}
+
+	public Map<String, Object> getOptions() {
+		return CollectionUtils.isEmpty(options) ? new HashMap<>(): Collections.unmodifiableMap(options);
+	}
+
+	@JsonIgnore
+	public <T> T getOption(String key, Class<T> type) {
+		return type.cast(options.get(key));
 	}
 
 	public static ServiceInstancePolicy seed(ServiceInstancePolicy policy) {
 		return ServiceInstancePolicy
 				.builder()
 					.description(policy.getDescription())
-					.fromDateTime(policy.getFromDateTime())
-					.fromDuration(policy.getFromDuration())
+					.operation(policy.getOperation())
+					.options(policy.getOptions())
 					.organizationWhiteList(policy.getOrganizationWhiteList())
 					.build();
 	}
@@ -83,8 +97,8 @@ public class ServiceInstancePolicy {
 				.builder()
 					.id(id)
 					.description(policy.getDescription())
-					.fromDateTime(policy.getFromDateTime())
-					.fromDuration(policy.getFromDuration())
+					.operation(policy.getOperation())
+					.options(policy.getOptions())
 					.organizationWhiteList(policy.getOrganizationWhiteList())
 					.build();
 	}

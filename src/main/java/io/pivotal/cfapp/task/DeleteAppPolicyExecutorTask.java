@@ -17,6 +17,7 @@ import org.springframework.util.CollectionUtils;
 import io.pivotal.cfapp.config.ButlerSettings;
 import io.pivotal.cfapp.domain.AppDetail;
 import io.pivotal.cfapp.domain.AppRelationship;
+import io.pivotal.cfapp.domain.ApplicationOperation;
 import io.pivotal.cfapp.domain.ApplicationPolicy;
 import io.pivotal.cfapp.domain.HistoricalRecord;
 import io.pivotal.cfapp.service.AppDetailService;
@@ -29,7 +30,7 @@ import reactor.core.publisher.Mono;
 
 @Slf4j
 @Component
-public class AppPolicyExecutorTask implements PolicyExecutorTask {
+public class DeleteAppPolicyExecutorTask implements PolicyExecutorTask {
 
 	private ButlerSettings settings;
 	private DefaultCloudFoundryOperations opsClient;
@@ -39,7 +40,7 @@ public class AppPolicyExecutorTask implements PolicyExecutorTask {
     private HistoricalRecordService historicalRecordService;
 
     @Autowired
-    public AppPolicyExecutorTask(
+    public DeleteAppPolicyExecutorTask(
     		ButlerSettings settings,
     		DefaultCloudFoundryOperations opsClient,
     		AppDetailService appInfoService,
@@ -62,16 +63,16 @@ public class AppPolicyExecutorTask implements PolicyExecutorTask {
 
 	@Override
     public void execute() {
-		log.info("AppPolicyExecutorTask started");
+		log.info("DeleteAppPolicyExecutorTask started");
     	deleteApplicationsWithNoServiceBindings()
 	    	.then(deleteApplicationsWithServiceBindingsButDoNotDeleteBoundServiceInstances())
 	    	.then(deleteApplicationsWithServiceBindingsAndDeleteBoundServiceInstances())
 	    	.subscribe(
 				result -> {
-					log.info("AppPolicyExecutorTask completed");
+					log.info("DeleteAppPolicyExecutorTask completed");
 				},
 				error -> {
-					log.error("AppPolicyExecutorTask terminated with error", error);
+					log.error("DeleteAppPolicyExecutorTask terminated with error", error);
 				}
 			);
     }
@@ -85,7 +86,7 @@ public class AppPolicyExecutorTask implements PolicyExecutorTask {
     	// these are the applications with no service bindings
     	// we can delete each one without having to first unbind it from one or more service instances
     	return policiesService
-		            .findAll()
+					.findByApplicationOperation(ApplicationOperation.DELETE)
 			            .flux()
 			            .flatMap(p -> Flux.fromIterable(p.getApplicationPolicies()))
 			        	.flatMap(ap -> appInfoService.findByApplicationPolicy(ap, false))
@@ -101,10 +102,10 @@ public class AppPolicyExecutorTask implements PolicyExecutorTask {
 		// in this case the application policy has been configured with delete-services = false
 		// so we:  a) unbind one or more service instances from each application, b) delete each application
 		return policiesService
-			        .findAll()
+			        .findByApplicationOperation(ApplicationOperation.DELETE)
 				        .flux()
 				        .flatMap(p -> Flux.fromIterable(p.getApplicationPolicies()))
-						.filter(f -> f.isDeleteServices() == false)
+						.filter(f -> f.getOption("delete-services", Boolean.class) == false)
 						.flatMap(ap -> appInfoService.findByApplicationPolicy(ap, true))
 						.filter(wl -> isWhitelisted(wl.getT2(), wl.getT1().getOrganization()))
 			        	.filter(bl -> isBlacklisted(bl.getT1().getOrganization()))
@@ -124,10 +125,10 @@ public class AppPolicyExecutorTask implements PolicyExecutorTask {
 		// so we:  a) unbind one or more service instances from each application, b) delete each application,
 		// and c) delete each formerly bound service instance
 		return policiesService
-	                .findAll()
+					.findByApplicationOperation(ApplicationOperation.DELETE)
 		                .flux()
 		                .flatMap(p -> Flux.fromIterable(p.getApplicationPolicies()))
-		                .filter(f -> f.isDeleteServices() == true)
+		                .filter(f -> f.getOption("delete-services", Boolean.class) == true)
 		                .flatMap(ap -> appInfoService.findByApplicationPolicy(ap, true))
 		                .filter(wl -> isWhitelisted(wl.getT2(), wl.getT1().getOrganization()))
 			        	.filter(bl -> isBlacklisted(bl.getT1().getOrganization()))

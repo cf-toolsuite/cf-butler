@@ -15,6 +15,7 @@ import org.springframework.util.CollectionUtils;
 import io.pivotal.cfapp.config.ButlerSettings;
 import io.pivotal.cfapp.domain.HistoricalRecord;
 import io.pivotal.cfapp.domain.ServiceInstanceDetail;
+import io.pivotal.cfapp.domain.ServiceInstanceOperation;
 import io.pivotal.cfapp.domain.ServiceInstancePolicy;
 import io.pivotal.cfapp.service.HistoricalRecordService;
 import io.pivotal.cfapp.service.PoliciesService;
@@ -25,7 +26,7 @@ import reactor.core.publisher.Mono;
 
 @Slf4j
 @Component
-public class ServiceInstancePolicyExecutorTask implements PolicyExecutorTask {
+public class DeleteServiceInstancePolicyExecutorTask implements PolicyExecutorTask {
 
 	private ButlerSettings settings;
 	private DefaultCloudFoundryOperations opsClient;
@@ -34,7 +35,7 @@ public class ServiceInstancePolicyExecutorTask implements PolicyExecutorTask {
     private HistoricalRecordService historicalRecordService;
 
     @Autowired
-    public ServiceInstancePolicyExecutorTask(
+    public DeleteServiceInstancePolicyExecutorTask(
     		ButlerSettings settings,
     		DefaultCloudFoundryOperations opsClient,
     		ServiceInstanceDetailService serviceInfoService,
@@ -55,9 +56,9 @@ public class ServiceInstancePolicyExecutorTask implements PolicyExecutorTask {
 
 	@Override
     public void execute() {
-		log.info("ServiceInstancePolicyExecutorTask started");
+		log.info("DeleteServiceInstancePolicyExecutorTask started");
     	policiesService
-	        .findAll()
+	        .findByServiceInstanceOperation(ServiceInstanceOperation.DELETE)
 				.flux()
 				.flatMap(p -> Flux.fromIterable(p.getServiceInstancePolicies()))
 				.flatMap(sp -> serviceInfoService.findByServiceInstancePolicy(sp))
@@ -68,10 +69,10 @@ public class ServiceInstancePolicyExecutorTask implements PolicyExecutorTask {
 				.collectList()
 				.subscribe(
 					result -> {
-						log.info("ServiceInstancePolicyExecutorTask completed");
+						log.info("DeleteServiceInstancePolicyExecutorTask completed");
 					},
 					error -> {
-						log.error("ServiceInstancePolicyExecutorTask terminated with error", error);
+						log.error("DeleteServiceInstancePolicyExecutorTask terminated with error", error);
 					}
 				);
     }

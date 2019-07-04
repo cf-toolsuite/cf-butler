@@ -1,5 +1,6 @@
 package io.pivotal.cfapp.repository;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -154,13 +155,13 @@ public class R2dbcAppDetailRepository {
 		StringBuilder where = new StringBuilder();
 		where.append("where requested_state = " + settings.getBindPrefix() + 1 + " ");
 		LocalDateTime temporal = null;
-		if (policy.getFromDateTime() != null) {
+		if (policy.getOption("from-datetime", LocalDateTime.class) != null) {
 			where.append("and last_event_time <= " + settings.getBindPrefix() + 2 + " ");
-			temporal = policy.getFromDateTime();
+			temporal = policy.getOption("from-datetime", LocalDateTime.class);
 		}
-		if (policy.getFromDuration() != null) {
+		if (policy.getOption("from-duration", String.class) != null) {
 			where.append("and last_event_time <= " + settings.getBindPrefix() + 2 + " ");
-			LocalDateTime eventTime = LocalDateTime.now().minus(policy.getFromDuration());
+			LocalDateTime eventTime = LocalDateTime.now().minus(Duration.parse(policy.getOption("from-duration", String.class)));
 			temporal = eventTime;
 		}
 		String orderBy = "order by organization, space, app_name";
@@ -183,13 +184,13 @@ public class R2dbcAppDetailRepository {
 		StringBuilder where = new StringBuilder();
 		where.append("where ar.service_instance_id is null and ad.requested_state = " + settings.getBindPrefix() + 1 + " ");
 		LocalDateTime temporal = null;
-		if (policy.getFromDateTime() != null) {
+		if (policy.getOption("from-datetime", LocalDateTime.class) != null) {
 			where.append("and ad.last_event_time <= " + settings.getBindPrefix() + 2 + " ");
-			temporal = policy.getFromDateTime();
+			temporal = policy.getOption("from-datetime", LocalDateTime.class);
 		}
-		if (policy.getFromDuration() != null) {
+		if (policy.getOption("from-duration", String.class) != null) {
 			where.append("and ad.last_event_time <= " + settings.getBindPrefix() + 2 + " ");
-			LocalDateTime eventTime = LocalDateTime.now().minus(policy.getFromDuration());
+			LocalDateTime eventTime = LocalDateTime.now().minus(Duration.parse(policy.getOption("from-duration", String.class)));
 			temporal = eventTime;
 		}
 		String orderBy = "order by ad.organization, ad.space, ad.app_name";

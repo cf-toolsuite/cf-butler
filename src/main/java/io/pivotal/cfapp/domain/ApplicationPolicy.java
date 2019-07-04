@@ -1,8 +1,9 @@
 package io.pivotal.cfapp.domain;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -21,8 +22,7 @@ import lombok.Getter;
 
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({ "id", "description", "state", "from-datetime", "from-duration",
-	"delete-services", "organization-whitelist" })
+@JsonPropertyOrder({ "id", "operation", "description", "state", "options", "organization-whitelist" })
 @Getter
 public class ApplicationPolicy {
 
@@ -34,20 +34,18 @@ public class ApplicationPolicy {
 	@JsonProperty("id")
 	private String id = Generators.timeBasedGenerator().generate().toString();
 
+	@JsonProperty("operation")
+	private String operation;
+
 	@JsonProperty("description")
 	private String description;
 
 	@JsonProperty("state")
-	private ApplicationState state;
+	private String state;
 
-	@JsonProperty("from-datetime")
-	private LocalDateTime fromDateTime;
-
-	@JsonProperty("from-duration")
-	private Duration fromDuration;
-
-	@JsonProperty("delete-services")
-	private boolean deleteServices;
+	@Default
+	@JsonProperty("options")
+	private Map<String, Object> options = new HashMap<>();
 
 	@Default
 	@JsonProperty("organization-whitelist")
@@ -57,19 +55,17 @@ public class ApplicationPolicy {
 	ApplicationPolicy(
 			@JsonProperty("pk") Long pk,
 			@JsonProperty("id") String id,
+			@JsonProperty("operation") String operation,
 			@JsonProperty("description") String description,
-			@JsonProperty("state") ApplicationState state,
-			@JsonProperty("from-datetime") LocalDateTime fromDateTime,
-			@JsonProperty("from-duration") Duration fromDuration,
-			@JsonProperty("delete-services") boolean deleteServices,
+			@JsonProperty("state") String state,
+			@JsonProperty("options") Map<String, Object> options,
 			@JsonProperty("organization-whitelist") Set<String> organizationWhiteList) {
 		this.pk = pk;
 		this.id = id;
+		this.operation = operation;
 		this.description = description;
 		this.state = state;
-		this.fromDateTime = fromDateTime;
-		this.fromDuration = fromDuration;
-		this.deleteServices = deleteServices;
+		this.options = options;
 		this.organizationWhiteList = organizationWhiteList;
 	}
 
@@ -79,16 +75,24 @@ public class ApplicationPolicy {
 	}
 
 	public Set<String> getOrganizationWhiteList() {
-		return CollectionUtils.isEmpty(organizationWhiteList) ? new HashSet<>() : organizationWhiteList;
+		return CollectionUtils.isEmpty(organizationWhiteList) ? new HashSet<>() : Collections.unmodifiableSet(organizationWhiteList);
+	}
+
+	public Map<String, Object> getOptions() {
+		return CollectionUtils.isEmpty(options) ? new HashMap<>(): Collections.unmodifiableMap(options);
+	}
+
+	@JsonIgnore
+	public <T> T getOption(String key, Class<T> type) {
+		return type.cast(options.get(key));
 	}
 
 	public static ApplicationPolicy seed(ApplicationPolicy policy) {
 		return ApplicationPolicy
 				.builder()
 					.description(policy.getDescription())
-					.deleteServices(policy.isDeleteServices())
-					.fromDateTime(policy.getFromDateTime())
-					.fromDuration(policy.getFromDuration())
+					.operation(policy.getOperation())
+					.options(policy.getOptions())
 					.organizationWhiteList(policy.getOrganizationWhiteList())
 					.state(policy.getState())
 					.build();
@@ -99,9 +103,8 @@ public class ApplicationPolicy {
 				.builder()
 					.id(id)
 					.description(policy.getDescription())
-					.deleteServices(policy.isDeleteServices())
-					.fromDateTime(policy.getFromDateTime())
-					.fromDuration(policy.getFromDuration())
+					.operation(policy.getOperation())
+					.options(policy.getOptions())
 					.organizationWhiteList(policy.getOrganizationWhiteList())
 					.state(policy.getState())
 					.build();

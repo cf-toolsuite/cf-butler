@@ -30,6 +30,6 @@ logs/
 .history/
 
 ### User config
-config/secrets*.json
+config/*.json
 config/application-*.yml
 src/main/resources/application-*.yml

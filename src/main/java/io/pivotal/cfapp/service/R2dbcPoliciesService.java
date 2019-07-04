@@ -3,7 +3,9 @@ package io.pivotal.cfapp.service;
 import org.springframework.stereotype.Service;
 
 import io.pivotal.cfapp.config.PoliciesSettings;
+import io.pivotal.cfapp.domain.ApplicationOperation;
 import io.pivotal.cfapp.domain.Policies;
+import io.pivotal.cfapp.domain.ServiceInstanceOperation;
 import io.pivotal.cfapp.repository.R2dbcPoliciesRepository;
 import reactor.core.publisher.Mono;
 
@@ -61,6 +63,16 @@ public class R2dbcPoliciesService implements PoliciesService {
 			throw new UnsupportedOperationException(UNSUPPORTED_OP_MESSAGE);
 		}
 		return repo.deleteServicePolicyById(id);
+	}
+
+	@Override
+	public Mono<Policies> findByApplicationOperation(ApplicationOperation operation) {
+		return repo.findByApplicationOperation(operation);
+	}
+
+	@Override
+	public Mono<Policies> findByServiceInstanceOperation(ServiceInstanceOperation operation) {
+		return repo.findByServiceInstanceOperation(operation);
 	}
 
 }
