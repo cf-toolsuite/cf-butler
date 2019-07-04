@@ -50,6 +50,7 @@ public class PoliciesLoader implements ApplicationRunner {
 
 	@Override
 	public void run(ApplicationArguments args) throws Exception {
+		log.info("PoliciesLoader started");
 		Repository repo = client.getRepository(settings.getUri());
 		List<ApplicationPolicy> applicationPolicies = new ArrayList<>();
 		List<ServiceInstancePolicy> serviceInstancePolicies = new ArrayList<>();
@@ -65,7 +66,7 @@ public class PoliciesLoader implements ApplicationRunner {
 							serviceInstancePolicies.add(mapper.readValue(fileContent, ServiceInstancePolicy.class));
 						} else {
 							log.warn(
-									"Policy file {} does not adhere to naming convention. File name must end with either {} or {}.", 
+									"Policy file {} does not adhere to naming convention. File name must end with either {} or {}.",
 									fp, APPLICATION_POLICY_SUFFIX, SERVICE_INSTANCE_POLICY_SUFFIX);
 						}
 					} catch (IOException ioe) {
@@ -75,7 +76,15 @@ public class PoliciesLoader implements ApplicationRunner {
 		service
 			.deleteAll()
 			.then(service.save(new Policies(applicationPolicies, serviceInstancePolicies)))
-			.subscribe();
+			.subscribe(
+				result -> {
+					log.info("PoliciesLoader completed");
+					log.info(String.format("-- Loaded %s application policies and %s service instance policies.", result.getApplicationPolicies().size(), result.getServiceInstancePolicies().size()));
+				},
+				error -> {
+					log.error("PoliciesLoader terminated with error", error);
+				}
+			);
 	}
 
 }

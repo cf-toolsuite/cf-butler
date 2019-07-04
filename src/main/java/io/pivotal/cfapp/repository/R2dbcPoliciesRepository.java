@@ -1,7 +1,6 @@
 package io.pivotal.cfapp.repository;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -10,18 +9,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.r2dbc.function.DatabaseClient;
 import org.springframework.data.r2dbc.function.DatabaseClient.GenericInsertSpec;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.CollectionUtils;
 
 import io.pivotal.cfapp.config.DbmsSettings;
 import io.pivotal.cfapp.config.PoliciesSettings;
+import io.pivotal.cfapp.domain.ApplicationOperation;
 import io.pivotal.cfapp.domain.ApplicationPolicy;
 import io.pivotal.cfapp.domain.ApplicationState;
 import io.pivotal.cfapp.domain.Defaults;
 import io.pivotal.cfapp.domain.Policies;
 import io.pivotal.cfapp.domain.PoliciesValidator;
+import io.pivotal.cfapp.domain.ServiceInstanceOperation;
 import io.pivotal.cfapp.domain.ServiceInstancePolicy;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -32,15 +38,18 @@ public class R2dbcPoliciesRepository {
 	private final DatabaseClient client;
 	private final PoliciesSettings policiesSettings;
 	private final DbmsSettings dbmsSettings;
+	private final ObjectMapper mapper;
 
 	@Autowired
 	public R2dbcPoliciesRepository(
 		DatabaseClient client,
 		PoliciesSettings policiesSettings,
-		DbmsSettings dbmsSettings) {
+		DbmsSettings dbmsSettings,
+		ObjectMapper mapper) {
 		this.client = client;
 		this.policiesSettings = policiesSettings;
 		this.dbmsSettings = dbmsSettings;
+		this.mapper = mapper;
 	}
 
 	public Mono<Policies> save(Policies entity) {
@@ -59,7 +68,7 @@ public class R2dbcPoliciesRepository {
 
 	public Mono<Policies> findServiceInstancePolicyById(String id) {
 		String index = dbmsSettings.getBindPrefix() + 1;
-		String selectServiceInstancePolicy = "select pk, id, description, from_datetime, from_duration, organization_whitelist from service_instance_policy where id = " + index;
+		String selectServiceInstancePolicy = "select pk, id, operation, description, options, organization_whitelist from service_instance_policy where id = " + index;
 		List<ServiceInstancePolicy> serviceInstancePolicies = new ArrayList<>();
 		return
 			Flux
@@ -70,9 +79,9 @@ public class R2dbcPoliciesRepository {
 								.builder()
 									.pk(row.get("pk", Long.class))
 									.id(row.get("id", String.class))
+									.operation(row.get("operation", String.class))
 									.description(Defaults.getValueOrDefault(row.get("description", String.class), ""))
-									.fromDateTime(Defaults.getValueOrDefault(row.get("from_datetime", LocalDateTime.class), null))
-									.fromDuration(row.get("from_duration", String.class) != null ? Duration.parse(row.get("from_duration", String.class)): null)
+									.options(readOptions(row.get("options", String.class) == null ? "{}" : row.get("options", String.class)))
 									.organizationWhiteList(row.get("organization_whitelist", String.class) != null ? new HashSet<String>(Arrays.asList(row.get("organization_whitelist", String.class).split("\\s*,\\s*"))): new HashSet<>())
 									.build())
 						.all())
@@ -83,7 +92,7 @@ public class R2dbcPoliciesRepository {
 
 	public Mono<Policies> findApplicationPolicyById(String id) {
 		String index = dbmsSettings.getBindPrefix() + 1;
-		String selectApplicationPolicy = "select pk, id, description, state, from_datetime, from_duration, delete_services, organization_whitelist from application_policy where id = " + index;
+		String selectApplicationPolicy = "select pk, id, operation, description, state, options, organization_whitelist from application_policy where id = " + index;
 		List<ApplicationPolicy> applicationPolicies = new ArrayList<>();
 		return
 			Flux
@@ -94,12 +103,11 @@ public class R2dbcPoliciesRepository {
 								.builder()
 									.pk(row.get("pk", Long.class))
 									.id(row.get("id", String.class))
+									.operation(row.get("operation", String.class))
 									.description(Defaults.getValueOrDefault(row.get("description", String.class), ""))
-									.fromDateTime(Defaults.getValueOrDefault(row.get("from_datetime", LocalDateTime.class), null))
-									.fromDuration(row.get("from_duration", String.class) != null ? Duration.parse(row.get("from_duration", String.class)): null)
+									.options(readOptions(row.get("options", String.class) == null ? "{}" : row.get("options", String.class)))
 									.organizationWhiteList(row.get("organization_whitelist", String.class) != null ? new HashSet<String>(Arrays.asList(row.get("organization_whitelist", String.class).split("\\s*,\\s*"))): new HashSet<>())
-									.state(ApplicationState.from(row.get("state", String.class)))
-									.deleteServices(row.get("delete_services", Boolean.class))
+									.state(row.get("state", String.class))
 									.build())
 						.all())
 				.map(ap -> applicationPolicies.add(ap))
@@ -108,8 +116,8 @@ public class R2dbcPoliciesRepository {
 	}
 
 	public Mono<Policies> findAll() {
-		String selectAllApplicationPolicies = "select pk, id, description, state, from_datetime, from_duration, delete_services, organization_whitelist from application_policy";
-		String selectAllServiceInstancePolicies = "select pk, id, description, from_datetime, from_duration, organization_whitelist from service_instance_policy";
+		String selectAllApplicationPolicies = "select pk, id, operation, description, state, options, organization_whitelist from application_policy";
+		String selectAllServiceInstancePolicies = "select pk, id, operation, description, options, organization_whitelist from service_instance_policy";
 		List<ApplicationPolicy> applicationPolicies = new ArrayList<>();
 		List<ServiceInstancePolicy> serviceInstancePolicies = new ArrayList<>();
 
@@ -121,12 +129,11 @@ public class R2dbcPoliciesRepository {
 									.builder()
 										.pk(row.get("pk", Long.class))
 										.id(row.get("id", String.class))
+										.operation(row.get("operation", String.class))
 										.description(row.get("description", String.class))
-										.fromDateTime(Defaults.getValueOrDefault(row.get("from_datetime", LocalDateTime.class), null))
-										.fromDuration(row.get("from_duration", String.class) != null ? Duration.parse(row.get("from_duration", String.class)): null)
+										.options(readOptions(row.get("options", String.class) == null ? "{}" : row.get("options", String.class)))
 										.organizationWhiteList(row.get("organization_whitelist", String.class) != null ? new HashSet<String>(Arrays.asList(row.get("organization_whitelist", String.class).split("\\s*,\\s*"))): new HashSet<>())
-										.state(ApplicationState.from(row.get("state", String.class)))
-										.deleteServices(row.get("delete_services", Boolean.class))
+										.state(row.get("state", String.class))
 										.build())
 							.all())
 					.map(ap -> applicationPolicies.add(ap))
@@ -138,9 +145,9 @@ public class R2dbcPoliciesRepository {
 											.builder()
 												.pk(row.get("pk", Long.class))
 												.id(row.get("id", String.class))
+												.operation(row.get("operation", String.class))
 												.description(Defaults.getValueOrDefault(row.get("description", String.class), ""))
-												.fromDateTime(Defaults.getValueOrDefault(row.get("from_datetime", LocalDateTime.class), null))
-												.fromDuration(row.get("from_duration", String.class) != null ? Duration.parse(row.get("from_duration", String.class)): null)
+												.options(readOptions(row.get("options", String.class) == null ? "{}" : row.get("options", String.class)))
 												.organizationWhiteList(row.get("organization_whitelist", String.class) != null ? new HashSet<String>(Arrays.asList(row.get("organization_whitelist", String.class).split("\\s*,\\s*"))): new HashSet<>())
 												.build())
 									.all())
@@ -211,17 +218,16 @@ public class R2dbcPoliciesRepository {
 		} else {
 			spec = spec.nullValue("state");
 		}
-		if (ap.getFromDateTime() != null) {
-			spec = spec.value("from_datetime", ap.getFromDateTime());
+		if (ap.getOperation() != null) {
+			spec = spec.value("operation", ap.getOperation());
 		} else {
-			spec = spec.nullValue("from_datetime");
+			spec = spec.nullValue("operation");
 		}
-		if (ap.getFromDuration() != null) {
-			spec = spec.value("from_duration", ap.getFromDuration().toString());
+		if (!CollectionUtils.isEmpty(ap.getOptions())) {
+			spec = spec.value("options", writeOptions(ap.getOptions()));
 		} else {
-			spec = spec.nullValue("from_duration");
+			spec = spec.nullValue("options");
 		}
-		spec = spec.value("delete_services", ap.isDeleteServices());
 		spec = spec.value("organization_whitelist", String.join(",", ap.getOrganizationWhiteList()));
 		return spec.fetch().rowsUpdated();
 	}
@@ -235,18 +241,84 @@ public class R2dbcPoliciesRepository {
 		} else {
 			spec = spec.nullValue("description");
 		}
-		if (sip.getFromDateTime() != null) {
-			spec = spec.value("from_datetime", sip.getFromDateTime());
+		if (sip.getOperation() != null) {
+			spec = spec.value("operation", sip.getOperation());
 		} else {
-			spec = spec.nullValue("from_datetime");
+			spec = spec.nullValue("operation");
 		}
-		if (sip.getFromDuration() != null) {
-			spec = spec.value("from_duration", sip.getFromDuration().toString());
+		if (!CollectionUtils.isEmpty(sip.getOptions())) {
+			spec = spec.value("options", writeOptions(sip.getOptions()));
 		} else {
-			spec = spec.nullValue("from_duration");
+			spec = spec.nullValue("options");
 		}
 		spec = spec.value("organization_whitelist", String.join(",", sip.getOrganizationWhiteList()));
 		return spec.fetch().rowsUpdated();
 	}
 
+	public Mono<Policies> findByApplicationOperation(ApplicationOperation operation) {
+		String index = dbmsSettings.getBindPrefix() + 1;
+		String selectAllApplicationPolicies = "select pk, id, operation, description, state, options, organization_whitelist from application_policy where operation = " + index;
+		List<ApplicationPolicy> applicationPolicies = new ArrayList<>();
+		List<ServiceInstancePolicy> serviceInstancePolicies = new ArrayList<>();
+
+		return
+				Flux
+					.from(client.execute().sql(selectAllApplicationPolicies).bind(index, operation.getName())
+							.map((row, metadata) ->
+								ApplicationPolicy
+									.builder()
+										.pk(row.get("pk", Long.class))
+										.id(row.get("id", String.class))
+										.operation(row.get("operation", String.class))
+										.description(row.get("description", String.class))
+										.options(readOptions(row.get("options", String.class) == null ? "{}" : row.get("options", String.class)))
+										.organizationWhiteList(row.get("organization_whitelist", String.class) != null ? new HashSet<String>(Arrays.asList(row.get("organization_whitelist", String.class).split("\\s*,\\s*"))): new HashSet<>())
+										.state(row.get("state", String.class))
+										.build())
+							.all())
+					.map(ap -> applicationPolicies.add(ap))
+					.then(Mono.just(new Policies(applicationPolicies, serviceInstancePolicies)))
+					.flatMap(p -> p.isEmpty() ? Mono.empty(): Mono.just(p));
+	}
+
+	public Mono<Policies> findByServiceInstanceOperation(ServiceInstanceOperation operation) {
+		String index = dbmsSettings.getBindPrefix() + 1;
+		String selectAllServiceInstancePolicies = "select pk, id, operation, description, options, organization_whitelist from service_instance_policy where operation = " + index;
+		List<ApplicationPolicy> applicationPolicies = new ArrayList<>();
+		List<ServiceInstancePolicy> serviceInstancePolicies = new ArrayList<>();
+
+		return
+				Flux
+					.from(client.execute().sql(selectAllServiceInstancePolicies).bind(index, operation.getName())
+							.map((row, metadata) ->
+								ServiceInstancePolicy
+									.builder()
+										.pk(row.get("pk", Long.class))
+										.id(row.get("id", String.class))
+										.operation(row.get("operation", String.class))
+										.description(Defaults.getValueOrDefault(row.get("description", String.class), ""))
+										.options(readOptions(row.get("options", String.class) == null ? "{}" : row.get("options", String.class)))
+										.organizationWhiteList(row.get("organization_whitelist", String.class) != null ? new HashSet<String>(Arrays.asList(row.get("organization_whitelist", String.class).split("\\s*,\\s*"))): new HashSet<>())
+										.build())
+							.all())
+					.map(sp -> serviceInstancePolicies.add(sp))
+					.then(Mono.just(new Policies(applicationPolicies, serviceInstancePolicies)))
+					.flatMap(p -> p.isEmpty() ? Mono.empty(): Mono.just(p));
+	}
+
+	private String writeOptions(Object value) {
+        try {
+            return mapper.writeValueAsString(value);
+        } catch (JsonProcessingException jpe) {
+            throw new RuntimeException("Problem writing options", jpe);
+        }
+	}
+
+	private Map<String, Object> readOptions(String value) {
+        try {
+            return mapper.readValue(value, new TypeReference<Map<String, Object>>() {});
+        } catch (IOException ioe) {
+            throw new RuntimeException("Problem reading options", ioe);
+        }
+	}
 }

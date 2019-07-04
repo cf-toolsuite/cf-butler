@@ -1,5 +1,6 @@
 package io.pivotal.cfapp.repository;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -145,13 +146,13 @@ public class R2dbcServiceInstanceDetailRepository {
 		StringBuilder where = new StringBuilder();
 		LocalDateTime temporal = null;
 		where.append("where bound_applications is null "); // orphans only
-		if (policy.getFromDateTime() != null) {
+		if (policy.getOption("from-datetime", LocalDateTime.class) != null) {
 			where.append("and last_updated <= " + index + " ");
-			temporal = policy.getFromDateTime();
+			temporal = policy.getOption("from-datetime", LocalDateTime.class);
 		}
-		if (policy.getFromDuration() != null) {
+		if (policy.getOption("from-duration", String.class) != null) {
 			where.append("and last_updated <= " + index + " ");
-			LocalDateTime eventTime = LocalDateTime.now().minus(policy.getFromDuration());
+			LocalDateTime eventTime = LocalDateTime.now().minus(Duration.parse(policy.getOption("from-duration", String.class)));
 			temporal = eventTime;
 		}
 		String orderBy = "order by organization, space, service_name";

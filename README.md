@@ -659,28 +659,26 @@ POST /policies
 {
   "application-policies": [
     {
-      "description": "Remove stopped applications retroactively as of an explicit date",
+      "description": "Remove stopped applications that are older than some date/time from now and restricted to whitelisted organizations",
       "state": "stopped",
-      "from-datetime": "2018-12-01T08:00:00",
-      "delete-services": "false"
-    },
-    {
-      "description": "Remove stopped applications that are older than some duration from now and restricted to whitelisted organizations",
-      "state": "stopped",
-      "from-duration": "P1D",
-      "delete-services": "true",
-      "organization-whitelist": [ "zoo-labs" ]
+      "options": {
+        "from-datime": "2019-07-01T12:30:00",
+        "delete-services": true
+      },
+      "organization-whitelist": [
+        "zoo-labs"
+      ]
     }
   ],
   "service-instance-policies": [
     {
-      "description": "Remove orphaned services retroactively as of an explicit date",
-      "from-datetime": "2018-12-01T08:00:00"
-    },
-    {
       "description": "Remove orphaned services that are older than some duration from now and restricted to whitelisted organizations",
-      "from-duration": "P1D",
-      "organization-whitelist": [ "zoo-labs" ]
+      "options": {
+        "from-duration": "P1D"
+      },
+      "organization-whitelist": [
+        "zoo-labs"
+      ]
     }
   ]
 }

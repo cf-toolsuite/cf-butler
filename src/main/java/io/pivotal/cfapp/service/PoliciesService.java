@@ -1,6 +1,8 @@
 package io.pivotal.cfapp.service;
 
+import io.pivotal.cfapp.domain.ApplicationOperation;
 import io.pivotal.cfapp.domain.Policies;
+import io.pivotal.cfapp.domain.ServiceInstanceOperation;
 import reactor.core.publisher.Mono;
 
 public interface PoliciesService {
@@ -12,4 +14,6 @@ public interface PoliciesService {
 	Mono<Void> deleteApplicationPolicyById(String id);
 	Mono<Void> deleteServiceInstancePolicyById(String id);
 	Mono<Void> deleteAll();
+	Mono<Policies> findByApplicationOperation(ApplicationOperation operation);
+	Mono<Policies> findByServiceInstanceOperation(ServiceInstanceOperation operation);
 }
