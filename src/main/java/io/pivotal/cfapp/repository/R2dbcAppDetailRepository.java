@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.r2dbc.function.DatabaseClient;
+import org.springframework.data.r2dbc.function.DatabaseClient.GenericExecuteSpec;
 import org.springframework.data.r2dbc.function.DatabaseClient.GenericInsertSpec;
 import org.springframework.stereotype.Repository;
 
@@ -166,10 +167,15 @@ public class R2dbcAppDetailRepository {
 		}
 		String orderBy = "order by organization, space, app_name";
 		String sql = String.join(" ", select, from, where, orderBy);
-		return client.execute().sql(sql)
-						.bind(settings.getBindPrefix() + 1, policy.getState())
-						.bind(settings.getBindPrefix() + 2, temporal)
-						.map((row, metadata) -> fromRow(row))
+		GenericExecuteSpec spec =
+			client
+				.execute().sql(sql)
+				.bind(settings.getBindPrefix() + 1, policy.getState());
+		if (temporal != null) {
+			spec = spec.bind(settings.getBindPrefix() + 2, temporal);
+		}
+		return spec
+				.map((row, metadata) -> fromRow(row))
 						.all()
 						.map(r -> toTuple(r, policy));
 	}
@@ -195,10 +201,15 @@ public class R2dbcAppDetailRepository {
 		}
 		String orderBy = "order by ad.organization, ad.space, ad.app_name";
 		String sql = String.join(" ", select, from, leftJoin, where, orderBy);
-		return client.execute().sql(sql)
-						.bind(settings.getBindPrefix() + 1, policy.getState())
-						.bind(settings.getBindPrefix() + 2, temporal)
-						.map((row, metadata) -> fromRow(row))
+		GenericExecuteSpec spec =
+			client
+				.execute().sql(sql)
+				.bind(settings.getBindPrefix() + 1, policy.getState());
+		if (temporal != null) {
+			spec = spec.bind(settings.getBindPrefix() + 2, temporal);
+		}
+		return spec
+				.map((row, metadata) -> fromRow(row))
 						.all()
 						.map(r -> toTuple(r, policy));
 	}

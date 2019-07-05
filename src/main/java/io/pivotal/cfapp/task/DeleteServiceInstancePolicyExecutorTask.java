@@ -70,6 +70,7 @@ public class DeleteServiceInstancePolicyExecutorTask implements PolicyExecutorTa
 				.subscribe(
 					result -> {
 						log.info("DeleteServiceInstancePolicyExecutorTask completed");
+						log.info("-- {} service instances deleted.", result.size());
 					},
 					error -> {
 						log.error("DeleteServiceInstancePolicyExecutorTask terminated with error", error);
