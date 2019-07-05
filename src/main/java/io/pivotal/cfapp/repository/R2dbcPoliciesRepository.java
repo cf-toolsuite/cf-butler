@@ -23,7 +23,6 @@ import io.pivotal.cfapp.config.DbmsSettings;
 import io.pivotal.cfapp.config.PoliciesSettings;
 import io.pivotal.cfapp.domain.ApplicationOperation;
 import io.pivotal.cfapp.domain.ApplicationPolicy;
-import io.pivotal.cfapp.domain.ApplicationState;
 import io.pivotal.cfapp.domain.Defaults;
 import io.pivotal.cfapp.domain.Policies;
 import io.pivotal.cfapp.domain.PoliciesValidator;

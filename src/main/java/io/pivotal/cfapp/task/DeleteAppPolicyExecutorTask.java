@@ -64,12 +64,17 @@ public class DeleteAppPolicyExecutorTask implements PolicyExecutorTask {
 	@Override
     public void execute() {
 		log.info("DeleteAppPolicyExecutorTask started");
-    	deleteApplicationsWithNoServiceBindings()
-	    	.then(deleteApplicationsWithServiceBindingsButDoNotDeleteBoundServiceInstances())
-	    	.then(deleteApplicationsWithServiceBindingsAndDeleteBoundServiceInstances())
+		Flux
+			.concat(
+				deleteApplicationsWithNoServiceBindings(),
+				deleteApplicationsWithServiceBindingsButDoNotDeleteBoundServiceInstances(),
+				deleteApplicationsWithServiceBindingsAndDeleteBoundServiceInstances()
+			)
+			.collectList()
 	    	.subscribe(
 				result -> {
 					log.info("DeleteAppPolicyExecutorTask completed");
+					log.info("-- {} applications deleted.", result.size());
 				},
 				error -> {
 					log.error("DeleteAppPolicyExecutorTask terminated with error", error);
@@ -82,7 +87,7 @@ public class DeleteAppPolicyExecutorTask implements PolicyExecutorTask {
     	execute();
     }
 
-	protected Mono<Void> deleteApplicationsWithNoServiceBindings() {
+	protected Flux<HistoricalRecord> deleteApplicationsWithNoServiceBindings() {
     	// these are the applications with no service bindings
     	// we can delete each one without having to first unbind it from one or more service instances
     	return policiesService
@@ -93,11 +98,10 @@ public class DeleteAppPolicyExecutorTask implements PolicyExecutorTask {
 						.filter(wl -> isWhitelisted(wl.getT2(), wl.getT1().getOrganization()))
 			        	.filter(bl -> isBlacklisted(bl.getT1().getOrganization()))
 			        	.flatMap(ad -> deleteApplication(ad.getT1()))
-						.flatMap(historicalRecordService::save)
-			            .then();
+						.flatMap(historicalRecordService::save);
     }
 
-	protected Mono<Void> deleteApplicationsWithServiceBindingsButDoNotDeleteBoundServiceInstances() {
+	protected Flux<HistoricalRecord> deleteApplicationsWithServiceBindingsButDoNotDeleteBoundServiceInstances() {
 		// these are the applications with service bindings
 		// in this case the application policy has been configured with delete-services = false
 		// so we:  a) unbind one or more service instances from each application, b) delete each application
@@ -115,11 +119,10 @@ public class DeleteAppPolicyExecutorTask implements PolicyExecutorTask {
 						.flatMap(ad -> appInfoService.findByAppId(ad.getAppId()))
 						.distinct()
 						.flatMap(this::deleteApplication)
-						.flatMap(historicalRecordService::save)
-						.then();
+						.flatMap(historicalRecordService::save);
 	}
 
-	protected Mono<Void> deleteApplicationsWithServiceBindingsAndDeleteBoundServiceInstances() {
+	protected Flux<HistoricalRecord> deleteApplicationsWithServiceBindingsAndDeleteBoundServiceInstances() {
 		// these are the applications with service bindings
 		// in this case the application policy has been configured with delete-services = true
 		// so we:  a) unbind one or more service instances from each application, b) delete each application,
@@ -141,8 +144,7 @@ public class DeleteAppPolicyExecutorTask implements PolicyExecutorTask {
 						.flatMap(historicalRecordService::save)
 			            .flatMap(dad -> appRelationshipService.findByApplicationId(dad.getAppId()))
 			            .flatMap(this::deleteServiceInstance)
-						.flatMap(historicalRecordService::save)
-						.then();
+						.flatMap(historicalRecordService::save);
 	}
 
 	protected Mono<HistoricalRecord> unbindServiceInstance(AppRelationship relationship) {

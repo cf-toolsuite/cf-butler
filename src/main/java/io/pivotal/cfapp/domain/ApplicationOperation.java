@@ -10,7 +10,7 @@ import org.springframework.util.Assert;
 public enum ApplicationOperation {
 
     DELETE("delete"),
-    SCALE("scale");
+    SCALE_INSTANCES("scale-instances");
 
     private final String name;
 

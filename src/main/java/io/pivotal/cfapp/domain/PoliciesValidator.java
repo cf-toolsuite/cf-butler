@@ -16,7 +16,14 @@ public class PoliciesValidator {
         boolean valid = !hasId && hasOperation && hasState;
         if (hasOperation) {
             try {
-                ApplicationOperation.from(policy.getOperation());
+                ApplicationOperation op = ApplicationOperation.from(policy.getOperation());
+                if (op.equals(ApplicationOperation.SCALE_INSTANCES)) {
+                    Integer instancesFrom = policy.getOption("instances-from", Integer.class);
+                    Integer instancesTo = policy.getOption("instances-to", Integer.class);
+                    if (instancesFrom < 1 || instancesTo < 1 || instancesFrom == instancesTo) {
+                        valid = false;
+                    }
+                }
             } catch (IllegalArgumentException iae) {
                 valid = false;
             }

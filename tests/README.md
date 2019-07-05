@@ -1,6 +1,6 @@
 # Tests for cf-butler
 
-In order to test definition and execution of application and service instance policies we've set up some scripts to orchestrate [cf-cli](http://cli.cloudfoundry.org/en-US/cf/) calls to [push](https://cli.cloudfoundry.org/en-US/cf/push.html), [cs](https://cli.cloudfoundry.org/en-US/cf/create-service.html), [bs](https://cli.cloudfoundry.org/en-US/cf/bind-service.html), [stop](https://cli.cloudfoundry.org/en-US/cf/stop.html).  We've also implemented some test endpoints to trigger on-demand collection and policy execution.  
+In order to test definition and execution of application and service instance policies we've set up some scripts to orchestrate [cf-cli](http://cli.cloudfoundry.org/en-US/cf/) calls to [push](https://cli.cloudfoundry.org/en-US/cf/push.html), [cs](https://cli.cloudfoundry.org/en-US/cf/create-service.html), [bs](https://cli.cloudfoundry.org/en-US/cf/bind-service.html), [stop](https://cli.cloudfoundry.org/en-US/cf/stop.html).  We've also implemented some test endpoints to trigger on-demand collection and policy execution.
 
 ## How to Run Tests
 
@@ -55,7 +55,7 @@ Use the [cf-cli](http://cli.cloudfoundry.org/en-US/cf/) to [target](http://cli.c
 ### Review the historical report
 
 ```
-GET /report
+GET /policies/report
 ```
 
 It should contain records for each application and/or service instance removed.
@@ -95,6 +95,7 @@ POST /collect
 	* delete bound service instances
 * Removing orphaned services retroactively as of an explicit date
 * Removing orphaned services that are older than some duration from now
+* Scaling application instances from n to m
 
 Sub-folders here-in contain bash scripts for cloning sample applications, building and pushing those applications, creating service instances and binding them to applications, and stopping applications and service instances when appropriate to setup each use case.
 
@@ -105,7 +106,3 @@ At a minimum a sub-folder should contain the following files
 * `setup.sh`
 * `teardown.sh`
 * one or more policy variant json files
-
-
-
-
