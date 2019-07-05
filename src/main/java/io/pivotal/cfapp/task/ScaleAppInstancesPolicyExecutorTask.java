@@ -2,6 +2,7 @@ package io.pivotal.cfapp.task;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
@@ -61,6 +62,7 @@ public class ScaleAppInstancesPolicyExecutorTask implements PolicyExecutorTask {
 	    	.subscribe(
 				result -> {
 					log.info("ScaleAppInstancesPolicyExecutorTask completed");
+					log.info("-- {} applications scaled.", result.size());
 				},
 				error -> {
 					log.error("ScaleAppInstancesPolicyExecutorTask terminated with error", error);
@@ -73,7 +75,7 @@ public class ScaleAppInstancesPolicyExecutorTask implements PolicyExecutorTask {
     	execute();
     }
 
-	protected Mono<Void> scaleApplications() {
+	protected Mono<List<HistoricalRecord>> scaleApplications() {
     	return policiesService
 					.findByApplicationOperation(ApplicationOperation.SCALE_INSTANCES)
 			            .flux()
@@ -84,7 +86,7 @@ public class ScaleAppInstancesPolicyExecutorTask implements PolicyExecutorTask {
 						.filter(from -> from.getT1().getRunningInstances() == from.getT2().getOption("instances-from", Integer.class))
 			        	.flatMap(ad -> scaleApplication(ad.getT2(), ad.getT1()))
 						.flatMap(historicalRecordService::save)
-			            .then();
+			            .collectList();
     }
 
     protected Mono<HistoricalRecord> scaleApplication(ApplicationPolicy policy, AppDetail detail) {
