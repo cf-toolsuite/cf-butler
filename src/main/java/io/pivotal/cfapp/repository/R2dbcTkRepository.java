@@ -2,7 +2,7 @@ package io.pivotal.cfapp.repository;
 
 import java.time.LocalDateTime;
 
-import org.springframework.data.r2dbc.function.DatabaseClient;
+import org.springframework.data.r2dbc.core.DatabaseClient;
 import org.springframework.stereotype.Repository;
 
 import io.r2dbc.spi.Row;

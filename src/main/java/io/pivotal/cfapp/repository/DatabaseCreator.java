@@ -10,7 +10,7 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.data.r2dbc.function.DatabaseClient;
+import org.springframework.data.r2dbc.core.DatabaseClient;
 import org.springframework.stereotype.Component;
 
 import io.pivotal.cfapp.config.DbmsSettings;
