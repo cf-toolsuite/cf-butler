@@ -1,7 +1,6 @@
 package io.pivotal.cfapp.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -24,7 +23,7 @@ import reactor.test.StepVerifier;
 
 
 @ExtendWith(SpringExtension.class)
-@SpringBootTest(webEnvironment = RANDOM_PORT)
+@SpringBootTest
 public class SnapshotServiceTest {
 
     private final SnapshotService snapService;
