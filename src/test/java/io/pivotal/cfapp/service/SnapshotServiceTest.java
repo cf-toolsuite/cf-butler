@@ -1,6 +1,7 @@
 package io.pivotal.cfapp.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -20,10 +21,10 @@ import io.pivotal.cfapp.domain.SpaceUsers;
 import io.pivotal.cfapp.domain.UserCounts;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-import reactor.util.function.Tuple3;
+
 
 @ExtendWith(SpringExtension.class)
-@SpringBootTest
+@SpringBootTest(webEnvironment = RANDOM_PORT)
 public class SnapshotServiceTest {
 
     private final SnapshotService snapService;
@@ -84,20 +85,9 @@ public class SnapshotServiceTest {
                                 .organization("zoo-labs")
                                 .space("dev")
                                 .build();
-        Mono<Tuple3<AppDetail, ServiceInstanceDetail, SpaceUsers>> result =
-            Mono.zip(
-                appService.deleteAll().then(appService.save(ad)),
-                siService.deleteAll().then(siService.save(sid)),
-                usersService.deleteAll().then(usersService.save(su))
-            );
-        StepVerifier
-            .create(result)
-            .assertNext(r -> {
-                assertEquals(ad, r.getT1());
-                assertEquals(sid, r.getT2());
-                assertEquals(su, r.getT3());
-            })
-            .verifyComplete();
+        StepVerifier.create(appService.deleteAll().then(appService.save(ad))).expectNext(ad).verifyComplete();
+        StepVerifier.create(siService.deleteAll().then(siService.save(sid))).expectNext(sid).verifyComplete();
+        StepVerifier.create(usersService.deleteAll().then(usersService.save(su))).expectNext(su).verifyComplete();
     }
 
     @Test

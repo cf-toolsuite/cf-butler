@@ -48,9 +48,9 @@ ext {
 	set('springCloudVersion', 'Hoxton.M1')
 	set('commons-lang3.version', '3.9')
 	set('jackson.version', '2.9.9')
-	set('junit-jupiter.version', '5.4.2')
+	set('junit-jupiter.version', '5.5.0')
     set('lombok.version', '1.18.8')
-	set('mockito.version', '2.27.0')
+	set('mockito.version', '2.28.2')
 }
 
 dependencyManagement {
@@ -78,7 +78,7 @@ test {
 }
 
 jacoco {
-	toolVersion = "0.8.3"
+	toolVersion = "0.8.4"
 }
 
 jacocoTestReport {
@@ -115,9 +115,9 @@ dependencies {
     implementation('org.eclipse.jgit:org.eclipse.jgit:5.4.0.201906121030-r')
     implementation('org.cloudfoundry:cloudfoundry-client-reactor:3.15.0.RELEASE')
     implementation('org.cloudfoundry:cloudfoundry-operations:3.15.0.RELEASE')
-    implementation('io.projectreactor:reactor-core:3.2.10.RELEASE')
-    implementation('io.projectreactor.addons:reactor-extra:3.2.3.RELEASE')
-    implementation('io.projectreactor.netty:reactor-netty:0.8.9.RELEASE')
+    implementation('io.projectreactor:reactor-core:3.3.0.M1')
+    implementation('io.projectreactor.addons:reactor-extra:3.3.0.M1')
+    implementation('io.projectreactor.netty:reactor-netty:0.9.0.M2')
     implementation('io.micrometer:micrometer-registry-prometheus')
     testImplementation('io.projectreactor:reactor-test')
     testImplementation('org.junit.jupiter:junit-jupiter-api')

@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.r2dbc.core.DatabaseClient;
 import org.springframework.data.r2dbc.core.DatabaseClient.GenericInsertSpec;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import io.pivotal.cfapp.config.DbmsSettings;
@@ -51,6 +52,7 @@ public class R2dbcPoliciesRepository {
 		this.mapper = mapper;
 	}
 
+	@Transactional
 	public Mono<Policies> save(Policies entity) {
 		List<ApplicationPolicy> applicationPolicies = entity.getApplicationPolicies().stream()
 				.filter(ap -> PoliciesValidator.validate(ap)).map(p -> seedApplicationPolicy(p)).collect(Collectors.toList());

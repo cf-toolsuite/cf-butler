@@ -21,6 +21,7 @@ import org.springframework.context.event.SimpleApplicationEventMulticaster;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import io.netty.handler.ssl.SslContext;
@@ -29,8 +30,9 @@ import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.tcp.TcpClient;
 
-@EnableScheduling
 @Configuration
+@EnableScheduling
+@EnableTransactionManagement
 public class ButlerConfig {
 
     @Bean
