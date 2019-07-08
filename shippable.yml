@@ -5,9 +5,6 @@ jdk:
   - oraclejdk11
 
 build:
-  cache: true
-  cache_dir_list:
-    - /home/shippable/.gradle/caches
   ci:
     - sdk use gradle 5.5
     - mkdir -p shippable/testresults
@@ -16,4 +13,4 @@ build:
   on_failure:
     - gradle dependencies
   always:
-    - cp -r build/reports/jacoco/test shippable/codecoverage
+    - cp -r build/reports/tests/test shippable/codecoverage
