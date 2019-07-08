@@ -116,13 +116,13 @@ public class R2dbcAppDetailRepository {
 
 	public Flux<AppDetail> findAll() {
 		String select = "select pk, organization, space, app_id, app_name, buildpack, image, stack, running_instances, total_instances, memory_used, disk_used, urls, last_pushed, last_event, last_event_actor, last_event_time, requested_state from application_detail order by organization, space, app_name";
-		return client.execute().sql(select)
+		return client.execute(select)
 						.map((row, metadata) -> fromRow(row))
 						.all();
 	}
 
 	public Mono<Void> deleteAll() {
-		return client.execute().sql("delete from application_detail")
+		return client.execute("delete from application_detail")
 						.fetch()
 						.rowsUpdated()
 						.then();
@@ -130,7 +130,7 @@ public class R2dbcAppDetailRepository {
 
 	public Flux<AppDetail> findByDateRange(LocalDate start, LocalDate end) {
 		String sql = "select pk, organization, space, app_id, app_name, buildpack, image, stack, running_instances, total_instances, memory_used, disk_used, urls, last_pushed, last_event, last_event_actor, last_event_time, requested_state from application_detail where last_pushed <= " + settings.getBindPrefix() + 2 + " and last_pushed > " + settings.getBindPrefix() + 1 + " order by last_pushed desc";
-		return client.execute().sql(sql)
+		return client.execute(sql)
 				.bind(settings.getBindPrefix() + 1, LocalDateTime.of(end, LocalTime.MAX))
 				.bind(settings.getBindPrefix() + 2, LocalDateTime.of(start, LocalTime.MIDNIGHT))
 				.map((row, metadata) -> fromRow(row))
@@ -140,7 +140,7 @@ public class R2dbcAppDetailRepository {
 	public Mono<AppDetail> findByAppId(String appId) {
 		String index = settings.getBindPrefix() + 1;
 		String selectOne = "select pk, organization, space, app_id, app_name, buildpack, image, stack, running_instances, total_instances, memory_used, disk_used, urls, last_pushed, last_event, last_event_actor, last_event_time, requested_state from application_detail where app_id = " + index;
-		return client.execute().sql(selectOne)
+		return client.execute(selectOne)
 						.bind(index, appId)
 						.map((row, metadata) -> fromRow(row))
 						.one();
@@ -171,7 +171,7 @@ public class R2dbcAppDetailRepository {
 		String sql = String.join(" ", select, from, where, orderBy);
 		GenericExecuteSpec spec =
 			client
-				.execute().sql(sql)
+				.execute(sql)
 				.bind(settings.getBindPrefix() + 1, policy.getState());
 		if (temporal != null) {
 			spec = spec.bind(settings.getBindPrefix() + 2, temporal);
@@ -205,7 +205,7 @@ public class R2dbcAppDetailRepository {
 		String sql = String.join(" ", select, from, leftJoin, where, orderBy);
 		GenericExecuteSpec spec =
 			client
-				.execute().sql(sql)
+				.execute(sql)
 				.bind(settings.getBindPrefix() + 1, policy.getState());
 		if (temporal != null) {
 			spec = spec.bind(settings.getBindPrefix() + 2, temporal);

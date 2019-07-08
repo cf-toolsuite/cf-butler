@@ -37,7 +37,7 @@ public class R2dbcSpaceUsersRepository {
 
 	public Mono<Void> deleteAll() {
 		String deleteAll = "delete from space_users";
-		return client.execute().sql(deleteAll).fetch().rowsUpdated().then();
+		return client.execute(deleteAll).fetch().rowsUpdated().then();
 	}
 
 	@Transactional
@@ -66,13 +66,13 @@ public class R2dbcSpaceUsersRepository {
 	public Mono<SpaceUsers> findByOrganizationAndSpace(String organization, String space) {
 		String selectOne = "select pk, organization, space, auditors, managers, developers from space_users where organization = "
 				+ settings.getBindPrefix() + 1 + " and space = " + settings.getBindPrefix() + 2;
-		return client.execute().sql(selectOne).bind(settings.getBindPrefix() + 1, organization)
+		return client.execute(selectOne).bind(settings.getBindPrefix() + 1, organization)
 				.bind(settings.getBindPrefix() + 2, space).as(SpaceUsers.class).fetch().one();
 	}
 
 	public Flux<SpaceUsers> findAll() {
 		String selectAll = "select pk, organization, space, auditors, managers, developers from space_users order by organization, space";
-		return client.execute().sql(selectAll).map((row, metadata) -> fromRow(row)).all();
+		return client.execute(selectAll).map((row, metadata) -> fromRow(row)).all();
 	}
 
 	private SpaceUsers fromRow(Row row) {

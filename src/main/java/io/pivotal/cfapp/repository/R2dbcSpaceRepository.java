@@ -23,7 +23,7 @@ public class R2dbcSpaceRepository {
 
 	public Mono<Void> deleteAll() {
 		String deleteAll = "delete from spaces";
-		return client.execute().sql(deleteAll).fetch().rowsUpdated().then();
+		return client.execute(deleteAll).fetch().rowsUpdated().then();
 	}
 
 	@Transactional
@@ -40,7 +40,7 @@ public class R2dbcSpaceRepository {
 
 	public Flux<Space> findAll() {
 		String selectAll = "select org_name, space_name from spaces order by org_name, space_name";
-		return client.execute().sql(selectAll).map((row, metadata) -> fromRow(row)).all();
+		return client.execute(selectAll).map((row, metadata) -> fromRow(row)).all();
 	}
 
 	private Space fromRow(Row row) {

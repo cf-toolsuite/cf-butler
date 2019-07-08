@@ -73,7 +73,7 @@ public class R2dbcPoliciesRepository {
 		List<ServiceInstancePolicy> serviceInstancePolicies = new ArrayList<>();
 		return
 			Flux
-				.from(client.execute().sql(selectServiceInstancePolicy)
+				.from(client.execute(selectServiceInstancePolicy)
 						.bind(index, id)
 						.map((row, metadata) ->
 							ServiceInstancePolicy
@@ -97,7 +97,7 @@ public class R2dbcPoliciesRepository {
 		List<ApplicationPolicy> applicationPolicies = new ArrayList<>();
 		return
 			Flux
-				.from(client.execute().sql(selectApplicationPolicy)
+				.from(client.execute(selectApplicationPolicy)
 						.bind(index, id)
 						.map((row, metadata) ->
 							ApplicationPolicy
@@ -124,7 +124,7 @@ public class R2dbcPoliciesRepository {
 
 		return
 				Flux
-					.from(client.execute().sql(selectAllApplicationPolicies)
+					.from(client.execute(selectAllApplicationPolicies)
 							.map((row, metadata) ->
 								ApplicationPolicy
 									.builder()
@@ -140,7 +140,7 @@ public class R2dbcPoliciesRepository {
 					.map(ap -> applicationPolicies.add(ap))
 					.thenMany(
 						Flux
-							.from(client.execute().sql(selectAllServiceInstancePolicies)
+							.from(client.execute(selectAllServiceInstancePolicies)
 									.map((row, metadata) ->
 										ServiceInstancePolicy
 											.builder()
@@ -162,7 +162,7 @@ public class R2dbcPoliciesRepository {
 		String deleteApplicationPolicy = "delete from application_policy where id = " + index;
 		return
 			Flux
-				.from(client.execute().sql(deleteApplicationPolicy)
+				.from(client.execute(deleteApplicationPolicy)
 					.bind(index, id)
 					.fetch()
 					.rowsUpdated())
@@ -174,7 +174,7 @@ public class R2dbcPoliciesRepository {
 		String deleteServiceInstancePolicy = "delete from service_instance_policy where id = " + index;
 		return
 			Flux
-				.from(client.execute().sql(deleteServiceInstancePolicy)
+				.from(client.execute(deleteServiceInstancePolicy)
 					.bind(index, id)
 					.fetch()
 					.rowsUpdated())
@@ -186,12 +186,12 @@ public class R2dbcPoliciesRepository {
 		String deleteAllServiceInstancePolicies = "delete from service_instance_policy";
 		return
 			Flux
-				.from(client.execute().sql(deleteAllApplicationPolicies)
+				.from(client.execute(deleteAllApplicationPolicies)
 					.fetch()
 					.rowsUpdated())
 				.thenMany(
 					Flux
-						.from(client.execute().sql(deleteAllServiceInstancePolicies)
+						.from(client.execute(deleteAllServiceInstancePolicies)
 							.fetch()
 							.rowsUpdated()))
 				.then();
@@ -264,7 +264,7 @@ public class R2dbcPoliciesRepository {
 
 		return
 				Flux
-					.from(client.execute().sql(selectAllApplicationPolicies).bind(index, operation.getName())
+					.from(client.execute(selectAllApplicationPolicies).bind(index, operation.getName())
 							.map((row, metadata) ->
 								ApplicationPolicy
 									.builder()
@@ -290,7 +290,7 @@ public class R2dbcPoliciesRepository {
 
 		return
 				Flux
-					.from(client.execute().sql(selectAllServiceInstancePolicies).bind(index, operation.getName())
+					.from(client.execute(selectAllServiceInstancePolicies).bind(index, operation.getName())
 							.map((row, metadata) ->
 								ServiceInstancePolicy
 									.builder()

@@ -60,7 +60,7 @@ public class R2dbcAppRelationshipRepository {
 
 	public Flux<AppRelationship> findAll() {
 		String select = "select pk, organization, space, app_id, app_name, service_instance_id, service_name, service_plan, service_type from application_relationship order by organization, space, app_name";
-		return client.execute().sql(select)
+		return client.execute(select)
 						.as(AppRelationship.class)
 						.fetch()
 						.all();
@@ -69,7 +69,7 @@ public class R2dbcAppRelationshipRepository {
 	public Flux<AppRelationship> findByApplicationId(String applicationId) {
 		String index = settings.getBindPrefix() + 1;
 		String selectOne = "select pk, organization, space, app_id, app_name, service_instance_id, service_name, service_plan, service_type from application_relationship where app_id = " + index + " order by organization, space, service_name";
-		return client.execute().sql(selectOne)
+		return client.execute(selectOne)
 						.bind(index, applicationId)
 						.as(AppRelationship.class)
 						.fetch()
@@ -77,7 +77,7 @@ public class R2dbcAppRelationshipRepository {
 	}
 
 	public Mono<Void> deleteAll() {
-		return client.execute().sql("delete from application_relationship")
+		return client.execute("delete from application_relationship")
 						.fetch()
 						.rowsUpdated()
 						.then();

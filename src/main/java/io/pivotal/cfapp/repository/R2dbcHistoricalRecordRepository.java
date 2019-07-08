@@ -51,7 +51,7 @@ public class R2dbcHistoricalRecordRepository {
 
 	public Flux<HistoricalRecord> findAll() {
 		String select = "select pk, transaction_date_time, action_taken, organization, space, app_id, service_instance_id, type, name from historical_record order by transaction_datetime desc";
-		return client.execute().sql(select)
+		return client.execute(select)
 						.as(HistoricalRecord.class)
 						.fetch()
 						.all();

@@ -103,7 +103,7 @@ public class R2dbcServiceInstanceDetailRepository {
 
 	public Flux<ServiceInstanceDetail> findAll() {
 		String select = "select pk, organization, space, service_instance_id, service_name, service, description, plan, type, bound_applications, last_operation, last_updated, dashboard_url, requested_state from service_instance_detail order by organization, space, service, service_name";
-		return client.execute().sql(select)
+		return client.execute(select)
 				.map((row, metadata) -> fromRow(row))
 				.all();
 	}
@@ -136,7 +136,7 @@ public class R2dbcServiceInstanceDetailRepository {
 	}
 
 	public Mono<Void> deleteAll() {
-		return client.execute().sql("delete from service_instance_detail")
+		return client.execute("delete from service_instance_detail")
 						.fetch()
 						.rowsUpdated()
 						.then();
@@ -162,7 +162,7 @@ public class R2dbcServiceInstanceDetailRepository {
 		String sql = String.join(" ", select, from, where, orderBy);
 		GenericExecuteSpec spec =
 			client
-				.execute().sql(sql);
+				.execute(sql);
 		if (temporal != null) {
 			spec = spec.bind(index, temporal);
 		}
@@ -174,7 +174,7 @@ public class R2dbcServiceInstanceDetailRepository {
 
 	public Flux<ServiceInstanceDetail> findByDateRange(LocalDate start, LocalDate end) {
 		String sql = "select pk, organization, space, service_instance_id, service_name, service, description, plan, type, bound_applications, last_operation, last_updated, dashboard_url, requested_state from service_instance_detail where last_updated <= " + settings.getBindPrefix() + 2 + " and last_updated > " + settings.getBindPrefix() + 1 + " order by last_updated desc";
-		return client.execute().sql(sql)
+		return client.execute(sql)
 				.bind(settings.getBindPrefix() + 1, LocalDateTime.of(end, LocalTime.MAX))
 				.bind(settings.getBindPrefix() + 2, LocalDateTime.of(start, LocalTime.MIDNIGHT))
 				.as(ServiceInstanceDetail.class)

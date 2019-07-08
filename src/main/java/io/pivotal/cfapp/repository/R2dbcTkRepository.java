@@ -27,7 +27,7 @@ public class R2dbcTkRepository {
     }
 
     public Mono<Void> deleteOne() {
-		return client.execute().sql("delete from time_keeper")
+		return client.execute("delete from time_keeper")
 						.fetch()
 						.rowsUpdated()
 						.then();
@@ -35,7 +35,7 @@ public class R2dbcTkRepository {
 
     public Mono<LocalDateTime> findOne() {
 		String select = "select collection_time from time_keeper";
-		return client.execute().sql(select)
+		return client.execute(select)
 						.map((row, metadata) -> fromRow(row))
 						.one();
     }

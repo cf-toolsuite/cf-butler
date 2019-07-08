@@ -23,7 +23,7 @@ public class R2dbcOrganizationRepository {
 
 	public Mono<Void> deleteAll() {
 		String deleteAll = "delete from organizations";
-		return client.execute().sql(deleteAll).fetch().rowsUpdated().then();
+		return client.execute(deleteAll).fetch().rowsUpdated().then();
 	}
 
 	@Transactional
@@ -40,7 +40,7 @@ public class R2dbcOrganizationRepository {
 
 	public Flux<Organization> findAll() {
 		String selectAll = "select id, org_name from organizations order by org_name";
-		return client.execute().sql(selectAll).map((row, metadata) -> fromRow(row)).all();
+		return client.execute(selectAll).map((row, metadata) -> fromRow(row)).all();
 	}
 
 	private Organization fromRow(Row row) {

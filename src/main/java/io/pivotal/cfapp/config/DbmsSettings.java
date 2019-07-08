@@ -33,7 +33,8 @@ public class DbmsSettings {
         // provider for  must sync with ConnectionFactoryMetadata::getName
         H2("H2","$"),
         POSTGRESQL("PostgreSQL","$"),
-        MSSQL("Microsoft SQL Server","@");
+        MSSQL("Microsoft SQL Server","@"),
+        MYSQL("MySQL","?");
 
         private final String provider;
         private final String symbol;

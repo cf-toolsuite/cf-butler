@@ -122,9 +122,9 @@ Before you `cf push`, stash the credentials for your database in `config/secrets
 
 Or you may wish to `cf bind-service` to a database service instance. In this case you must abide by a naming convention. The name of your service instance must be `cf-butler-backend`.
 
-[DDL](https://en.wikipedia.org/wiki/Data_definition_language) scripts for each supported database are managed underneath [src/main/resources/db](src/main/resources/db). Supported databases are: [h2](src/main/resources/db/h2/schema.ddl) and [postgresql](src/main/resources/db/postgresql/schema.ddl).
+[DDL](https://en.wikipedia.org/wiki/Data_definition_language) scripts for each supported database are managed underneath [src/main/resources/db](src/main/resources/db). Supported databases are: [h2](src/main/resources/db/h2/schema.ddl), [mysql](src/main/resources/db/mysql/schema.ddl) and [postgresql](src/main/resources/db/postgresql/schema.ddl).
 
-> A sample [script](deploy.xdb.sh) and [secrets](samples/secrets.pws.with-postgres.json) for deploying `cf-butler` to Pivotal Web Services with an [ElephantSQL](https://www.elephantsql.com) backend exists for your perusal.
+> A sample [script](deploy.xdb.sh) and [secrets](samples/secrets.pws.with-postgres.json) for deploying `cf-butler` to Pivotal Web Services with an [ElephantSQL](https://www.elephantsql.com) backend exists for your perusal.  If you're interested in MySQL take a look at this version of [secrets](samples/secrets.pws.with-mysql.json).
 
 ### Managing policies
 
@@ -224,6 +224,16 @@ Add entries in your `config/secrets.json` like
 ./gradlew build
 ```
 
+### alternative build with MySQL support
+
+If you want to target a MySQL database as your back-end you will need to run a script to fetch and build the [mysql-r2dbc](https://github.com/mirromutth/r2dbc-mysql) dependency.  (As of 2019-07-08 it's not currently available as a release from a public repository).
+
+> Note: You will need to have a distribution of Java JDK 8 available to package and install the dependency to be later resolved from your local Maven repository.
+
+```
+./fetch-and-build-mysql-driver.sh
+./gradlew -b build.w-mysql.gradle
+```
 
 ## How to Run with Gradle
 
@@ -236,7 +246,7 @@ where `{target_foundation_profile}` is something like `pws` or `pcfone`
 
 ## How to Run with Docker
 
-You might choose this option when experimenting with an external database provider image like [postgres](https://github.com/docker-library/postgres/blob/6c3b27f1433ad81675afb386a182098dc867e3e8/11/alpine/Dockerfile)
+You might choose this option when experimenting with an external database provider image like [postgres](https://github.com/docker-library/postgres/blob/6c3b27f1433ad81675afb386a182098dc867e3e8/11/alpine/Dockerfile) or [mysql](https://github.com/docker-library/mysql/blob/26380f33a0fcd07dda35e37516eb24eaf962845c/5.7/Dockerfile)
 
 Build
 
@@ -245,6 +255,23 @@ docker build -t pivotalio/cf-butler:latest .
 ```
 
 Run
+
+Start database
+
+```
+docker run --name butler-mysql -e MYSQL_DATABASE=butler -e MYSQL_ROOT_PASSWORD=p@ssw0rd! -e MYSQL_USER=butler -e MYSQL_PASSWORD=p@ssw0rd -p 3306:3306 -d mysql:5.7.26
+```
+> MySQL
+
+or
+
+```
+docker run --name butler-postgres -e POSTGRES_DB=butler -e POSTGRES_USER=butler -e POSTGRES_PASSWORD=p@ssw0rd -p 5432:5432 -d postgres:11.4
+```
+> PostgreSQL
+
+
+Start application
 
 ```
 docker run -it --rm -e SPRING_PROFILES_ACTIVE={env} pivotalio/cf-butler
@@ -257,7 +284,7 @@ Stop
 docker ps -a
 docker stop {pid}
 ```
-> where `{pid}` is the Docker process id
+> where `{pid}` is a Docker process id
 
 Cleanup
 
@@ -716,4 +743,7 @@ GET /policies/report
 
 ## Credits
 
+* [Mark Paluch](https://github.com/mp911de) For helping me untangle Gradle depdendencies
+* [Stephane Maldini](https://github.com/smaldini) For all the coaching on Reactor; especially error handling
 * [Peter Royal](https://github.com/osi) for [assistance](https://gitter.im/reactor/reactor?at=5c38c24966f3433023afceb2) troubleshooting some method implementation in [ApplicationPolicyExecutorTask](https://github.com/pacphi/cf-butler/blob/master/src/main/java/io/pivotal/cfapp/task/AppPolicyExecutorTask.java)
+* []()
