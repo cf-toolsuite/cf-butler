@@ -1,0 +1,14 @@
+language: java
+
+jdk:
+  - openjdk11
+  - oraclejdk11
+
+build:
+  ci:
+    - sdk use gradle 5.5
+    #Create folders for test and code coverage
+    - mkdir -p shippable/testresults
+    - mkdir -p shippable/codecoverage
+    - gradle assemble
+    - cp -r build/reports/jacoco/test shippable/codecoverage
