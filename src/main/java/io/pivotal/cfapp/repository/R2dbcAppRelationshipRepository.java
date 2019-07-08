@@ -3,9 +3,10 @@ package io.pivotal.cfapp.repository;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.r2dbc.function.DatabaseClient;
-import org.springframework.data.r2dbc.function.DatabaseClient.GenericInsertSpec;
+import org.springframework.data.r2dbc.core.DatabaseClient;
+import org.springframework.data.r2dbc.core.DatabaseClient.GenericInsertSpec;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import io.pivotal.cfapp.config.DbmsSettings;
 import io.pivotal.cfapp.domain.AppRelationship;
@@ -26,6 +27,7 @@ public class R2dbcAppRelationshipRepository {
 		this.settings = settings;
 	}
 
+	@Transactional
 	public Mono<AppRelationship> save(AppRelationship entity) {
 		GenericInsertSpec<Map<String, Object>> spec =
 			client.insert().into("application_relationship")

@@ -220,18 +220,9 @@ Add entries in your `config/secrets.json` like
 
 ## How to Build
 
-**Important:** If you pulled the source for cf-butler after May 8, 2019, please consult and execute the [fetch-legacy-dependencies.sh](fetch-legacy-dependencies.sh) script.  Also, see [refreshing](https://stackoverflow.com/questions/13565082/how-can-i-force-gradle-to-redownload-dependencies) dependencies.
-
-```
-./fetch-legacy-dependencies.sh
-```
-
-and/or
-
 ```
 ./gradlew build
 ```
-
 
 
 ## How to Run with Gradle

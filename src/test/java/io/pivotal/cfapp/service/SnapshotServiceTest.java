@@ -21,6 +21,7 @@ import io.pivotal.cfapp.domain.UserCounts;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 public class SnapshotServiceTest {
@@ -60,7 +61,6 @@ public class SnapshotServiceTest {
                                 .diskUsage(1L)
                                 .requestedState("stopped")
                                 .build();
-        StepVerifier.create(appService.deleteAll().then(appService.save(ad))).expectNext(ad).verifyComplete();
         ServiceInstanceDetail sid = ServiceInstanceDetail
                                     .builder()
                                         .serviceInstanceId("bar-id")
@@ -76,7 +76,6 @@ public class SnapshotServiceTest {
                                         .organization("zoo-labs")
                                         .type("managed_service_instance")
                                         .build();
-        StepVerifier.create(siService.deleteAll().then(siService.save(sid))).expectNext(sid).verifyComplete();
         SpaceUsers su = SpaceUsers
                             .builder()
                                 .auditors(Arrays.asList(new String[] { "marty@mcfly.org" }))
@@ -85,14 +84,21 @@ public class SnapshotServiceTest {
                                 .organization("zoo-labs")
                                 .space("dev")
                                 .build();
+        StepVerifier.create(appService.deleteAll().then(appService.save(ad))).expectNext(ad).verifyComplete();
+        StepVerifier.create(siService.deleteAll().then(siService.save(sid))).expectNext(sid).verifyComplete();
         StepVerifier.create(usersService.deleteAll().then(usersService.save(su))).expectNext(su).verifyComplete();
     }
 
     @Test
     public void testAssembleUserCounts() {
         Mono<UserCounts> input = snapService.assembleUserCounts();
-        StepVerifier.create(input).assertNext(uc -> assertEquals(3, uc.getTotalUserAccounts())).verifyComplete();
-        StepVerifier.create(input).assertNext(uc -> assertEquals(0, uc.getTotalServiceAccounts())).verifyComplete();
+        StepVerifier
+            .create(input)
+            .assertNext(uc -> {
+                assertEquals(3, uc.getTotalUserAccounts());
+                assertEquals(0, uc.getTotalServiceAccounts());
+            })
+            .verifyComplete();
     }
 
     @Test
