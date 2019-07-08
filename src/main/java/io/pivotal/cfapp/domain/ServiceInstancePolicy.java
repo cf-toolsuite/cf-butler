@@ -13,7 +13,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.uuid.Generators;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.annotation.Id;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
 import lombok.Builder;
@@ -79,7 +81,12 @@ public class ServiceInstancePolicy {
 
 	@JsonIgnore
 	public <T> T getOption(String key, Class<T> type) {
-		return type.cast(options.get(key));
+		Assert.isTrue(StringUtils.isNotBlank(key), "Option key must not be blank.");
+		Object value = options.get(key);
+		if (value == null) {
+			return null;
+		}
+		return type.cast(value);
 	}
 
 	public static ServiceInstancePolicy seed(ServiceInstancePolicy policy) {

@@ -53,6 +53,22 @@ public class PoliciesValidatorTest {
                 .id(null)
                 .build();
         Assertions.assertThat(PoliciesValidator.validate(dateTimePolicy) == true);
+
+        Map<String, Object> options3 = new HashMap<>();
+        options.put("instances-from", 1);
+        options.put("instances-to", 2);
+        ApplicationPolicy scalingPolicy =
+            ApplicationPolicy
+                .builder()
+                .description("Scale all applications ")
+                .operation(ApplicationOperation.SCALE_INSTANCES.getName())
+                .options(options3)
+                .organizationWhiteList(Set.of("zoo-labs"))
+                .state(ApplicationState.STOPPED.getName())
+                .pk(100L)
+                .id(null)
+                .build();
+        Assertions.assertThat(PoliciesValidator.validate(scalingPolicy) == true);
     }
 
     @Test
@@ -60,10 +76,10 @@ public class PoliciesValidatorTest {
         Map<String, Object> options = new HashMap<>();
         options.put("from-duration", "PT30S");
         options.put("from-datetime", LocalDateTime.now().minusSeconds(30));
-        ApplicationPolicy invalidPolicy =
+        ApplicationPolicy invalidDeletePolicy =
             ApplicationPolicy
                 .builder()
-                .description("Delete applications in stiopped state that were pushed more than 30s ago.")
+                .description("Delete applications in stopped state that were pushed more than 30s ago, but with multiple timeframes.")
                 .operation(ApplicationOperation.DELETE.getName())
                 .organizationWhiteList(Set.of("zoo-labs"))
                 .options(options)
@@ -71,6 +87,18 @@ public class PoliciesValidatorTest {
                 .pk(100L)
                 .id(null)
                 .build();
-        Assertions.assertThat(PoliciesValidator.validate(invalidPolicy) == false);
+        Assertions.assertThat(PoliciesValidator.validate(invalidDeletePolicy) == false);
+
+        ApplicationPolicy invalidScalingPolicy =
+            ApplicationPolicy
+                .builder()
+                .description("Scale all applications, no parameters supplied")
+                .operation(ApplicationOperation.SCALE_INSTANCES.getName())
+                .organizationWhiteList(Set.of("zoo-labs"))
+                .state(ApplicationState.STOPPED.getName())
+                .pk(100L)
+                .id(null)
+                .build();
+        Assertions.assertThat(PoliciesValidator.validate(invalidScalingPolicy) == false);
     }
 }
