@@ -1,0 +1,16 @@
+language: java
+
+jdk:
+  - openjdk11
+  - oraclejdk11
+
+build:
+  ci:
+    - sdk use gradle 5.5
+    - mkdir -p shippable/testresults
+    - mkdir -p shippable/codecoverage
+    - gradle clean build
+  on_failure:
+    - gradle dependencies
+  always:
+    - cp -r build/reports/tests/test shippable/codecoverage
