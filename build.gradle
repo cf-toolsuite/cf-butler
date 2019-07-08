@@ -58,6 +58,10 @@ dependencyManagement {
 		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
 		mavenBom "io.pivotal.spring.cloud:spring-cloud-services-dependencies:${springCloudServicesVersion}"
 	}
+    dependencies {
+        // spring-tx is pinned to BUILD-SNAPSHOT b/c if set to 5.2.0.M3 then we get a java.lang.NoSuchMethodError: org.springframework.transaction.reactive.TransactionSynchronizationManager.currentTransaction()Lreactor/core/publisher/Mono;
+        dependency 'org.springframework:spring-tx:5.2.0.BUILD-SNAPSHOT'
+    }
 }
 
 bootRun {
@@ -68,13 +72,6 @@ bootRun {
 configurations {
 	// exclude Logback
     implementation.exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
-
-    // spring-tx is pinned to BUILD-SNAPSHOT b/c if set to 5.2.0.M3 then we get a java.lang.NoSuchMethodError: org.springframework.transaction.reactive.TransactionSynchronizationManager.currentTransaction()Lreactor/core/publisher/Mono;
-    all {
-        resolutionStrategy {
-            force 'org.springframework:spring-tx:5.2.0.BUILD-SNAPSHOT'
-        }
-    }
 }
 
 test {
@@ -117,7 +114,6 @@ dependencies {
     implementation('org.springframework.data:spring-data-r2dbc:1.0.0.M2')
     // FIXME Seems like we shouldn't have a dependency on Spring JDBC
     implementation('org.springframework:spring-jdbc')
-    implementation('org.springframework:spring-tx:5.2.0.BUILD-SNAPSHOT')
     implementation('io.r2dbc:r2dbc-client:0.8.0.M8')
     runtime('io.r2dbc:r2dbc-pool:0.8.0.M8')
     implementation('io.r2dbc:r2dbc-h2:0.8.0.M8')
