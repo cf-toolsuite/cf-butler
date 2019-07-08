@@ -12,7 +12,6 @@ import org.springframework.data.r2dbc.core.DatabaseClient;
 import org.springframework.data.r2dbc.core.DatabaseClient.GenericExecuteSpec;
 import org.springframework.data.r2dbc.core.DatabaseClient.GenericInsertSpec;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import io.pivotal.cfapp.config.DbmsSettings;
 import io.pivotal.cfapp.domain.AppDetail;
@@ -38,7 +37,6 @@ public class R2dbcAppDetailRepository {
 		this.settings = settings;
 	}
 
-	@Transactional
 	public Mono<AppDetail> save(AppDetail entity) {
 		GenericInsertSpec<Map<String, Object>> spec =
 			client.insert().into("application_detail")

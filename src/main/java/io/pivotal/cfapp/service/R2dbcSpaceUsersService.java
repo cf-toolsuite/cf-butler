@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import io.pivotal.cfapp.domain.SpaceUsers;
 import io.pivotal.cfapp.domain.UserAccounts;
@@ -34,11 +35,13 @@ public class R2dbcSpaceUsersService implements SpaceUsersService {
 	}
 
 	@Override
+	@Transactional
 	public Mono<Void> deleteAll() {
 		return repo.deleteAll();
 	}
 
 	@Override
+	@Transactional
 	public Mono<SpaceUsers> save(SpaceUsers entity) {
 		return repo
 				.save(entity)

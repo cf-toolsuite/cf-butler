@@ -3,7 +3,6 @@ package io.pivotal.cfapp.repository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.r2dbc.core.DatabaseClient;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import io.pivotal.cfapp.domain.Defaults;
 import io.pivotal.cfapp.domain.Organization;
@@ -26,7 +25,6 @@ public class R2dbcOrganizationRepository {
 		return client.execute(deleteAll).fetch().rowsUpdated().then();
 	}
 
-	@Transactional
 	public Mono<Organization> save(Organization entity) {
 		return client
 				.insert()

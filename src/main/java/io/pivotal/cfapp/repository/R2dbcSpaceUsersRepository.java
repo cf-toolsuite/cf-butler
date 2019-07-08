@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.r2dbc.core.DatabaseClient;
 import org.springframework.data.r2dbc.core.DatabaseClient.GenericInsertSpec;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import io.pivotal.cfapp.config.DbmsSettings;
 import io.pivotal.cfapp.domain.Defaults;
@@ -40,7 +39,6 @@ public class R2dbcSpaceUsersRepository {
 		return client.execute(deleteAll).fetch().rowsUpdated().then();
 	}
 
-	@Transactional
 	public Mono<SpaceUsers> save(SpaceUsers entity) {
 		GenericInsertSpec<Map<String, Object>> spec = client.insert().into("space_users").value("organization",
 				entity.getOrganization());

@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 
 import org.springframework.data.r2dbc.core.DatabaseClient;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import io.r2dbc.spi.Row;
 import reactor.core.publisher.Mono;
@@ -18,7 +17,6 @@ public class R2dbcTkRepository {
         this.client = client;
     }
 
-    @Transactional
     public Mono<Integer> save(LocalDateTime collectionTime) {
         return client
                 .insert().into("time_keeper")
