@@ -743,7 +743,7 @@ GET /policies/report
 
 ## Credits
 
-* [Mark Paluch](https://github.com/mp911de) For helping me untangle Gradle depdendencies
-* [Stephane Maldini](https://github.com/smaldini) For all the coaching on Reactor; especially error handling
+* [Mark Paluch](https://github.com/mp911de) for helping me untangle Gradle depdendencies and coaching on R2DBC
+* [Stephane Maldini](https://github.com/smaldini) for all the coaching on Reactor; especially error handling
 * [Peter Royal](https://github.com/osi) for [assistance](https://gitter.im/reactor/reactor?at=5c38c24966f3433023afceb2) troubleshooting some method implementation in [ApplicationPolicyExecutorTask](https://github.com/pacphi/cf-butler/blob/master/src/main/java/io/pivotal/cfapp/task/AppPolicyExecutorTask.java)
-* []()
+* [Oleh Dokuka](https://github.com/OlegDokuka) for writing [Hands-on Reactive Programming in Spring 5](https://www.packtpub.com/application-development/hands-reactive-programming-spring-5); it really helped level-up my understanding and practice on more than a few occasions
