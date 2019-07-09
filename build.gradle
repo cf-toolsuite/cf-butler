@@ -103,7 +103,7 @@ dependencies {
     implementation('org.springframework.boot:spring-boot-starter-log4j2')
     // @see https://spring.io/blog/2019/05/15/spring-data-r2dbc-1-0-m2-and-spring-boot-starter-released
     implementation('org.springframework.boot.experimental:spring-boot-starter-data-r2dbc:0.1.0.M1')
-    implementation('org.springframework.boot.experimental:spring-boot-actuator-autoconfigure-r2dbc:0.1.0.M1')
+    implementation('org.springframework.boot.experimental:spring-boot-actuator-autoconfigure-r2dbc:0.1.0.BUILD-SNAPSHOT')
     implementation('org.springframework.data:spring-data-r2dbc:1.0.0.BUILD-SNAPSHOT')
     // FIXME Seems like we shouldn't have a dependency on Spring JDBC
     implementation('org.springframework:spring-jdbc')
