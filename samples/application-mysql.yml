@@ -1,0 +1,6 @@
+spring:
+  r2dbc:
+    url: r2dbc:mysql://localhost:3306/butler
+    name: butler
+    username: butler
+    password: p@ssw0rd

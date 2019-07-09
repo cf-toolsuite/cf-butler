@@ -2,6 +2,7 @@ package io.pivotal.cfapp.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import io.pivotal.cfapp.domain.AppRelationship;
 import io.pivotal.cfapp.repository.R2dbcAppRelationshipRepository;
@@ -21,11 +22,13 @@ public class R2dbcAppRelationshipService implements AppRelationshipService {
 	}
 
 	@Override
+	@Transactional
 	public Mono<Void> deleteAll() {
 		return repo.deleteAll();
 	}
 
 	@Override
+	@Transactional
 	public Mono<AppRelationship> save(AppRelationship entity) {
 		return repo
 				.save(entity)

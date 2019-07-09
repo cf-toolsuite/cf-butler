@@ -1,4 +1,4 @@
-package io.pivotal.cfapp.repository;
+package io.pivotal.cfapp.client;
 
 import java.io.File;
 import java.io.IOException;

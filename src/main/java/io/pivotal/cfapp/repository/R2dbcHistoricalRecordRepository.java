@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.r2dbc.core.DatabaseClient;
 import org.springframework.data.r2dbc.core.DatabaseClient.GenericInsertSpec;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import io.pivotal.cfapp.domain.HistoricalRecord;
 import reactor.core.publisher.Flux;
@@ -22,7 +21,6 @@ public class R2dbcHistoricalRecordRepository {
 		this.client = client;
 	}
 
-	@Transactional
 	public Mono<HistoricalRecord> save(HistoricalRecord entity) {
 		GenericInsertSpec<Map<String, Object>> spec =
 			client.insert().into("historical_record")
@@ -51,7 +49,7 @@ public class R2dbcHistoricalRecordRepository {
 
 	public Flux<HistoricalRecord> findAll() {
 		String select = "select pk, transaction_date_time, action_taken, organization, space, app_id, service_instance_id, type, name from historical_record order by transaction_datetime desc";
-		return client.execute().sql(select)
+		return client.execute(select)
 						.as(HistoricalRecord.class)
 						.fetch()
 						.all();

@@ -3,6 +3,7 @@ package io.pivotal.cfapp.service;
 import java.time.LocalDate;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import io.pivotal.cfapp.domain.ServiceInstanceDetail;
 import io.pivotal.cfapp.domain.ServiceInstancePolicy;
@@ -23,6 +24,7 @@ public class R2dbcServiceInstanceDetailService implements ServiceInstanceDetailS
 	}
 
 	@Override
+	@Transactional
 	public Mono<ServiceInstanceDetail> save(ServiceInstanceDetail entity) {
 		return repo
 				.save(entity)
@@ -36,6 +38,7 @@ public class R2dbcServiceInstanceDetailService implements ServiceInstanceDetailS
 	}
 
 	@Override
+	@Transactional
 	public Mono<Void> deleteAll() {
 		return repo.deleteAll();
 	}

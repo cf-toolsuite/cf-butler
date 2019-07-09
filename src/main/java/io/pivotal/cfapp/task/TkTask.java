@@ -1,9 +1,8 @@
 package io.pivotal.cfapp.task;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -12,10 +11,10 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
-public class TkTask implements ApplicationRunner {
+public class TkTask implements ApplicationListener<DatabaseCreatedEvent> {
 
     private final TkService tkService;
-    private ApplicationEventPublisher publisher;
+    private final ApplicationEventPublisher publisher;
 
     @Autowired
     public TkTask(
@@ -26,8 +25,8 @@ public class TkTask implements ApplicationRunner {
     }
 
     @Override
-    public void run(ApplicationArguments args) throws Exception {
-        collect();
+	public void onApplicationEvent(DatabaseCreatedEvent event) {
+		collect();
     }
 
     public void collect() {

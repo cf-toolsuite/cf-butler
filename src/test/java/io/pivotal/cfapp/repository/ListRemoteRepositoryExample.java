@@ -1,5 +1,6 @@
 package io.pivotal.cfapp.repository;
 
+import io.pivotal.cfapp.client.GitClient;
 import org.eclipse.jgit.lib.Repository;
 
 public class ListRemoteRepositoryExample {

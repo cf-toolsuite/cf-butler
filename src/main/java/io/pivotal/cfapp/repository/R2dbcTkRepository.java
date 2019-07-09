@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 
 import org.springframework.data.r2dbc.core.DatabaseClient;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import io.r2dbc.spi.Row;
 import reactor.core.publisher.Mono;
@@ -18,7 +17,6 @@ public class R2dbcTkRepository {
         this.client = client;
     }
 
-    @Transactional
     public Mono<Integer> save(LocalDateTime collectionTime) {
         return client
                 .insert().into("time_keeper")
@@ -27,7 +25,7 @@ public class R2dbcTkRepository {
     }
 
     public Mono<Void> deleteOne() {
-		return client.execute().sql("delete from time_keeper")
+		return client.execute("delete from time_keeper")
 						.fetch()
 						.rowsUpdated()
 						.then();
@@ -35,7 +33,7 @@ public class R2dbcTkRepository {
 
     public Mono<LocalDateTime> findOne() {
 		String select = "select collection_time from time_keeper";
-		return client.execute().sql(select)
+		return client.execute(select)
 						.map((row, metadata) -> fromRow(row))
 						.one();
     }

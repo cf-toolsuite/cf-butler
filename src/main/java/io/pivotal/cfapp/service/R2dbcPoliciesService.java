@@ -1,6 +1,7 @@
 package io.pivotal.cfapp.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import io.pivotal.cfapp.config.PoliciesSettings;
 import io.pivotal.cfapp.domain.ApplicationOperation;
@@ -25,6 +26,7 @@ public class R2dbcPoliciesService implements PoliciesService {
 	}
 
 	@Override
+	@Transactional
 	public Mono<Policies> save(Policies entity) {
 		return repo.save(entity);
 	}
@@ -35,6 +37,7 @@ public class R2dbcPoliciesService implements PoliciesService {
 	}
 
 	@Override
+	@Transactional
 	public Mono<Void> deleteAll() {
 		return repo.deleteAll();
 	}
@@ -50,6 +53,7 @@ public class R2dbcPoliciesService implements PoliciesService {
 	}
 
 	@Override
+	@Transactional
 	public Mono<Void> deleteApplicationPolicyById(String id) {
 		if (settings.isVersionManaged()) {
 			throw new UnsupportedOperationException(UNSUPPORTED_OP_MESSAGE);
@@ -58,6 +62,7 @@ public class R2dbcPoliciesService implements PoliciesService {
 	}
 
 	@Override
+	@Transactional
 	public Mono<Void> deleteServiceInstancePolicyById(String id) {
 		if (settings.isVersionManaged()) {
 			throw new UnsupportedOperationException(UNSUPPORTED_OP_MESSAGE);

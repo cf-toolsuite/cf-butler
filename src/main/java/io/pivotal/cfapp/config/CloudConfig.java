@@ -1,6 +1,8 @@
 package io.pivotal.cfapp.config;
 
 import java.net.URI;
+import java.util.Arrays;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -15,11 +17,14 @@ import io.r2dbc.spi.ConnectionFactories;
 import io.r2dbc.spi.ConnectionFactory;
 import io.r2dbc.spi.ConnectionFactoryOptions;
 import io.r2dbc.spi.Option;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Profile("cloud")
 @Configuration
 class CloudConfig {
 
+    private static final List<String> SUPPORTED_SCHEMES = Arrays.asList(new String[] { "mysql", "postgresql"});
     private static final String VCAP_SERVICE_VARIABLE = "vcap.services.cf-butler-backend.credentials.uri";
 
     @Autowired
@@ -51,10 +56,15 @@ class CloudConfig {
         return ConnectionFactories.get(builder.build());
     }
 
-    // support for external R2DBC source is limited to PostgreSQL providers that allow URI scheme
+    // support for external R2DBC source is limited to providers that support URI scheme
     private R2dbcProperties r2dbcProperties() {
         URI uri = env.getRequiredProperty(VCAP_SERVICE_VARIABLE, URI.class);
-        if (uri.getScheme().contains("postgres")) {
+        String scheme = uri.getScheme();
+        log.info("Attempting to connnect to a {} database instance.", scheme);
+        if (scheme.startsWith("postgres")) {
+            scheme = "postgresql";
+        }
+        if (SUPPORTED_SCHEMES.contains(scheme)) {
             R2dbcProperties properties = new R2dbcProperties();
             properties.setName(uri.getPath().replaceAll("/",""));
             String[] userInfoParts = uri.getUserInfo().split(":");
@@ -63,7 +73,7 @@ class CloudConfig {
             properties.setUsername(username);
             properties.setPassword(password);
             StringBuilder builder = new StringBuilder();
-            builder.append("r2dbc:postgresql://");
+            builder.append(String.format("r2dbc:%s://", scheme));
             builder.append(uri.getHost());
             if (uri.getPort() != -1) {
                 builder.append(":" + uri.getPort());
@@ -71,7 +81,8 @@ class CloudConfig {
             builder.append(uri.getPath());
             properties.setUrl(builder.toString());
             return properties;
+        } else {
+            throw new IllegalStateException(String.format("Could not initialize R2DBC properties from bound %s service instance.", uri.getScheme()));
         }
-        throw new IllegalStateException("Could not initialize R2DBC properties from bound PostgreSQL service instance.");
     }
 }
