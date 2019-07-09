@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import io.pivotal.cfapp.domain.AppDetail;
 import io.pivotal.cfapp.domain.ApplicationPolicy;
@@ -25,11 +26,13 @@ public class R2dbcAppDetailService implements AppDetailService {
 	}
 
 	@Override
+	@Transactional
 	public Mono<Void> deleteAll() {
 		return repo.deleteAll();
 	}
 
 	@Override
+	@Transactional
 	public Mono<AppDetail> save(AppDetail entity) {
 		return repo
 				.save(entity)

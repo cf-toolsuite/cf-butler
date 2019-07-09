@@ -40,6 +40,7 @@ repositories {
 	mavenCentral()
     maven { url "https://repo.spring.io/snapshot" }
 	maven { url "https://repo.spring.io/milestone" }
+    mavenLocal()
 }
 
 ext {
@@ -112,6 +113,7 @@ dependencies {
     //runtime('io.r2dbc:r2dbc-pool:0.8.0.M8')
     implementation('io.r2dbc:r2dbc-h2:0.8.0.M8')
     runtime('io.r2dbc:r2dbc-postgresql:0.8.0.M8')
+    runtime('io.github.mirromutth:r2dbc-mysql:0.1.0.BUILD-SNAPSHOT')
     implementation('org.eclipse.jgit:org.eclipse.jgit:5.4.0.201906121030-r')
     implementation('org.cloudfoundry:cloudfoundry-client-reactor:3.15.0.RELEASE')
     implementation('org.cloudfoundry:cloudfoundry-operations:3.15.0.RELEASE')

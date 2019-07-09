@@ -2,6 +2,7 @@ package io.pivotal.cfapp.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import io.pivotal.cfapp.domain.HistoricalRecord;
 import io.pivotal.cfapp.repository.R2dbcHistoricalRecordRepository;
@@ -21,6 +22,7 @@ public class R2dbcHistoricalRecordService implements HistoricalRecordService {
 	}
 
 	@Override
+	@Transactional
 	public Mono<HistoricalRecord> save(HistoricalRecord entity) {
 		return repo
 				.save(entity)

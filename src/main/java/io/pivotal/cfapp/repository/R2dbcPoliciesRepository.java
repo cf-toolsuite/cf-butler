@@ -16,11 +16,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.r2dbc.core.DatabaseClient;
 import org.springframework.data.r2dbc.core.DatabaseClient.GenericInsertSpec;
+import org.springframework.data.r2dbc.query.Criteria;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import io.pivotal.cfapp.config.DbmsSettings;
 import io.pivotal.cfapp.config.PoliciesSettings;
 import io.pivotal.cfapp.domain.ApplicationOperation;
 import io.pivotal.cfapp.domain.ApplicationPolicy;
@@ -37,22 +36,18 @@ public class R2dbcPoliciesRepository {
 
 	private final DatabaseClient client;
 	private final PoliciesSettings policiesSettings;
-	private final DbmsSettings dbmsSettings;
 	private final ObjectMapper mapper;
 
 	@Autowired
 	public R2dbcPoliciesRepository(
 		DatabaseClient client,
 		PoliciesSettings policiesSettings,
-		DbmsSettings dbmsSettings,
 		ObjectMapper mapper) {
 		this.client = client;
 		this.policiesSettings = policiesSettings;
-		this.dbmsSettings = dbmsSettings;
 		this.mapper = mapper;
 	}
 
-	@Transactional
 	public Mono<Policies> save(Policies entity) {
 		List<ApplicationPolicy> applicationPolicies = entity.getApplicationPolicies().stream()
 				.filter(ap -> PoliciesValidator.validate(ap)).map(p -> seedApplicationPolicy(p)).collect(Collectors.toList());
@@ -61,20 +56,20 @@ public class R2dbcPoliciesRepository {
 				.filter(sip -> PoliciesValidator.validate(sip)).map(p -> seedServiceInstancePolicy(p)).collect(Collectors.toList());
 
 		return Flux.fromIterable(applicationPolicies)
-					.flatMap(ap -> saveApplicationPolicy(ap))
+					.concatMap(ap -> saveApplicationPolicy(ap))
 					.thenMany(Flux.fromIterable(serviceInstancePolicies)
-					.flatMap(sip -> saveServiceInstancePolicy(sip)))
+					.concatMap(sip -> saveServiceInstancePolicy(sip)))
 					.then(Mono.just(new Policies(applicationPolicies, serviceInstancePolicies)));
 	}
 
 	public Mono<Policies> findServiceInstancePolicyById(String id) {
-		String index = dbmsSettings.getBindPrefix() + 1;
-		String selectServiceInstancePolicy = "select pk, id, operation, description, options, organization_whitelist from service_instance_policy where id = " + index;
 		List<ServiceInstancePolicy> serviceInstancePolicies = new ArrayList<>();
 		return
 			Flux
-				.from(client.execute().sql(selectServiceInstancePolicy)
-						.bind(index, id)
+				.from(client
+						.select()
+							.from("service_instance_policy")
+							.matching(Criteria.where("id").is(id))
 						.map((row, metadata) ->
 							ServiceInstancePolicy
 								.builder()
@@ -92,13 +87,13 @@ public class R2dbcPoliciesRepository {
 	}
 
 	public Mono<Policies> findApplicationPolicyById(String id) {
-		String index = dbmsSettings.getBindPrefix() + 1;
-		String selectApplicationPolicy = "select pk, id, operation, description, state, options, organization_whitelist from application_policy where id = " + index;
 		List<ApplicationPolicy> applicationPolicies = new ArrayList<>();
 		return
 			Flux
-				.from(client.execute().sql(selectApplicationPolicy)
-						.bind(index, id)
+				.from(client
+						.select()
+							.from("service_instance_policy")
+							.matching(Criteria.where("id").is(id))
 						.map((row, metadata) ->
 							ApplicationPolicy
 								.builder()
@@ -124,7 +119,7 @@ public class R2dbcPoliciesRepository {
 
 		return
 				Flux
-					.from(client.execute().sql(selectAllApplicationPolicies)
+					.from(client.execute(selectAllApplicationPolicies)
 							.map((row, metadata) ->
 								ApplicationPolicy
 									.builder()
@@ -140,7 +135,7 @@ public class R2dbcPoliciesRepository {
 					.map(ap -> applicationPolicies.add(ap))
 					.thenMany(
 						Flux
-							.from(client.execute().sql(selectAllServiceInstancePolicies)
+							.from(client.execute(selectAllServiceInstancePolicies)
 									.map((row, metadata) ->
 										ServiceInstancePolicy
 											.builder()
@@ -158,26 +153,26 @@ public class R2dbcPoliciesRepository {
 	}
 
 	public Mono<Void> deleteApplicationPolicyById(String id) {
-		String index = dbmsSettings.getBindPrefix() + 1;
-		String deleteApplicationPolicy = "delete from application_policy where id = " + index;
 		return
 			Flux
-				.from(client.execute().sql(deleteApplicationPolicy)
-					.bind(index, id)
-					.fetch()
-					.rowsUpdated())
+				.from(client
+						.delete()
+							.from("application_policy")
+							.matching(Criteria.where("id").is(id))
+						.fetch()
+						.rowsUpdated())
 				.then();
 	}
 
 	public Mono<Void> deleteServicePolicyById(String id) {
-		String index = dbmsSettings.getBindPrefix() + 1;
-		String deleteServiceInstancePolicy = "delete from service_instance_policy where id = " + index;
 		return
 			Flux
-				.from(client.execute().sql(deleteServiceInstancePolicy)
-					.bind(index, id)
-					.fetch()
-					.rowsUpdated())
+				.from(client
+						.delete()
+							.from("service_instance_policy")
+							.matching(Criteria.where("id").is(id))
+						.fetch()
+						.rowsUpdated())
 				.then();
 	}
 
@@ -186,12 +181,12 @@ public class R2dbcPoliciesRepository {
 		String deleteAllServiceInstancePolicies = "delete from service_instance_policy";
 		return
 			Flux
-				.from(client.execute().sql(deleteAllApplicationPolicies)
+				.from(client.execute(deleteAllApplicationPolicies)
 					.fetch()
 					.rowsUpdated())
 				.thenMany(
 					Flux
-						.from(client.execute().sql(deleteAllServiceInstancePolicies)
+						.from(client.execute(deleteAllServiceInstancePolicies)
 							.fetch()
 							.rowsUpdated()))
 				.then();
@@ -257,14 +252,14 @@ public class R2dbcPoliciesRepository {
 	}
 
 	public Mono<Policies> findByApplicationOperation(ApplicationOperation operation) {
-		String index = dbmsSettings.getBindPrefix() + 1;
-		String selectAllApplicationPolicies = "select pk, id, operation, description, state, options, organization_whitelist from application_policy where operation = " + index;
 		List<ApplicationPolicy> applicationPolicies = new ArrayList<>();
 		List<ServiceInstancePolicy> serviceInstancePolicies = new ArrayList<>();
-
 		return
 				Flux
-					.from(client.execute().sql(selectAllApplicationPolicies).bind(index, operation.getName())
+					.from(client
+							.select()
+								.from("application_policy")
+								.matching(Criteria.where("operation").is(operation.getName()))
 							.map((row, metadata) ->
 								ApplicationPolicy
 									.builder()
@@ -283,14 +278,14 @@ public class R2dbcPoliciesRepository {
 	}
 
 	public Mono<Policies> findByServiceInstanceOperation(ServiceInstanceOperation operation) {
-		String index = dbmsSettings.getBindPrefix() + 1;
-		String selectAllServiceInstancePolicies = "select pk, id, operation, description, options, organization_whitelist from service_instance_policy where operation = " + index;
 		List<ApplicationPolicy> applicationPolicies = new ArrayList<>();
 		List<ServiceInstancePolicy> serviceInstancePolicies = new ArrayList<>();
-
 		return
 				Flux
-					.from(client.execute().sql(selectAllServiceInstancePolicies).bind(index, operation.getName())
+					.from(client
+							.select()
+								.from("service_instance_policy")
+								.matching(Criteria.where("operation").is(operation.getName()))
 							.map((row, metadata) ->
 								ServiceInstancePolicy
 									.builder()

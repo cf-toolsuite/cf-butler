@@ -8,13 +8,12 @@ import java.util.Arrays;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.r2dbc.core.DatabaseClient;
-import org.springframework.data.r2dbc.core.DatabaseClient.GenericExecuteSpec;
 import org.springframework.data.r2dbc.core.DatabaseClient.GenericInsertSpec;
+import org.springframework.data.r2dbc.query.Criteria;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
-import io.pivotal.cfapp.config.DbmsSettings;
 import io.pivotal.cfapp.domain.Defaults;
 import io.pivotal.cfapp.domain.ServiceInstanceDetail;
 import io.pivotal.cfapp.domain.ServiceInstancePolicy;
@@ -28,17 +27,12 @@ import reactor.util.function.Tuples;
 public class R2dbcServiceInstanceDetailRepository {
 
 	private final DatabaseClient client;
-	private final DbmsSettings settings;
 
 	@Autowired
-	public R2dbcServiceInstanceDetailRepository(
-		DatabaseClient client,
-		DbmsSettings settings) {
+	public R2dbcServiceInstanceDetailRepository(DatabaseClient client) {
 		this.client = client;
-		this.settings = settings;
 	}
 
-	@Transactional
 	public Mono<ServiceInstanceDetail> save(ServiceInstanceDetail entity) {
 		GenericInsertSpec<Map<String, Object>> spec = client.insert().into("service_instance_detail")
 				.value("organization", entity.getOrganization());
@@ -103,7 +97,8 @@ public class R2dbcServiceInstanceDetailRepository {
 
 	public Flux<ServiceInstanceDetail> findAll() {
 		String select = "select pk, organization, space, service_instance_id, service_name, service, description, plan, type, bound_applications, last_operation, last_updated, dashboard_url, requested_state from service_instance_detail order by organization, space, service, service_name";
-		return client.execute().sql(select)
+		return client
+				.execute(select)
 				.map((row, metadata) -> fromRow(row))
 				.all();
 	}
@@ -136,49 +131,47 @@ public class R2dbcServiceInstanceDetailRepository {
 	}
 
 	public Mono<Void> deleteAll() {
-		return client.execute().sql("delete from service_instance_detail")
-						.fetch()
-						.rowsUpdated()
-						.then();
+		return client
+				.execute("delete from service_instance_detail")
+				.fetch()
+				.rowsUpdated()
+				.then();
 	}
 
 	public Flux<Tuple2<ServiceInstanceDetail, ServiceInstancePolicy>> findByServiceInstancePolicy(ServiceInstancePolicy policy) {
-		String index = settings.getBindPrefix() + 1;
-		String select = "select pk, organization, space, service_instance_id, service_name, service, description, plan, type, bound_applications, last_operation, last_updated, dashboard_url, requested_state";
-		String from = "from service_instance_detail";
-		StringBuilder where = new StringBuilder();
+		LocalDateTime fromDateTime = policy.getOption("from-datetime", LocalDateTime.class);
+		String fromDuration = policy.getOption("from-duration", String.class);
 		LocalDateTime temporal = null;
-		where.append("where bound_applications is null "); // orphans only
-		if (policy.getOption("from-datetime", LocalDateTime.class) != null) {
-			where.append("and last_updated <= " + index + " ");
-			temporal = policy.getOption("from-datetime", LocalDateTime.class);
+		Criteria criteria = null;
+		if (fromDateTime != null) {
+			temporal = fromDateTime;
 		}
-		if (policy.getOption("from-duration", String.class) != null) {
-			where.append("and last_updated <= " + index + " ");
-			LocalDateTime eventTime = LocalDateTime.now().minus(Duration.parse(policy.getOption("from-duration", String.class)));
-			temporal = eventTime;
+		if (fromDuration != null) {
+			temporal = LocalDateTime.now().minus(Duration.parse(fromDuration));;
 		}
-		String orderBy = "order by organization, space, service_name";
-		String sql = String.join(" ", select, from, where, orderBy);
-		GenericExecuteSpec spec =
-			client
-				.execute().sql(sql);
 		if (temporal != null) {
-			spec = spec.bind(index, temporal);
+			criteria = Criteria.where("bound_applications").isNull().and("last_updated").lessThanOrEquals(temporal);
+		} else {
+			criteria = Criteria.where("bound_applications").isNull();
 		}
-		return spec
+		return
+			client
+				.select()
+					.from("service_instance_detail")
+					.matching(criteria)
+					.orderBy(Order.asc("organization"), Order.asc("space"), Order.asc("service_name"))
 				.map((row, metadata) -> fromRow(row))
 						.all()
 						.map(r -> toTuple(r, policy));
 	}
 
 	public Flux<ServiceInstanceDetail> findByDateRange(LocalDate start, LocalDate end) {
-		String sql = "select pk, organization, space, service_instance_id, service_name, service, description, plan, type, bound_applications, last_operation, last_updated, dashboard_url, requested_state from service_instance_detail where last_updated <= " + settings.getBindPrefix() + 2 + " and last_updated > " + settings.getBindPrefix() + 1 + " order by last_updated desc";
-		return client.execute().sql(sql)
-				.bind(settings.getBindPrefix() + 1, LocalDateTime.of(end, LocalTime.MAX))
-				.bind(settings.getBindPrefix() + 2, LocalDateTime.of(start, LocalTime.MIDNIGHT))
-				.as(ServiceInstanceDetail.class)
-				.fetch()
+		return client
+				.select()
+					.from("service_instance_detail")
+					.matching(Criteria.where("last_updated").lessThanOrEquals(LocalDateTime.of(start, LocalTime.MIDNIGHT)).and("last_updated").greaterThan(LocalDateTime.of(end, LocalTime.MAX)))
+					.orderBy(Order.desc("last_updated"))
+				.map((row, metadata) -> fromRow(row))
 				.all();
 	}
 
