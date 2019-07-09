@@ -11,9 +11,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.r2dbc.core.DatabaseClient;
 import org.springframework.data.r2dbc.core.DatabaseClient.GenericInsertSpec;
+import org.springframework.data.r2dbc.query.Criteria;
 import org.springframework.stereotype.Repository;
 
-import io.pivotal.cfapp.config.DbmsSettings;
 import io.pivotal.cfapp.domain.Defaults;
 import io.pivotal.cfapp.domain.SpaceUsers;
 import io.r2dbc.spi.Row;
@@ -25,13 +25,11 @@ public class R2dbcSpaceUsersRepository {
 
 	private final DatabaseClient client;
 	private final ObjectMapper mapper;
-	private final DbmsSettings settings;
 
 	@Autowired
-	public R2dbcSpaceUsersRepository(DatabaseClient client, ObjectMapper mapper, DbmsSettings settings) {
+	public R2dbcSpaceUsersRepository(DatabaseClient client, ObjectMapper mapper) {
 		this.client = client;
 		this.mapper = mapper;
-		this.settings = settings;
 	}
 
 	public Mono<Void> deleteAll() {
@@ -62,10 +60,13 @@ public class R2dbcSpaceUsersRepository {
 	}
 
 	public Mono<SpaceUsers> findByOrganizationAndSpace(String organization, String space) {
-		String selectOne = "select pk, organization, space, auditors, managers, developers from space_users where organization = "
-				+ settings.getBindPrefix() + 1 + " and space = " + settings.getBindPrefix() + 2;
-		return client.execute(selectOne).bind(settings.getBindPrefix() + 1, organization)
-				.bind(settings.getBindPrefix() + 2, space).as(SpaceUsers.class).fetch().one();
+		return client
+				.select()
+					.from("space_users")
+					.matching(Criteria.where("organization").is(organization).and("space").is(space))
+					.as(SpaceUsers.class)
+				.fetch()
+				.one();
 	}
 
 	public Flux<SpaceUsers> findAll() {

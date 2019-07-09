@@ -3,11 +3,12 @@ package io.pivotal.cfapp.repository;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.r2dbc.core.DatabaseClient;
 import org.springframework.data.r2dbc.core.DatabaseClient.GenericInsertSpec;
+import org.springframework.data.r2dbc.query.Criteria;
 import org.springframework.stereotype.Repository;
 
-import io.pivotal.cfapp.config.DbmsSettings;
 import io.pivotal.cfapp.domain.AppRelationship;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -16,14 +17,10 @@ import reactor.core.publisher.Mono;
 public class R2dbcAppRelationshipRepository {
 
 	private final DatabaseClient client;
-	private final DbmsSettings settings;
 
 	@Autowired
-	public R2dbcAppRelationshipRepository(
-		DatabaseClient client,
-		DbmsSettings settings) {
+	public R2dbcAppRelationshipRepository(DatabaseClient client) {
 		this.client = client;
-		this.settings = settings;
 	}
 
 	public Mono<AppRelationship> save(AppRelationship entity) {
@@ -65,13 +62,14 @@ public class R2dbcAppRelationshipRepository {
 	}
 
 	public Flux<AppRelationship> findByApplicationId(String applicationId) {
-		String index = settings.getBindPrefix() + 1;
-		String selectOne = "select pk, organization, space, app_id, app_name, service_instance_id, service_name, service_plan, service_type from application_relationship where app_id = " + index + " order by organization, space, service_name";
-		return client.execute(selectOne)
-						.bind(index, applicationId)
-						.as(AppRelationship.class)
-						.fetch()
-						.all();
+		return client
+				.select()
+					.from("application_relationship")
+					.matching(Criteria.where("app_id").is(applicationId))
+				.orderBy((Order.asc("organization")), Order.asc("space"), Order.asc("service_name"))
+				.as(AppRelationship.class)
+				.fetch()
+				.all();
 	}
 
 	public Mono<Void> deleteAll() {

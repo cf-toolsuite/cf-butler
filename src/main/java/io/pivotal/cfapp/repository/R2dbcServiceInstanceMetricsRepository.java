@@ -6,12 +6,13 @@ import java.time.LocalTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.r2dbc.core.DatabaseClient;
+import org.springframework.data.r2dbc.query.Criteria;
 import org.springframework.stereotype.Repository;
 
-import io.pivotal.cfapp.config.DbmsSettings;
 import io.pivotal.cfapp.domain.Defaults;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.math.MathFlux;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
@@ -19,14 +20,11 @@ import reactor.util.function.Tuples;
 public class R2dbcServiceInstanceMetricsRepository {
 
 	private final DatabaseClient client;
-	private final DbmsSettings settings;
 
 	@Autowired
 	public R2dbcServiceInstanceMetricsRepository(
-		DatabaseClient client,
-		DbmsSettings settings) {
+		DatabaseClient client) {
 		this.client = client;
-		this.settings = settings;
 	}
 
 	protected Flux<Tuple2<String, Long>> by(String columnName) {
@@ -39,21 +37,26 @@ public class R2dbcServiceInstanceMetricsRepository {
 	}
 
 	protected Mono<Long> countByDateRange(LocalDate start, LocalDate end) {
-		String sql = "select count(last_updated) as cnt from service_instance_detail where last_updated <= " + settings.getBindPrefix() + 1 + " and last_updated > " + settings.getBindPrefix() + 2;
-		return client.execute(sql)
-				.bind(settings.getBindPrefix() + 1, LocalDateTime.of(end, LocalTime.MAX))
-				.bind(settings.getBindPrefix() + 2, LocalDateTime.of(start, LocalTime.MIDNIGHT))
-				.map((row, metadata) -> Defaults.getValueOrDefault(row.get("cnt", Long.class), 0L))
-				.one()
+		return client
+				.select()
+					.from("service_instance_detail")
+					.project("last_updated")
+					.matching(Criteria.where("last_updated").lessThanOrEquals(LocalDateTime.of(end, LocalTime.MAX)).and("last_updated").greaterThan(LocalDateTime.of(start, LocalTime.MIDNIGHT)))
+				.map((row, metadata) -> Defaults.getValueOrDefault(row.get("last_updated", LocalDateTime.class), 0L))
+				.all()
+				.count()
 				.defaultIfEmpty(0L);
 	}
 
 	protected Mono<Long> countStagnant(LocalDate end) {
-		String sql = "select count(last_updated) as cnt from service_instance_detail where last_updated < " + settings.getBindPrefix() + 1;
-		return client.execute(sql)
-				.bind(settings.getBindPrefix() + 1, LocalDateTime.of(end, LocalTime.MIDNIGHT))
-				.map((row, metadata) -> Defaults.getValueOrDefault(row.get("cnt", Long.class), 0L))
-				.one()
+		return client
+				.select()
+					.from("service_instance_detail")
+					.project("last_updated")
+					.matching(Criteria.where("last_updated").lessThan(LocalDateTime.of(end, LocalTime.MIDNIGHT)))
+				.map((row, metadata) -> Defaults.getValueOrDefault(row.get("last_updated", LocalDateTime.class), 0L))
+				.all()
+				.count()
 				.defaultIfEmpty(0L);
 	}
 

@@ -8,9 +8,11 @@ import java.util.Arrays;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.r2dbc.core.DatabaseClient;
 import org.springframework.data.r2dbc.core.DatabaseClient.GenericExecuteSpec;
 import org.springframework.data.r2dbc.core.DatabaseClient.GenericInsertSpec;
+import org.springframework.data.r2dbc.query.Criteria;
 import org.springframework.stereotype.Repository;
 
 import io.pivotal.cfapp.config.DbmsSettings;
@@ -27,14 +29,10 @@ import reactor.util.function.Tuples;
 public class R2dbcAppDetailRepository {
 
 	private final DatabaseClient client;
-	private final DbmsSettings settings;
 
 	@Autowired
-	public R2dbcAppDetailRepository(
-		DatabaseClient client,
-		DbmsSettings settings) {
+	public R2dbcAppDetailRepository(DatabaseClient client) {
 		this.client = client;
-		this.settings = settings;
 	}
 
 	public Mono<AppDetail> save(AppDetail entity) {
@@ -127,21 +125,22 @@ public class R2dbcAppDetailRepository {
 	}
 
 	public Flux<AppDetail> findByDateRange(LocalDate start, LocalDate end) {
-		String sql = "select pk, organization, space, app_id, app_name, buildpack, image, stack, running_instances, total_instances, memory_used, disk_used, urls, last_pushed, last_event, last_event_actor, last_event_time, requested_state from application_detail where last_pushed <= " + settings.getBindPrefix() + 2 + " and last_pushed > " + settings.getBindPrefix() + 1 + " order by last_pushed desc";
-		return client.execute(sql)
-				.bind(settings.getBindPrefix() + 1, LocalDateTime.of(end, LocalTime.MAX))
-				.bind(settings.getBindPrefix() + 2, LocalDateTime.of(start, LocalTime.MIDNIGHT))
+		return client
+				.select()
+					.from("application_detail")
+					.matching(Criteria.where("last_pushed").lessThanOrEquals(LocalDateTime.of(start, LocalTime.MIDNIGHT)).and("last_pushed").greaterThan(LocalDateTime.of(end, LocalTime.MAX)))
+					.orderBy(Order.desc("last_pushed"))
 				.map((row, metadata) -> fromRow(row))
 				.all();
 	}
 
 	public Mono<AppDetail> findByAppId(String appId) {
-		String index = settings.getBindPrefix() + 1;
-		String selectOne = "select pk, organization, space, app_id, app_name, buildpack, image, stack, running_instances, total_instances, memory_used, disk_used, urls, last_pushed, last_event, last_event_actor, last_event_time, requested_state from application_detail where app_id = " + index;
-		return client.execute(selectOne)
-						.bind(index, appId)
-						.map((row, metadata) -> fromRow(row))
-						.one();
+		return client
+				.select()
+					.from("application_detail")
+					.matching(Criteria.where("app_id").is(appId))
+				.map((row, metadata) -> fromRow(row))
+				.one();
 	}
 
 	public Flux<Tuple2<AppDetail, ApplicationPolicy>> findByApplicationPolicy(ApplicationPolicy policy, boolean mayHaveServiceBindings) {
@@ -151,64 +150,54 @@ public class R2dbcAppDetailRepository {
 	}
 
 	private Flux<Tuple2<AppDetail, ApplicationPolicy>> findApplicationsThatMayHaveServiceBindings(ApplicationPolicy policy) {
-		String select = "select pk, organization, space, app_id, app_name, buildpack, image, stack, running_instances, total_instances, memory_used, disk_used, urls, last_pushed, last_event, last_event_actor, last_event_time, requested_state";
-		String from = "from application_detail";
-		StringBuilder where = new StringBuilder();
-		where.append("where requested_state = " + settings.getBindPrefix() + 1 + " ");
+		LocalDateTime fromDateTime = policy.getOption("from-datetime", LocalDateTime.class);
+		String fromDuration = policy.getOption("from-duration", String.class);
 		LocalDateTime temporal = null;
-		if (policy.getOption("from-datetime", LocalDateTime.class) != null) {
-			where.append("and last_event_time <= " + settings.getBindPrefix() + 2 + " ");
-			temporal = policy.getOption("from-datetime", LocalDateTime.class);
+		Criteria criteria = null;
+		if (fromDateTime != null) {
+			temporal = fromDateTime;
 		}
-		if (policy.getOption("from-duration", String.class) != null) {
-			where.append("and last_event_time <= " + settings.getBindPrefix() + 2 + " ");
-			LocalDateTime eventTime = LocalDateTime.now().minus(Duration.parse(policy.getOption("from-duration", String.class)));
-			temporal = eventTime;
+		if (fromDuration != null) {
+			temporal = LocalDateTime.now().minus(Duration.parse(fromDuration));;
 		}
-		String orderBy = "order by organization, space, app_name";
-		String sql = String.join(" ", select, from, where, orderBy);
-		GenericExecuteSpec spec =
-			client
-				.execute(sql)
-				.bind(settings.getBindPrefix() + 1, policy.getState());
 		if (temporal != null) {
-			spec = spec.bind(settings.getBindPrefix() + 2, temporal);
+			criteria = Criteria.where("requested_state").is(policy.getState()).and("last_event_time").lessThanOrEquals(temporal);
+		} else {
+			criteria = Criteria.where("requested_state").is(policy.getState());
 		}
-		return spec
+		return
+			client
+				.select()
+					.from("application_detail")
+					.matching(criteria)
+					.orderBy(Order.asc("organization"), Order.asc("space"), Order.asc("app_name"))
 				.map((row, metadata) -> fromRow(row))
 						.all()
 						.map(r -> toTuple(r, policy));
 	}
 
 	private Flux<Tuple2<AppDetail, ApplicationPolicy>> findApplicationsThatDoNotHaveServiceBindings(ApplicationPolicy policy) {
-		String select =
-				"select ad.pk, ad.organization, ad.space, ad.app_id, ad.app_name, ad.buildpack, ad.image, " +
-				"ad.stack, ad.running_instances, ad.total_instances, ad.memory_used, ad.disk_used, ad.urls, ad.last_pushed, ad.last_event, " +
-				"ad.last_event_actor, ad.last_event_time, ad.requested_state";
-		String from = "from application_detail ad";
-		String leftJoin = "left join application_relationship ar on ad.app_id = ar.app_id";
-		StringBuilder where = new StringBuilder();
-		where.append("where ar.service_instance_id is null and ad.requested_state = " + settings.getBindPrefix() + 1 + " ");
+		LocalDateTime fromDateTime = policy.getOption("from-datetime", LocalDateTime.class);
+		String fromDuration = policy.getOption("from-duration", String.class);
 		LocalDateTime temporal = null;
-		if (policy.getOption("from-datetime", LocalDateTime.class) != null) {
-			where.append("and ad.last_event_time <= " + settings.getBindPrefix() + 2 + " ");
-			temporal = policy.getOption("from-datetime", LocalDateTime.class);
+		Criteria criteria = null;
+		if (fromDateTime != null) {
+			temporal = fromDateTime;
 		}
-		if (policy.getOption("from-duration", String.class) != null) {
-			where.append("and ad.last_event_time <= " + settings.getBindPrefix() + 2 + " ");
-			LocalDateTime eventTime = LocalDateTime.now().minus(Duration.parse(policy.getOption("from-duration", String.class)));
-			temporal = eventTime;
+		if (fromDuration != null) {
+			temporal = LocalDateTime.now().minus(Duration.parse(fromDuration));;
 		}
-		String orderBy = "order by ad.organization, ad.space, ad.app_name";
-		String sql = String.join(" ", select, from, leftJoin, where, orderBy);
-		GenericExecuteSpec spec =
-			client
-				.execute(sql)
-				.bind(settings.getBindPrefix() + 1, policy.getState());
 		if (temporal != null) {
-			spec = spec.bind(settings.getBindPrefix() + 2, temporal);
+			criteria = Criteria.where("requested_state").is(policy.getState()).and("service_instance_id").isNull().and("last_event_time").lessThanOrEquals(temporal);
+		} else {
+			criteria = Criteria.where("requested_state").is(policy.getState()).and("service_instance_id").isNull();
 		}
-		return spec
+		return
+			client
+				.select()
+					.from("service_bindings")
+					.matching(criteria)
+					.orderBy(Order.asc("organization"), Order.asc("space"), Order.asc("app_name"))
 				.map((row, metadata) -> fromRow(row))
 						.all()
 						.map(r -> toTuple(r, policy));

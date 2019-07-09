@@ -7,12 +7,14 @@ import java.time.LocalTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.r2dbc.core.DatabaseClient;
+import org.springframework.data.r2dbc.query.Criteria;
 import org.springframework.stereotype.Repository;
 
 import io.pivotal.cfapp.config.DbmsSettings;
 import io.pivotal.cfapp.domain.Defaults;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.math.MathFlux;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
@@ -40,21 +42,26 @@ public class R2dbcAppMetricsRepository {
 	}
 
 	protected Mono<Long> countByDateRange(LocalDate start, LocalDate end) {
-		String sql = "select count(last_pushed) as cnt from application_detail where last_pushed <= " + settings.getBindPrefix() + 1 + " and last_pushed > " + settings.getBindPrefix() + 2;
-		return client.execute(sql)
-				.bind(settings.getBindPrefix() + 1, LocalDateTime.of(end, LocalTime.MAX))
-				.bind(settings.getBindPrefix() + 2, LocalDateTime.of(start, LocalTime.MIDNIGHT))
-				.map((row, metadata) -> Defaults.getValueOrDefault(row.get("cnt", Long.class), 0L))
-				.one()
+		return client
+				.select()
+					.from("application_detail")
+					.project("last_pushed")
+					.matching(Criteria.where("last_pushed").lessThanOrEquals(LocalDateTime.of(end, LocalTime.MAX)).and("last_pushed").greaterThan(LocalDateTime.of(start, LocalTime.MIDNIGHT)))
+				.map((row, metadata) -> Defaults.getValueOrDefault(row.get("last_pushed", LocalDateTime.class), 0L))
+				.all()
+				.count()
 				.defaultIfEmpty(0L);
 	}
 
 	protected Mono<Long> countStagnant(LocalDate end) {
-		String sql = "select count(last_pushed) as cnt from application_detail where last_pushed < " + settings.getBindPrefix() + 1;
-		return client.execute(sql)
-				.bind(settings.getBindPrefix() + 1, LocalDateTime.of(end, LocalTime.MIDNIGHT))
-				.map((row, metadata) -> Defaults.getValueOrDefault(row.get("cnt", Long.class), 0L))
-				.one()
+		return client
+				.select()
+					.from("application_detail")
+					.project("last_pushed")
+					.matching(Criteria.where("last_pushed").lessThan(LocalDateTime.of(end, LocalTime.MIDNIGHT)))
+				.map((row, metadata) -> Defaults.getValueOrDefault(row.get("last_pushed", LocalDateTime.class), 0L))
+				.all()
+				.count()
 				.defaultIfEmpty(0L);
 	}
 
@@ -98,6 +105,9 @@ public class R2dbcAppMetricsRepository {
 
 	public Mono<Long> totalApplicationInstances() {
 		String sql = "select sum(total_instances) as cnt from application_detail";
+		if (settings.getProvider().equals("MySQL")) {
+			sql = "select cast(sum(total_instances) as signed) as cnt from application_detail";
+		}
 		return client.execute(sql)
 				.map((row, metadata) -> Defaults.getValueOrDefault(row.get("cnt", Long.class), 0L))
 				.one()
@@ -106,6 +116,9 @@ public class R2dbcAppMetricsRepository {
 
 	public Mono<Long> totalRunningApplicationInstances() {
 		String sql = "select sum(running_instances) as cnt from application_detail where requested_state = 'started'";
+		if (settings.getProvider().equals("MySQL")) {
+			sql = "select cast(sum(running_instances) as signed) as cnt from application_detail where requested_state = 'started'";
+		}
 		return client.execute(sql)
 				.map((row, metadata) -> Defaults.getValueOrDefault(row.get("cnt", Long.class), 0L))
 				.one()
@@ -122,6 +135,9 @@ public class R2dbcAppMetricsRepository {
 
 	public Mono<Long> totalStoppedApplicationInstances() {
 		String sql = "select sum(total_instances) as cnt from application_detail where requested_state = 'stopped'";
+		if (settings.getProvider().equals("MySQL")) {
+			sql = "select cast(sum(total_instances) as signed) as cnt from application_detail where requested_state = 'stopped'";
+		}
 		return client.execute(sql)
 				.map((row, metadata) -> Defaults.getValueOrDefault(row.get("cnt", Long.class), 0L))
 				.one()
