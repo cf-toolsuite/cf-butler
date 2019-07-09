@@ -56,9 +56,9 @@ public class R2dbcPoliciesRepository {
 				.filter(sip -> PoliciesValidator.validate(sip)).map(p -> seedServiceInstancePolicy(p)).collect(Collectors.toList());
 
 		return Flux.fromIterable(applicationPolicies)
-					.flatMap(ap -> saveApplicationPolicy(ap))
+					.concatMap(ap -> saveApplicationPolicy(ap))
 					.thenMany(Flux.fromIterable(serviceInstancePolicies)
-					.flatMap(sip -> saveServiceInstancePolicy(sip)))
+					.concatMap(sip -> saveServiceInstancePolicy(sip)))
 					.then(Mono.just(new Policies(applicationPolicies, serviceInstancePolicies)));
 	}
 

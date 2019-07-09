@@ -124,7 +124,7 @@ Or you may wish to `cf bind-service` to a database service instance. In this cas
 
 [DDL](https://en.wikipedia.org/wiki/Data_definition_language) scripts for each supported database are managed underneath [src/main/resources/db](src/main/resources/db). Supported databases are: [h2](src/main/resources/db/h2/schema.ddl), [mysql](src/main/resources/db/mysql/schema.ddl) and [postgresql](src/main/resources/db/postgresql/schema.ddl).
 
-> A sample [script](deploy.xdb.sh) and [secrets](samples/secrets.pws.with-postgres.json) for deploying `cf-butler` to Pivotal Web Services with an [ElephantSQL](https://www.elephantsql.com) backend exists for your perusal.  If you're interested in MySQL take a look at this version of [secrets](samples/secrets.pws.with-mysql.json).
+> A sample [script](deploy.postgres.sh) and [secrets](samples/secrets.pws.with-postgres.json) for deploying `cf-butler` to Pivotal Web Services with an [ElephantSQL](https://www.elephantsql.com) backend exists for your perusal.  If you're rather interested in MySQL as a backend, take a look at this version of [secrets](samples/secrets.pws.with-mysql.json) and the accompanying [script](deploy.mysql.sh).
 
 ### Managing policies
 
