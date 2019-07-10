@@ -3,11 +3,11 @@
 [![experimental](https://badges.github.io/stability-badges/dist/experimental.svg)](https://github.com/badges/stability-badges) [![Build Status](https://travis-ci.org/pacphi/cf-butler.svg?branch=master)](https://travis-ci.org/pacphi/cf-butler) [![Known Vulnerabilities](https://snyk.io/test/github/pacphi/cf-butler/badge.svg)](https://snyk.io/test/github/pacphi/cf-butler) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 
-You are a platform operator working for a Fortune 500 enterprise.  You've witnessed first-hand how the product development teams your team supports are super productive; happily invoking `cf push`, `cf cs` and `cf bs` many times per day to deploy applications, create services and bind them to those applications.
+You are a platform operator working for a Fortune 500 enterprise.  You've witnessed first-hand how the product development teams your team supports are super productive; happily invoking `cf push`, `cf create-service` and `cf bind-service` many times per day to deploy applications, create services and bind them to those applications.
 
 This is great, except that over time, on your non-production foundations, as you've browsed organizations and spaces, you have noticed a large number of stopped application instances and orphaned services (i.e., those not bound to any applications).
 
-Reaching out to each development team to tell them to clean-up has become a chore.  Why not implement some automation that allows you a) to obtain snapshot and usage reports and b) define and enforce some house-keeping policies for your non-production foundations where applications and services are perhaps more volatile?
+Reaching out to each development team to tell them to clean-up has become a chore.  Why not implement some automation that allows you a) to obtain snapshot and usage reports and b) define and enforce some house-keeping policies for your non-production foundations where applications and services are perhaps more volatile and c) easily handle multi-organization or system-wide use-cases like application instance scaling or stack changes?
 
 This is where `cf-butler` has your back.
 
@@ -19,17 +19,28 @@ Please take 5-10 mintues to view this short video demonstration to get a sense o
 
 ### Tell me, don't show me
 
-Cf-butler exposes a number of self-service endpoints that perform house-keeping for your foundation.  You define policies and an execution schedule.  Then applications and service instances are removed based on policy crtieria.  Cf-butler also provides detail and summary snapshot reporting on all applications, service instances, user accounts, organizations and spaces.  Lastly, cf-butler aspires to provide operators insight into the "freshness" of installed tiles, stemcells and buildpacks.
+Cf-butler exposes a number of self-service endpoints that perform house-keeping for your foundation.  You define policies and an execution schedule.  E.g., applications and service instances could be removed based on policy crtieria.  Cf-butler also provides detail and summary snapshot reporting on all applications, service instances, user accounts, organizations and spaces.  Lastly, cf-butler [aspires](https://github.com/pacphi/cf-butler/issues/62) to provide operators insight into the "freshness" of installed tiles, stemcells and buildpacks.
+
+### And what about Pivotal Telemetry Collector?
+
+[Pivotal Telemetry Collector](https://docs.pivotal.io/telemetry/1-0/index.html) supports collection of configuration data from Operations Manager, certificate data from Credhub, and usage data from Pivotal Application Service.  Customers download and install a [CLI](https://network.pivotal.io/products/pivotal-telemetry-collector/) from Pivotal Network.  Typically, a [Concourse](https://concourse-ci.org) [pipeline](https://docs.pivotal.io/telemetry/1-0/using-concourse.html) is configured to automate collection.  The result of collection is a foundation details [tarball](https://docs.pivotal.io/telemetry/1-0/data.html#collected). Customers may opt to transmit this data to Pivotal.
+
+Telemetry is also available for [PCF Dev](https://docs.pivotal.io/pcf-dev/telemetry.html) and [Pivotal Container Service](https://docs.pivotal.io/runtimes/pks/1-4/telemetry.html).
+
+> Note: the [Pivotal Telemetry]((https://pivotal.io/legal/telemetry)) program is opt-in.
+
+Cf-butler is configured and deployed as an application instance. Its capabilities overlap only on usage data collection from Pivotal Application Service.  However, cf-butler performs other useful duties like a) snapshot usage reporting and b) policy registration and execution.
+
 
 ## Prerequisites
 
 Required
 
-* [Pivotal Network](https://network.pivotal.io) account
 * [Pivotal Application Service](https://pivotal.io/platform/pivotal-application-service) admin account
 
 Optional
 
+* [Pivotal Network](https://network.pivotal.io) account
 * [Pivotal Operations Manager](https://pivotal.io/platform/pcf-components/pcf-ops-manager) admin account
 
 
@@ -124,7 +135,7 @@ Or you may wish to `cf bind-service` to a database service instance. In this cas
 
 [DDL](https://en.wikipedia.org/wiki/Data_definition_language) scripts for each supported database are managed underneath [src/main/resources/db](src/main/resources/db). Supported databases are: [h2](src/main/resources/db/h2/schema.ddl), [mysql](src/main/resources/db/mysql/schema.ddl) and [postgresql](src/main/resources/db/postgresql/schema.ddl).
 
-> A sample [script](deploy.postgres.sh) and [secrets](samples/secrets.pws.with-postgres.json) for deploying `cf-butler` to Pivotal Web Services with an [ElephantSQL](https://www.elephantsql.com) backend exists for your perusal.  If you're rather interested in MySQL as a backend, take a look at this version of [secrets](samples/secrets.pws.with-mysql.json) and the accompanying [script](deploy.mysql.sh).
+> A sample [script](scripts/deploy.postgres.sh) and [secrets](samples/secrets.pws.with-postgres.json) for deploying `cf-butler` to Pivotal Web Services with an [ElephantSQL](https://www.elephantsql.com) backend exists for your perusal.  If you're rather interested in MySQL as a backend, take a look at this version of [secrets](samples/secrets.pws.with-mysql.json) and the accompanying [script](scripts/deploy.mysql.sh).
 
 ### Managing policies
 
@@ -339,6 +350,12 @@ Paste the value as the value for `CF_REFRESH-TOKEN` in your `config/secrets.json
 ### using scripts
 
 Please review the [manifest.yml](manifest.yml) before deploying.
+
+Get into the scripts directory
+
+```
+cd scripts
+```
 
 Deploy the app (w/ a user-provided service instance vending secrets)
 
@@ -743,7 +760,7 @@ GET /policies/report
 
 ## Credits
 
-* [Mark Paluch](https://github.com/mp911de) for helping me untangle Gradle depdendencies and coaching on R2DBC
-* [Stephane Maldini](https://github.com/smaldini) for all the coaching on Reactor; especially error handling
-* [Peter Royal](https://github.com/osi) for [assistance](https://gitter.im/reactor/reactor?at=5c38c24966f3433023afceb2) troubleshooting some method implementation in [ApplicationPolicyExecutorTask](https://github.com/pacphi/cf-butler/blob/master/src/main/java/io/pivotal/cfapp/task/AppPolicyExecutorTask.java)
 * [Oleh Dokuka](https://github.com/OlegDokuka) for writing [Hands-on Reactive Programming in Spring 5](https://www.packtpub.com/application-development/hands-reactive-programming-spring-5); it really helped level-up my understanding and practice on more than a few occasions
+* [Stephane Maldini](https://github.com/smaldini) for all the coaching on [Reactor](https://projectreactor.io); especially error handling
+* [Mark Paluch](https://github.com/mp911de) for coaching on [R2DBC](https://r2dbc.io) and helping me untangle Gradle dependencies
+* [Peter Royal](https://github.com/osi) for [assistance](https://gitter.im/reactor/reactor?at=5c38c24966f3433023afceb2) troubleshooting some design and implementation of policy execution tasks

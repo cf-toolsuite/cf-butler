@@ -6,6 +6,8 @@ param (
 
 $AppName="cf-butler"
 
+cd ..
+
 switch ($Provider) {
 
 	"--with-credhub" {

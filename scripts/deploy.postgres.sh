@@ -11,6 +11,7 @@ set -e
 
 export APP_NAME=cf-butler
 
+cd ..
 cf push --no-start
 cf create-user-provided-service $APP_NAME-secrets -p config/secrets.json
 cf bind-service $APP_NAME $APP_NAME-secrets

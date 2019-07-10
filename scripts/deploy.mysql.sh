@@ -9,6 +9,7 @@ set -e
 
 export APP_NAME=cf-butler
 
+cd ..
 cf push --no-start
 cf create-service credhub default $APP_NAME-secrets -c config/secrets.json
 cf bind-service $APP_NAME $APP_NAME-secrets
