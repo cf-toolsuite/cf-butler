@@ -7,7 +7,6 @@ import java.util.Set;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.operations.services.DeleteServiceInstanceRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.ApplicationArguments;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -47,11 +46,6 @@ public class DeleteServiceInstancePolicyExecutorTask implements PolicyExecutorTa
         this.serviceInfoService = serviceInfoService;
         this.policiesService = policiesService;
         this.historicalRecordService = historicalRecordService;
-    }
-
-    @Override
-    public void run(ApplicationArguments args) throws Exception {
-    	// do nothing at startup
     }
 
 	@Override

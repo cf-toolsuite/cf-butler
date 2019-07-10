@@ -5,9 +5,21 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import io.pivotal.cfapp.service.StacksCache;
+@Component
 public class PoliciesValidator {
 
-    public static boolean validate(ApplicationPolicy policy) {
+    private final StacksCache stacksCache;
+
+    @Autowired
+    public PoliciesValidator(StacksCache stacksCache) {
+        this.stacksCache = stacksCache;
+    }
+
+    public boolean validate(ApplicationPolicy policy) {
         boolean hasId = Optional.ofNullable(policy.getId()).isPresent();
         boolean hasOperation = Optional.ofNullable(policy.getOperation()).isPresent();
         boolean hasState = Optional.ofNullable(policy.getState()).isPresent();
@@ -21,6 +33,13 @@ public class PoliciesValidator {
                     Integer instancesFrom = policy.getOption("instances-from", Integer.class);
                     Integer instancesTo = policy.getOption("instances-to", Integer.class);
                     if (instancesFrom == null || instancesTo == null || instancesFrom < 1 || instancesTo < 1 || instancesFrom == instancesTo) {
+                        valid = false;
+                    }
+                }
+                if (op.equals(ApplicationOperation.CHANGE_STACK)) {
+                    String stackFrom = policy.getOption("stack-from", String.class);
+                    String stackTo = policy.getOption("stack-to", String.class);
+                    if (!stacksCache.contains(stackFrom) || !stacksCache.contains(stackTo) || stackFrom.equalsIgnoreCase(stackTo)) {
                         valid = false;
                     }
                 }
@@ -48,7 +67,7 @@ public class PoliciesValidator {
         return valid;
     }
 
-    public static boolean validate(ServiceInstancePolicy policy) {
+    public boolean validate(ServiceInstancePolicy policy) {
         boolean hasId = Optional.ofNullable(policy.getId()).isPresent();
         boolean hasOperation = Optional.ofNullable(policy.getOperation()).isPresent();
         boolean hasFromDateTime = Optional.ofNullable(policy.getOption("from-datetime", LocalDateTime.class)).isPresent();

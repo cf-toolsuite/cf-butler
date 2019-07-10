@@ -36,24 +36,27 @@ public class R2dbcPoliciesRepository {
 
 	private final DatabaseClient client;
 	private final PoliciesSettings policiesSettings;
+	private final PoliciesValidator policiesValidator;
 	private final ObjectMapper mapper;
 
 	@Autowired
 	public R2dbcPoliciesRepository(
 		DatabaseClient client,
 		PoliciesSettings policiesSettings,
+		PoliciesValidator policiesValidator,
 		ObjectMapper mapper) {
 		this.client = client;
 		this.policiesSettings = policiesSettings;
+		this.policiesValidator = policiesValidator;
 		this.mapper = mapper;
 	}
 
 	public Mono<Policies> save(Policies entity) {
 		List<ApplicationPolicy> applicationPolicies = entity.getApplicationPolicies().stream()
-				.filter(ap -> PoliciesValidator.validate(ap)).map(p -> seedApplicationPolicy(p)).collect(Collectors.toList());
+				.filter(ap -> policiesValidator.validate(ap)).map(p -> seedApplicationPolicy(p)).collect(Collectors.toList());
 
 		List<ServiceInstancePolicy> serviceInstancePolicies = entity.getServiceInstancePolicies().stream()
-				.filter(sip -> PoliciesValidator.validate(sip)).map(p -> seedServiceInstancePolicy(p)).collect(Collectors.toList());
+				.filter(sip -> policiesValidator.validate(sip)).map(p -> seedServiceInstancePolicy(p)).collect(Collectors.toList());
 
 		return Flux.fromIterable(applicationPolicies)
 					.concatMap(ap -> saveApplicationPolicy(ap))
