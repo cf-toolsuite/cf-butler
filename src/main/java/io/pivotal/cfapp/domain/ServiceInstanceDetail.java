@@ -59,6 +59,19 @@ public class ServiceInstanceDetail {
 		return value != null ? StringUtils.wrap(value, '"') : StringUtils.wrap("", '"');
 	}
 
+	public static String tableName() {
+		return "service_instance_detail";
+	}
+
+	public static String[] columnNames() {
+		return
+			new String[] {
+				"pk", "organization", "space", "service_instance_id", "service_name", "service",
+				"description", "plan", "type", "bound_applications", "last_operation", "last_updated",
+				"dashboard_url", "requested_state"
+			};
+	}
+
 	public static String headers() {
         return String.join(",", "organization", "space", "service instance id",
                 "name", "service", "description", "plan", "type", "bound applications", "last operation", "last updated", "dashboard url", "requested state");

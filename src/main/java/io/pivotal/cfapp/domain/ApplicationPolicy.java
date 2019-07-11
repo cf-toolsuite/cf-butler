@@ -94,6 +94,17 @@ public class ApplicationPolicy {
 		return type.cast(value);
 	}
 
+	public static String tableName() {
+		return "application_policy";
+	}
+
+	public static String[] columnNames() {
+		return
+			new String[] {
+				"pk", "id", "operation", "description", "options", "organization_whitelist", "state"
+			};
+	}
+
 	public static ApplicationPolicy seed(ApplicationPolicy policy) {
 		return ApplicationPolicy
 				.builder()

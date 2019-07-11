@@ -89,6 +89,17 @@ public class ServiceInstancePolicy {
 		return type.cast(value);
 	}
 
+	public static String tableName() {
+		return "service_instance_policy";
+	}
+
+	public static String[] columnNames() {
+		return
+			new String[] {
+				"pk", "id", "operation", "description", "options", "organization_whitelist"
+			};
+	}
+
 	public static ServiceInstancePolicy seed(ServiceInstancePolicy policy) {
 		return ServiceInstancePolicy
 				.builder()

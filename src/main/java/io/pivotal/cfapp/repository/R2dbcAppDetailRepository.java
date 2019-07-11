@@ -35,7 +35,7 @@ public class R2dbcAppDetailRepository {
 
 	public Mono<AppDetail> save(AppDetail entity) {
 		GenericInsertSpec<Map<String, Object>> spec =
-			client.insert().into("application_detail")
+			client.insert().into(AppDetail.tableName())
 				.value("organization", entity.getOrganization());
 		spec = spec.value("space", entity.getSpace());
 		spec = spec.value("app_id", entity.getAppId());
@@ -109,23 +109,29 @@ public class R2dbcAppDetailRepository {
 	}
 
 	public Flux<AppDetail> findAll() {
-		String select = "select pk, organization, space, app_id, app_name, buildpack, image, stack, running_instances, total_instances, memory_used, disk_used, urls, last_pushed, last_event, last_event_actor, last_event_time, requested_state from application_detail order by organization, space, app_name";
-		return client.execute(select)
-						.map((row, metadata) -> fromRow(row))
-						.all();
+		return client
+				.select()
+				.from(AppDetail.tableName())
+				.project(AppDetail.columnNames())
+				.orderBy(Order.asc("organization"), Order.asc("space"), Order.asc("app_name"))
+				.map((row, metadata) -> fromRow(row))
+				.all();
 	}
 
 	public Mono<Void> deleteAll() {
-		return client.execute("delete from application_detail")
-						.fetch()
-						.rowsUpdated()
-						.then();
+		return client
+				.delete()
+				.from(AppDetail.tableName())
+				.fetch()
+				.rowsUpdated()
+				.then();
 	}
 
 	public Flux<AppDetail> findByDateRange(LocalDate start, LocalDate end) {
 		return client
 				.select()
-					.from("application_detail")
+					.from(AppDetail.tableName())
+					.project(AppDetail.columnNames())
 					.matching(Criteria.where("last_pushed").lessThanOrEquals(LocalDateTime.of(start, LocalTime.MIDNIGHT)).and("last_pushed").greaterThan(LocalDateTime.of(end, LocalTime.MAX)))
 					.orderBy(Order.desc("last_pushed"))
 				.map((row, metadata) -> fromRow(row))
@@ -135,7 +141,8 @@ public class R2dbcAppDetailRepository {
 	public Mono<AppDetail> findByAppId(String appId) {
 		return client
 				.select()
-					.from("application_detail")
+					.from(AppDetail.tableName())
+					.project(AppDetail.columnNames())
 					.matching(Criteria.where("app_id").is(appId))
 				.map((row, metadata) -> fromRow(row))
 				.one();
@@ -166,7 +173,8 @@ public class R2dbcAppDetailRepository {
 		return
 			client
 				.select()
-					.from("application_detail")
+					.from(AppDetail.tableName())
+					.project(AppDetail.columnNames())
 					.matching(criteria)
 					.orderBy(Order.asc("organization"), Order.asc("space"), Order.asc("app_name"))
 				.map((row, metadata) -> fromRow(row))
@@ -194,6 +202,7 @@ public class R2dbcAppDetailRepository {
 			client
 				.select()
 					.from("service_bindings")
+					.project(AppDetail.columnNames())
 					.matching(criteria)
 					.orderBy(Order.asc("organization"), Order.asc("space"), Order.asc("app_name"))
 				.map((row, metadata) -> fromRow(row))

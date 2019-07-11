@@ -44,6 +44,17 @@ public class HistoricalRecord {
 		return value != null ? StringUtils.wrap(value, '"') : StringUtils.wrap("", '"');
 	}
 
+	public static String tableName() {
+		return "historical_record";
+	}
+
+	public static String[] columnNames() {
+		return
+			new String[] {
+				"pk", "transaction_date_time", "action_taken", "organization", "space", "app_id",
+				"service_instance_id", "type", "name" };
+	}
+
 	public static String headers() {
         return String.join(",", "transaction date/time", "action taken", "organization", "space",
                 "application id", "service instance id", "type", "name");

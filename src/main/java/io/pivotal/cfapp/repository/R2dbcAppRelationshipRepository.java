@@ -25,7 +25,7 @@ public class R2dbcAppRelationshipRepository {
 
 	public Mono<AppRelationship> save(AppRelationship entity) {
 		GenericInsertSpec<Map<String, Object>> spec =
-			client.insert().into("application_relationship")
+			client.insert().into(AppRelationship.tableName())
 				.value("organization", entity.getOrganization());
 		spec = spec.value("space", entity.getSpace());
 		spec = spec.value("app_id", entity.getAppId());
@@ -54,17 +54,21 @@ public class R2dbcAppRelationshipRepository {
 	}
 
 	public Flux<AppRelationship> findAll() {
-		String select = "select pk, organization, space, app_id, app_name, service_instance_id, service_name, service_plan, service_type from application_relationship order by organization, space, app_name";
-		return client.execute(select)
-						.as(AppRelationship.class)
-						.fetch()
-						.all();
+		return client
+				.select()
+				.from(AppRelationship.tableName())
+				.project(AppRelationship.columnNames())
+				.orderBy(Order.asc("organization"), Order.asc("space"), Order.asc("app_name"))
+				.as(AppRelationship.class)
+				.fetch()
+				.all();
 	}
 
 	public Flux<AppRelationship> findByApplicationId(String applicationId) {
 		return client
 				.select()
-					.from("application_relationship")
+					.from(AppRelationship.tableName())
+					.project(AppRelationship.columnNames())
 					.matching(Criteria.where("app_id").is(applicationId))
 				.orderBy((Order.asc("organization")), Order.asc("space"), Order.asc("service_name"))
 				.as(AppRelationship.class)
@@ -73,10 +77,12 @@ public class R2dbcAppRelationshipRepository {
 	}
 
 	public Mono<Void> deleteAll() {
-		return client.execute("delete from application_relationship")
-						.fetch()
-						.rowsUpdated()
-						.then();
+		return client
+				.delete()
+				.from(AppRelationship.tableName())
+				.fetch()
+				.rowsUpdated()
+				.then();
 	}
 
 }
