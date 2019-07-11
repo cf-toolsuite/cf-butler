@@ -1,5 +1,6 @@
 package io.pivotal.cfapp.service;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -13,22 +14,32 @@ import io.pivotal.cfapp.domain.Stack;
 @Component
 public class StacksCache {
 
-    private final Map<String, Stack> stacks = new TreeMap<>();
+    private final Map<String, Stack> stacksByName = new TreeMap<>();
+    private final Map<String, Stack> stacksById = new HashMap<>();
 
-    public Stack getStack(String name) {
+    public Stack getStackById(String id) {
+        Assert.isTrue(StringUtils.isNotBlank(id), "Stack id must not be blank.");
+        return stacksById.get(id);
+    }
+
+    public Stack getStackByName(String name) {
         Assert.isTrue(StringUtils.isNotBlank(name), "Stack name must not be blank.");
-        return stacks.get(name);
+        return stacksByName.get(name);
     }
 
     public boolean contains(String name) {
-        return getStack(name) != null ? true: false;
+        return getStackByName(name) != null ? true: false;
     }
 
     public Map<String, Stack> from(List<org.cloudfoundry.operations.stacks.Stack> input) {
-        stacks.clear();
+        stacksByName.clear();
+        stacksById.clear();
         input.forEach(
-            s -> stacks.put(s.getName(),
-                    Stack.builder().id(s.getId()).name(s.getName()).description(s.getDescription()).build()));
-        return stacks;
+            s -> {
+                Stack stack = Stack.builder().id(s.getId()).name(s.getName()).description(s.getDescription()).build();
+                stacksByName.put(s.getName(), stack);
+                stacksById.put(s.getId(), stack);
+            });
+        return stacksByName;
     }
 }

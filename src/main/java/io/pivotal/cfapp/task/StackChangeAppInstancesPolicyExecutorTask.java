@@ -7,8 +7,11 @@ import java.util.Set;
 
 import org.cloudfoundry.client.v2.applications.RestageApplicationRequest;
 import org.cloudfoundry.client.v2.applications.RestageApplicationResponse;
-import org.cloudfoundry.client.v2.applications.UpdateApplicationRequest;
-import org.cloudfoundry.client.v2.applications.UpdateApplicationResponse;
+import org.cloudfoundry.client.v3.Lifecycle;
+import org.cloudfoundry.client.v3.LifecycleData;
+import org.cloudfoundry.client.v3.LifecycleType;
+import org.cloudfoundry.client.v3.applications.UpdateApplicationRequest;
+import org.cloudfoundry.client.v3.applications.UpdateApplicationResponse;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -24,6 +27,8 @@ import io.pivotal.cfapp.service.AppDetailService;
 import io.pivotal.cfapp.service.HistoricalRecordService;
 import io.pivotal.cfapp.service.PoliciesService;
 import io.pivotal.cfapp.service.StacksCache;
+import lombok.Builder;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -120,18 +125,29 @@ public class StackChangeAppInstancesPolicyExecutorTask implements PolicyExecutor
     }
 
 	private Mono<UpdateApplicationResponse> updateApplication(ApplicationPolicy policy, AppDetail detail) {
+		LifecycleData data =
+			BuildpackLifecycleData
+				.builder()
+				.stack(policy.getOption("stack-to", String.class))
+				.build();
+		Lifecycle lifecycle =
+			Lifecycle
+				.builder()
+				.type(LifecycleType.BUILDPACK)
+				.data(data)
+				.build();
 		return DefaultCloudFoundryOperations.builder()
                 .from(opsClient)
                 .organization(detail.getOrganization())
                 .space(detail.getSpace())
                 .build()
 				.getCloudFoundryClient()
-					.applicationsV2()
+					.applicationsV3()
 					.update(
 							UpdateApplicationRequest
 								.builder()
-									.name(detail.getAppName())
-									.stackId(stacksCache.getStack(policy.getOption("stack-to", String.class)).getId())
+									.applicationId(detail.getAppId())
+									.lifecycle(lifecycle)
 									.build());
 	}
 
@@ -162,5 +178,13 @@ public class StackChangeAppInstancesPolicyExecutorTask implements PolicyExecutor
     					prunedSet: policy.getOrganizationWhiteList();
     	return
 			whitelist.isEmpty() ? true: policy.getOrganizationWhiteList().contains(organization);
+	}
+
+	@Builder
+	@Getter
+	static class BuildpackLifecycleData implements LifecycleData {
+
+		private List<String> buildpacks;
+		private String stack;
 	}
 }
