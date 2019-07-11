@@ -21,11 +21,13 @@ import org.springframework.util.CollectionUtils;
 import lombok.Builder;
 import lombok.Builder.Default;
 import lombok.Getter;
+import lombok.ToString;
 
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({ "id", "operation", "description", "options", "organization-whitelist" })
 @Getter
+@ToString
 public class ServiceInstancePolicy {
 
 	@Id

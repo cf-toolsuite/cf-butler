@@ -27,7 +27,7 @@ public class StacksCache {
     public Map<String, Stack> from(List<org.cloudfoundry.operations.stacks.Stack> input) {
         stacks.clear();
         input.forEach(
-            s -> stacks.put(s.getId(),
+            s -> stacks.put(s.getName(),
                     Stack.builder().id(s.getId()).name(s.getName()).description(s.getDescription()).build()));
         return stacks;
     }
