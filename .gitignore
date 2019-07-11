@@ -31,5 +31,6 @@ logs/
 
 ### User config
 config/*.json
+config/*.sql
 config/application-*.yml
 src/main/resources/application-*.yml
