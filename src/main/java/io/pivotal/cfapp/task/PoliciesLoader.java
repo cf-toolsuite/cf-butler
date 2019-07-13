@@ -64,6 +64,8 @@ public class PoliciesLoader implements ApplicationListener<StacksRetrievedEvent>
 			List<ServiceInstancePolicy> serviceInstancePolicies = new ArrayList<>();
 			settings
 				.getFilePaths()
+					.stream()
+					.filter(fp -> !fp.startsWith("#"))
 					.forEach(fp -> {
 						String fileContent;
 						try {

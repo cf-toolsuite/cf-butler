@@ -7,9 +7,7 @@ cf:
 
 logging:
   level:
-    de.flapdoodle.embed.mongo: INFO
     org.springframework: INFO
-    com.sendgrid: DEBUG
     org.cloudfoundry.reactor: DEBUG
 
 # Set schedule for this task to adhere to
