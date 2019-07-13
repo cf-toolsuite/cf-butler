@@ -28,7 +28,7 @@ public class StacksCache {
     }
 
     public boolean contains(String name) {
-        return getStackByName(name) != null ? true: false;
+        return stacksByName.containsKey(name);
     }
 
     public Map<String, Stack> from(List<org.cloudfoundry.operations.stacks.Stack> input) {
