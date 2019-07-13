@@ -1,18 +1,33 @@
 package io.pivotal.cfapp.task;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 
-import org.cloudfoundry.client.v2.applications.RestageApplicationRequest;
-import org.cloudfoundry.client.v2.applications.RestageApplicationResponse;
 import org.cloudfoundry.client.v3.Lifecycle;
 import org.cloudfoundry.client.v3.LifecycleData;
 import org.cloudfoundry.client.v3.LifecycleType;
+import org.cloudfoundry.client.v3.Relationship;
+import org.cloudfoundry.client.v3.applications.GetApplicationCurrentDropletRequest;
+import org.cloudfoundry.client.v3.applications.GetApplicationCurrentDropletResponse;
+import org.cloudfoundry.client.v3.applications.SetApplicationCurrentDropletRequest;
+import org.cloudfoundry.client.v3.applications.SetApplicationCurrentDropletResponse;
 import org.cloudfoundry.client.v3.applications.UpdateApplicationRequest;
 import org.cloudfoundry.client.v3.applications.UpdateApplicationResponse;
+import org.cloudfoundry.client.v3.builds.BuildState;
+import org.cloudfoundry.client.v3.builds.CreateBuildRequest;
+import org.cloudfoundry.client.v3.builds.CreateBuildResponse;
+import org.cloudfoundry.client.v3.builds.GetBuildRequest;
+import org.cloudfoundry.client.v3.builds.GetBuildResponse;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
+import org.cloudfoundry.operations.applications.RestartApplicationRequest;
+import org.cloudfoundry.util.DelayTimeoutException;
+import org.cloudfoundry.util.DelayUtils;
+import org.cloudfoundry.util.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -26,7 +41,6 @@ import io.pivotal.cfapp.domain.HistoricalRecord;
 import io.pivotal.cfapp.service.AppDetailService;
 import io.pivotal.cfapp.service.HistoricalRecordService;
 import io.pivotal.cfapp.service.PoliciesService;
-import io.pivotal.cfapp.service.StacksCache;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -41,7 +55,6 @@ public class StackChangeAppInstancesPolicyExecutorTask implements PolicyExecutor
 	private final DefaultCloudFoundryOperations opsClient;
     private final AppDetailService appInfoService;
 	private final PoliciesService policiesService;
-	private final StacksCache stacksCache;
     private final HistoricalRecordService historicalRecordService;
 
     @Autowired
@@ -50,14 +63,12 @@ public class StackChangeAppInstancesPolicyExecutorTask implements PolicyExecutor
     		DefaultCloudFoundryOperations opsClient,
     		AppDetailService appInfoService,
 			PoliciesService policiesService,
-			StacksCache stacksCache,
     		HistoricalRecordService historicalRecordService
     		) {
     	this.settings = settings;
         this.opsClient = opsClient;
         this.appInfoService = appInfoService;
 		this.policiesService = policiesService;
-		this.stacksCache = stacksCache;
         this.historicalRecordService = historicalRecordService;
     }
 
@@ -81,50 +92,45 @@ public class StackChangeAppInstancesPolicyExecutorTask implements PolicyExecutor
     	execute();
     }
 
+	// FIXME current implementation has no recoverability and is not capable of zero-downtime deployment
 	protected Mono<List<HistoricalRecord>> stackChangeApplications() {
 		return
-			Flux
-				.concat(
-					policiesService
-						.findByApplicationOperation(ApplicationOperation.CHANGE_STACK)
-							.flux()
-							.flatMap(p -> Flux.fromIterable(p.getApplicationPolicies()))
-							.flatMap(ap -> appInfoService.findByApplicationPolicy(ap, false))
-							.filter(wl -> isWhitelisted(wl.getT2(), wl.getT1().getOrganization()))
-							.filter(bl -> isBlacklisted(bl.getT1().getOrganization()))
-							.filter(from -> from.getT1().getStack().equals(from.getT2().getOption("stack-from", String.class)))
-							.flatMap(ad -> stackChangeApplication(ad.getT2(), ad.getT1()))
-							.flatMap(historicalRecordService::save),
-					policiesService
-						.findByApplicationOperation(ApplicationOperation.CHANGE_STACK)
-							.flux()
-							.flatMap(p -> Flux.fromIterable(p.getApplicationPolicies()))
-							.flatMap(ap -> appInfoService.findByApplicationPolicy(ap, true))
-							.filter(wl -> isWhitelisted(wl.getT2(), wl.getT1().getOrganization()))
-							.filter(bl -> isBlacklisted(bl.getT1().getOrganization()))
-							.filter(from -> from.getT1().getStack().equals(from.getT2().getOption("stack-from", String.class)))
-							.flatMap(ad -> stackChangeApplication(ad.getT2(), ad.getT1()))
-							.flatMap(historicalRecordService::save)
-				)
-				.collectList();
+			policiesService
+				.findByApplicationOperation(ApplicationOperation.CHANGE_STACK)
+					.flux()
+					.flatMap(p -> Flux.fromIterable(p.getApplicationPolicies()))
+					.flatMap(ap -> Flux.concat(appInfoService.findByApplicationPolicy(ap, false), appInfoService.findByApplicationPolicy(ap, true)))
+					.filter(wl -> isWhitelisted(wl.getT2(), wl.getT1().getOrganization()))
+					.filter(bl -> isBlacklisted(bl.getT1().getOrganization()))
+					.filter(from -> from.getT1().getStack().equals(from.getT2().getOption("stack-from", String.class)))
+					.flatMap(ad -> {
+						log.info("{} is a candidate for stack change using policy {}.", ad.getT1(), ad.getT2());
+						return stackChangeApplication(ad.getT2(), ad.getT1());
+					})
+					.flatMap(historicalRecordService::save)
+					.collectList();
     }
 
     protected Mono<HistoricalRecord> stackChangeApplication(ApplicationPolicy policy, AppDetail detail) {
-    	return updateApplication(policy, detail)
-				.flatMap(uar -> restageApplication(uar, detail))
+		return assignTargetStack(policy, detail)
+				.then(getCurrentDroplet(detail))
+				.flatMap(droplet -> stagePackage(droplet, detail))
+				.flatMap(build -> waitForStagedBuild(build, detail, null))
+				.flatMap(build -> setDroplet(build, detail))
+				.flatMap(build -> restartApp(detail))
 				.then(Mono.just(HistoricalRecord
-							.builder()
-								.transactionDateTime(LocalDateTime.now())
-								.actionTaken("change-stack")
-								.organization(detail.getOrganization())
-								.space(detail.getSpace())
-								.appId(detail.getAppId())
-								.type("application")
-								.name(detail.getAppName())
-								.build()));
-    }
+									.builder()
+										.transactionDateTime(LocalDateTime.now())
+										.actionTaken("change-stack")
+										.organization(detail.getOrganization())
+										.space(detail.getSpace())
+										.appId(detail.getAppId())
+										.type("application")
+										.name(detail.getAppName())
+										.build()));
+	}
 
-	private Mono<UpdateApplicationResponse> updateApplication(ApplicationPolicy policy, AppDetail detail) {
+	private Mono<UpdateApplicationResponse> assignTargetStack(ApplicationPolicy policy, AppDetail detail) {
 		LifecycleData data =
 			BuildpackLifecycleData
 				.builder()
@@ -151,19 +157,70 @@ public class StackChangeAppInstancesPolicyExecutorTask implements PolicyExecutor
 									.build());
 	}
 
-	private Mono<RestageApplicationResponse> restageApplication(UpdateApplicationResponse response, AppDetail detail) {
+	private Mono<GetApplicationCurrentDropletResponse> getCurrentDroplet(AppDetail detail) {
 		return DefaultCloudFoundryOperations.builder()
                 .from(opsClient)
                 .organization(detail.getOrganization())
                 .space(detail.getSpace())
                 .build()
 				.getCloudFoundryClient()
-					.applicationsV2()
-					.restage(
-							RestageApplicationRequest
-								.builder()
-									.applicationId(detail.getAppId())
-									.build());
+					.applicationsV3()
+						.getCurrentDroplet(GetApplicationCurrentDropletRequest.builder().applicationId(detail.getAppId()).build()); 
+	}
+
+	private Mono<CreateBuildResponse> stagePackage(GetApplicationCurrentDropletResponse droplet, AppDetail detail) {
+		Relationship pkg = Relationship.builder().id(droplet.getLinks().get("package").getHref()).build();
+		return DefaultCloudFoundryOperations.builder()
+                .from(opsClient)
+                .organization(detail.getOrganization())
+                .space(detail.getSpace())
+                .build()
+				.getCloudFoundryClient()
+					.builds()
+						.create(CreateBuildRequest.builder().getPackage(pkg).build());
+	}
+
+	private Mono<GetBuildResponse> waitForStagedBuild(CreateBuildResponse build, AppDetail detail, Duration stagingTimeout) {
+        Duration timeout = Optional.ofNullable(stagingTimeout).orElse(Duration.ofMinutes(15));
+        return getBuild(build, detail)
+            .filter(isStagingComplete())
+            .repeatWhenEmpty(DelayUtils.exponentialBackOff(Duration.ofSeconds(1), Duration.ofSeconds(15), timeout))
+            .filter(isStaged())
+            .switchIfEmpty(ExceptionUtils.illegalState("Build %s failed during staging", build.getId()))
+            .onErrorResume(DelayTimeoutException.class, t -> ExceptionUtils.illegalState("Build %s timed out during staging", build.getId()));
+	}
+
+	private Mono<GetBuildResponse> getBuild(CreateBuildResponse build, AppDetail detail) {
+		return DefaultCloudFoundryOperations.builder()
+				.from(opsClient)
+				.organization(detail.getOrganization())
+				.space(detail.getSpace())
+				.build()
+					.getCloudFoundryClient()
+					.builds()
+						.get(GetBuildRequest.builder().buildId(build.getId()).build());
+	}
+
+	private Mono<SetApplicationCurrentDropletResponse> setDroplet(GetBuildResponse build, AppDetail detail) {
+		Relationship data = Relationship.builder().id(build.getDroplet().getId()).build();
+		return DefaultCloudFoundryOperations.builder()
+				.from(opsClient)
+				.organization(detail.getOrganization())
+				.space(detail.getSpace())
+				.build()
+					.getCloudFoundryClient()
+					.applicationsV3()
+						.setCurrentDroplet(SetApplicationCurrentDropletRequest.builder().applicationId(detail.getAppId()).data(data).build());
+	}
+
+	private Mono<Void> restartApp(AppDetail detail) {
+		return DefaultCloudFoundryOperations.builder()
+				.from(opsClient)
+				.organization(detail.getOrganization())
+				.space(detail.getSpace())
+				.build()
+					.applications()
+						.restart(RestartApplicationRequest.builder().name(detail.getAppName()).build());
 	}
 
     private boolean isBlacklisted(String  organization) {
@@ -179,6 +236,14 @@ public class StackChangeAppInstancesPolicyExecutorTask implements PolicyExecutor
     	return
 			whitelist.isEmpty() ? true: policy.getOrganizationWhiteList().contains(organization);
 	}
+
+	private static Predicate<GetBuildResponse> isStagingComplete() {
+        return response -> response.getState().equals(BuildState.STAGED) || response.getState().equals(BuildState.FAILED);
+	}
+
+	private static Predicate<GetBuildResponse> isStaged() {
+        return response -> response.getState().equals(BuildState.STAGED);
+    }
 
 	@Builder
 	@Getter
