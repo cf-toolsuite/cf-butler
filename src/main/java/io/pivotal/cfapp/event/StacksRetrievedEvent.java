@@ -1,12 +1,12 @@
-package io.pivotal.cfapp.task;
+package io.pivotal.cfapp.event;
 
 import org.springframework.context.ApplicationEvent;
 
-public class DatabaseCreatedEvent extends ApplicationEvent {
+public class StacksRetrievedEvent extends ApplicationEvent {
 
     private static final long serialVersionUID = 1L;
 
-    public DatabaseCreatedEvent(Object source) {
+    public StacksRetrievedEvent(Object source) {
         super(source);
     }
 

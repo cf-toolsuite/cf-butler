@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 import io.pivotal.cfapp.config.ButlerSettings;
 import io.pivotal.cfapp.domain.AppRelationship;
-import io.pivotal.cfapp.task.AppRelationshipRetrievedEvent;
+import io.pivotal.cfapp.event.AppRelationshipRetrievedEvent;
 
 public class AppRelationshipCsvReport  {
 
@@ -41,5 +41,5 @@ public class AppRelationshipCsvReport  {
                 });
         return details.toString();
     }
-    
+
 }

@@ -19,6 +19,7 @@ import io.pivotal.cfapp.domain.ApplicationPolicy;
 import io.pivotal.cfapp.domain.Policies;
 import io.pivotal.cfapp.domain.PoliciesValidator;
 import io.pivotal.cfapp.domain.ServiceInstancePolicy;
+import io.pivotal.cfapp.event.StacksRetrievedEvent;
 import io.pivotal.cfapp.service.PoliciesService;
 import lombok.extern.slf4j.Slf4j;
 
