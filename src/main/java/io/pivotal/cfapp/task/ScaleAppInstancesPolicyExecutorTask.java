@@ -71,30 +71,18 @@ public class ScaleAppInstancesPolicyExecutorTask implements PolicyExecutorTask {
 
 	protected Mono<List<HistoricalRecord>> scaleApplications() {
 		return
-			Flux
-				.concat(
-					policiesService
-						.findByApplicationOperation(ApplicationOperation.SCALE_INSTANCES)
-							.flux()
-							.flatMap(p -> Flux.fromIterable(p.getApplicationPolicies()))
-							.flatMap(ap -> appInfoService.findByApplicationPolicy(ap, false))
-							.filter(wl -> isWhitelisted(wl.getT2(), wl.getT1().getOrganization()))
-							.filter(bl -> isBlacklisted(bl.getT1().getOrganization()))
-							.filter(from -> from.getT1().getRunningInstances() == from.getT2().getOption("instances-from", Integer.class))
-							.flatMap(ad -> scaleApplication(ad.getT2(), ad.getT1()))
-							.flatMap(historicalRecordService::save),
-					policiesService
-						.findByApplicationOperation(ApplicationOperation.SCALE_INSTANCES)
-							.flux()
-							.flatMap(p -> Flux.fromIterable(p.getApplicationPolicies()))
-							.flatMap(ap -> appInfoService.findByApplicationPolicy(ap, true))
-							.filter(wl -> isWhitelisted(wl.getT2(), wl.getT1().getOrganization()))
-							.filter(bl -> isBlacklisted(bl.getT1().getOrganization()))
-							.filter(from -> from.getT1().getRunningInstances() == from.getT2().getOption("instances-from", Integer.class))
-							.flatMap(ad -> scaleApplication(ad.getT2(), ad.getT1()))
-							.flatMap(historicalRecordService::save)
-				)
-				.collectList();
+			policiesService
+				.findByApplicationOperation(ApplicationOperation.SCALE_INSTANCES)
+					.flux()
+					.flatMap(p -> Flux.fromIterable(p.getApplicationPolicies()))
+					.flatMap(ap -> Flux.concat(appInfoService.findByApplicationPolicy(ap, false), appInfoService.findByApplicationPolicy(ap, true)))
+					.distinct()
+					.filter(wl -> isWhitelisted(wl.getT2(), wl.getT1().getOrganization()))
+					.filter(bl -> isBlacklisted(bl.getT1().getOrganization()))
+					.filter(from -> from.getT1().getRunningInstances() == from.getT2().getOption("instances-from", Integer.class))
+					.flatMap(ad -> scaleApplication(ad.getT2(), ad.getT1()))
+					.flatMap(historicalRecordService::save)
+					.collectList();
     }
 
     protected Mono<HistoricalRecord> scaleApplication(ApplicationPolicy policy, AppDetail detail) {
