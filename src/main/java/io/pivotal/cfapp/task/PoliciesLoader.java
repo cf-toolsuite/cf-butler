@@ -17,6 +17,7 @@ import io.pivotal.cfapp.client.GitClient;
 import io.pivotal.cfapp.config.PoliciesSettings;
 import io.pivotal.cfapp.domain.ApplicationPolicy;
 import io.pivotal.cfapp.domain.Policies;
+import io.pivotal.cfapp.domain.PoliciesValidator;
 import io.pivotal.cfapp.domain.ServiceInstancePolicy;
 import io.pivotal.cfapp.service.PoliciesService;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Component
 @ConditionalOnProperty(name = "cf.policies.provider", havingValue = "git")
-public class PoliciesLoader implements ApplicationListener<DatabaseCreatedEvent> {
+public class PoliciesLoader implements ApplicationListener<StacksRetrievedEvent> {
 
 	private static final String APPLICATION_POLICY_SUFFIX = "-AP.json";
 	private static final String SERVICE_INSTANCE_POLICY_SUFFIX = "-SIP.json";
@@ -32,6 +33,7 @@ public class PoliciesLoader implements ApplicationListener<DatabaseCreatedEvent>
 	private final GitClient client;
 	private final PoliciesService service;
 	private final PoliciesSettings settings;
+	private final PoliciesValidator validator;
 	private final ObjectMapper mapper;
 
 	@Autowired
@@ -39,17 +41,19 @@ public class PoliciesLoader implements ApplicationListener<DatabaseCreatedEvent>
 			GitClient client,
 			PoliciesService service,
 			PoliciesSettings settings,
+			PoliciesValidator validator,
 			ObjectMapper mapper
 			) {
 		this.client = client;
 		this.service = service;
 		this.settings = settings;
+		this.validator = validator;
 		this.mapper = mapper;
 	}
 
 	@Override
-    public void onApplicationEvent(DatabaseCreatedEvent event) {
-        load();
+	public void onApplicationEvent(StacksRetrievedEvent event) {
+		load();
 	}
 
 	public void load() {
@@ -65,9 +69,15 @@ public class PoliciesLoader implements ApplicationListener<DatabaseCreatedEvent>
 						try {
 							fileContent = client.readFile(repo, settings.getCommit(), fp);
 							if (fp.endsWith(APPLICATION_POLICY_SUFFIX)) {
-								applicationPolicies.add(mapper.readValue(fileContent, ApplicationPolicy.class));
+								ApplicationPolicy policy = mapper.readValue(fileContent, ApplicationPolicy.class);
+								if (validator.validate(policy)) {
+									applicationPolicies.add(policy);
+								}
 							} else if (fp.endsWith(SERVICE_INSTANCE_POLICY_SUFFIX)) {
-								serviceInstancePolicies.add(mapper.readValue(fileContent, ServiceInstancePolicy.class));
+								ServiceInstancePolicy policy = mapper.readValue(fileContent, ServiceInstancePolicy.class);
+								if (validator.validate(policy)) {
+									serviceInstancePolicies.add(policy);
+								}
 							} else {
 								log.warn(
 										"Policy file {} does not adhere to naming convention. File name must end with either {} or {}.",

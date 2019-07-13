@@ -11,6 +11,7 @@ import org.springframework.data.r2dbc.query.Criteria;
 import org.springframework.stereotype.Repository;
 
 import io.pivotal.cfapp.config.DbmsSettings;
+import io.pivotal.cfapp.domain.AppDetail;
 import io.pivotal.cfapp.domain.Defaults;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -43,7 +44,7 @@ public class R2dbcAppMetricsRepository {
 	protected Mono<Long> countByDateRange(LocalDate start, LocalDate end) {
 		return client
 				.select()
-					.from("application_detail")
+					.from(AppDetail.tableName())
 					.project("last_pushed")
 					.matching(Criteria.where("last_pushed").lessThanOrEquals(LocalDateTime.of(end, LocalTime.MAX)).and("last_pushed").greaterThan(LocalDateTime.of(start, LocalTime.MIDNIGHT)))
 				.map((row, metadata) -> Defaults.getValueOrDefault(row.get("last_pushed", LocalDateTime.class), 0L))
@@ -55,7 +56,7 @@ public class R2dbcAppMetricsRepository {
 	protected Mono<Long> countStagnant(LocalDate end) {
 		return client
 				.select()
-					.from("application_detail")
+					.from(AppDetail.tableName())
 					.project("last_pushed")
 					.matching(Criteria.where("last_pushed").lessThan(LocalDateTime.of(end, LocalTime.MIDNIGHT)))
 				.map((row, metadata) -> Defaults.getValueOrDefault(row.get("last_pushed", LocalDateTime.class), 0L))

@@ -25,17 +25,21 @@ public class R2dbcTkRepository {
     }
 
     public Mono<Void> deleteOne() {
-		return client.execute("delete from time_keeper")
-						.fetch()
-						.rowsUpdated()
-						.then();
+        return client
+                .delete()
+                .from("time_keeper")
+                .fetch()
+                .rowsUpdated()
+                .then();
     }
 
     public Mono<LocalDateTime> findOne() {
-		String select = "select collection_time from time_keeper";
-		return client.execute(select)
-						.map((row, metadata) -> fromRow(row))
-						.one();
+        return client
+                .select()
+                .from("time_keeper")
+                .project("collection_time")
+                .map((row, metadata) -> fromRow(row))
+                .one();
     }
 
     private LocalDateTime fromRow(Row row) {
