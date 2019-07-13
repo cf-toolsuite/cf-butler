@@ -33,8 +33,12 @@ public class R2dbcSpaceUsersRepository {
 	}
 
 	public Mono<Void> deleteAll() {
-		String deleteAll = "delete from space_users";
-		return client.execute(deleteAll).fetch().rowsUpdated().then();
+		return client
+				.delete()
+				.from("space_users")
+				.fetch()
+				.rowsUpdated()
+				.then();
 	}
 
 	public Mono<SpaceUsers> save(SpaceUsers entity) {
@@ -63,6 +67,7 @@ public class R2dbcSpaceUsersRepository {
 		return client
 				.select()
 					.from("space_users")
+					.project("pk", "organization", "space", "auditors", "managers", "developers")
 					.matching(Criteria.where("organization").is(organization).and("space").is(space))
 					.as(SpaceUsers.class)
 				.fetch()

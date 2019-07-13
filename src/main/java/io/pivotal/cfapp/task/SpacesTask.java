@@ -18,9 +18,9 @@ import reactor.core.publisher.Flux;
 @Component
 public class SpacesTask implements ApplicationListener<OrganizationsRetrievedEvent> {
 
-	private DefaultCloudFoundryOperations opsClient;
-    private SpaceService service;
-    private ApplicationEventPublisher publisher;
+	private final DefaultCloudFoundryOperations opsClient;
+    private final SpaceService service;
+    private final ApplicationEventPublisher publisher;
 
     @Autowired
     public SpacesTask(

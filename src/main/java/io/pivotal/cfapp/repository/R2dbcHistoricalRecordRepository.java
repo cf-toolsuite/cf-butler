@@ -3,6 +3,7 @@ package io.pivotal.cfapp.repository;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.r2dbc.core.DatabaseClient;
 import org.springframework.data.r2dbc.core.DatabaseClient.GenericInsertSpec;
 import org.springframework.stereotype.Repository;
@@ -48,11 +49,14 @@ public class R2dbcHistoricalRecordRepository {
 	}
 
 	public Flux<HistoricalRecord> findAll() {
-		String select = "select pk, transaction_date_time, action_taken, organization, space, app_id, service_instance_id, type, name from historical_record order by transaction_datetime desc";
-		return client.execute(select)
-						.as(HistoricalRecord.class)
-						.fetch()
-						.all();
+		return client
+				.select()
+				.from(HistoricalRecord.tableName())
+				.project(HistoricalRecord.columnNames())
+				.orderBy(Order.desc("transaction_datetime"))
+				.as(HistoricalRecord.class)
+				.fetch()
+				.all();
 	}
 
 }

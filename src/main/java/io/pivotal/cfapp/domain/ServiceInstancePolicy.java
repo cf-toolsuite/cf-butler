@@ -21,11 +21,13 @@ import org.springframework.util.CollectionUtils;
 import lombok.Builder;
 import lombok.Builder.Default;
 import lombok.Getter;
+import lombok.ToString;
 
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({ "id", "operation", "description", "options", "organization-whitelist" })
 @Getter
+@ToString
 public class ServiceInstancePolicy {
 
 	@Id
@@ -87,6 +89,17 @@ public class ServiceInstancePolicy {
 			return null;
 		}
 		return type.cast(value);
+	}
+
+	public static String tableName() {
+		return "service_instance_policy";
+	}
+
+	public static String[] columnNames() {
+		return
+			new String[] {
+				"pk", "id", "operation", "description", "options", "organization_whitelist"
+			};
 	}
 
 	public static ServiceInstancePolicy seed(ServiceInstancePolicy policy) {

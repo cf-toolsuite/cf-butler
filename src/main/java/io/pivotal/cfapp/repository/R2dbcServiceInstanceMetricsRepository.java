@@ -10,6 +10,7 @@ import org.springframework.data.r2dbc.query.Criteria;
 import org.springframework.stereotype.Repository;
 
 import io.pivotal.cfapp.domain.Defaults;
+import io.pivotal.cfapp.domain.ServiceInstanceDetail;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
@@ -38,7 +39,7 @@ public class R2dbcServiceInstanceMetricsRepository {
 	protected Mono<Long> countByDateRange(LocalDate start, LocalDate end) {
 		return client
 				.select()
-					.from("service_instance_detail")
+					.from(ServiceInstanceDetail.tableName())
 					.project("last_updated")
 					.matching(Criteria.where("last_updated").lessThanOrEquals(LocalDateTime.of(end, LocalTime.MAX)).and("last_updated").greaterThan(LocalDateTime.of(start, LocalTime.MIDNIGHT)))
 				.map((row, metadata) -> Defaults.getValueOrDefault(row.get("last_updated", LocalDateTime.class), 0L))
@@ -50,7 +51,7 @@ public class R2dbcServiceInstanceMetricsRepository {
 	protected Mono<Long> countStagnant(LocalDate end) {
 		return client
 				.select()
-					.from("service_instance_detail")
+					.from(ServiceInstanceDetail.tableName())
 					.project("last_updated")
 					.matching(Criteria.where("last_updated").lessThan(LocalDateTime.of(end, LocalTime.MIDNIGHT)))
 				.map((row, metadata) -> Defaults.getValueOrDefault(row.get("last_updated", LocalDateTime.class), 0L))

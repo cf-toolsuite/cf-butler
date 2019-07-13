@@ -1,5 +1,7 @@
 package io.pivotal.cfapp.task;
 
+import java.time.Duration;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -56,6 +58,7 @@ public class ProductsAndReleasesTask implements ApplicationRunner {
                     .getLatestProductReleases()
                     .collectList()
                     .flatMap(releases -> { cache.setLatestProductReleases(releases); return Mono.empty(); }))
+            .delaySubscription(Duration.ofSeconds(10))
             .subscribe(
                 result -> {
                     publisher.publishEvent(

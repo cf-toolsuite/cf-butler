@@ -212,7 +212,7 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
     }
 
     private String nullSafeStack(String stackId) {
-        Stack stack = stacksCache.getStack(stackId);
+        Stack stack = stacksCache.getStackById(stackId);
         if (stack != null) {
             return stack.getName();
         }

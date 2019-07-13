@@ -1,8 +1,8 @@
 package io.pivotal.cfapp.domain;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -70,6 +70,19 @@ public class AppDetail {
 
 	private Double toGigabytes(Long input) {
 		return Double.valueOf(input / 1000000000.0);
+	}
+
+	public static String tableName() {
+		return "application_detail";
+	}
+
+	public static String[] columnNames() {
+		return
+			new String[] {
+				"pk", "organization", "space", "app_id", "app_name", "buildpack", "image",
+				"stack", "running_instances", "total_instances", "memory_used", "disk_used",
+				"urls", "last_pushed", "last_event", "last_event_actor", "last_event_time", 
+				"requested_state" };
 	}
 
 	public static String headers() {

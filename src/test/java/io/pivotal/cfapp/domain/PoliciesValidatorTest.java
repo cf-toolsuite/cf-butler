@@ -7,8 +7,21 @@ import java.util.Set;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+@ExtendWith(SpringExtension.class)
+@SpringBootTest
 public class PoliciesValidatorTest {
+
+    private final PoliciesValidator policiesValidator;
+
+    @Autowired
+    public PoliciesValidatorTest(PoliciesValidator policiesValidator) {
+        this.policiesValidator = policiesValidator;
+    }
 
     @Test
     public void assertValidApplicationPolicy() {
@@ -25,7 +38,7 @@ public class PoliciesValidatorTest {
                 .pk(100L)
                 .id(null)
                 .build();
-        Assertions.assertThat(PoliciesValidator.validate(durationPolicy) == true);
+        Assertions.assertThat(policiesValidator.validate(durationPolicy) == true);
 
         ApplicationPolicy noTimeframePolicy =
             ApplicationPolicy
@@ -37,7 +50,7 @@ public class PoliciesValidatorTest {
                 .pk(100L)
                 .id(null)
                 .build();
-        Assertions.assertThat(PoliciesValidator.validate(noTimeframePolicy) == true);
+        Assertions.assertThat(policiesValidator.validate(noTimeframePolicy) == true);
 
         Map<String, Object> options2 = new HashMap<>();
         options.put("from-datetime", LocalDateTime.now().minusDays(2));
@@ -52,7 +65,7 @@ public class PoliciesValidatorTest {
                 .pk(100L)
                 .id(null)
                 .build();
-        Assertions.assertThat(PoliciesValidator.validate(dateTimePolicy) == true);
+        Assertions.assertThat(policiesValidator.validate(dateTimePolicy) == true);
 
         Map<String, Object> options3 = new HashMap<>();
         options.put("instances-from", 1);
@@ -68,7 +81,7 @@ public class PoliciesValidatorTest {
                 .pk(100L)
                 .id(null)
                 .build();
-        Assertions.assertThat(PoliciesValidator.validate(scalingPolicy) == true);
+        Assertions.assertThat(policiesValidator.validate(scalingPolicy) == true);
     }
 
     @Test
@@ -87,7 +100,7 @@ public class PoliciesValidatorTest {
                 .pk(100L)
                 .id(null)
                 .build();
-        Assertions.assertThat(PoliciesValidator.validate(invalidDeletePolicy) == false);
+        Assertions.assertThat(policiesValidator.validate(invalidDeletePolicy) == false);
 
         ApplicationPolicy invalidScalingPolicy =
             ApplicationPolicy
@@ -99,6 +112,6 @@ public class PoliciesValidatorTest {
                 .pk(100L)
                 .id(null)
                 .build();
-        Assertions.assertThat(PoliciesValidator.validate(invalidScalingPolicy) == false);
+        Assertions.assertThat(policiesValidator.validate(invalidScalingPolicy) == false);
     }
 }

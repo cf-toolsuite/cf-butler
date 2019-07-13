@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.operations.stacks.Stack;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
@@ -20,16 +21,18 @@ public class StacksTask implements ApplicationListener<TkRetrievedEvent> {
     private final DefaultCloudFoundryOperations opsClient;
     private final ObjectMapper mapper;
     private final StacksCache cache;
-
+    private final ApplicationEventPublisher publisher;
 
     @Autowired
     public StacksTask(
         DefaultCloudFoundryOperations opsClient,
         ObjectMapper mapper,
-        StacksCache cache) {
+        StacksCache cache,
+        ApplicationEventPublisher publisher) {
         this.opsClient = opsClient;
         this.mapper = mapper;
         this.cache = cache;
+        this.publisher = publisher;
     }
 
 
@@ -45,6 +48,7 @@ public class StacksTask implements ApplicationListener<TkRetrievedEvent> {
             .map(list -> cache.from(list))
             .subscribe(
                 result -> {
+                    publisher.publishEvent(new StacksRetrievedEvent(this));
                     log.trace(mapWithException("StacksCache", result));
                     log.info("StacksTask completed");
                     log.trace("Retrieved {} stacks", result.size());

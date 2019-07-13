@@ -21,8 +21,12 @@ public class R2dbcSpaceRepository {
 	}
 
 	public Mono<Void> deleteAll() {
-		String deleteAll = "delete from spaces";
-		return client.execute(deleteAll).fetch().rowsUpdated().then();
+		return client
+				.delete()
+				.from("spaces")
+				.fetch()
+				.rowsUpdated()
+				.then();
 	}
 
 	public Mono<Space> save(Space entity) {

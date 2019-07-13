@@ -25,7 +25,6 @@ import io.pivotal.cfapp.domain.ApplicationOperation;
 import io.pivotal.cfapp.domain.ApplicationPolicy;
 import io.pivotal.cfapp.domain.Defaults;
 import io.pivotal.cfapp.domain.Policies;
-import io.pivotal.cfapp.domain.PoliciesValidator;
 import io.pivotal.cfapp.domain.ServiceInstanceOperation;
 import io.pivotal.cfapp.domain.ServiceInstancePolicy;
 import reactor.core.publisher.Flux;
@@ -49,11 +48,13 @@ public class R2dbcPoliciesRepository {
 	}
 
 	public Mono<Policies> save(Policies entity) {
-		List<ApplicationPolicy> applicationPolicies = entity.getApplicationPolicies().stream()
-				.filter(ap -> PoliciesValidator.validate(ap)).map(p -> seedApplicationPolicy(p)).collect(Collectors.toList());
+		List<ApplicationPolicy> applicationPolicies =
+			entity.getApplicationPolicies().stream()
+				.map(p -> seedApplicationPolicy(p)).collect(Collectors.toList());
 
-		List<ServiceInstancePolicy> serviceInstancePolicies = entity.getServiceInstancePolicies().stream()
-				.filter(sip -> PoliciesValidator.validate(sip)).map(p -> seedServiceInstancePolicy(p)).collect(Collectors.toList());
+		List<ServiceInstancePolicy> serviceInstancePolicies =
+			entity.getServiceInstancePolicies().stream()
+				.map(p -> seedServiceInstancePolicy(p)).collect(Collectors.toList());
 
 		return Flux.fromIterable(applicationPolicies)
 					.concatMap(ap -> saveApplicationPolicy(ap))
@@ -68,7 +69,8 @@ public class R2dbcPoliciesRepository {
 			Flux
 				.from(client
 						.select()
-							.from("service_instance_policy")
+							.from(ServiceInstancePolicy.tableName())
+							.project(ServiceInstancePolicy.columnNames())
 							.matching(Criteria.where("id").is(id))
 						.map((row, metadata) ->
 							ServiceInstancePolicy
@@ -92,7 +94,8 @@ public class R2dbcPoliciesRepository {
 			Flux
 				.from(client
 						.select()
-							.from("service_instance_policy")
+							.from(ApplicationPolicy.tableName())
+							.project(ApplicationPolicy.columnNames())
 							.matching(Criteria.where("id").is(id))
 						.map((row, metadata) ->
 							ApplicationPolicy
@@ -157,7 +160,7 @@ public class R2dbcPoliciesRepository {
 			Flux
 				.from(client
 						.delete()
-							.from("application_policy")
+							.from(ApplicationPolicy.tableName())
 							.matching(Criteria.where("id").is(id))
 						.fetch()
 						.rowsUpdated())
@@ -169,7 +172,7 @@ public class R2dbcPoliciesRepository {
 			Flux
 				.from(client
 						.delete()
-							.from("service_instance_policy")
+							.from(ServiceInstancePolicy.tableName())
 							.matching(Criteria.where("id").is(id))
 						.fetch()
 						.rowsUpdated())
@@ -177,18 +180,24 @@ public class R2dbcPoliciesRepository {
 	}
 
 	public Mono<Void> deleteAll() {
-		String deleteAllApplicationPolicies = "delete from application_policy";
-		String deleteAllServiceInstancePolicies = "delete from service_instance_policy";
 		return
 			Flux
-				.from(client.execute(deleteAllApplicationPolicies)
-					.fetch()
-					.rowsUpdated())
+				.from(
+					client
+						.delete()
+						.from(ApplicationPolicy.tableName())
+						.fetch()
+						.rowsUpdated()
+				)
 				.thenMany(
 					Flux
-						.from(client.execute(deleteAllServiceInstancePolicies)
-							.fetch()
-							.rowsUpdated()))
+						.from(
+							client
+								.delete()
+								.from(ServiceInstancePolicy.tableName())
+								.fetch()
+								.rowsUpdated())
+						)
 				.then();
 	}
 
@@ -202,7 +211,7 @@ public class R2dbcPoliciesRepository {
 
 	private Mono<Integer> saveApplicationPolicy(ApplicationPolicy ap) {
 		GenericInsertSpec<Map<String, Object>> spec =
-			client.insert().into("application_policy")
+			client.insert().into(ApplicationPolicy.tableName())
 				.value("id", ap.getId());
 		if (ap.getDescription() != null) {
 			spec = spec.value("description", ap.getDescription());
@@ -230,7 +239,7 @@ public class R2dbcPoliciesRepository {
 
 	private Mono<Integer> saveServiceInstancePolicy(ServiceInstancePolicy sip) {
 		GenericInsertSpec<Map<String, Object>> spec =
-			client.insert().into("service_instance_policy")
+			client.insert().into(ServiceInstancePolicy.tableName())
 				.value("id", sip.getId());
 		if (sip.getDescription() != null) {
 			spec = spec.value("description", sip.getDescription());
@@ -258,7 +267,8 @@ public class R2dbcPoliciesRepository {
 				Flux
 					.from(client
 							.select()
-								.from("application_policy")
+								.from(ApplicationPolicy.tableName())
+								.project(ApplicationPolicy.columnNames())
 								.matching(Criteria.where("operation").is(operation.getName()))
 							.map((row, metadata) ->
 								ApplicationPolicy
@@ -284,7 +294,8 @@ public class R2dbcPoliciesRepository {
 				Flux
 					.from(client
 							.select()
-								.from("service_instance_policy")
+								.from(ServiceInstancePolicy.tableName())
+								.project(ServiceInstancePolicy.columnNames())
 								.matching(Criteria.where("operation").is(operation.getName()))
 							.map((row, metadata) ->
 								ServiceInstancePolicy

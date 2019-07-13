@@ -42,6 +42,17 @@ public class AppRelationship {
 		return value != null ? StringUtils.wrap(value, '"') : StringUtils.wrap("", '"');
 	}
 
+	public static String tableName() {
+		return "application_relationship";
+	}
+
+	public static String[] columnNames() {
+		return
+			new String[] {
+				"pk", "organization", "space", "app_id", "app_name", "service_instance_id", "service_name",
+				"service_plan, service_type" };
+	}
+
 	public static String headers() {
         return String.join(",", "organization", "space", "application id",
                 "application name", "service instance id", "service name", "service plan", "service type");

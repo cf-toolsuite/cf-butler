@@ -34,7 +34,7 @@ public class R2dbcServiceInstanceDetailRepository {
 	}
 
 	public Mono<ServiceInstanceDetail> save(ServiceInstanceDetail entity) {
-		GenericInsertSpec<Map<String, Object>> spec = client.insert().into("service_instance_detail")
+		GenericInsertSpec<Map<String, Object>> spec = client.insert().into(ServiceInstanceDetail.tableName())
 				.value("organization", entity.getOrganization());
 		spec = spec.value("space", entity.getSpace());
 		if (entity.getServiceInstanceId() != null) {
@@ -96,9 +96,11 @@ public class R2dbcServiceInstanceDetailRepository {
 	}
 
 	public Flux<ServiceInstanceDetail> findAll() {
-		String select = "select pk, organization, space, service_instance_id, service_name, service, description, plan, type, bound_applications, last_operation, last_updated, dashboard_url, requested_state from service_instance_detail order by organization, space, service, service_name";
 		return client
-				.execute(select)
+				.select()
+				.from(ServiceInstanceDetail.tableName())
+				.project(ServiceInstanceDetail.columnNames())
+				.orderBy(Order.asc("organization"), Order.asc("space"), Order.asc("service"), Order.asc("service_name"))
 				.map((row, metadata) -> fromRow(row))
 				.all();
 	}
@@ -132,7 +134,8 @@ public class R2dbcServiceInstanceDetailRepository {
 
 	public Mono<Void> deleteAll() {
 		return client
-				.execute("delete from service_instance_detail")
+				.delete()
+				.from(ServiceInstanceDetail.tableName())
 				.fetch()
 				.rowsUpdated()
 				.then();
@@ -157,7 +160,8 @@ public class R2dbcServiceInstanceDetailRepository {
 		return
 			client
 				.select()
-					.from("service_instance_detail")
+					.from(ServiceInstanceDetail.tableName())
+					.project(ServiceInstanceDetail.columnNames())
 					.matching(criteria)
 					.orderBy(Order.asc("organization"), Order.asc("space"), Order.asc("service_name"))
 				.map((row, metadata) -> fromRow(row))
@@ -168,7 +172,8 @@ public class R2dbcServiceInstanceDetailRepository {
 	public Flux<ServiceInstanceDetail> findByDateRange(LocalDate start, LocalDate end) {
 		return client
 				.select()
-					.from("service_instance_detail")
+					.from(ServiceInstanceDetail.tableName())
+					.project(ServiceInstanceDetail.columnNames())
 					.matching(Criteria.where("last_updated").lessThanOrEquals(LocalDateTime.of(start, LocalTime.MIDNIGHT)).and("last_updated").greaterThan(LocalDateTime.of(end, LocalTime.MAX)))
 					.orderBy(Order.desc("last_updated"))
 				.map((row, metadata) -> fromRow(row))
