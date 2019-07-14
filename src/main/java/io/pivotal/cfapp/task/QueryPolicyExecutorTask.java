@@ -1,10 +1,13 @@
 package io.pivotal.cfapp.task;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -90,28 +93,48 @@ public class QueryPolicyExecutorTask implements PolicyExecutorTask {
     }
 
     protected Mono<String> executeQuery(Query query) {
-        return queryService
-                .executeQuery(query)
+        Flux<Tuple2<Row, RowMetadata>> results =
+            queryService
+                .executeQuery(query);
+        return results
                 .flatMap(tuple -> toCommaSeparatedValue(tuple))
                 .collectList()
-                .map(list -> String.join(System.getProperty("line.separator"), list));
+                .flatMap(columnNamesAndRows -> constructCsvOutput(columnNamesAndRows));
     }
 
-    private static Mono<String> toCommaSeparatedValue(Tuple2<Row, RowMetadata> tuple) {
+    private static Mono<String> constructCsvOutput(List<Tuple2<Collection<String>, String>> columnNamesAndRows) {
+        StringBuilder builder = new StringBuilder();
+        int i = 0;
+        for (Tuple2<Collection<String>, String> tuple: columnNamesAndRows) {
+            if (i == 0) {
+                List<String> headerRow = new ArrayList<>();
+                headerRow.addAll(tuple.getT1());
+                builder.append(String.join(",", headerRow));
+            }
+            builder.append(System.getProperty("line.separator"));
+            builder.append(tuple.getT2());
+            i++;
+        }
+        return Mono.just(builder.toString());
+    }
+    private static Mono<Tuple2<Collection<String>, String>> toCommaSeparatedValue(Tuple2<Row, RowMetadata> tuple) {
+        Collection<String> columnNames = tuple.getT2().getColumnNames();
         List<String> rawValueList =
-            tuple
-                .getT2()
-                    .getColumnNames()
-                        .stream()
-                            .map(column -> Defaults.getValueOrDefault(tuple.getT1().get(column).toString(), ""))
-                            .collect(Collectors.toList());
-        return Mono.just(String.join(",", rawValueList));
+            columnNames
+                .stream()
+                    .map(column -> Defaults.getValueOrDefault(tuple.getT1().get(column), "").toString())
+                    .collect(Collectors.toList());
+        return Mono.just(Tuples.of(columnNames, String.join(",", rawValueList)));
     }
 
     private static Map<String, String> toMap(List<Tuple2<String, String>> contents) {
         Map<String, String> result = new HashMap<>();
         for (Tuple2<String, String> c: contents) {
-            result.put(c.getT1(), c.getT2());
+            if (StringUtils.isNotBlank(c.getT2())) {
+                result.put(c.getT1(), c.getT2());
+            } else {
+                result.put(c.getT1(), "No results.");
+            }
         }
         return result;
     }
