@@ -8,6 +8,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import io.jsonwebtoken.lang.Collections;
 import io.pivotal.cfapp.service.StacksCache;
 import lombok.extern.slf4j.Slf4j;
 @Slf4j
@@ -19,6 +20,8 @@ public class PoliciesValidator {
     private static final String CHANGE_STACK_REJECTED_MESSAGE = "-- {} was rejected because stack-from and/or stack-to in options failed validation.";
     private static final String PARSING_REJECTED_MESSAGE = "-- {} was rejected because one or more of its properties could be parsed succesfully. {}";
     private static final String DUAL_TIME_CONSTRAINTS_REJECTED_MESSAGE = "-- {} was rejected because it contained both from-datetime and from-duration in options. Choose only one time constraint.";
+    private static final String QUERY_REJECTED_MESSAGE = "-- {} was rejected because it was either blank or did not start with SELECT.";
+    private static final String EMAIL_NOTIFICATION_TEMPLATE_REJECTED_MESSAGE = "-- {} was rejected because either the email template did not contain a valid email addresses for from/to, or the subject/body was blank, or the attachments format was not not a supported media type.";
 
     private final StacksCache stacksCache;
 
@@ -108,6 +111,36 @@ public class PoliciesValidator {
             } catch (DateTimeParseException dtpe) {
                 valid = false;
                 log.warn(PARSING_REJECTED_MESSAGE, policy.toString(), dtpe.getMessage());
+            }
+        }
+        if (valid == false) {
+            log.warn(REQUIRED_PROPERTIES_REJECTED_MESSAGE, policy.toString());
+        }
+        return valid;
+    }
+
+    public boolean validate(QueryPolicy policy) {
+        boolean hasId = Optional.ofNullable(policy.getId()).isPresent();
+        boolean hasQueries = Optional.ofNullable(policy.getQueries()).isPresent();
+        boolean hasEmailNotificationTemplate = Optional.ofNullable(policy.getEmailNotificationTemplate()).isPresent();
+        boolean valid = !hasId && hasQueries && hasEmailNotificationTemplate;
+        if (hasQueries) {
+            if (Collections.isEmpty(policy.getQueries())) {
+                valid = false;
+            } else {
+                for (Query q: policy.getQueries()) {
+                    if (!q.isValid()) {
+                        valid = false;
+                        log.warn(QUERY_REJECTED_MESSAGE, policy.toString());
+                        break;
+                    }
+                }
+            }
+        }
+        if (hasEmailNotificationTemplate) {
+            if (!policy.getEmailNotificationTemplate().isValid()) {
+                valid = false;
+                log.warn(EMAIL_NOTIFICATION_TEMPLATE_REJECTED_MESSAGE, policy.toString());
             }
         }
         if (valid == false) {

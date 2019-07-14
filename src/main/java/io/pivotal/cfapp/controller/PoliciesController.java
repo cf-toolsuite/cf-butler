@@ -36,6 +36,13 @@ public class PoliciesController {
 								.defaultIfEmpty(ResponseEntity.notFound().build());
 	}
 
+	@GetMapping(value = { "/policies/query/{id}" }, produces = MediaType.APPLICATION_JSON_VALUE)
+	public Mono<ResponseEntity<Policies>> obtainQueryPolicy(@PathVariable String id) {
+		return policiesService.findQueryPolicyById(id)
+								.map(p -> ResponseEntity.ok(p))
+								.defaultIfEmpty(ResponseEntity.notFound().build());
+	}
+
 	@GetMapping(value = { "/policies" }, produces = MediaType.APPLICATION_JSON_VALUE)
 	public Mono<ResponseEntity<Policies>> listAllPolicies() {
 		return policiesService.findAll()

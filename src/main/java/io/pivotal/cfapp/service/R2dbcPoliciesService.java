@@ -53,6 +53,11 @@ public class R2dbcPoliciesService implements PoliciesService {
 	}
 
 	@Override
+	public Mono<Policies> findQueryPolicyById(String id) {
+		return repo.findQueryPolicyById(id);
+	}
+
+	@Override
 	@Transactional
 	public Mono<Void> deleteApplicationPolicyById(String id) {
 		if (settings.isVersionManaged()) {
@@ -67,7 +72,16 @@ public class R2dbcPoliciesService implements PoliciesService {
 		if (settings.isVersionManaged()) {
 			throw new UnsupportedOperationException(UNSUPPORTED_OP_MESSAGE);
 		}
-		return repo.deleteServicePolicyById(id);
+		return repo.deleteServiceInstancePolicyById(id);
+	}
+
+	@Override
+	@Transactional
+	public Mono<Void> deleteQueryPolicyById(String id) {
+		if (settings.isVersionManaged()) {
+			throw new UnsupportedOperationException(UNSUPPORTED_OP_MESSAGE);
+		}
+		return repo.deleteQueryPolicyById(id);
 	}
 
 	@Override

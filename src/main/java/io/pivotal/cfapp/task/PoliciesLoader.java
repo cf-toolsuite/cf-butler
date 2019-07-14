@@ -18,6 +18,7 @@ import io.pivotal.cfapp.config.PoliciesSettings;
 import io.pivotal.cfapp.domain.ApplicationPolicy;
 import io.pivotal.cfapp.domain.Policies;
 import io.pivotal.cfapp.domain.PoliciesValidator;
+import io.pivotal.cfapp.domain.QueryPolicy;
 import io.pivotal.cfapp.domain.ServiceInstancePolicy;
 import io.pivotal.cfapp.event.StacksRetrievedEvent;
 import io.pivotal.cfapp.service.PoliciesService;
@@ -30,6 +31,7 @@ public class PoliciesLoader implements ApplicationListener<StacksRetrievedEvent>
 
 	private static final String APPLICATION_POLICY_SUFFIX = "-AP.json";
 	private static final String SERVICE_INSTANCE_POLICY_SUFFIX = "-SIP.json";
+	private static final String QUERY_POLICY_SUFFIX = "-QP.json";
 
 	private final GitClient client;
 	private final PoliciesService service;
@@ -63,6 +65,7 @@ public class PoliciesLoader implements ApplicationListener<StacksRetrievedEvent>
 			Repository repo = client.getRepository(settings.getUri());
 			List<ApplicationPolicy> applicationPolicies = new ArrayList<>();
 			List<ServiceInstancePolicy> serviceInstancePolicies = new ArrayList<>();
+			List<QueryPolicy> queryPolicies = new ArrayList<>();
 			settings
 				.getFilePaths()
 					.stream()
@@ -81,6 +84,11 @@ public class PoliciesLoader implements ApplicationListener<StacksRetrievedEvent>
 								if (validator.validate(policy)) {
 									serviceInstancePolicies.add(policy);
 								}
+							} else if (fp.endsWith(QUERY_POLICY_SUFFIX)) {
+								QueryPolicy policy = mapper.readValue(fileContent, QueryPolicy.class);
+								if (validator.validate(policy)) {
+									queryPolicies.add(policy);
+								}
 							} else {
 								log.warn(
 										"Policy file {} does not adhere to naming convention. File name must end with either {} or {}.",
@@ -92,7 +100,7 @@ public class PoliciesLoader implements ApplicationListener<StacksRetrievedEvent>
 					});
 			service
 				.deleteAll()
-				.then(service.save(new Policies(applicationPolicies, serviceInstancePolicies)))
+				.then(service.save(new Policies(applicationPolicies, serviceInstancePolicies, queryPolicies)))
 				.subscribe(
 					result -> {
 						log.info("PoliciesLoader completed");

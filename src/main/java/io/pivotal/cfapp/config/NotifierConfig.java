@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.javamail.JavaMailSender;
 
+import io.pivotal.cfapp.notifier.EmailNotifier;
 import io.pivotal.cfapp.notifier.JavaMailNotifier;
 import io.pivotal.cfapp.notifier.SendGridNotifier;
 
@@ -22,7 +23,7 @@ public class NotifierConfig {
     static class MailConfig {
 
         @Bean
-        public JavaMailNotifier javaMailNotifier(JavaMailSender javaMailSender) {
+        public EmailNotifier javaMailNotifier(JavaMailSender javaMailSender) {
             return new JavaMailNotifier(javaMailSender);
         }
     }
@@ -33,7 +34,7 @@ public class NotifierConfig {
     static class SendGridConfig {
 
         @Bean
-        public SendGridNotifier sendGridNotifier(SendGrid sendGrid) {
+        public EmailNotifier sendGridNotifier(SendGrid sendGrid) {
             return new SendGridNotifier(sendGrid);
         }
     }
