@@ -1,5 +1,7 @@
 package io.pivotal.cfapp.domain;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -7,15 +9,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.http.InvalidMediaTypeException;
-import org.springframework.http.MediaType;
 
 import lombok.Builder;
 import lombok.Getter;
 
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({ "from", "to", "subject", "body", "attachmentsFormat" })
+@JsonPropertyOrder({ "from", "to", "subject", "body" })
 @Getter
 public class EmailNotificationTemplate {
 
@@ -23,7 +23,7 @@ public class EmailNotificationTemplate {
     private String from;
 
     @JsonProperty("to")
-    private String to;
+    private List<String> to;
 
     @JsonProperty("subject")
     private String subject;
@@ -31,38 +31,34 @@ public class EmailNotificationTemplate {
     @JsonProperty("body")
     private String body;
 
-    @JsonProperty("attachmentsFormat")
-    private String attachmentsFormat;
-
     @JsonCreator
     public EmailNotificationTemplate(
         @JsonProperty("from") String from,
-        @JsonProperty("to") String to,
+        @JsonProperty("to") List<String> to,
         @JsonProperty("subject") String subject,
-        @JsonProperty("body") String body,
-        @JsonProperty("attachmentsFormat") String attachmentsFormat) {
+        @JsonProperty("body") String body
+    ) {
         this.from = from;
         this.to = to;
         this.subject = subject;
         this.body = body;
-        this.attachmentsFormat = attachmentsFormat;
     }
 
     @JsonIgnore
     public boolean isValid() {
         return EmailValidator.isValid(from)
-                && EmailValidator.isValid(to)
+                && areRecipientsValid(to)
                 && StringUtils.isNotBlank(subject)
-                && StringUtils.isNotBlank(body)
-                && isMediaType(attachmentsFormat);
+                && StringUtils.isNotBlank(body);
     }
 
-    private static boolean isMediaType(String value) {
+    private static boolean areRecipientsValid(List<String> recipients) {
         boolean result = true;
-        try {
-            MediaType.valueOf(value);
-        } catch (InvalidMediaTypeException imte) {
-            result = false;
+        for (String recipient: recipients) {
+            if (!EmailValidator.isValid(recipient)) {
+                result = false;
+                break;
+            }
         }
         return result;
     }

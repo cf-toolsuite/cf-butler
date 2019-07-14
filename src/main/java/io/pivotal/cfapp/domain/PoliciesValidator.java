@@ -20,8 +20,8 @@ public class PoliciesValidator {
     private static final String CHANGE_STACK_REJECTED_MESSAGE = "-- {} was rejected because stack-from and/or stack-to in options failed validation.";
     private static final String PARSING_REJECTED_MESSAGE = "-- {} was rejected because one or more of its properties could be parsed succesfully. {}";
     private static final String DUAL_TIME_CONSTRAINTS_REJECTED_MESSAGE = "-- {} was rejected because it contained both from-datetime and from-duration in options. Choose only one time constraint.";
-    private static final String QUERY_REJECTED_MESSAGE = "-- {} was rejected because it was either blank or did not start with SELECT.";
-    private static final String EMAIL_NOTIFICATION_TEMPLATE_REJECTED_MESSAGE = "-- {} was rejected because either the email template did not contain a valid email addresses for from/to, or the subject/body was blank, or the attachments format was not not a supported media type.";
+    private static final String QUERY_REJECTED_MESSAGE = "-- {} was rejected because either name or sql was blank or sql did not start with SELECT.";
+    private static final String EMAIL_NOTIFICATION_TEMPLATE_REJECTED_MESSAGE = "-- {} was rejected because either the email template did not contain valid email addresses for from/to or the subject/body was blank.";
 
     private final StacksCache stacksCache;
 

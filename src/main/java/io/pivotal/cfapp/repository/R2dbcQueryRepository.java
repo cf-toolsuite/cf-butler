@@ -6,7 +6,10 @@ import org.springframework.stereotype.Repository;
 
 import io.pivotal.cfapp.domain.Query;
 import io.r2dbc.spi.Row;
+import io.r2dbc.spi.RowMetadata;
 import reactor.core.publisher.Flux;
+import reactor.util.function.Tuple2;
+import reactor.util.function.Tuples;
 
 @Repository
 public class R2dbcQueryRepository {
@@ -18,10 +21,10 @@ public class R2dbcQueryRepository {
         this.client = client;
     }
 
-    public Flux<Row> executeQuery(Query query) {
+    public Flux<Tuple2<Row, RowMetadata>> executeQuery(Query query) {
         return client
                 .execute(query.getSql())
-                .map((row, metadata) -> row)
+                .map((row, metadata) -> Tuples.of(row, metadata))
                 .all();
     }
 }

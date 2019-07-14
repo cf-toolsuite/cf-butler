@@ -3,6 +3,7 @@ package io.pivotal.cfapp.domain;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -130,11 +131,10 @@ public class PoliciesValidatorTest {
         EmailNotificationTemplate template =
             EmailNotificationTemplate
                 .builder()
-                    .to("bruce@wayneenterprises.com")
+                    .to(List.of("bruce@wayneenterprises.com"))
                     .from("tony@starkventures.com")
                     .subject("Contemplating K8s")
                     .body("Here's a boatload of containers")
-                    .attachmentsFormat("plain/text")
                 .build();
         QueryPolicy policy =
             QueryPolicy
@@ -159,7 +159,7 @@ public class PoliciesValidatorTest {
         EmailNotificationTemplate template =
             EmailNotificationTemplate
                 .builder()
-                    .to("bruce@wayneenterprises.com")
+                    .to(List.of("bruce@wayneenterprises.com"))
                     .from("tony@starkventures.com")
                     .subject("Ha ha")
                     .body("You got nothing")

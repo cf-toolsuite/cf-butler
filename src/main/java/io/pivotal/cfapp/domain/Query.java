@@ -37,6 +37,8 @@ public class Query {
     }
     @JsonIgnore
     public boolean isValid() {
-        return StringUtils.isNotBlank(sql) && sql.toLowerCase().startsWith("select");
+        return StringUtils.isNotBlank(name)
+                && StringUtils.isNotBlank(sql)
+                && sql.toLowerCase().startsWith("select");
     }
 }

@@ -6,8 +6,10 @@ import org.springframework.stereotype.Service;
 import io.pivotal.cfapp.domain.Query;
 import io.pivotal.cfapp.repository.R2dbcQueryRepository;
 import io.r2dbc.spi.Row;
+import io.r2dbc.spi.RowMetadata;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
+import reactor.util.function.Tuple2;
 
 @Slf4j
 @Service
@@ -21,7 +23,7 @@ public class R2dbcQueryService implements QueryService {
     }
 
     @Override
-    public Flux<Row> executeQuery(Query query) {
+    public Flux<Tuple2<Row, RowMetadata>> executeQuery(Query query) {
         return repo
                 .executeQuery(query)
                 .onErrorContinue(
