@@ -104,7 +104,10 @@ public class PoliciesLoader implements ApplicationListener<StacksRetrievedEvent>
 				.subscribe(
 					result -> {
 						log.info("PoliciesLoader completed");
-						log.info(String.format("-- Loaded %s application policies and %s service instance policies.", result.getApplicationPolicies().size(), result.getServiceInstancePolicies().size()));
+						log.info(
+							String.format("-- Loaded %d application policies, %d service instance policies, and %d query policies.",
+								result.getApplicationPolicies().size(), result.getServiceInstancePolicies().size(), result.getQueryPolicies().size())
+						);
 					},
 					error -> {
 						log.error("PoliciesLoader terminated with error", error);

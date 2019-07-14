@@ -2,6 +2,7 @@ package io.pivotal.cfapp.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import io.pivotal.cfapp.domain.Query;
 import io.pivotal.cfapp.repository.R2dbcQueryRepository;
@@ -23,6 +24,7 @@ public class R2dbcQueryService implements QueryService {
     }
 
     @Override
+    @Transactional
     public Flux<Tuple2<Row, RowMetadata>> executeQuery(Query query) {
         return repo
                 .executeQuery(query)

@@ -5,7 +5,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.nimbusds.oauth2.sdk.util.StringUtils;
+
+import org.apache.commons.lang3.StringUtils;
 
 import lombok.Builder;
 import lombok.Getter;
