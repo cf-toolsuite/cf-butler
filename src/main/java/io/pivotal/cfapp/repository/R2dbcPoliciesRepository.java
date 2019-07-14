@@ -205,6 +205,32 @@ public class R2dbcPoliciesRepository {
 					.flatMap(p -> p.isEmpty() ? Mono.empty(): Mono.just(p));
 	}
 
+	public Mono<Policies> findAllQueryPolicies() {
+		return
+			client
+				.select()
+				.from(QueryPolicy.tableName())
+				.project(QueryPolicy.columnNames())
+				.map(
+					(row, metadata) ->
+						QueryPolicy
+							.builder()
+								.pk(row.get("pk", Long.class))
+								.id(row.get("id", String.class))
+								.description(Defaults.getValueOrDefault(row.get("description", String.class), ""))
+								.queries(readQueries(row.get("queries", String.class) == null ? "[]" : row.get("queries", String.class)))
+								.emailNotificationTemplate(
+									readEmailNotificationTemplate(
+										row.get("email_notification_template", String.class) == null
+											? "{}"
+											: row.get("email_notification_template", String.class)))
+							.build())
+				.all()
+				.collectList()
+				.map(qps -> new Policies(Collections.emptyList(), Collections.emptyList(), qps))
+				.flatMap(p -> p.isEmpty() ? Mono.empty(): Mono.just(p));
+	}
+
 	public Mono<Void> deleteApplicationPolicyById(String id) {
 		return
 			Flux

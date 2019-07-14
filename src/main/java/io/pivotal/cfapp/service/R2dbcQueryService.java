@@ -1,0 +1,30 @@
+package io.pivotal.cfapp.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import io.pivotal.cfapp.domain.Query;
+import io.pivotal.cfapp.repository.R2dbcQueryRepository;
+import io.r2dbc.spi.Row;
+import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Flux;
+
+@Slf4j
+@Service
+public class R2dbcQueryService implements QueryService {
+
+    private final R2dbcQueryRepository repo;
+
+    @Autowired
+    public R2dbcQueryService(R2dbcQueryRepository repo) {
+        this.repo = repo;
+    }
+
+    @Override
+    public Flux<Row> executeQuery(Query query) {
+        return repo
+                .executeQuery(query)
+                .onErrorContinue(
+                    (ex, data) -> log.error(String.format("Problem executing query %s.", query.getSql()), ex));
+    }
+}

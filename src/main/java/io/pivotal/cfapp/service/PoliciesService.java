@@ -12,6 +12,7 @@ public interface PoliciesService {
 	Mono<Policies> findServiceInstancePolicyById(String id);
 	Mono<Policies> findQueryPolicyById(String id);
 	Mono<Policies> findAll();
+	Mono<Policies> findAllQueryPolicies();
 	Mono<Void> deleteApplicationPolicyById(String id);
 	Mono<Void> deleteServiceInstancePolicyById(String id);
 	Mono<Void> deleteQueryPolicyById(String id);

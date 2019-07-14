@@ -58,6 +58,11 @@ public class R2dbcPoliciesService implements PoliciesService {
 	}
 
 	@Override
+	public Mono<Policies> findAllQueryPolicies() {
+		return repo.findAllQueryPolicies();
+	}
+
+	@Override
 	@Transactional
 	public Mono<Void> deleteApplicationPolicyById(String id) {
 		if (settings.isVersionManaged()) {
