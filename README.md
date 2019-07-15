@@ -387,28 +387,22 @@ Paste the value as the value for `CF_REFRESH-TOKEN` in your `config/secrets.json
 
 Please review the [manifest.yml](manifest.yml) before deploying.
 
-Get into the scripts directory
-
-```
-cd scripts
-```
-
 Deploy the app (w/ a user-provided service instance vending secrets)
 
 ```
-./deploy.sh
+./scripts/deploy.sh
 ```
 
 Deploy the app (w/ a Credhub service instance vending secrets)
 
 ```
-./deploy.sh --with-credhub
+./scripts/deploy.sh --with-credhub
 ```
 
 Shutdown and destroy the app and service instances
 
 ```
-./destroy.sh
+./scripts/destroy.sh
 ```
 
 > Note: If you are seeing [OutOfMemory exceptions](https://dzone.com/articles/troubleshooting-problems-with-native-off-heap-memo) shortly after startup you may need to [cf scale](https://docs.run.pivotal.io/devguide/deploy-apps/cf-scale.html#vertical) the available memory for large foundations.
