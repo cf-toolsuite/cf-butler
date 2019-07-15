@@ -833,6 +833,10 @@ GET /policies/report
 ```
 > Produces `text/plain` historical output detailing what policies had an effect on applications and service instances.  (Does not track execution of query policies).
 
+```
+GET /policies/report?start={startDate}&end={endDate}
+```
+> Produces `text/plain` historical output detailing what policies had an effect on applications and service instances constrained by date range.  `{startDate}` must be before `{endDate}`.  Both parameters are [LocalDate](https://docs.oracle.com/javase/8/docs/api/java/time/LocalDate.html).  (Does not track execution of query policies).
 
 ## Credits
 

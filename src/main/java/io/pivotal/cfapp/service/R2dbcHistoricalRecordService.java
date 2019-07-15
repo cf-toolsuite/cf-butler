@@ -1,5 +1,7 @@
 package io.pivotal.cfapp.service;
 
+import java.time.LocalDate;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +35,11 @@ public class R2dbcHistoricalRecordService implements HistoricalRecordService {
 	@Override
 	public Flux<HistoricalRecord> findAll() {
 		return repo.findAll();
+	}
+
+	@Override
+	public Flux<HistoricalRecord> findByDateRange(LocalDate start, LocalDate end) {
+		return repo.findByDateRange(start, end);
 	}
 
 }

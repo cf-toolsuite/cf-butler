@@ -132,7 +132,7 @@ public class R2dbcAppDetailRepository {
 				.select()
 					.from(AppDetail.tableName())
 					.project(AppDetail.columnNames())
-					.matching(Criteria.where("last_pushed").lessThanOrEquals(LocalDateTime.of(start, LocalTime.MIDNIGHT)).and("last_pushed").greaterThan(LocalDateTime.of(end, LocalTime.MAX)))
+					.matching(Criteria.where("last_pushed").lessThanOrEquals(LocalDateTime.of(end, LocalTime.MAX)).and("last_pushed").greaterThan(LocalDateTime.of(start, LocalTime.MIDNIGHT)))
 					.orderBy(Order.desc("last_pushed"))
 				.map((row, metadata) -> fromRow(row))
 				.all();
