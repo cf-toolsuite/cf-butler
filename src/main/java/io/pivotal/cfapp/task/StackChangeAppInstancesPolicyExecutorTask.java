@@ -12,8 +12,6 @@ import org.cloudfoundry.client.v3.Lifecycle;
 import org.cloudfoundry.client.v3.LifecycleData;
 import org.cloudfoundry.client.v3.LifecycleType;
 import org.cloudfoundry.client.v3.Relationship;
-import org.cloudfoundry.client.v3.applications.GetApplicationCurrentDropletRequest;
-import org.cloudfoundry.client.v3.applications.GetApplicationCurrentDropletResponse;
 import org.cloudfoundry.client.v3.applications.SetApplicationCurrentDropletRequest;
 import org.cloudfoundry.client.v3.applications.SetApplicationCurrentDropletResponse;
 import org.cloudfoundry.client.v3.applications.UpdateApplicationRequest;
@@ -100,6 +98,7 @@ public class StackChangeAppInstancesPolicyExecutorTask implements PolicyExecutor
 					.flux()
 					.flatMap(p -> Flux.fromIterable(p.getApplicationPolicies()))
 					.flatMap(ap -> Flux.concat(appInfoService.findByApplicationPolicy(ap, false), appInfoService.findByApplicationPolicy(ap, true)))
+					.distinct()
 					.filter(wl -> isWhitelisted(wl.getT2(), wl.getT1().getOrganization()))
 					.filter(bl -> isBlacklisted(bl.getT1().getOrganization()))
 					.filter(from -> from.getT1().getStack().equals(from.getT2().getOption("stack-from", String.class)))
@@ -113,7 +112,6 @@ public class StackChangeAppInstancesPolicyExecutorTask implements PolicyExecutor
 
     protected Mono<HistoricalRecord> stackChangeApplication(ApplicationPolicy policy, AppDetail detail) {
 		return assignTargetStack(policy, detail)
-				.then(getCurrentDroplet(detail))
 				.flatMap(droplet -> stagePackage(droplet, detail))
 				.flatMap(build -> waitForStagedBuild(build, detail, null))
 				.flatMap(build -> setDroplet(build, detail))
@@ -157,19 +155,8 @@ public class StackChangeAppInstancesPolicyExecutorTask implements PolicyExecutor
 									.build());
 	}
 
-	private Mono<GetApplicationCurrentDropletResponse> getCurrentDroplet(AppDetail detail) {
-		return DefaultCloudFoundryOperations.builder()
-                .from(opsClient)
-                .organization(detail.getOrganization())
-                .space(detail.getSpace())
-                .build()
-				.getCloudFoundryClient()
-					.applicationsV3()
-						.getCurrentDroplet(GetApplicationCurrentDropletRequest.builder().applicationId(detail.getAppId()).build()); 
-	}
-
-	private Mono<CreateBuildResponse> stagePackage(GetApplicationCurrentDropletResponse droplet, AppDetail detail) {
-		Relationship pkg = Relationship.builder().id(droplet.getLinks().get("package").getHref()).build();
+	private Mono<CreateBuildResponse> stagePackage(UpdateApplicationResponse updatedApplication, AppDetail detail) {
+		Relationship pkg = Relationship.builder().id(updatedApplication.getLinks().get("packages").getHref()).build();
 		log.info("Attempting to stage package {}", pkg);
 		return DefaultCloudFoundryOperations.builder()
                 .from(opsClient)
@@ -178,7 +165,7 @@ public class StackChangeAppInstancesPolicyExecutorTask implements PolicyExecutor
                 .build()
 				.getCloudFoundryClient()
 					.builds()
-						.create(CreateBuildRequest.builder().getPackage(pkg).build());
+						.create(CreateBuildRequest.builder().lifecycle(updatedApplication.getLifecycle()).getPackage(pkg).build());
 	}
 
 	private Mono<GetBuildResponse> waitForStagedBuild(CreateBuildResponse build, AppDetail detail, Duration stagingTimeout) {
