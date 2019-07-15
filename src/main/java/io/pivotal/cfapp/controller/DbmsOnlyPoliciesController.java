@@ -43,6 +43,12 @@ public class DbmsOnlyPoliciesController {
 								.map(p -> ResponseEntity.ok(p));
 	}
 
+	@DeleteMapping("/policies/query/{id}")
+	public Mono<ResponseEntity<Void>> deleteQueryPolicy(@PathVariable String id) {
+		return policiesService.deleteQueryPolicyById(id)
+								.map(p -> ResponseEntity.ok(p));
+	}
+
 	@DeleteMapping("/policies")
 	public Mono<ResponseEntity<Void>> deleteAllPolicies() {
 		return policiesService.deleteAll()

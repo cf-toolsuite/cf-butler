@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
+import io.pivotal.cfapp.event.TkRetrievedEvent;
 import io.pivotal.cfapp.service.UsageCache;
 import io.pivotal.cfapp.service.UsageService;
 import lombok.extern.slf4j.Slf4j;

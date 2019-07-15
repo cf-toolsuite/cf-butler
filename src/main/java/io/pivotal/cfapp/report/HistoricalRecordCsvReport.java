@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 import io.pivotal.cfapp.config.ButlerSettings;
 import io.pivotal.cfapp.domain.HistoricalRecord;
-import io.pivotal.cfapp.task.HistoricalRecordRetrievedEvent;
+import io.pivotal.cfapp.event.HistoricalRecordRetrievedEvent;
 
 public class HistoricalRecordCsvReport {
 

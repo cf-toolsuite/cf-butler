@@ -81,12 +81,37 @@ management:
     prometheus:
       enabled: true
 
+# Options are: none, java-mail or sendgrid
+notification:
+  engine: none
+
 spring:
   r2dbc:
     url: r2dbc:h2:mem:///cf-butler?options=DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false
     name: cf-butler
     username: sa
     password: 
+
+# Java Mail
+# Reset the values for spring.mail.username, spring.mail.password
+# Configuration below is set up to work w/ a Gmail account
+# @see http://www.baeldung.com/spring-email
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: replace_me
+    password: replace_me
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+# SendGrid API key (alternative to username/password).
+  sendgrid:
+    api-key: replace_me
 
 ---
 ## Assumes naming convention for secrets service
@@ -97,10 +122,28 @@ spring:
   credhub:
     url: https://credhub.service.cf.internal:8844
 
+  mail:
+    host: ${vcap.services.cf-butler-secrets.credentials.MAIL_HOST:}
+    port: ${vcap.services.cf-butler-secrets.credentials.MAIL_PORT:}
+    username: ${vcap.services.cf-butler-secrets.credentials.MAIL_USERNAME:}
+    password: ${vcap.services.cf-butler-secrets.credentials.MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: ${vcap.services.cf-butler-secrets.credentials.MAIL_SMTP_AUTH_ENABLED:true}
+          starttls:
+            enable: ${vcap.services.cf-butler-secrets.credentials.MAIL_SMTP_STARTTLS_ENABLED:true}
+
+  sendgrid:
+    api-key: ${vcap.services.cf-butler-secrets.credentials.SENDGRID_API-KEY:}
+
   r2dbc:
     url: ${vcap.services.cf-butler-secrets.credentials.R2DBC_URL:r2dbc:h2:mem:///cf-butler?options=DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false}
     username: ${vcap.services.cf-butler-secrets.credentials.R2DBC_USERNAME:sa}
     password: ${vcap.services.cf-butler-secrets.credentials.R2DBC_PASSWORD:}
+
+notification:
+  engine: ${vcap.services.cf-butler-secrets.credentials.NOTIFICATION_ENGINE:none}
 
 cf:
   apiHost: ${vcap.services.cf-butler-secrets.credentials.CF_API-HOST}

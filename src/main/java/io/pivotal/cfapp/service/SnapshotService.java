@@ -16,9 +16,9 @@ import io.pivotal.cfapp.domain.UserCounts;
 import io.pivotal.cfapp.report.AppDetailCsvReport;
 import io.pivotal.cfapp.report.ServiceInstanceDetailCsvReport;
 import io.pivotal.cfapp.report.UserAccountsCsvReport;
-import io.pivotal.cfapp.task.AppDetailRetrievedEvent;
-import io.pivotal.cfapp.task.ServiceInstanceDetailRetrievedEvent;
-import io.pivotal.cfapp.task.UserAccountsRetrievedEvent;
+import io.pivotal.cfapp.event.AppDetailRetrievedEvent;
+import io.pivotal.cfapp.event.ServiceInstanceDetailRetrievedEvent;
+import io.pivotal.cfapp.event.UserAccountsRetrievedEvent;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 

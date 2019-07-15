@@ -8,7 +8,7 @@ import io.pivotal.cfapp.config.ButlerSettings;
 import io.pivotal.cfapp.report.ServiceInstanceDetailCsvReport;
 import io.pivotal.cfapp.service.TkService;
 import io.pivotal.cfapp.service.TkServiceUtil;
-import io.pivotal.cfapp.task.ServiceInstanceDetailRetrievedEvent;
+import io.pivotal.cfapp.event.ServiceInstanceDetailRetrievedEvent;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j

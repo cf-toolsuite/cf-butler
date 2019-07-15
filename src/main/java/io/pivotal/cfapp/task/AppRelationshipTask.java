@@ -12,6 +12,8 @@ import org.springframework.util.CollectionUtils;
 import io.pivotal.cfapp.domain.AppRelationship;
 import io.pivotal.cfapp.domain.AppRelationshipRequest;
 import io.pivotal.cfapp.domain.ServiceInstanceDetail;
+import io.pivotal.cfapp.event.AppRelationshipRetrievedEvent;
+import io.pivotal.cfapp.event.ServiceInstanceDetailRetrievedEvent;
 import io.pivotal.cfapp.service.AppRelationshipService;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;

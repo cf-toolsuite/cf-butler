@@ -170,6 +170,7 @@ public class StackChangeAppInstancesPolicyExecutorTask implements PolicyExecutor
 
 	private Mono<CreateBuildResponse> stagePackage(GetApplicationCurrentDropletResponse droplet, AppDetail detail) {
 		Relationship pkg = Relationship.builder().id(droplet.getLinks().get("package").getHref()).build();
+		log.info("Attempting to stage package {}", pkg);
 		return DefaultCloudFoundryOperations.builder()
                 .from(opsClient)
                 .organization(detail.getOrganization())

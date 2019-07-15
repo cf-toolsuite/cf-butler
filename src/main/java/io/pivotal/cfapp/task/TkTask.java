@@ -6,6 +6,8 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import io.pivotal.cfapp.event.DatabaseCreatedEvent;
+import io.pivotal.cfapp.event.TkRetrievedEvent;
 import io.pivotal.cfapp.service.TkService;
 import lombok.extern.slf4j.Slf4j;
 

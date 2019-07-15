@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 import io.pivotal.cfapp.config.ButlerSettings;
 import io.pivotal.cfapp.domain.ServiceInstanceDetail;
-import io.pivotal.cfapp.task.ServiceInstanceDetailRetrievedEvent;
+import io.pivotal.cfapp.event.ServiceInstanceDetailRetrievedEvent;
 
 public class ServiceInstanceDetailCsvReport {
 

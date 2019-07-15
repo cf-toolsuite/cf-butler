@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import io.pivotal.cfapp.config.ButlerSettings;
 import io.pivotal.cfapp.report.HistoricalRecordCsvReport;
 import io.pivotal.cfapp.service.HistoricalRecordService;
-import io.pivotal.cfapp.task.HistoricalRecordRetrievedEvent;
+import io.pivotal.cfapp.event.HistoricalRecordRetrievedEvent;
 import reactor.core.publisher.Mono;
 
 @RestController

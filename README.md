@@ -156,6 +156,42 @@ Have a look at [secrets.pws.json](samples/secrets.pws.json) for an example of ho
 
 On startup `cf-butler` will read files from the repo and cache in a database.  Each policy's id will be set to the commit id.
 
+#### Query policies
+
+Query policies are useful when you want to step out side the canned snapshot reporting capabilties and leverage the underlying [schema](https://github.com/pacphi/cf-butler/tree/master/src/main/resources/db) to author one or more of your own queries and have the results delivered as comma-separated value attachments using a defined email notification [template](https://github.com/pacphi/cf-butler/blob/master/src/main/java/io/pivotal/cfapp/domain/EmailNotificationTemplate.java).
+
+As mentioned previously the policy file must adhere to a naming convention
+
+* a filename ending with `-QP.json` encapsulates an individual [QueryPolicy](src/main/java/io/pivotal/cfapp/domain/QueryPolicy.java)
+
+If you intend to deploy query policies you must also configure the `notification.engine` property.  You can define it in your
+
+application-{env}.yml
+
+```
+notification:
+  engine: <engine>
+```
+
+or
+
+secrets-{env}.json
+
+```
+  "NOTIFICATION_ENGINE": "<engine>"
+```
+
+> Replace `<engine>` above with one of either `java-mail`, or `sendgrid`
+
+Furthermore, you will need to define additional properties depending on which engine you chose.  Checkout the secrets profile in [application.yml](https://github.com/pacphi/cf-butler/blob/master/src/main/resources/application.yml) to get to know what they are.
+
+E.g, if you intended to use [sendgrid](https://www.sendgrid.com) as your email notification engine then your secrets-{env}.yml might contain
+
+```
+  "NOTIFICATION_ENGINE": "sendgrid",
+  "SENDGRID_API-KEY": "replace_me"
+```
+
 ### To set the operations schedule
 
 Update the value of the `cron` properties in `application.yml`.  Consult this [article](https://www.baeldung.com/spring-scheduled-tasks) and the [Javadoc](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/scheduling/annotation/Scheduled.html#cron--) to understand how to tune it for your purposes.
