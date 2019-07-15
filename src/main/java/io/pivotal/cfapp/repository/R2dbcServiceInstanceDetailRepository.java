@@ -174,7 +174,7 @@ public class R2dbcServiceInstanceDetailRepository {
 				.select()
 					.from(ServiceInstanceDetail.tableName())
 					.project(ServiceInstanceDetail.columnNames())
-					.matching(Criteria.where("last_updated").lessThanOrEquals(LocalDateTime.of(start, LocalTime.MIDNIGHT)).and("last_updated").greaterThan(LocalDateTime.of(end, LocalTime.MAX)))
+					.matching(Criteria.where("last_updated").lessThanOrEquals(LocalDateTime.of(end, LocalTime.MAX)).and("last_updated").greaterThan(LocalDateTime.of(start, LocalTime.MIDNIGHT)))
 					.orderBy(Order.desc("last_updated"))
 				.map((row, metadata) -> fromRow(row))
 				.all();

@@ -1,11 +1,15 @@
 package io.pivotal.cfapp.repository;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.r2dbc.core.DatabaseClient;
 import org.springframework.data.r2dbc.core.DatabaseClient.GenericInsertSpec;
+import org.springframework.data.r2dbc.query.Criteria;
 import org.springframework.stereotype.Repository;
 
 import io.pivotal.cfapp.domain.HistoricalRecord;
@@ -53,6 +57,18 @@ public class R2dbcHistoricalRecordRepository {
 				.select()
 				.from(HistoricalRecord.tableName())
 				.project(HistoricalRecord.columnNames())
+				.orderBy(Order.desc("transaction_datetime"))
+				.as(HistoricalRecord.class)
+				.fetch()
+				.all();
+	}
+
+	public Flux<HistoricalRecord> findByDateRange(LocalDate start, LocalDate end) {
+		return client
+				.select()
+				.from(HistoricalRecord.tableName())
+				.project(HistoricalRecord.columnNames())
+				.matching(Criteria.where("transaction_datetime").lessThanOrEquals(LocalDateTime.of(end, LocalTime.MAX)).and("transaction_datetime").greaterThan(LocalDateTime.of(start, LocalTime.MIDNIGHT)))
 				.orderBy(Order.desc("transaction_datetime"))
 				.as(HistoricalRecord.class)
 				.fetch()
