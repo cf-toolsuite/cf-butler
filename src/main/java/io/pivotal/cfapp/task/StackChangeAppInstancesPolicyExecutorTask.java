@@ -21,6 +21,10 @@ import org.cloudfoundry.client.v3.builds.CreateBuildRequest;
 import org.cloudfoundry.client.v3.builds.CreateBuildResponse;
 import org.cloudfoundry.client.v3.builds.GetBuildRequest;
 import org.cloudfoundry.client.v3.builds.GetBuildResponse;
+import org.cloudfoundry.client.v3.packages.GetPackageResponse;
+import org.cloudfoundry.client.v3.packages.ListPackagesRequest;
+import org.cloudfoundry.client.v3.packages.PackageResource;
+import org.cloudfoundry.client.v3.packages.PackageState;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.operations.applications.RestartApplicationRequest;
 import org.cloudfoundry.util.DelayTimeoutException;
@@ -112,7 +116,8 @@ public class StackChangeAppInstancesPolicyExecutorTask implements PolicyExecutor
 
     protected Mono<HistoricalRecord> stackChangeApplication(ApplicationPolicy policy, AppDetail detail) {
 		return assignTargetStack(policy, detail)
-				.flatMap(droplet -> stagePackage(droplet, detail))
+				.flatMap(updatedApp -> getPackage(updatedApp, detail))
+				.flatMap(pkg -> createBuild(pkg, detail))
 				.flatMap(build -> waitForStagedBuild(build, detail, null))
 				.flatMap(build -> setDroplet(build, detail))
 				.flatMap(build -> restartApp(detail))
@@ -155,9 +160,24 @@ public class StackChangeAppInstancesPolicyExecutorTask implements PolicyExecutor
 									.build());
 	}
 
-	private Mono<CreateBuildResponse> stagePackage(UpdateApplicationResponse updatedApplication, AppDetail detail) {
-		Relationship pkg = Relationship.builder().id(updatedApplication.getLinks().get("packages").getHref()).build();
-		log.info("Attempting to stage package {}", pkg);
+	private Mono<PackageResource> getPackage(UpdateApplicationResponse updatedApplication, AppDetail detail) {
+		log.info("Attempting to fetch package from {}", updatedApplication.getLinks().get("packages").getHref());
+		return DefaultCloudFoundryOperations.builder()
+                .from(opsClient)
+                .organization(detail.getOrganization())
+                .space(detail.getSpace())
+                .build()
+				.getCloudFoundryClient()
+					.packages()
+						.list(ListPackagesRequest.builder().applicationId(detail.getAppId()).build())
+						.flatMapMany(response -> Flux.fromIterable(response.getResources()))
+						.filter(resource -> resource.getState().equals(PackageState.READY))
+						.next();
+	}
+
+	private Mono<CreateBuildResponse> createBuild(PackageResource packageResource, AppDetail detail) {
+		log.info("Attempting to create build with package {}", packageResource);
+		Relationship pkg = Relationship.builder().id(packageResource.getId()).build();
 		return DefaultCloudFoundryOperations.builder()
                 .from(opsClient)
                 .organization(detail.getOrganization())
@@ -165,7 +185,7 @@ public class StackChangeAppInstancesPolicyExecutorTask implements PolicyExecutor
                 .build()
 				.getCloudFoundryClient()
 					.builds()
-						.create(CreateBuildRequest.builder().lifecycle(updatedApplication.getLifecycle()).getPackage(pkg).build());
+						.create(CreateBuildRequest.builder().getPackage(pkg).build());
 	}
 
 	private Mono<GetBuildResponse> waitForStagedBuild(CreateBuildResponse build, AppDetail detail, Duration stagingTimeout) {
