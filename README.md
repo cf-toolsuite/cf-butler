@@ -725,10 +725,23 @@ POST /policies
   "application-policies": [
     {
       "description": "Remove stopped applications that are older than some date/time from now and restricted to whitelisted organizations",
+      "operation":"delete",
       "state": "stopped",
       "options": {
         "from-datime": "2019-07-01T12:30:00",
         "delete-services": true
+      },
+      "organization-whitelist": [
+        "zoo-labs"
+      ]
+    },
+    {
+      "description": "Scale running applications restricted to whitelisted organizations",
+      "operation": "scale-instances",
+      "state": "started",
+      "options": {
+        "instances-from": 1,
+        "instances-to": 2
       },
       "organization-whitelist": [
         "zoo-labs"
@@ -738,6 +751,7 @@ POST /policies
   "service-instance-policies": [
     {
       "description": "Remove orphaned services that are older than some duration from now and restricted to whitelisted organizations",
+      "operation":"delete",
       "options": {
         "from-duration": "P1D"
       },
@@ -745,10 +759,32 @@ POST /policies
         "zoo-labs"
       ]
     }
+  ],
+  "query-policies": [
+    {
+      "description":"Query policy that will run two queries and email the results as per the template configuration.",
+      "queries": [
+          {
+              "name": "docker-images",
+              "description": "Find all running Docker image based containers",
+              "sql": "select * from application_detail where running_instances > 0 and requested_state = 'started' and image is not null"
+          },
+          {
+              "name": "all-apps-pushed-and-still-running-in-the-last-week",
+              "description": "Find all running applications pushed in the last week not including the system organization",
+              "sql": "select * from application_detail where running_instances > 0 and requested_state = 'started' and week(last_pushed) = week(current_date) -1 AND year(last_pushed) = year(current_date) and organization not in ('system')"
+          }
+      ],
+      "email-notification-template":{
+        "from": "admin@nowhere.me",
+        "to": [ "drwho@tardis.io" ],
+        "subject": "Query Policy Sample Report",
+        "body": "Results are herewith attached for your consideration."
+    }
   ]
 }
 ```
-> Establish policies to remove stopped applications and/or orphaned services. This endpoint is only available when `cf.policies.provider` is set to `dbms`.
+> Establish policies to delete and scale applications, delete service instances, and query for anything from schema. This endpoint is only available when `cf.policies.provider` is set to `dbms`.
 
 > Consult the [java.time.Duration](https://docs.oracle.com/javase/8/docs/api/java/time/Duration.html#parse-java.lang.CharSequence-) javadoc for other examples of what you can specify when setting values for `from-duration` properties above.
 
@@ -773,6 +809,11 @@ GET /policies/serviceInstance/{id}
 > Obtain service instance policy details by id
 
 ```
+GET /policies/query/{id}
+```
+> Obtain query policy details by id
+
+```
 DELETE /policies/application/{id}
 ```
 > Delete an application policy by its id. This endpoint is only available when `cf.policies.provider` is set to `dbms`.
@@ -783,9 +824,14 @@ DELETE /policies/serviceInstance/{id}
 > Delete a service instance policy by its id. This endpoint is only available when `cf.policies.provider` is set to `dbms`.
 
 ```
+DELETE /policies/query/{id}
+```
+> Delete a query policy by its id. This endpoint is only available when `cf.policies.provider` is set to `dbms`.
+
+```
 GET /policies/report
 ```
-> Produces `text/plain` historical output detailing what applications and service instances have been removed
+> Produces `text/plain` historical output detailing what policies had an effect on applications and service instances.  (Does not track execution of query policies).
 
 
 ## Credits
