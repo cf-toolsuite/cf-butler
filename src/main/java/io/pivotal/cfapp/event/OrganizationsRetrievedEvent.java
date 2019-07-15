@@ -1,4 +1,4 @@
-package io.pivotal.cfapp.task;
+package io.pivotal.cfapp.event;
 
 import java.util.List;
 

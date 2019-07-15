@@ -30,6 +30,8 @@ import io.pivotal.cfapp.domain.AppDetail;
 import io.pivotal.cfapp.domain.AppEvent;
 import io.pivotal.cfapp.domain.Space;
 import io.pivotal.cfapp.domain.Stack;
+import io.pivotal.cfapp.event.AppDetailRetrievedEvent;
+import io.pivotal.cfapp.event.SpacesRetrievedEvent;
 import io.pivotal.cfapp.service.StacksCache;
 import io.pivotal.cfapp.service.AppDetailService;
 import lombok.extern.slf4j.Slf4j;

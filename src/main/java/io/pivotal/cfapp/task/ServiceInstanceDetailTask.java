@@ -18,6 +18,8 @@ import org.springframework.stereotype.Component;
 
 import io.pivotal.cfapp.domain.ServiceInstanceDetail;
 import io.pivotal.cfapp.domain.Space;
+import io.pivotal.cfapp.event.ServiceInstanceDetailRetrievedEvent;
+import io.pivotal.cfapp.event.SpacesRetrievedEvent;
 import io.pivotal.cfapp.service.ServiceInstanceDetailService;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;

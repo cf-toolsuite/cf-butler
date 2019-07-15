@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 import io.pivotal.cfapp.config.ButlerSettings;
 import io.pivotal.cfapp.domain.UserAccounts;
-import io.pivotal.cfapp.task.UserAccountsRetrievedEvent;
+import io.pivotal.cfapp.event.UserAccountsRetrievedEvent;
 
 public class UserAccountsCsvReport  {
 

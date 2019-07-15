@@ -15,7 +15,7 @@ import org.springframework.data.r2dbc.core.DatabaseClient;
 import org.springframework.stereotype.Component;
 
 import io.pivotal.cfapp.config.DbmsSettings;
-import io.pivotal.cfapp.task.DatabaseCreatedEvent;
+import io.pivotal.cfapp.event.DatabaseCreatedEvent;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j

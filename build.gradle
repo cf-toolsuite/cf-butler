@@ -113,6 +113,11 @@ dependencies {
     implementation('io.r2dbc:r2dbc-h2:0.8.0.M8')
     runtime('io.r2dbc:r2dbc-postgresql:0.8.0.M8')
     implementation('org.eclipse.jgit:org.eclipse.jgit:5.4.0.201906121030-r')
+    implementation('org.springframework.boot:spring-boot-starter-mail')
+    implementation('com.sendgrid:sendgrid-java:4.4.1') {
+        exclude group: 'org.apache.httpcomponents', module: 'httpclient'
+    }
+    implementation('org.apache.httpcomponents:httpclient:4.5.9')
     implementation('org.cloudfoundry:cloudfoundry-client-reactor:3.15.0.RELEASE')
     implementation('org.cloudfoundry:cloudfoundry-operations:3.15.0.RELEASE')
     implementation('io.projectreactor:reactor-core:3.3.0.M1')

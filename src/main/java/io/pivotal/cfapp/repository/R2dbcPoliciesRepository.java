@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -24,7 +25,10 @@ import io.pivotal.cfapp.config.PoliciesSettings;
 import io.pivotal.cfapp.domain.ApplicationOperation;
 import io.pivotal.cfapp.domain.ApplicationPolicy;
 import io.pivotal.cfapp.domain.Defaults;
+import io.pivotal.cfapp.domain.EmailNotificationTemplate;
 import io.pivotal.cfapp.domain.Policies;
+import io.pivotal.cfapp.domain.Query;
+import io.pivotal.cfapp.domain.QueryPolicy;
 import io.pivotal.cfapp.domain.ServiceInstanceOperation;
 import io.pivotal.cfapp.domain.ServiceInstancePolicy;
 import reactor.core.publisher.Flux;
@@ -56,11 +60,17 @@ public class R2dbcPoliciesRepository {
 			entity.getServiceInstancePolicies().stream()
 				.map(p -> seedServiceInstancePolicy(p)).collect(Collectors.toList());
 
+		List<QueryPolicy> queryPolicies =
+			entity.getQueryPolicies().stream()
+				.map(p -> seedQueryPolicy(p)).collect(Collectors.toList());
+
 		return Flux.fromIterable(applicationPolicies)
 					.concatMap(ap -> saveApplicationPolicy(ap))
 					.thenMany(Flux.fromIterable(serviceInstancePolicies)
 					.concatMap(sip -> saveServiceInstancePolicy(sip)))
-					.then(Mono.just(new Policies(applicationPolicies, serviceInstancePolicies)));
+					.thenMany(Flux.fromIterable(queryPolicies)
+					.concatMap(qp -> saveQueryPolicy(qp)))
+					.then(Mono.just(new Policies(applicationPolicies, serviceInstancePolicies, queryPolicies)));
 	}
 
 	public Mono<Policies> findServiceInstancePolicyById(String id) {
@@ -84,7 +94,7 @@ public class R2dbcPoliciesRepository {
 									.build())
 						.all())
 				.map(sp -> serviceInstancePolicies.add(sp))
-				.then(Mono.just(new Policies(Collections.emptyList(), serviceInstancePolicies)))
+				.then(Mono.just(new Policies(Collections.emptyList(), serviceInstancePolicies, Collections.emptyList())))
 				.flatMap(p -> p.isEmpty() ? Mono.empty(): Mono.just(p));
 	}
 
@@ -110,15 +120,41 @@ public class R2dbcPoliciesRepository {
 									.build())
 						.all())
 				.map(ap -> applicationPolicies.add(ap))
-				.then(Mono.just(new Policies(applicationPolicies, Collections.emptyList())))
+				.then(Mono.just(new Policies(applicationPolicies, Collections.emptyList(), Collections.emptyList())))
+				.flatMap(p -> p.isEmpty() ? Mono.empty(): Mono.just(p));
+	}
+
+	public Mono<Policies> findQueryPolicyById(String id) {
+		List<QueryPolicy> queryPolicies = new ArrayList<>();
+		return
+			Flux
+				.from(client
+						.select()
+							.from(QueryPolicy.tableName())
+							.project(QueryPolicy.columnNames())
+							.matching(Criteria.where("id").is(id))
+						.map((row, metadata) ->
+							QueryPolicy
+								.builder()
+									.pk(row.get("pk", Long.class))
+									.id(row.get("id", String.class))
+									.description(Defaults.getValueOrDefault(row.get("description", String.class), ""))
+									.queries(readQueries(row.get("queries", String.class) == null ? "{}" : row.get("queries", String.class)))
+									.emailNotificationTemplate(readEmailNotificationTemplate(row.get("email_notification_template", String.class) == null ? "{}": row.get("email_notification_template", String.class)))
+									.build())
+						.all())
+				.map(qp -> queryPolicies.add(qp))
+				.then(Mono.just(new Policies(Collections.emptyList(), Collections.emptyList(), queryPolicies)))
 				.flatMap(p -> p.isEmpty() ? Mono.empty(): Mono.just(p));
 	}
 
 	public Mono<Policies> findAll() {
 		String selectAllApplicationPolicies = "select pk, id, operation, description, state, options, organization_whitelist from application_policy";
 		String selectAllServiceInstancePolicies = "select pk, id, operation, description, options, organization_whitelist from service_instance_policy";
+		String selectAllQueryPolicies = "select pk, id, description, queries, email_notification_template from query_policy";
 		List<ApplicationPolicy> applicationPolicies = new ArrayList<>();
 		List<ServiceInstancePolicy> serviceInstancePolicies = new ArrayList<>();
+		List<QueryPolicy> queryPolicies = new ArrayList<>();
 
 		return
 				Flux
@@ -151,8 +187,48 @@ public class R2dbcPoliciesRepository {
 												.build())
 									.all())
 							.map(sp -> serviceInstancePolicies.add(sp)))
-					.then(Mono.just(new Policies(applicationPolicies, serviceInstancePolicies)))
+					.thenMany(
+						Flux
+							.from(client.execute(selectAllQueryPolicies)
+									.map((row, metadata) ->
+										QueryPolicy
+											.builder()
+												.pk(row.get("pk", Long.class))
+												.id(row.get("id", String.class))
+												.description(Defaults.getValueOrDefault(row.get("description", String.class), ""))
+												.queries(readQueries(row.get("queries", String.class) == null ? "[]" : row.get("queries", String.class)))
+												.emailNotificationTemplate(readEmailNotificationTemplate(row.get("email_notification_template", String.class) == null ? "{}": row.get("email_notification_template", String.class)))
+												.build())
+									.all())
+							.map(qp -> queryPolicies.add(qp)))
+					.then(Mono.just(new Policies(applicationPolicies, serviceInstancePolicies, queryPolicies)))
 					.flatMap(p -> p.isEmpty() ? Mono.empty(): Mono.just(p));
+	}
+
+	public Mono<Policies> findAllQueryPolicies() {
+		return
+			client
+				.select()
+				.from(QueryPolicy.tableName())
+				.project(QueryPolicy.columnNames())
+				.map(
+					(row, metadata) ->
+						QueryPolicy
+							.builder()
+								.pk(row.get("pk", Long.class))
+								.id(row.get("id", String.class))
+								.description(Defaults.getValueOrDefault(row.get("description", String.class), ""))
+								.queries(readQueries(row.get("queries", String.class) == null ? "[]" : row.get("queries", String.class)))
+								.emailNotificationTemplate(
+									readEmailNotificationTemplate(
+										row.get("email_notification_template", String.class) == null
+											? "{}"
+											: row.get("email_notification_template", String.class)))
+							.build())
+				.all()
+				.collectList()
+				.map(qps -> new Policies(Collections.emptyList(), Collections.emptyList(), qps))
+				.flatMap(p -> p.isEmpty() ? Mono.empty(): Mono.just(p));
 	}
 
 	public Mono<Void> deleteApplicationPolicyById(String id) {
@@ -167,12 +243,24 @@ public class R2dbcPoliciesRepository {
 				.then();
 	}
 
-	public Mono<Void> deleteServicePolicyById(String id) {
+	public Mono<Void> deleteServiceInstancePolicyById(String id) {
 		return
 			Flux
 				.from(client
 						.delete()
 							.from(ServiceInstancePolicy.tableName())
+							.matching(Criteria.where("id").is(id))
+						.fetch()
+						.rowsUpdated())
+				.then();
+	}
+
+	public Mono<Void> deleteQueryPolicyById(String id) {
+		return
+			Flux
+				.from(client
+						.delete()
+							.from(QueryPolicy.tableName())
 							.matching(Criteria.where("id").is(id))
 						.fetch()
 						.rowsUpdated())
@@ -207,6 +295,10 @@ public class R2dbcPoliciesRepository {
 
 	private ServiceInstancePolicy seedServiceInstancePolicy(ServiceInstancePolicy policy) {
 		return policiesSettings.isVersionManaged() ? ServiceInstancePolicy.seedWith(policy, policiesSettings.getCommit()): ServiceInstancePolicy.seed(policy);
+	}
+
+	private QueryPolicy seedQueryPolicy(QueryPolicy policy) {
+		return policiesSettings.isVersionManaged() ? QueryPolicy.seedWith(policy, policiesSettings.getCommit()): QueryPolicy.seed(policy);
 	}
 
 	private Mono<Integer> saveApplicationPolicy(ApplicationPolicy ap) {
@@ -260,9 +352,32 @@ public class R2dbcPoliciesRepository {
 		return spec.fetch().rowsUpdated();
 	}
 
+	private Mono<Integer> saveQueryPolicy(QueryPolicy qp) {
+		GenericInsertSpec<Map<String, Object>> spec =
+			client.insert().into(QueryPolicy.tableName())
+				.value("id", qp.getId());
+		if (qp.getDescription() != null) {
+			spec = spec.value("description", qp.getDescription());
+		} else {
+			spec = spec.nullValue("description");
+		}
+		if (!CollectionUtils.isEmpty(qp.getQueries())) {
+			spec = spec.value("queries", writeQueries(qp.getQueries()));
+		} else {
+			spec = spec.nullValue("queries");
+		}
+		if (qp.getEmailNotificationTemplate() != null) {
+			spec = spec.value("email_notification_template", writeEmailNotificationTemplate(qp.getEmailNotificationTemplate()));
+		} else {
+			spec = spec.nullValue("email_notification_template");
+		}
+		return spec.fetch().rowsUpdated();
+	}
+
 	public Mono<Policies> findByApplicationOperation(ApplicationOperation operation) {
 		List<ApplicationPolicy> applicationPolicies = new ArrayList<>();
 		List<ServiceInstancePolicy> serviceInstancePolicies = new ArrayList<>();
+		List<QueryPolicy> queryPolicies = new ArrayList<>();
 		return
 				Flux
 					.from(client
@@ -283,13 +398,14 @@ public class R2dbcPoliciesRepository {
 										.build())
 							.all())
 					.map(ap -> applicationPolicies.add(ap))
-					.then(Mono.just(new Policies(applicationPolicies, serviceInstancePolicies)))
+					.then(Mono.just(new Policies(applicationPolicies, serviceInstancePolicies, queryPolicies)))
 					.flatMap(p -> p.isEmpty() ? Mono.empty(): Mono.just(p));
 	}
 
 	public Mono<Policies> findByServiceInstanceOperation(ServiceInstanceOperation operation) {
 		List<ApplicationPolicy> applicationPolicies = new ArrayList<>();
 		List<ServiceInstancePolicy> serviceInstancePolicies = new ArrayList<>();
+		List<QueryPolicy> queryPolicies = new ArrayList<>();
 		return
 				Flux
 					.from(client
@@ -309,8 +425,16 @@ public class R2dbcPoliciesRepository {
 										.build())
 							.all())
 					.map(sp -> serviceInstancePolicies.add(sp))
-					.then(Mono.just(new Policies(applicationPolicies, serviceInstancePolicies)))
+					.then(Mono.just(new Policies(applicationPolicies, serviceInstancePolicies, queryPolicies)))
 					.flatMap(p -> p.isEmpty() ? Mono.empty(): Mono.just(p));
+	}
+
+	private String writeQueries(Set<Query> value) {
+        try {
+            return mapper.writeValueAsString(value);
+        } catch (JsonProcessingException jpe) {
+            throw new RuntimeException("Problem writing queries", jpe);
+        }
 	}
 
 	private String writeOptions(Object value) {
@@ -321,11 +445,35 @@ public class R2dbcPoliciesRepository {
         }
 	}
 
+	private String writeEmailNotificationTemplate(EmailNotificationTemplate value) {
+        try {
+            return mapper.writeValueAsString(value);
+        } catch (JsonProcessingException jpe) {
+            throw new RuntimeException("Problem writing email notification template", jpe);
+        }
+	}
+
 	private Map<String, Object> readOptions(String value) {
         try {
             return mapper.readValue(value, new TypeReference<Map<String, Object>>() {});
         } catch (IOException ioe) {
             throw new RuntimeException("Problem reading options", ioe);
+        }
+	}
+
+	private Set<Query> readQueries(String value) {
+        try {
+            return mapper.readValue(value, new TypeReference<Set<Query>>() {});
+        } catch (IOException ioe) {
+            throw new RuntimeException("Problem reading queries", ioe);
+        }
+	}
+
+	private EmailNotificationTemplate readEmailNotificationTemplate(String value) {
+        try {
+            return mapper.readValue(value, EmailNotificationTemplate.class);
+        } catch (IOException ioe) {
+            throw new RuntimeException("Problem reading email notification template", ioe);
         }
 	}
 }

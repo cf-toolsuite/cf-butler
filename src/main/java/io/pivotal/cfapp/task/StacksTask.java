@@ -10,6 +10,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
+import io.pivotal.cfapp.event.StacksRetrievedEvent;
+import io.pivotal.cfapp.event.TkRetrievedEvent;
 import io.pivotal.cfapp.service.StacksCache;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;

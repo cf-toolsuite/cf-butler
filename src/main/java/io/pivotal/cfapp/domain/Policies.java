@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-@JsonPropertyOrder({ "application-policies", "service-instance-policies"})
+@JsonPropertyOrder({ "application-policies", "service-instance-policies", "query-policies" })
 public class Policies {
 
 	@JsonProperty("application-policies")
@@ -20,12 +20,17 @@ public class Policies {
 	@JsonProperty("service-instance-policies")
 	private List<ServiceInstancePolicy> serviceInstancePolicies;
 
+	@JsonProperty("query-policies")
+	private List<QueryPolicy> queryPolicies;
+
 	@JsonCreator
 	public Policies(
-			@JsonProperty("application-policies") List<ApplicationPolicy> applicationPolicies, 
-			@JsonProperty("service-instance-policies") List<ServiceInstancePolicy> serviceInstancePolicies) {
+			@JsonProperty("application-policies") List<ApplicationPolicy> applicationPolicies,
+			@JsonProperty("service-instance-policies") List<ServiceInstancePolicy> serviceInstancePolicies,
+			@JsonProperty("query-policies") List<QueryPolicy> queryPolicies) {
 		this.applicationPolicies = applicationPolicies;
 		this.serviceInstancePolicies = serviceInstancePolicies;
+		this.queryPolicies = queryPolicies;
 	}
 
 	public List<ApplicationPolicy> getApplicationPolicies() {
@@ -36,9 +41,15 @@ public class Policies {
 		return serviceInstancePolicies != null ? serviceInstancePolicies: Collections.emptyList();
 	}
 
+	public List<QueryPolicy> getQueryPolicies() {
+		return queryPolicies != null ? queryPolicies: Collections.emptyList();
+	}
+
 	@JsonIgnore
 	public boolean isEmpty() {
-		return getApplicationPolicies().isEmpty() && getServiceInstancePolicies().isEmpty();
+		return getApplicationPolicies().isEmpty()
+				&& getServiceInstancePolicies().isEmpty()
+				&& getQueryPolicies().isEmpty();
 	}
 
 }

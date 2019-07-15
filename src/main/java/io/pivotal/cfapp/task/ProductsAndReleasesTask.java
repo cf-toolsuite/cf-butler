@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import io.pivotal.cfapp.client.PivnetClient;
 import io.pivotal.cfapp.domain.product.PivnetCache;
+import io.pivotal.cfapp.event.ProductsAndReleasesRetrievedEvent;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
