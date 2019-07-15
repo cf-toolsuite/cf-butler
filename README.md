@@ -746,6 +746,18 @@ POST /policies
       "organization-whitelist": [
         "zoo-labs"
       ]
+    },
+    {
+      "description": "Change the stack for applications restricted to whitelisted organizations",
+      "operation": "change-stack",
+      "state": "started",
+      "options": {
+        "stack-from": "cflinuxfs2",
+        "stack-to": "cflinuxfs3"
+      },
+      "organization-whitelist": [
+        "zoo-labs","jujubees","full-beaker"
+      ]
     }
   ],
   "service-instance-policies": [
