@@ -4,6 +4,8 @@ import java.time.Duration;
 import java.time.LocalDate;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,7 +35,13 @@ public class HistoricalReportController {
 	}
 
 	@GetMapping(value = { "/policies/report" }, produces = MediaType.TEXT_PLAIN_VALUE)
-	public Mono<ResponseEntity<String>> generateReport(@RequestParam(required = false, value = "start") LocalDate start, @RequestParam(required = false, value = "end") LocalDate end) {
+	public Mono<ResponseEntity<String>> generateReport(
+		@DateTimeFormat(iso = ISO.DATE)
+		@RequestParam(required = false, value = "start")
+		LocalDate start,
+		@DateTimeFormat(iso = ISO.DATE)
+		@RequestParam(required = false, value = "end")
+		LocalDate end) {
 		Mono<ResponseEntity<String>> result = null;
 		boolean hasDateRange = start != null && end != null;
 		boolean hasValidDateRange = hasDateRange && start.isBefore(end);
@@ -52,8 +60,7 @@ public class HistoricalReportController {
 										report.generatePreamble(),
 										report.generateDetail(e))))
 					.defaultIfEmpty(ResponseEntity.notFound().build());
-		}
-		if (hasValidDateRange) {
+		} else if (hasValidDateRange) {
 			result = historicalRecordService
 					.findByDateRange(start, end)
 					.collectList()
