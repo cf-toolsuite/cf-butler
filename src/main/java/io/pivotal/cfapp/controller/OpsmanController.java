@@ -4,10 +4,8 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.pivotal.cfapp.client.OpsmanClient;
@@ -28,23 +26,23 @@ public class OpsmanController {
     }
 
     @GetMapping("/products/deployed")
-    public Mono<ResponseEntity<List<DeployedProduct>>> getDeployedProducts(@RequestHeader(HttpHeaders.AUTHORIZATION) String uaaToken) {
+    public Mono<ResponseEntity<List<DeployedProduct>>> getDeployedProducts() {
         return client
-                .getDeployedProducts(uaaToken)
+                .getDeployedProducts()
                 .map(products -> ResponseEntity.ok(products));
     }
 
     @GetMapping("/products/stemcell/assignments")
-    public Mono<ResponseEntity<StemcellAssignments>> getStemcellAssignments(@RequestHeader(HttpHeaders.AUTHORIZATION) String uaaToken) {
+    public Mono<ResponseEntity<StemcellAssignments>> getStemcellAssignments() {
         return client
-                .getStemcellAssignments(uaaToken)
+                .getStemcellAssignments()
                 .map(assignments -> ResponseEntity.ok(assignments));
     }
 
     @GetMapping("/products/om/info")
-    public Mono<ResponseEntity<OmInfo>> getOmInfo(@RequestHeader(HttpHeaders.AUTHORIZATION) String uaaToken) {
+    public Mono<ResponseEntity<OmInfo>> getOmInfo() {
         return client
-                .getOmInfo(uaaToken)
+                .getOmInfo()
                 .map(info -> ResponseEntity.ok(info));
     }
 

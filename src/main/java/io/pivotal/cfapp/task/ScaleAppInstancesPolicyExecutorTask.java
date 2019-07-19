@@ -12,7 +12,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import io.pivotal.cfapp.config.ButlerSettings;
+import io.pivotal.cfapp.config.PasSettings;
 import io.pivotal.cfapp.domain.AppDetail;
 import io.pivotal.cfapp.domain.ApplicationOperation;
 import io.pivotal.cfapp.domain.ApplicationPolicy;
@@ -28,7 +28,7 @@ import reactor.core.publisher.Mono;
 @Component
 public class ScaleAppInstancesPolicyExecutorTask implements PolicyExecutorTask {
 
-	private ButlerSettings settings;
+	private PasSettings settings;
 	private DefaultCloudFoundryOperations opsClient;
     private AppDetailService appInfoService;
     private PoliciesService policiesService;
@@ -36,7 +36,7 @@ public class ScaleAppInstancesPolicyExecutorTask implements PolicyExecutorTask {
 
     @Autowired
     public ScaleAppInstancesPolicyExecutorTask(
-    		ButlerSettings settings,
+    		PasSettings settings,
     		DefaultCloudFoundryOperations opsClient,
     		AppDetailService appInfoService,
     		PoliciesService policiesService,
