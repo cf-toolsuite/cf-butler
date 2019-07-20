@@ -9,7 +9,6 @@ import lombok.Data;
 public class OpsmanSettings {
 
     private String apiHost;
-    private boolean sslValidationSkipped;
     private String username;
     private String password;
     private boolean enabled;

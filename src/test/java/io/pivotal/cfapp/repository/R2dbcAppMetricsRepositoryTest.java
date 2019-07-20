@@ -9,17 +9,17 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import io.pivotal.cfapp.ButlerTest;
 import io.pivotal.cfapp.domain.AppDetail;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import reactor.util.function.Tuple2;
 
+@ButlerTest
 @ExtendWith(SpringExtension.class)
-@SpringBootTest
 public class R2dbcAppMetricsRepositoryTest {
 
     private final R2dbcAppMetricsRepository metricsRepo;

@@ -92,6 +92,21 @@ spring:
     username: sa
     password: 
 
+  security:
+    oauth2:
+      client:
+        provider:
+          om:
+            token-uri: https://${om.apiHost}/uaa/oauth/token
+            authorization-uri: https://${om.apiHost}/uaa/oauth/authorize
+        registration:
+          om:
+            provider: om
+            client-id: opsman
+            client-secret: 
+            authorization-grant-type: authorization_code
+            redirect-uri: https://${om.apiHost}/uaa/login/oauth/code/{registrationId}
+
 # Java Mail
 # Reset the values for spring.mail.username, spring.mail.password
 # Configuration below is set up to work w/ a Gmail account
