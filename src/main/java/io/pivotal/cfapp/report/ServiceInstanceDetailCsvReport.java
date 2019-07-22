@@ -2,15 +2,15 @@ package io.pivotal.cfapp.report;
 
 import java.time.LocalDateTime;
 
-import io.pivotal.cfapp.config.ButlerSettings;
+import io.pivotal.cfapp.config.PasSettings;
 import io.pivotal.cfapp.domain.ServiceInstanceDetail;
 import io.pivotal.cfapp.event.ServiceInstanceDetailRetrievedEvent;
 
 public class ServiceInstanceDetailCsvReport {
 
-	private ButlerSettings settings;
+	private PasSettings settings;
 
-	public ServiceInstanceDetailCsvReport(ButlerSettings settings) {
+	public ServiceInstanceDetailCsvReport(PasSettings settings) {
 		this.settings = settings;
 	}
 

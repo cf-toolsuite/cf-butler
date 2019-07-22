@@ -13,7 +13,7 @@ import lombok.Data;
 
 @Data
 @ConfigurationProperties(prefix = "cf")
-public class ButlerSettings {
+public class PasSettings {
 
 	public static final String SYSTEM_ORG = "system";
 	private static final Set<String> DEFAULT_BLACKLIST = Set.of(SYSTEM_ORG);

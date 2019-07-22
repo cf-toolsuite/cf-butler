@@ -1,6 +1,6 @@
 package io.pivotal.cfapp.service;
 
-import static io.pivotal.cfapp.config.ButlerSettings.SYSTEM_ORG;
+import static io.pivotal.cfapp.config.PasSettings.SYSTEM_ORG;
 
 import java.util.HashMap;
 import java.util.Map;

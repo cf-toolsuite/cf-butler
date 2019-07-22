@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import io.pivotal.cfapp.config.ButlerSettings;
+import io.pivotal.cfapp.config.PasSettings;
 import io.pivotal.cfapp.domain.ApplicationCounts;
 import io.pivotal.cfapp.domain.ServiceInstanceCounts;
 import io.pivotal.cfapp.domain.SnapshotDetail;
@@ -37,7 +37,7 @@ public class SnapshotService {
 
     @Autowired
     public SnapshotService(
-        ButlerSettings settings,
+        PasSettings settings,
         AppDetailService appDetailService,
         ServiceInstanceDetailService siDetailService,
         AppRelationshipService appRelationshipService,

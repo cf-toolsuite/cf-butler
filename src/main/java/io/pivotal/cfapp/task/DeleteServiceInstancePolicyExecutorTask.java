@@ -11,7 +11,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import io.pivotal.cfapp.config.ButlerSettings;
+import io.pivotal.cfapp.config.PasSettings;
 import io.pivotal.cfapp.domain.HistoricalRecord;
 import io.pivotal.cfapp.domain.ServiceInstanceDetail;
 import io.pivotal.cfapp.domain.ServiceInstanceOperation;
@@ -27,7 +27,7 @@ import reactor.core.publisher.Mono;
 @Component
 public class DeleteServiceInstancePolicyExecutorTask implements PolicyExecutorTask {
 
-	private ButlerSettings settings;
+	private PasSettings settings;
 	private DefaultCloudFoundryOperations opsClient;
     private ServiceInstanceDetailService serviceInfoService;
     private PoliciesService policiesService;
@@ -35,7 +35,7 @@ public class DeleteServiceInstancePolicyExecutorTask implements PolicyExecutorTa
 
     @Autowired
     public DeleteServiceInstancePolicyExecutorTask(
-    		ButlerSettings settings,
+    		PasSettings settings,
     		DefaultCloudFoundryOperations opsClient,
     		ServiceInstanceDetailService serviceInfoService,
     		PoliciesService policiesService,

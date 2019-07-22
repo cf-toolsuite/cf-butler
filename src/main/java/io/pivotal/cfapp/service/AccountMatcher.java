@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import io.pivotal.cfapp.config.ButlerSettings;
+import io.pivotal.cfapp.config.PasSettings;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -14,10 +14,10 @@ import lombok.extern.slf4j.Slf4j;
 public class AccountMatcher {
 
     private final Pattern pattern;
-    private final ButlerSettings settings;
+    private final PasSettings settings;
 
     @Autowired
-    public AccountMatcher(ButlerSettings settings) {
+    public AccountMatcher(PasSettings settings) {
         this.settings = settings;
         this.pattern = Pattern.compile(settings.getAccountRegex());
     }

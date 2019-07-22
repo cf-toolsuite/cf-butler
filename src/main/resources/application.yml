@@ -67,6 +67,7 @@ cf:
 cron:
   collection: "0 0 0 * * *"
   execution: "0 0 2 * * *"
+  tokenRefresh: "0 */1 * * * *"
 
 management:
   endpoints:
@@ -165,6 +166,9 @@ cf:
 
 om:
   apiHost: ${vcap.services.cf-butler-secrets.credentials.OM_API-HOST}
+  clientId: ${vcap.services.cf-butler-secrets.credentials.OM_CLIENT-ID:opsman}
+  username: ${vcap.services.cf-butler-secrets.credentials.OM_USERNAME}
+  password: ${vcap.services.cf-butler-secrets.credentials.OM_PASSWORD}
   enabled: ${vcap.services.cf-butler-secrets.credentials.OM_ENABLED:false}
 
 pivnet:

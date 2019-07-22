@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.pivotal.cfapp.config.ButlerSettings;
+import io.pivotal.cfapp.config.PasSettings;
 import io.pivotal.cfapp.event.HistoricalRecordRetrievedEvent;
 import io.pivotal.cfapp.report.HistoricalRecordCsvReport;
 import io.pivotal.cfapp.service.HistoricalRecordService;
@@ -28,7 +28,7 @@ public class HistoricalReportController {
 
 	@Autowired
 	public HistoricalReportController(
-			ButlerSettings butlerSettings,
+			PasSettings butlerSettings,
 			HistoricalRecordService historicalRecordService) {
 		this.historicalRecordService = historicalRecordService;
 		this.report = new HistoricalRecordCsvReport(butlerSettings);

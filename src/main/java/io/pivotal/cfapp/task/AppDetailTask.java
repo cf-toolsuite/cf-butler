@@ -25,7 +25,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
-import io.pivotal.cfapp.config.ButlerSettings;
+import io.pivotal.cfapp.config.PasSettings;
 import io.pivotal.cfapp.domain.AppDetail;
 import io.pivotal.cfapp.domain.AppEvent;
 import io.pivotal.cfapp.domain.Space;
@@ -44,7 +44,7 @@ import reactor.util.function.Tuples;
 @Component
 public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> {
 
-    private ButlerSettings settings;
+    private PasSettings settings;
     private DefaultCloudFoundryOperations opsClient;
     private AppDetailService service;
     private StacksCache stacksCache;
@@ -52,7 +52,7 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
 
     @Autowired
     public AppDetailTask(
-            ButlerSettings settings,
+            PasSettings settings,
     		DefaultCloudFoundryOperations opsClient,
             AppDetailService service,
             StacksCache stacksCache,

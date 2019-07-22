@@ -13,7 +13,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import io.pivotal.cfapp.config.ButlerSettings;
+import io.pivotal.cfapp.config.PasSettings;
 import io.pivotal.cfapp.domain.AppDetail;
 import io.pivotal.cfapp.domain.AppRelationship;
 import io.pivotal.cfapp.domain.ApplicationOperation;
@@ -31,7 +31,7 @@ import reactor.core.publisher.Mono;
 @Component
 public class DeleteAppPolicyExecutorTask implements PolicyExecutorTask {
 
-	private ButlerSettings settings;
+	private PasSettings settings;
 	private DefaultCloudFoundryOperations opsClient;
     private AppDetailService appInfoService;
     private AppRelationshipService appRelationshipService;
@@ -40,7 +40,7 @@ public class DeleteAppPolicyExecutorTask implements PolicyExecutorTask {
 
     @Autowired
     public DeleteAppPolicyExecutorTask(
-    		ButlerSettings settings,
+    		PasSettings settings,
     		DefaultCloudFoundryOperations opsClient,
     		AppDetailService appInfoService,
     		AppRelationshipService appRelationshipService,

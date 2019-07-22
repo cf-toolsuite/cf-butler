@@ -20,7 +20,7 @@ public class OmInfo {
 
     @Builder
     @Getter
-    private static class Info {
+    public static class Info {
 
         @JsonProperty("version")
         private String version;

@@ -413,7 +413,7 @@ These REST endpoints have been exposed for reporting and administrative purposes
 
 ### Operations Manager
 
-These endpoints are only available when the `om.enabled` property is set to `true`.  A valid `om.apiHost` property must also have been defined.  Mimics a reduced set of the [Operations Manager API](https://docs.pivotal.io/pivotalcf/2-5/opsman-api/).  For each request, the Request header must contain an Authorization bearer token.  To obtain a token, consult the [Authentication](https://docs.pivotal.io/pivotalcf/2-5/opsman-api/?shell#authentication) section of the Operations Manager API.
+These endpoints are only available when the `om.enabled` property is set to `true`. `om.apiHost`, `om.username` and `om.password` properties must also have been defined.  Mimics a reduced set of the [Operations Manager API](https://docs.pivotal.io/pivotalcf/2-6/opsman-api/).
 
 ```
 GET /products/deployed
@@ -424,6 +424,12 @@ GET /products/deployed
 GET /products/stemcell/assignments
 ```
 > Lists all stemcells associated with installed tiles (includes staged and available stemcell versions).
+
+```
+GET /products/stemcell/associations
+```
+> Lists all stemcells associated with installed tiles (includes staged and available stemcell versions).
+> Only available from Operations Manager 2.6.0 onward.
 
 ```
 GET /products/om/info

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import io.pivotal.cfapp.config.ButlerSettings;
+import io.pivotal.cfapp.config.PasSettings;
 import io.pivotal.cfapp.domain.accounting.application.AppUsageReport;
 import io.pivotal.cfapp.domain.accounting.service.ServiceUsageReport;
 import io.pivotal.cfapp.domain.accounting.task.TaskUsageReport;
@@ -26,7 +26,7 @@ public class UsageService {
     private final WebClient webClient;
     private final DefaultConnectionContext connectionContext;
     private final TokenProvider tokenProvider;
-    private final ButlerSettings settings;
+    private final PasSettings settings;
 
     @Autowired
     public UsageService(
@@ -34,7 +34,7 @@ public class UsageService {
         WebClient webClient,
         DefaultConnectionContext connectionContext,
         TokenProvider tokenProvider,
-        ButlerSettings settings,
+        PasSettings settings,
         UsageCache cache) {
         this.orgService = orgService;
         this.webClient = webClient;
