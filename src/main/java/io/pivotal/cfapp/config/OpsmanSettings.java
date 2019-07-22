@@ -9,6 +9,7 @@ import lombok.Data;
 public class OpsmanSettings {
 
     private String apiHost;
+    private String clientId = "opsman";
     private String username;
     private String password;
     private boolean enabled;

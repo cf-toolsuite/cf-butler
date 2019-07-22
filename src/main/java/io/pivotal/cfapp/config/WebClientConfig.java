@@ -20,7 +20,7 @@ public class WebClientConfig {
     // @see https://stackoverflow.com/questions/45418523/spring-5-webclient-using-ssl/53147631#53147631
 
     @Bean
-    @ConditionalOnProperty(prefix="cf", name="sslValidationSkipped", havingValue="true")
+    @ConditionalOnProperty(name = "cf.sslValidationSkipped", havingValue="true")
     public WebClient insecureWebClient() throws SSLException {
         SslContext sslContext =
             SslContextBuilder
@@ -36,7 +36,7 @@ public class WebClientConfig {
     }
 
     @Bean
-    @ConditionalOnProperty(prefix="cf", name="sslValidationSkipped", havingValue="false", matchIfMissing=true)
+    @ConditionalOnProperty(name = "cf.sslValidationSkipped", havingValue="false", matchIfMissing=true)
     public WebClient secureWebClient() {
           return WebClient
                     .builder()

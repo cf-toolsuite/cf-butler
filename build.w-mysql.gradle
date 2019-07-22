@@ -101,11 +101,6 @@ dependencies {
     implementation('org.springframework.credhub:spring-credhub-cloud-connector:2.0.1.RELEASE')
     implementation('org.springframework.boot:spring-boot-starter-actuator')
     implementation('org.springframework.boot:spring-boot-starter-webflux')
-    implementation('org.springframework.boot:spring-boot-starter-security')
-    implementation('org.springframework.security:spring-security-config')
-    implementation('org.springframework.security:spring-security-web')
-	implementation('org.springframework.security:spring-security-oauth2-client')
-	implementation('org.springframework.security:spring-security-oauth2-jose')
     implementation('org.springframework.boot:spring-boot-starter-log4j2')
     // @see https://spring.io/blog/2019/05/15/spring-data-r2dbc-1-0-m2-and-spring-boot-starter-released
     implementation('org.springframework.boot.experimental:spring-boot-starter-data-r2dbc:0.1.0.M1')
