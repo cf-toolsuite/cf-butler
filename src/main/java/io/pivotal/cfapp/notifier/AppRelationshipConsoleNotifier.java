@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
-import io.pivotal.cfapp.config.ButlerSettings;
+import io.pivotal.cfapp.config.PasSettings;
 import io.pivotal.cfapp.report.AppRelationshipCsvReport;
 import io.pivotal.cfapp.service.TkService;
 import io.pivotal.cfapp.service.TkServiceUtil;
@@ -20,7 +20,7 @@ public class AppRelationshipConsoleNotifier implements ApplicationListener<AppRe
 
     @Autowired
     public AppRelationshipConsoleNotifier(
-		ButlerSettings appSettings,
+		PasSettings appSettings,
 		TkService tkService) {
 		this.report = new AppRelationshipCsvReport(appSettings);
 		this.util = new TkServiceUtil(tkService);
