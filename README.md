@@ -439,7 +439,7 @@ GET /products/om/info
 ```
 GET /products/metrics
 ```
-> Returns release metric information for all installed products
+> Returns release metric information for installed products (includes tiles and buildpacks)
 
 Sample output
 
@@ -493,6 +493,30 @@ Sample output
             "pre-release": false,
             "days-behind-latest-available-version": 0,
             "type": "tile"
+        },
+        {
+            "currently-installed-release-date": "2019-04-25",
+            "currently-installed-version": "1.7.38",
+            "days-behind-latest-available-version": 82,
+            "end-of-life": false,
+            "end-of-support-date": null,
+            "latest-available-release-date": "2019-07-16",
+            "latest-available-version": "1.7.42",
+            "name": "ruby-buildpack",
+            "pre-release": false,
+            "type": "buildpack"
+        },
+        {
+            "currently-installed-release-date": "2019-04-24",
+            "currently-installed-version": "1.6.32",
+            "days-behind-latest-available-version": 84,
+            "end-of-life": false,
+            "end-of-support-date": null,
+            "latest-available-release-date": "2019-07-17",
+            "latest-available-version": "1.6.36",
+            "name": "python-buildpack",
+            "pre-release": false,
+            "type": "buildpack"
         }
     ]
 }
