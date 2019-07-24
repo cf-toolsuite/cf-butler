@@ -273,8 +273,7 @@ Add entries in your `config/secrets.json` like
 
 ### alternative build with MySQL support
 
-If you want to target a MySQL database as your back-end you will need to run a script to fetch and build the [mysql-r2dbc](https://github.com/mirromutth/r2dbc-mysql) dependency.  (As of 2019-07-08 it's not currently available as a release from a public repository).
-
+If you want to target a MySQL database as your back-end you will need to run a script to fetch and build the [mysql-r2dbc](https://github.com/mirromutth/r2dbc-mysql) dependency.  (While a milestone release is available [here](https://jitpack.io/#mirromutth/r2dbc-mysql), it does not yet contain a necessary fix for this [issue](https://github.com/mirromutth/r2dbc-mysql/pull/29), so we must build from source).
 > Note: You will need to have a distribution of Java JDK 8 available to package and install the dependency to be later resolved from your local Maven repository.
 
 ```
