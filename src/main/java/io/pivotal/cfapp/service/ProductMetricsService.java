@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Service;
@@ -28,17 +29,71 @@ public class ProductMetricsService {
 
     private final PivnetCache pivnetCache;
     private final OpsmanClient opsmanClient;
+    private final DefaultCloudFoundryOperations cfClient;
 
     @Autowired
     public ProductMetricsService(
         PivnetCache pivnetCache,
-        OpsmanClient opsmanClient
+        OpsmanClient opsmanClient,
+        DefaultCloudFoundryOperations cfClient
     ) {
         this.pivnetCache = pivnetCache;
         this.opsmanClient = opsmanClient;
+        this.cfClient = cfClient;
     }
 
     public Mono<ProductMetrics> getProductMetrics() {
+        return Flux
+                .concat(getTiles(), getBuildpacks())
+                .collect(Collectors.toSet())
+                .map(metrics ->
+                    ProductMetrics
+                        .builder()
+                        .productMetrics(metrics)
+                        .build()
+                );
+    }
+
+    protected Flux<ProductMetric> getBuildpacks() {
+        return cfClient
+                .buildpacks()
+                    .list()
+                    .map(b ->
+                        ProductMetric
+                        .builder()
+                        .name(refineName(b.getName()))
+                        .currentlyInstalledVersion(obtainVersionFromBuildpackFilename(b.getFilename()))
+                        .currentlyInstalledReleaseDate(
+                            pivnetCache.findProductReleaseBySlugAndVersion(
+                                refineName(b.getName()), obtainVersionFromBuildpackFilename(b.getFilename())
+                            )
+                            .getReleaseDate()
+                        )
+                        .latestAvailableVersion(
+                            pivnetCache.findLatestProductReleaseBySlug(
+                                refineName(b.getName())
+                            )
+                            .getVersion()
+                        )
+                        .latestAvailableReleaseDate(
+                            pivnetCache.findLatestProductReleaseBySlug(
+                                refineName(b.getName())
+                            )
+                            .getReleaseDate()
+                        )
+                        .type(ProductType.from(refineName(b.getName())))
+                        .endOfSupportDate(
+                            pivnetCache.findProductReleaseBySlugAndVersion(
+                                refineName(b.getName()), obtainVersionFromBuildpackFilename(b.getFilename())
+                            )
+                            .getEndOfSupportDate()
+                        )
+                        .build()
+                    )
+                    .distinct();
+    }
+
+    protected Flux<ProductMetric> getTiles() {
         return opsmanClient
                 .getDeployedProducts()
                 .flatMapMany(deployedProducts -> Flux.fromIterable(deployedProducts))
@@ -74,14 +129,16 @@ public class ProductMetricsService {
                         )
                         .build()
                 )
-                .filter(productExclusions())
-                .collect(Collectors.toSet())
-                .map(metrics ->
-                    ProductMetrics
-                        .builder()
-                        .productMetrics(metrics)
-                        .build()
-                );
+                .filter(productExclusions());
+    }
+
+    private static String obtainVersionFromBuildpackFilename(String filename) {
+        String rawVersion = filename.substring(filename.lastIndexOf("-") + 1);
+        return rawVersion.replaceAll(".zip", "").replaceAll("v", "");
+    }
+
+    private static String refineName(String value) {
+        return value.replaceAll("_", "-");
     }
 
     private static String refineType(String value) {
