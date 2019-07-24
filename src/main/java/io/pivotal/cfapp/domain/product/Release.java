@@ -117,4 +117,8 @@ public class Release {
         return slug;
     }
 
+    public static Release empty() {
+        return Release.builder().build();
+    }
+
 }
