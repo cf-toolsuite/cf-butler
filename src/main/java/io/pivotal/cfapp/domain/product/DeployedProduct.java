@@ -53,8 +53,9 @@ public class DeployedProduct {
     ) {
         this.installationName = installationName;
         this.guid = guid;
-        this.label = label;
+        this.type = type;
         this.productVersion = productVersion;
+        this.label = label;
         this.serviceBroker = serviceBroker;
         this.stale = stale;
     }

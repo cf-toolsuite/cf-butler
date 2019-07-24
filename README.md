@@ -436,6 +436,69 @@ GET /products/om/info
 ```
 > Returns the current version of the Operations Manager instance
 
+```
+GET /products/metrics
+```
+> Returns release metric information for all installed products
+
+Sample output
+
+```
+{
+    "product-metrics": [
+        {
+            "currently-installed-release-date": null,
+            "currently-installed-version": "1.6.0-build.41",
+            "end-of-life": false,
+            "end-of-support-date": null,
+            "latest-available-release-date": "2019-01-10",
+            "latest-available-version": "1.6.0",
+            "name": "apm",
+            "pre-release": true,
+            "days-behind-latest-available-version": null,
+            "type": "tile"
+        },
+        {
+            "currently-installed-release-date": "2019-06-19",
+            "currently-installed-version": "2.6.0",
+            "end-of-life": false,
+            "end-of-support-date": "2020-03-31",
+            "latest-available-release-date": "2019-07-15",
+            "latest-available-version": "2.6.2",
+            "name": "elastic-runtime",
+            "pre-release": false,
+            "days-behind-latest-available-version": 26,
+            "type": "tile"
+        },
+        {
+            "currently-installed-release-date": "2019-05-31",
+            "currently-installed-version": "3.0.2",
+            "end-of-life": false,
+            "end-of-support-date": "2020-02-29",
+            "latest-available-release-date": "2019-05-31",
+            "latest-available-version": "3.0.2",
+            "name": "p-spring-cloud-services",
+            "pre-release": false,
+            "days-behind-latest-available-version": 0,
+            "type": "tile"
+        },
+        {
+            "currently-installed-release-date": "2019-07-02",
+            "currently-installed-version": "1.3.3",
+            "end-of-life": false,
+            "end-of-support-date": "2020-07-02",
+            "latest-available-release-date": "2019-07-02",
+            "latest-available-version": "1.3.3",
+            "name": "credhub-service-broker",
+            "pre-release": false,
+            "days-behind-latest-available-version": 0,
+            "type": "tile"
+        }
+    ]
+}
+```
+
+
 ### Pivotal Network
 
 These endpoints are only available when the `pivnet.enabled` property is set to `true`. A valid `pivnet.apiToken` property must also have been defined.  Mimics a reduced set of the [Pivotal Network API](https://network.pivotal.io/docs/api).

@@ -21,7 +21,6 @@ import org.cloudfoundry.client.v3.builds.CreateBuildRequest;
 import org.cloudfoundry.client.v3.builds.CreateBuildResponse;
 import org.cloudfoundry.client.v3.builds.GetBuildRequest;
 import org.cloudfoundry.client.v3.builds.GetBuildResponse;
-import org.cloudfoundry.client.v3.packages.GetPackageResponse;
 import org.cloudfoundry.client.v3.packages.ListPackagesRequest;
 import org.cloudfoundry.client.v3.packages.PackageResource;
 import org.cloudfoundry.client.v3.packages.PackageState;
