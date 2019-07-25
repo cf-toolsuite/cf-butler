@@ -200,7 +200,7 @@ Update the value of the `cron` properties in `application.yml`.  Consult this [a
 
 ### To discriminate user from service accounts
 
-Consult [ButlerSettings.java](https://github.com/pacphi/cf-butler/blob/master/src/main/java/io/pivotal/cfapp/config/ButlerSettings.java#L25) for the default pattern value used to discriminate between user and service accounts.  You may override the default by adding to
+Consult [PasSettings.java](https://github.com/pacphi/cf-butler/blob/master/src/main/java/io/pivotal/cfapp/config/PasSettings.java#L25) for the default pattern value used to discriminate between user and service accounts.  You may override the default by adding to
 
 * application.yml
 

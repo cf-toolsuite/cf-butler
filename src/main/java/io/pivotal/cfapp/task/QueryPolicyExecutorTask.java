@@ -13,6 +13,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import io.pivotal.cfapp.config.PasSettings;
 import io.pivotal.cfapp.domain.Defaults;
 import io.pivotal.cfapp.domain.Query;
 import io.pivotal.cfapp.domain.QueryPolicy;
@@ -31,16 +32,19 @@ import reactor.util.function.Tuples;
 @Component
 public class QueryPolicyExecutorTask implements PolicyExecutorTask {
 
+    private final PasSettings settings;
     private final PoliciesService policiesService;
     private final QueryService queryService;
     private final ApplicationEventPublisher publisher;
 
     @Autowired
     public QueryPolicyExecutorTask(
+        PasSettings settings,
         PoliciesService policiesService,
         QueryService queryService,
         ApplicationEventPublisher publisher
     ) {
+        this.settings = settings;
         this.policiesService = policiesService;
         this.queryService = queryService;
         this.publisher = publisher;
@@ -58,6 +62,7 @@ public class QueryPolicyExecutorTask implements PolicyExecutorTask {
                         result ->
                             publisher.publishEvent(
                                 new EmailNotificationEvent(this)
+                                    .domain(settings.getAppsDomain())
                                     .from(result.getT1().getEmailNotificationTemplate().getFrom())
                                     .recipients(result.getT1().getEmailNotificationTemplate().getTo())
                                     .subject(result.getT1().getEmailNotificationTemplate().getSubject())

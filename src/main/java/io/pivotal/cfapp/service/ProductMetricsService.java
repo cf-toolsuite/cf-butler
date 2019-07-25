@@ -1,7 +1,5 @@
 package io.pivotal.cfapp.service;
 
-import static org.mockito.ArgumentMatchers.anyIterableOf;
-
 import java.util.Arrays;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -138,7 +136,7 @@ public class ProductMetricsService {
     }
 
     private static String refineName(String value) {
-        return value.replaceAll("_", "-");
+        return value.replaceAll("_", "-").replaceAll("offline", "");
     }
 
     private static String refineType(String value) {

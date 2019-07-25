@@ -1,5 +1,6 @@
 package io.pivotal.cfapp.notifier;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -15,7 +16,8 @@ public abstract class EmailNotifier implements ApplicationListener<EmailNotifica
     public void onApplicationEvent(EmailNotificationEvent event) {
         List<String> recipients = event.getRecipients();
         String from = event.getFrom();
-        String body = event.getBody();
+        String footer = String.format("[This email was sent from %s on %tc]", event.getDomain(), LocalDateTime.now());
+        String body = String.format("%s%n%n%s", event.getBody(), footer);
         String subject = event.getSubject();
         Map<String, String> attachmentContents = event.getAttachmentContents();
         recipients.forEach(recipient -> {

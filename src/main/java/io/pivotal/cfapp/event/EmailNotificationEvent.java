@@ -9,6 +9,7 @@ public class EmailNotificationEvent extends ApplicationEvent {
 
     private static final long serialVersionUID = 1L;
 
+    private String domain;
     private List<String> recipients;
     private String from;
     private String subject;
@@ -17,6 +18,15 @@ public class EmailNotificationEvent extends ApplicationEvent {
 
     public EmailNotificationEvent(Object source) {
         super(source);
+    }
+
+    public EmailNotificationEvent domain(String domain) {
+        this.domain = domain;
+        return this;
+    }
+
+    public String getDomain() {
+        return domain;
     }
 
     public EmailNotificationEvent recipients(List<String> recipients) {
