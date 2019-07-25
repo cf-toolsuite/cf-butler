@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 @Builder
@@ -17,6 +18,7 @@ import lombok.Getter;
     "latest-available-release-date", "latest-available-version", "end-of-support-date",
     "days-behind-latest-available-version", "end-of-life", "pre-release"
 })
+@EqualsAndHashCode
 public class ProductMetric {
 
     @JsonProperty("name")
@@ -42,7 +44,8 @@ public class ProductMetric {
 
     @JsonCreator
     public ProductMetric(
-        @JsonProperty("name") String name, @JsonProperty("type") ProductType type,
+        @JsonProperty("name") String name,
+        @JsonProperty("type") ProductType type,
         @JsonProperty("currently-installed-release-date") LocalDate currentlyInstalledReleaseDate,
         @JsonProperty("currently-installed-version") String currentlyInstalledVersion,
         @JsonProperty("latest-available-release-date") LocalDate latestAvailableReleaseDate,
@@ -59,7 +62,7 @@ public class ProductMetric {
     }
 
     @JsonProperty("days-behind-latest-available-version")
-    public Long getStaleness() {
+    public Long getDaysBehindLatestAvailableVersion() {
         Long result = null;
         if (currentlyInstalledReleaseDate != null && latestAvailableReleaseDate != null) {
             result = ChronoUnit.DAYS.between(currentlyInstalledReleaseDate, latestAvailableReleaseDate);
