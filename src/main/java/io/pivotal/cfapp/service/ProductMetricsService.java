@@ -136,7 +136,7 @@ public class ProductMetricsService {
     }
 
     private static String refineName(String value) {
-        return value.replaceAll("_", "-").replaceAll("offline", "");
+        return value.replaceAll("_", "-").replaceAll("-offline", "");
     }
 
     private static String refineType(String value) {
