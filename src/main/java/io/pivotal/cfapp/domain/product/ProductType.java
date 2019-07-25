@@ -1,9 +1,5 @@
 package io.pivotal.cfapp.domain.product;
 
-import java.util.Arrays;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum ProductType {

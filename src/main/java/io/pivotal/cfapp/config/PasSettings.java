@@ -51,6 +51,10 @@ public class PasSettings {
 		return "https://" + getApiHost().replace("api.", "app-usage.");
 	}
 
+	public String getAppsDomain() {
+		return "https://" + getApiHost().replace("api.", "apps.");
+	}
+
 	public Set<String> getBuildpacks() {
 		while (buildpacks.remove(""));
 		Set<String> nonEmptyBuildpacks = CollectionUtils.isEmpty(buildpacks) ?
