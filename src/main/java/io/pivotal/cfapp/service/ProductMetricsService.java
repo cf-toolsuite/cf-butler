@@ -43,6 +43,7 @@ public class ProductMetricsService {
     public Mono<ProductMetrics> getProductMetrics() {
         return Flux
                 .concat(getTiles(), getBuildpacks())
+                .distinct()
                 .collect(Collectors.toSet())
                 .map(metrics ->
                     ProductMetrics
@@ -87,8 +88,7 @@ public class ProductMetricsService {
                             .getEndOfSupportDate()
                         )
                         .build()
-                    )
-                    .distinct();
+                    );
     }
 
     protected Flux<ProductMetric> getTiles() {
