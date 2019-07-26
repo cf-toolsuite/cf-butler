@@ -16,10 +16,9 @@ public class PolicyIdProvider {
     private final PoliciesSettings settings;
     private final String commit;
 
-    @Autowired(required = false)
     public PolicyIdProvider(
         PoliciesSettings settings,
-        GitClient client
+        @Autowired(required = false) GitClient client
     ) {
         this.settings = settings;
         if (client != null) {
