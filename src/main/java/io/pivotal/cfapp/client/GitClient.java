@@ -7,53 +7,101 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
+import java.util.List;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Component
 @ConditionalOnProperty(prefix = "cf.policies", name = "provider", havingValue = "git")
 public class GitClient {
 
-	public Repository getRepository(String uri) throws GitAPIException, IOException {
+	public Repository getRepository(String uri) {
+		Repository result = null;
 		Assert.hasText(uri, "URI of remote Git repository must be specified");
 		Assert.isTrue(uri.endsWith(".git"), "URI must end with .git");
 		String path = String.join(File.separator, "tmp", uri.substring(uri.lastIndexOf("/")).replace(".git",""));
-		File directory = new File(path);
-		Path p = Paths.get(directory.toURI());
-		if (Files.exists(p)) {
-    		Files
-    			.walk(p)
-	    	    .sorted(Comparator.reverseOrder())
-	    	    .map(Path::toFile)
-	    	    .forEach(File::delete);
-    		}
-		Git
-			.cloneRepository()
-				.setURI(uri)
-				.setDirectory(directory)
-				.setCloneAllBranches(true)
-				.call();
-		return Git.open(directory).getRepository();
+		try {
+			File directory = new File(path);
+			Path p = Paths.get(directory.toURI());
+			if (Files.exists(p)) {
+				Files
+					.walk(p)
+					.sorted(Comparator.reverseOrder())
+					.map(Path::toFile)
+					.forEach(File::delete);
+				}
+			Git
+				.cloneRepository()
+					.setURI(uri)
+					.setDirectory(directory)
+					.setCloneAllBranches(true)
+					.call();
+			result = Git.open(directory).getRepository();
+		} catch (GitAPIException | IOException e) {
+			log.warn(String.format("Cannot clone Git repository at %s", uri), e);
+		}
+		return result;
 	}
 
-    public String readFile(Repository repo, String commitId, String filepath) throws IOException {
-    	ObjectId oid = repo.resolve(commitId);
-        RevCommit commit = repo.parseCommit(oid);
-    	try (TreeWalk walk = TreeWalk.forPath(repo, filepath, commit.getTree())) {
+    public String readFile(Repository repo, String commitId, String filePath) throws IOException {
+		ObjectId oid = repo.resolve(commitId);
+		RevCommit commit = repo.parseCommit(oid);
+    	try (TreeWalk walk = TreeWalk.forPath(repo, filePath, commit.getTree())) {
             if (walk != null) {
                 byte[] bytes = repo.open(walk.getObjectId(0)).getBytes();
                 return new String(bytes, StandardCharsets.UTF_8);
             } else {
-                throw new IllegalArgumentException("No path found.");
+                throw new IllegalArgumentException(String.format("No file found for commitId=%s and filePath=%s", commitId, filePath));
             }
         }
-    }
+	}
+
+	// @see https://stackoverflow.com/questions/42820282/get-the-latest-commit-in-a-repository-with-jgit
+	public RevCommit getLatestCommit(Repository repo) throws IOException, GitAPIException {
+		RevCommit latestCommit = null;
+		int inc = 0;
+		try(
+			Git git = new Git(repo);
+			RevWalk walk = new RevWalk(repo);
+		) {
+			List<Ref> branches = git.branchList().call();
+			for(Ref branch : branches) {
+				RevCommit commit = walk.parseCommit(branch.getObjectId());
+				if (inc == 0)
+					latestCommit = commit;
+				if(commit.getAuthorIdent().getWhen().compareTo(latestCommit.getAuthorIdent().getWhen()) > 0)
+					latestCommit = commit;
+				inc++;
+			}
+		}
+		return latestCommit;
+	}
+
+	public String orLatestCommit(String commit, Repository repo) {
+		String result = null;
+		if (commit != null) {
+			result = commit;
+		} else {
+			try {
+				result = getLatestCommit(repo).getName();
+			} catch (GitAPIException | IOException e) {
+				log.error("Trouble fetching latest commit id.", e);
+			}
+		}
+		return result;
+	}
+
 }

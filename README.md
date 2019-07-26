@@ -143,6 +143,7 @@ Creation and deletion of policies are managed via API endpoints by default. When
 
 * `cf.policies.uri` the location of the repository that contains policy files in JSON format
 * `cf.policies.commit` the commit id to pull from
+  * if this property is missing the latest commit will be used
 * `cf.policies.filePaths` an array of file paths of policy files
 
 Policy files must adhere to a naming convention where:

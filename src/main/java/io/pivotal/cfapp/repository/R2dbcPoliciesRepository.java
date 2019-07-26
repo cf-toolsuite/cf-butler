@@ -21,7 +21,6 @@ import org.springframework.data.r2dbc.query.Criteria;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
 
-import io.pivotal.cfapp.config.PoliciesSettings;
 import io.pivotal.cfapp.domain.ApplicationOperation;
 import io.pivotal.cfapp.domain.ApplicationPolicy;
 import io.pivotal.cfapp.domain.Defaults;
@@ -37,32 +36,32 @@ import reactor.core.publisher.Mono;
 @Repository
 public class R2dbcPoliciesRepository {
 
-	private final DatabaseClient client;
-	private final PoliciesSettings policiesSettings;
+	private final DatabaseClient dbClient;
+	private final PolicyIdProvider idProvider;
 	private final ObjectMapper mapper;
 
 	@Autowired
 	public R2dbcPoliciesRepository(
-		DatabaseClient client,
-		PoliciesSettings policiesSettings,
+		DatabaseClient dbClient,
+		PolicyIdProvider idProvider,
 		ObjectMapper mapper) {
-		this.client = client;
-		this.policiesSettings = policiesSettings;
+		this.dbClient = dbClient;
+		this.idProvider = idProvider;
 		this.mapper = mapper;
 	}
 
 	public Mono<Policies> save(Policies entity) {
 		List<ApplicationPolicy> applicationPolicies =
 			entity.getApplicationPolicies().stream()
-				.map(p -> seedApplicationPolicy(p)).collect(Collectors.toList());
+				.map(p -> idProvider.seedApplicationPolicy(p)).collect(Collectors.toList());
 
 		List<ServiceInstancePolicy> serviceInstancePolicies =
 			entity.getServiceInstancePolicies().stream()
-				.map(p -> seedServiceInstancePolicy(p)).collect(Collectors.toList());
+				.map(p -> idProvider.seedServiceInstancePolicy(p)).collect(Collectors.toList());
 
 		List<QueryPolicy> queryPolicies =
 			entity.getQueryPolicies().stream()
-				.map(p -> seedQueryPolicy(p)).collect(Collectors.toList());
+				.map(p -> idProvider.seedQueryPolicy(p)).collect(Collectors.toList());
 
 		return Flux.fromIterable(applicationPolicies)
 					.concatMap(ap -> saveApplicationPolicy(ap))
@@ -77,7 +76,7 @@ public class R2dbcPoliciesRepository {
 		List<ServiceInstancePolicy> serviceInstancePolicies = new ArrayList<>();
 		return
 			Flux
-				.from(client
+				.from(dbClient
 						.select()
 							.from(ServiceInstancePolicy.tableName())
 							.project(ServiceInstancePolicy.columnNames())
@@ -102,7 +101,7 @@ public class R2dbcPoliciesRepository {
 		List<ApplicationPolicy> applicationPolicies = new ArrayList<>();
 		return
 			Flux
-				.from(client
+				.from(dbClient
 						.select()
 							.from(ApplicationPolicy.tableName())
 							.project(ApplicationPolicy.columnNames())
@@ -128,7 +127,7 @@ public class R2dbcPoliciesRepository {
 		List<QueryPolicy> queryPolicies = new ArrayList<>();
 		return
 			Flux
-				.from(client
+				.from(dbClient
 						.select()
 							.from(QueryPolicy.tableName())
 							.project(QueryPolicy.columnNames())
@@ -158,7 +157,7 @@ public class R2dbcPoliciesRepository {
 
 		return
 				Flux
-					.from(client.execute(selectAllApplicationPolicies)
+					.from(dbClient.execute(selectAllApplicationPolicies)
 							.map((row, metadata) ->
 								ApplicationPolicy
 									.builder()
@@ -174,7 +173,7 @@ public class R2dbcPoliciesRepository {
 					.map(ap -> applicationPolicies.add(ap))
 					.thenMany(
 						Flux
-							.from(client.execute(selectAllServiceInstancePolicies)
+							.from(dbClient.execute(selectAllServiceInstancePolicies)
 									.map((row, metadata) ->
 										ServiceInstancePolicy
 											.builder()
@@ -189,7 +188,7 @@ public class R2dbcPoliciesRepository {
 							.map(sp -> serviceInstancePolicies.add(sp)))
 					.thenMany(
 						Flux
-							.from(client.execute(selectAllQueryPolicies)
+							.from(dbClient.execute(selectAllQueryPolicies)
 									.map((row, metadata) ->
 										QueryPolicy
 											.builder()
@@ -207,7 +206,7 @@ public class R2dbcPoliciesRepository {
 
 	public Mono<Policies> findAllQueryPolicies() {
 		return
-			client
+			dbClient
 				.select()
 				.from(QueryPolicy.tableName())
 				.project(QueryPolicy.columnNames())
@@ -234,7 +233,7 @@ public class R2dbcPoliciesRepository {
 	public Mono<Void> deleteApplicationPolicyById(String id) {
 		return
 			Flux
-				.from(client
+				.from(dbClient
 						.delete()
 							.from(ApplicationPolicy.tableName())
 							.matching(Criteria.where("id").is(id))
@@ -246,7 +245,7 @@ public class R2dbcPoliciesRepository {
 	public Mono<Void> deleteServiceInstancePolicyById(String id) {
 		return
 			Flux
-				.from(client
+				.from(dbClient
 						.delete()
 							.from(ServiceInstancePolicy.tableName())
 							.matching(Criteria.where("id").is(id))
@@ -258,7 +257,7 @@ public class R2dbcPoliciesRepository {
 	public Mono<Void> deleteQueryPolicyById(String id) {
 		return
 			Flux
-				.from(client
+				.from(dbClient
 						.delete()
 							.from(QueryPolicy.tableName())
 							.matching(Criteria.where("id").is(id))
@@ -271,7 +270,7 @@ public class R2dbcPoliciesRepository {
 		return
 			Flux
 				.from(
-					client
+					dbClient
 						.delete()
 						.from(ApplicationPolicy.tableName())
 						.fetch()
@@ -280,7 +279,7 @@ public class R2dbcPoliciesRepository {
 				.thenMany(
 					Flux
 						.from(
-							client
+							dbClient
 								.delete()
 								.from(ServiceInstancePolicy.tableName())
 								.fetch()
@@ -289,21 +288,9 @@ public class R2dbcPoliciesRepository {
 				.then();
 	}
 
-	private ApplicationPolicy seedApplicationPolicy(ApplicationPolicy policy) {
-		return policiesSettings.isVersionManaged() ? ApplicationPolicy.seedWith(policy, policiesSettings.getCommit()): ApplicationPolicy.seed(policy);
-	}
-
-	private ServiceInstancePolicy seedServiceInstancePolicy(ServiceInstancePolicy policy) {
-		return policiesSettings.isVersionManaged() ? ServiceInstancePolicy.seedWith(policy, policiesSettings.getCommit()): ServiceInstancePolicy.seed(policy);
-	}
-
-	private QueryPolicy seedQueryPolicy(QueryPolicy policy) {
-		return policiesSettings.isVersionManaged() ? QueryPolicy.seedWith(policy, policiesSettings.getCommit()): QueryPolicy.seed(policy);
-	}
-
 	private Mono<Integer> saveApplicationPolicy(ApplicationPolicy ap) {
 		GenericInsertSpec<Map<String, Object>> spec =
-			client.insert().into(ApplicationPolicy.tableName())
+			dbClient.insert().into(ApplicationPolicy.tableName())
 				.value("id", ap.getId());
 		if (ap.getDescription() != null) {
 			spec = spec.value("description", ap.getDescription());
@@ -331,7 +318,7 @@ public class R2dbcPoliciesRepository {
 
 	private Mono<Integer> saveServiceInstancePolicy(ServiceInstancePolicy sip) {
 		GenericInsertSpec<Map<String, Object>> spec =
-			client.insert().into(ServiceInstancePolicy.tableName())
+			dbClient.insert().into(ServiceInstancePolicy.tableName())
 				.value("id", sip.getId());
 		if (sip.getDescription() != null) {
 			spec = spec.value("description", sip.getDescription());
@@ -354,7 +341,7 @@ public class R2dbcPoliciesRepository {
 
 	private Mono<Integer> saveQueryPolicy(QueryPolicy qp) {
 		GenericInsertSpec<Map<String, Object>> spec =
-			client.insert().into(QueryPolicy.tableName())
+			dbClient.insert().into(QueryPolicy.tableName())
 				.value("id", qp.getId());
 		if (qp.getDescription() != null) {
 			spec = spec.value("description", qp.getDescription());
@@ -380,7 +367,7 @@ public class R2dbcPoliciesRepository {
 		List<QueryPolicy> queryPolicies = new ArrayList<>();
 		return
 				Flux
-					.from(client
+					.from(dbClient
 							.select()
 								.from(ApplicationPolicy.tableName())
 								.project(ApplicationPolicy.columnNames())
@@ -408,7 +395,7 @@ public class R2dbcPoliciesRepository {
 		List<QueryPolicy> queryPolicies = new ArrayList<>();
 		return
 				Flux
-					.from(client
+					.from(dbClient
 							.select()
 								.from(ServiceInstancePolicy.tableName())
 								.project(ServiceInstancePolicy.columnNames())

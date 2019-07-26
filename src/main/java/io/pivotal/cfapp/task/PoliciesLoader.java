@@ -6,7 +6,6 @@ import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Repository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -61,11 +60,13 @@ public class PoliciesLoader implements ApplicationListener<StacksRetrievedEvent>
 
 	public void load() {
 		log.info("PoliciesLoader started");
-		try {
-			Repository repo = client.getRepository(settings.getUri());
+		Repository repo = client.getRepository(settings.getUri());
+		if (repo != null) {
 			List<ApplicationPolicy> applicationPolicies = new ArrayList<>();
 			List<ServiceInstancePolicy> serviceInstancePolicies = new ArrayList<>();
 			List<QueryPolicy> queryPolicies = new ArrayList<>();
+			String commit = client.orLatestCommit(settings.getCommit(), repo);
+			log.info("-- Fetching policies from {} using commit {}", settings.getUri(), commit);
 			settings
 				.getFilePaths()
 					.stream()
@@ -73,7 +74,7 @@ public class PoliciesLoader implements ApplicationListener<StacksRetrievedEvent>
 					.forEach(fp -> {
 						String fileContent;
 						try {
-							fileContent = client.readFile(repo, settings.getCommit(), fp);
+							fileContent = client.readFile(repo, commit, fp);
 							if (fp.endsWith(APPLICATION_POLICY_SUFFIX)) {
 								ApplicationPolicy policy = mapper.readValue(fileContent, ApplicationPolicy.class);
 								if (validator.validate(policy)) {
@@ -94,7 +95,7 @@ public class PoliciesLoader implements ApplicationListener<StacksRetrievedEvent>
 										"Policy file {} does not adhere to naming convention. File name must end with either {} or {}.",
 										fp, APPLICATION_POLICY_SUFFIX, SERVICE_INSTANCE_POLICY_SUFFIX);
 							}
-						} catch (IOException ioe) {
+						} catch (IOException e1) {
 							log.warn("Could not read {} from {} with commit {} ", fp, settings.getUri(), settings.getCommit());
 						}
 					});
@@ -113,8 +114,8 @@ public class PoliciesLoader implements ApplicationListener<StacksRetrievedEvent>
 						log.error("PoliciesLoader terminated with error", error);
 					}
 				);
-		} catch (GitAPIException | IOException ioe) {
-			log.error("PoliciesLoader terminated with error", ioe);
+		} else {
+			log.error("PoliciesLoader terminated because it could not connect to Git repository");
 		}
 	}
 
