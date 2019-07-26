@@ -4,12 +4,16 @@ import java.util.Set;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-import lombok.Data;
+import lombok.Builder;
+import lombok.Builder.Default;
+import lombok.Getter;
 
-@Data
+@Builder
+@Getter
 @ConfigurationProperties(prefix = "cf.policies")
 public class PoliciesSettings {
 
+    @Default
     private String provider = "dbms";
     private String uri;
     private String commit;
@@ -18,4 +22,6 @@ public class PoliciesSettings {
     public boolean isVersionManaged() {
         return getProvider().equalsIgnoreCase("git");
     }
+
+
 }
