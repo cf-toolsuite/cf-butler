@@ -934,6 +934,11 @@ DELETE /policies/query/{id}
 > Delete a query policy by its id. This endpoint is only available when `cf.policies.provider` is set to `dbms`.
 
 ```
+POST /policies/refresh
+```
+> Refreshes policies loaded from an external Git repo. This endpoint is only available when `cf.policies.provider` is set to `git`.
+
+```
 GET /policies/report
 ```
 > Produces `text/plain` historical output detailing what policies had an effect on applications and service instances.  (Does not track execution of query policies).
