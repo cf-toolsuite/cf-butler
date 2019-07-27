@@ -1,6 +1,7 @@
 package io.pivotal.cfapp.service;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -23,7 +24,7 @@ import reactor.core.publisher.Mono;
 )
 public class ProductMetricsService {
 
-    private static final String[] PRODUCT_EXCLUSIONS = { "p-bosh" };
+    private static final String BOSH_EXCLUDE = "p-bosh";
 
     private final PivnetCache pivnetCache;
     private final OpsmanClient opsmanClient;
@@ -42,7 +43,7 @@ public class ProductMetricsService {
 
     public Mono<ProductMetrics> getProductMetrics() {
         return Flux
-                .concat(getTiles(), getBuildpacks())
+                .concat(getTiles(), getBuildpacks(), getStemcells())
                 .distinct()
                 .collect(Collectors.toSet())
                 .map(metrics ->
@@ -130,6 +131,45 @@ public class ProductMetricsService {
                 .filter(productExclusions());
     }
 
+    protected Flux<ProductMetric> getStemcells() {
+        return opsmanClient
+                .getStemcellAssociations()
+                .flatMapMany(associations -> Flux.fromIterable(associations.getProducts()))
+                .map(sa ->
+                    ProductMetric
+                        .builder()
+                        .name(String.format("%s:%s:%s", refineType(sa.getIdentifier()), sa.getDeployedProductVersion(), sa.getDeployedStemcells().get(0).getOs()))
+                        .currentlyInstalledVersion(sa.getDeployedStemcells().get(0).getVersion())
+                        .currentlyInstalledReleaseDate(
+                            pivnetCache.findProductReleaseBySlugAndVersion(
+                                "stemcells-" + sa.getDeployedStemcells().get(0).getOs(), sa.getDeployedStemcells().get(0).getVersion()
+                            )
+                            .getReleaseDate()
+                        )
+                        .latestAvailableVersion(
+                            pivnetCache.findLatestMinorProductReleaseBySlugAndVersion(
+                                "stemcells-" + sa.getDeployedStemcells().get(0).getOs(), sa.getDeployedStemcells().get(0).getVersion()
+                            )
+                            .getVersion()
+                        )
+                        .latestAvailableReleaseDate(
+                            pivnetCache.findLatestMinorProductReleaseBySlugAndVersion(
+                                "stemcells-" + sa.getDeployedStemcells().get(0).getOs(), sa.getDeployedStemcells().get(0).getVersion()
+                            )
+                            .getReleaseDate()
+                        )
+                        .type(ProductType.STEMCELL)
+                        .endOfSupportDate(
+                            pivnetCache.findProductReleaseBySlugAndVersion(
+                                "stemcells-" + sa.getDeployedStemcells().get(0).getOs(), sa.getDeployedStemcells().get(0).getVersion()
+                            )
+                            .getEndOfSupportDate()
+                        )
+                        .build()
+                )
+                .filter(productExclusions());
+    }
+
     private static String obtainVersionFromBuildpackFilename(String filename) {
         String rawVersion = filename.substring(filename.lastIndexOf("-") + 1);
         return rawVersion.replaceAll(".zip", "").replaceAll("v", "");
@@ -150,7 +190,7 @@ public class ProductMetricsService {
     }
 
     private static Predicate<ProductMetric> productExclusions() {
-        return productMetric -> !Arrays.asList(PRODUCT_EXCLUSIONS).contains(productMetric.getName());
+        return productMetric -> !productMetric.getName().startsWith(BOSH_EXCLUDE);
     }
 
 }

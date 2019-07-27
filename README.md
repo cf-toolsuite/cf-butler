@@ -439,7 +439,7 @@ GET /products/om/info
 ```
 GET /products/metrics
 ```
-> Returns release metric information for installed products (includes tiles and buildpacks)
+> Returns release metric information for installed products (includes buildpacks, stemcells and tiles).  Note: stemcell release metrics are only available from foundations administered with Ops Manager 2.6 or later.
 
 Sample output
 
@@ -517,7 +517,19 @@ Sample output
             "name": "python-buildpack",
             "pre-release": false,
             "type": "buildpack"
-        }
+        },
+        {
+            "name": "apm:1.6.0-build.41:ubuntu-xenial",
+            "type": "stemcell",
+            "currently-installed-release-date": "2019-06-24",
+            "currently-installed-version": "170.93",
+            "latest-available-release-date": "2019-07-16",
+            "latest-available-version": "170.109",
+            "end-of-support-date": null,
+            "days-behind-latest-available-version": 22,
+            "end-of-life": false,
+            "pre-release": false
+        },
     ]
 }
 ```
