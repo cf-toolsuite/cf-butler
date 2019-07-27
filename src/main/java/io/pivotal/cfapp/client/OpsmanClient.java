@@ -69,7 +69,7 @@ public class OpsmanClient {
         String uri = String.format(URI_TEMPLATE, settings.getApiHost(), "/api/v0/stemcell_associations");
         return
             getOmVersion()
-            .filter(version -> version.startsWith("2.6"))
+            .filter(version -> Double.valueOf(version) >= 2.6)
             .flatMap(
                 r ->
                     tokenProvider.obtainAccessToken()

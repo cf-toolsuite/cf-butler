@@ -1,12 +1,12 @@
 package io.pivotal.cfapp.domain.product;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.nimbusds.oauth2.sdk.util.CollectionUtils;
-
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import lombok.Data;
 
@@ -19,26 +19,42 @@ public class PivnetCache {
     private List<Release> latestProductReleases = new ArrayList<>();
 
     public Release findProductReleaseBySlugAndVersion(String slug, String version) {
-        List<Release> candidate =
+        List<Release> candidates =
             allProductReleases
                 .stream()
                 .filter(release -> release.getSlug().equals(slug) && release.getVersion().equals(version))
                 .collect(Collectors.toList());
-        if (CollectionUtils.isNotEmpty(candidate)) {
-            return candidate.get(0);
+        if (!CollectionUtils.isEmpty(candidates)) {
+            return candidates.get(0);
+        } else {
+            return Release.empty();
+        }
+    }
+
+    public Release findLatestMinorProductReleaseBySlugAndVersion(String slug, String version) {
+        List<Release> candidates =
+            allProductReleases
+                .stream()
+                .filter(release ->
+                    release.getSlug().equals(slug)
+                        && version.startsWith(release.getVersion().split("\\.")[0]))
+                .sorted(Comparator.comparing(Release::getReleaseDate).reversed())
+                .collect(Collectors.toList());
+        if (!CollectionUtils.isEmpty(candidates)) {
+            return candidates.get(0);
         } else {
             return Release.empty();
         }
     }
 
     public Release findLatestProductReleaseBySlug(String slug) {
-        List<Release> candidate =
+        List<Release> candidates =
             latestProductReleases
                 .stream()
                 .filter(release -> release.getSlug().equals(slug))
                 .collect(Collectors.toList());
-        if (CollectionUtils.isNotEmpty(candidate)) {
-            return candidate.get(0);
+        if (!CollectionUtils.isEmpty(candidates)) {
+            return candidates.get(0);
         } else {
             return Release.empty();
         }
