@@ -804,21 +804,36 @@ Sample output
 ```
 GET /accounting/applications
 ```
-> Produces a system-wide account report of [application usage](https://docs.pivotal.io/pivotalcf/2-4/opsguide/accounting-report.html#app-usage)
+> Produces a system-wide account report of [application usage](https://docs.pivotal.io/pivotalcf/2-6/opsguide/accounting-report.html#app-usage)
 
 > **Note**: Report excludes application instances in the `system` org
 
 ```
 GET /accounting/services
 ```
-> Produces a system-wide account report of [service usage](https://docs.pivotal.io/pivotalcf/2-4/opsguide/accounting-report.html#service-usage)
+> Produces a system-wide account report of [service usage](https://docs.pivotal.io/pivotalcf/2-6/opsguide/accounting-report.html#service-usage)
 
 > **Note**: Report excludes user-provided service instances
 
 ```
 GET /accounting/tasks
 ```
-> Produces a system-wide account report of [task usage](https://docs.pivotal.io/pivotalcf/2-4/opsguide/accounting-report.html#task-usage)
+> Produces a system-wide account report of [task usage](https://docs.pivotal.io/pivotalcf/2-6/opsguide/accounting-report.html#task-usage)
+
+```
+GET /accounting/applications/{orgName}/{startDate}/{endDate}
+```
+> Produces an [application usage](https://docs.pivotal.io/pivotalcf/2-6/opsguide/accounting-report.html#org-app-usage) constrained to single organization and time period
+
+```
+GET /accounting/services/{orgName}/{startDate}/{endDate}
+```
+> Produces a [service usage](https://docs.pivotal.io/pivotalcf/2-6/opsguide/accounting-report.html#org-service-usage) constrained to single organization and time period
+
+```
+GET /accounting/tasks/{orgName}/{startDate}/{endDate}
+```
+> Produces a [task usage](https://docs.pivotal.io/pivotalcf/2-6/opsguide/accounting-report.html#org-task-usage) constrained to single organization and time period
 
 
 ### Policies

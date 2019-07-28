@@ -14,7 +14,6 @@ import io.pivotal.cfapp.config.PasSettings;
 import io.pivotal.cfapp.domain.accounting.application.AppUsageReport;
 import io.pivotal.cfapp.domain.accounting.service.ServiceUsageReport;
 import io.pivotal.cfapp.domain.accounting.task.TaskUsageReport;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 // @see https://docs.pivotal.io/pivotalcf/2-4/opsguide/accounting-report.html
@@ -60,34 +59,31 @@ public class UsageService {
                                             .bodyToMono(String.class));
     }
 
-    public Mono<String> getTaskUsage(String orgGuid, LocalDate start, LocalDate end) {
-        return getUsage("task_usages", orgGuid, start, end);
-    }
-
-    public Mono<String> getApplicationUsage(String orgGuid, LocalDate start, LocalDate end) {
-        return getUsage("app_usages", orgGuid, start, end);
-    }
-
-    public Mono<String> getServiceUsage(String orgGuid, LocalDate start, LocalDate end) {
-        return getUsage("service_usages", orgGuid, start, end);
-    }
-
-    public Flux<String> getTaskUsage(LocalDate start, LocalDate end) {
-        return orgService
+    public Mono<String> getTaskUsage(String orgName, LocalDate start, LocalDate end) {
+        return
+            orgService
                 .findAll()
-                    .flatMap(o -> getTaskUsage(o.getId(), start, end));
+                .filter(org -> org.getName().equalsIgnoreCase(orgName))
+                .single()
+                .flatMap(org -> getUsage("task_usages", org.getId(), start, end));
     }
 
-    public Flux<String> getApplicationUsage(LocalDate start, LocalDate end) {
-        return orgService
+    public Mono<String> getApplicationUsage(String orgName, LocalDate start, LocalDate end) {
+        return
+            orgService
                 .findAll()
-                .flatMap(o -> getApplicationUsage(o.getId(), start, end));
+                .filter(org -> org.getName().equalsIgnoreCase(orgName))
+                .single()
+                .flatMap(org -> getUsage("app_usages", org.getId(), start, end));
     }
 
-    public Flux<String> getServiceUsage(LocalDate start, LocalDate end) {
-        return orgService
+    public Mono<String> getServiceUsage(String orgName, LocalDate start, LocalDate end) {
+        return
+            orgService
                 .findAll()
-                    .flatMap(o -> getServiceUsage(o.getId(), start, end));
+                .filter(org -> org.getName().equalsIgnoreCase(orgName))
+                .single()
+                .flatMap(org -> getUsage("service_usages", org.getId(), start, end));
     }
 
     //----------
