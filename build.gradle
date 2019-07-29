@@ -3,6 +3,7 @@ plugins {
     id 'org.springframework.boot' version '2.2.0.M4'
     id 'io.spring.dependency-management' version '1.0.8.RELEASE'
     id 'com.github.ben-manes.versions' version '0.21.0'
+    id 'io.franzbecker.gradle-lombok' version '3.1.0'
 	id 'java'
     id 'jacoco'
     id 'maven-publish'
@@ -36,6 +37,16 @@ tasks.withType(com.github.spotbugs.SpotBugsTask) {
 group = 'io.pivotal'
 version = '0.1-SNAPSHOT'
 sourceCompatibility = JavaVersion.VERSION_11
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allJava
+    archiveClassifier = 'sources'
+}
+
+task javadocJar(type: Jar) {
+    from javadoc
+    archiveClassifier = 'javadoc'
+}
 
 repositories {
 	mavenCentral()
@@ -141,6 +152,16 @@ publishing {
     publications {
         maven(MavenPublication) {
             from components.java
+            artifact sourcesJar
+            artifact javadocJar
+            versionMapping {
+                usage('java-api') {
+                    fromResolutionOf('runtimeClasspath')
+                }
+                usage('java-runtime') {
+                    fromResolutionResult()
+                }
+            }
         }
         mavenJava(MavenPublication) {
             pom {
@@ -166,6 +187,29 @@ publishing {
                 }
             }
         }
+    }
+}
+
+import io.franzbecker.gradle.lombok.task.DelombokTask
+
+task delombok(type: DelombokTask, dependsOn: compileJava) {
+    ext.outputDir = file("$buildDir/delombok")
+    outputs.dir(outputDir)
+    sourceSets.main.java.srcDirs.each {
+        inputs.dir(it)
+        args(it, "-d", outputDir)
+    }
+    doFirst {
+        outputDir.deleteDir()
+    }
+}
+
+javadoc {
+    dependsOn delombok
+    source = delombok.outputDir
+    failOnError = false
+    if(JavaVersion.current().isJava9Compatible()) {
+        options.addBooleanOption('html5', true)
     }
 }
 
