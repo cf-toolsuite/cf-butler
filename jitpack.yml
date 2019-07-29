@@ -1,0 +1,4 @@
+jdk:
+  - openjdk11
+install:
+   - ./gradlew -b build.w-mysql.gradle clean build publishToMavenLocal
