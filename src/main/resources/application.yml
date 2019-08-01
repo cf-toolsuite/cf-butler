@@ -158,7 +158,7 @@ cf:
   policies:
     provider: ${vcap.services.cf-butler-secrets.credentials.CF_POLICIES_PROVIDER}
     uri: ${vcap.services.cf-butler-secrets.credentials.CF_POLICIES_URI}
-    commit: ${vcap.services.cf-butler-secrets.credentials.CF_POLICIES_COMMIT}
+    commit: ${vcap.services.cf-butler-secrets.credentials.CF_POLICIES_COMMIT:}
     filePaths: ${vcap.services.cf-butler-secrets.credentials.CF_POLICIES_FILE-PATHS}
   buildpacks: ${vcap.services.cf-butler-secrets.credentials.CF_BUILDPACKS:}
   applicationStatisticsEnabled: ${vcap.services.cf-butler-secrets.credentials.CF_APP_STATS_ENABLED:true}
