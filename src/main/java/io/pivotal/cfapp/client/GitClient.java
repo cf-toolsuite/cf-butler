@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.ObjectId;
@@ -92,7 +93,7 @@ public class GitClient {
 
 	public String orLatestCommit(String commit, Repository repo) {
 		String result = null;
-		if (commit != null) {
+		if (StringUtils.isNotBlank(commit)) {
 			result = commit;
 		} else {
 			try {
