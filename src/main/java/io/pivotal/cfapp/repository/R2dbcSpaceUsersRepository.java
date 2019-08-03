@@ -82,11 +82,11 @@ public class R2dbcSpaceUsersRepository {
 	private SpaceUsers fromRow(Row row) {
 		return SpaceUsers.builder()
 				.pk(row.get("pk", Long.class))
-				.organization(Defaults.getValueOrDefault(row.get("organization", String.class), ""))
-				.space(Defaults.getValueOrDefault(row.get("space", String.class), ""))
-				.auditors(toList(Defaults.getValueOrDefault(row.get("auditors", String.class), "")))
-				.developers(toList(Defaults.getValueOrDefault(row.get("developers", String.class), "")))
-				.managers(toList(Defaults.getValueOrDefault(row.get("managers", String.class), "")))
+				.organization(Defaults.getColumnValueOrDefault(row, "organization", String.class, ""))
+				.space(Defaults.getColumnValueOrDefault(row, "space", String.class, ""))
+				.auditors(toList(Defaults.getColumnValueOrDefault(row, "auditors", String.class, "")))
+				.developers(toList(Defaults.getColumnValueOrDefault(row, "developers", String.class, "")))
+				.managers(toList(Defaults.getColumnValueOrDefault(row, "managers", String.class, "")))
 				.build();
 	}
 

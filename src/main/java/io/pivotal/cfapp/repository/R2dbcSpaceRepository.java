@@ -46,6 +46,6 @@ public class R2dbcSpaceRepository {
 	}
 
 	private Space fromRow(Row row) {
-		return new Space(row.get("org_name", String.class), Defaults.getValueOrDefault(row.get("space_name", String.class), ""));
+		return new Space(row.get("org_name", String.class), Defaults.getColumnValueOrDefault(row, "space_name", String.class, ""));
 	}
 }

@@ -42,7 +42,7 @@ public class R2dbcOrganizationRepository {
 	}
 
 	private Organization fromRow(Row row) {
-		return new Organization(row.get("id", String.class), Defaults.getValueOrDefault(row.get("org_name", String.class), ""));
+		return new Organization(row.get("id", String.class), Defaults.getColumnValueOrDefault(row, "org_name", String.class, ""));
 	}
 
 }
