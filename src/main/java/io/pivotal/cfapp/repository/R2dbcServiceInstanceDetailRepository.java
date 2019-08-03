@@ -106,30 +106,24 @@ public class R2dbcServiceInstanceDetailRepository {
 	}
 
 	private ServiceInstanceDetail fromRow(Row row) {
-		ServiceInstanceDetail partial = ServiceInstanceDetail
+		return ServiceInstanceDetail
 				.builder()
 					.pk(row.get("pk", Long.class))
-					.organization(Defaults.getValueOrDefault(row.get("organization", String.class), ""))
-					.space(Defaults.getValueOrDefault(row.get("space", String.class), ""))
-					.serviceInstanceId(Defaults.getValueOrDefault(row.get("service_instance_id", String.class), ""))
-					.name(Defaults.getValueOrDefault(row.get("service_name", String.class), ""))
-					.service(Defaults.getValueOrDefault(row.get("service", String.class), ""))
-					.description(Defaults.getValueOrDefault(row.get("description", String.class), ""))
-					.type(Defaults.getValueOrDefault(row.get("type", String.class), ""))
-					.plan(Defaults.getValueOrDefault(row.get("plan", String.class), ""))
+					.organization(Defaults.getColumnValueOrDefault(row, "organization", String.class, ""))
+					.space(Defaults.getColumnValueOrDefault(row, "space", String.class, ""))
+					.serviceInstanceId(Defaults.getColumnValueOrDefault(row, "service_instance_id", String.class, ""))
+					.name(Defaults.getColumnValueOrDefault(row, "service_name", String.class, ""))
+					.service(Defaults.getColumnValueOrDefault(row, "service", String.class, ""))
+					.description(Defaults.getColumnValueOrDefault(row, "description", String.class, ""))
+					.type(Defaults.getColumnValueOrDefault(row, "type", String.class, ""))
+					.plan(Defaults.getColumnValueOrDefault(row, "plan", String.class, ""))
 					.applications(
-						Arrays.asList(Defaults.getValueOrDefault(row.get("bound_applications", String.class), "").split("\\s*,\\s*")))
-					.lastOperation(Defaults.getValueOrDefault(row.get("last_operation", String.class), ""))
-					.dashboardUrl(Defaults.getValueOrDefault(row.get("dashboard_url", String.class), ""))
-					.requestedState(Defaults.getValueOrDefault(row.get("requested_state", String.class), ""))
+						Arrays.asList(Defaults.getColumnValueOrDefault(row, "bound_applications", String.class, "").split("\\s*,\\s*")))
+					.lastOperation(Defaults.getColumnValueOrDefault(row, "last_operation", String.class, ""))
+					.dashboardUrl(Defaults.getColumnValueOrDefault(row, "dashboard_url", String.class, ""))
+					.lastUpdated(Defaults.getColumnValueOrDefault(row, "last_updated", LocalDateTime.class, null))
+					.requestedState(Defaults.getColumnValueOrDefault(row, "requested_state", String.class, ""))
 					.build();
-		// FIXME Dirty hack! We can remove this bit of code when https://github.com/r2dbc/r2dbc-h2/issues/78 is addressed.
-		try {
-			return ServiceInstanceDetail.from(partial).lastUpdated(row.get("last_updated", LocalDateTime.class)).build();
-		} catch (ClassCastException cce) {
-			return partial;
-		}
-
 	}
 
 	public Mono<Void> deleteAll() {

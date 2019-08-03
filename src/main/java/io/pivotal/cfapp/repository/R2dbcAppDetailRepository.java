@@ -211,38 +211,28 @@ public class R2dbcAppDetailRepository {
 	}
 
 	private AppDetail fromRow(Row row) {
-		AppDetail partial =
+		return
 			AppDetail
 				.builder()
 					.pk(row.get("pk", Long.class))
-					.organization(Defaults.getValueOrDefault(row.get("organization", String.class), ""))
-					.space(Defaults.getValueOrDefault(row.get("space", String.class), ""))
-					.appId(Defaults.getValueOrDefault(row.get("app_id", String.class), ""))
-					.appName(Defaults.getValueOrDefault(row.get("app_name", String.class), ""))
-					.buildpack(Defaults.getValueOrDefault(row.get("buildpack", String.class), ""))
-					.runningInstances(Defaults.getValueOrDefault(row.get("running_instances", Integer.class), 0))
-					.totalInstances(Defaults.getValueOrDefault(row.get("total_instances", Integer.class), 0))
-					.memoryUsage(Defaults.getValueOrDefault(row.get("memory_used", Long.class), 0L))
-					.diskUsage(Defaults.getValueOrDefault(row.get("disk_used", Long.class), 0L))
-					.image(Defaults.getValueOrDefault(row.get("image", String.class), ""))
-					.stack(Defaults.getValueOrDefault(row.get("stack", String.class), ""))
-					.urls(Arrays.asList(Defaults.getValueOrDefault(row.get("urls", String.class), "").split("\\s*,\\s*")))
-					.lastEvent(Defaults.getValueOrDefault(row.get("last_event", String.class), ""))
-					.lastEventActor(Defaults.getValueOrDefault(row.get("last_event_actor", String.class), ""))
-					.requestedState(Defaults.getValueOrDefault(row.get("requested_state", String.class), ""))
+					.organization(Defaults.getColumnValueOrDefault(row, "organization", String.class, ""))
+					.space(Defaults.getColumnValueOrDefault(row, "space", String.class, ""))
+					.appId(Defaults.getColumnValueOrDefault(row, "app_id", String.class, ""))
+					.appName(Defaults.getColumnValueOrDefault(row, "app_name", String.class, ""))
+					.buildpack(Defaults.getColumnValueOrDefault(row, "buildpack", String.class, ""))
+					.runningInstances(Defaults.getColumnValueOrDefault(row, "running_instances", Integer.class, 0))
+					.totalInstances(Defaults.getColumnValueOrDefault(row, "total_instances", Integer.class, 0))
+					.memoryUsage(Defaults.getColumnValueOrDefault(row, "memory_used", Long.class, 0L))
+					.diskUsage(Defaults.getColumnValueOrDefault(row, "disk_used", Long.class, 0L))
+					.image(Defaults.getColumnValueOrDefault(row, "image", String.class, ""))
+					.stack(Defaults.getColumnValueOrDefault(row, "stack", String.class, ""))
+					.urls(Arrays.asList(Defaults.getColumnValueOrDefault(row, "urls", String.class, "").split("\\s*,\\s*")))
+					.lastPushed(Defaults.getColumnValueOrDefault(row, "last_pushed", LocalDateTime.class, null))
+					.lastEventTime(Defaults.getColumnValueOrDefault(row, "last_event_time", LocalDateTime.class, null))
+					.lastEvent(Defaults.getColumnValueOrDefault(row, "last_event", String.class, ""))
+					.lastEventActor(Defaults.getColumnValueOrDefault(row, "last_event_actor", String.class, ""))
+					.requestedState(Defaults.getColumnValueOrDefault(row, "requested_state", String.class, ""))
 					.build();
-		// FIXME Dirty hack! We can remove this bit of code when https://github.com/r2dbc/r2dbc-h2/issues/78 is addressed.
-		AppDetail partialWithEventTime = null;
-		try {
-			partialWithEventTime = AppDetail.from(partial).lastEventTime(row.get("last_event_time", LocalDateTime.class)).build();
-		} catch (ClassCastException cce) {
-			partialWithEventTime = partial;
-		}
-		try {
-			return AppDetail.from(partialWithEventTime).lastPushed(row.get("last_pushed", LocalDateTime.class)).build();
-		} catch (ClassCastException cce) {
-			return partialWithEventTime;
-		}
 	}
 
 	private Tuple2<AppDetail, ApplicationPolicy> toTuple(AppDetail detail, ApplicationPolicy policy) {

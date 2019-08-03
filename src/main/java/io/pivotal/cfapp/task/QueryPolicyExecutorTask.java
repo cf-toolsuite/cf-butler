@@ -127,7 +127,7 @@ public class QueryPolicyExecutorTask implements PolicyExecutorTask {
         List<String> rawValueList =
             columnNames
                 .stream()
-                    .map(column -> Defaults.getValueOrDefault(tuple.getT1().get(column), "").toString())
+                    .map(columnName -> Defaults.getColumnValueOrDefault(tuple.getT1(), columnName, "").toString())
                     .collect(Collectors.toList());
         return Mono.just(Tuples.of(columnNames, String.join(",", rawValueList)));
     }

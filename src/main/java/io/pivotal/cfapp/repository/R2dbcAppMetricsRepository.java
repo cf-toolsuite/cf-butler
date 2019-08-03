@@ -36,7 +36,7 @@ public class R2dbcAppMetricsRepository {
 		String sql = "select " + columnName + ", count(" + columnName + ") as cnt from application_detail group by " + columnName;
 		return client.execute(sql)
 					.map((row, metadata)
-							-> Tuples.of(Defaults.getValueOrDefault(row.get(columnName, String.class), "--"), Defaults.getValueOrDefault(row.get("cnt", Long.class), 0L)))
+							-> Tuples.of(Defaults.getColumnValueOrDefault(row, columnName, String.class, "--"), Defaults.getColumnValueOrDefault(row, "cnt", Long.class, 0L)))
 					.all()
 					.defaultIfEmpty(Tuples.of("--", 0L));
 	}
@@ -47,7 +47,7 @@ public class R2dbcAppMetricsRepository {
 					.from(AppDetail.tableName())
 					.project("last_pushed")
 					.matching(Criteria.where("last_pushed").lessThanOrEquals(LocalDateTime.of(end, LocalTime.MAX)).and("last_pushed").greaterThan(LocalDateTime.of(start, LocalTime.MIDNIGHT)))
-				.map((row, metadata) -> Defaults.getValueOrDefault(row.get("last_pushed", LocalDateTime.class), 0L))
+				.map((row, metadata) -> Defaults.getColumnValueOrDefault(row, "last_pushed", LocalDateTime.class, null))
 				.all()
 				.count()
 				.defaultIfEmpty(0L);
@@ -59,7 +59,7 @@ public class R2dbcAppMetricsRepository {
 					.from(AppDetail.tableName())
 					.project("last_pushed")
 					.matching(Criteria.where("last_pushed").lessThan(LocalDateTime.of(end, LocalTime.MIDNIGHT)))
-				.map((row, metadata) -> Defaults.getValueOrDefault(row.get("last_pushed", LocalDateTime.class), 0L))
+				.map((row, metadata) -> Defaults.getColumnValueOrDefault(row, "last_pushed", LocalDateTime.class, null))
 				.all()
 				.count()
 				.defaultIfEmpty(0L);
@@ -77,7 +77,7 @@ public class R2dbcAppMetricsRepository {
 		String sql = "select buildpack, count(buildpack) as cnt from application_detail where image is null and buildpack is not null group by buildpack";
 		return client.execute(sql)
 					.map((row, metadata)
-							-> Tuples.of(Defaults.getValueOrDefault(row.get("buildpack", String.class), "--"), Defaults.getValueOrDefault(row.get("cnt", Long.class), 0L)))
+							-> Tuples.of(Defaults.getColumnValueOrDefault(row, "buildpack", String.class, "--"), Defaults.getColumnValueOrDefault(row, "cnt", Long.class, 0L)))
 					.all()
 					.defaultIfEmpty(Tuples.of("--", 0L));
 	}
@@ -86,7 +86,7 @@ public class R2dbcAppMetricsRepository {
 		String sql = "select image, count(image) as cnt from application_detail where image is not null group by image";
 		return client.execute(sql)
 					.map((row, metadata)
-							-> Tuples.of(Defaults.getValueOrDefault(row.get("image", String.class), "--"), Defaults.getValueOrDefault(row.get("cnt", Long.class), 0L)))
+							-> Tuples.of(Defaults.getColumnValueOrDefault(row, "image", String.class, "--"), Defaults.getColumnValueOrDefault(row, "cnt", Long.class, 0L)))
 					.all()
 					.defaultIfEmpty(Tuples.of("--", 0L));
 	}
@@ -98,7 +98,7 @@ public class R2dbcAppMetricsRepository {
 	public Mono<Long> totalApplications() {
 		String sql = "select count(*) as cnt from application_detail";
 		return client.execute(sql)
-				.map((row, metadata) -> Defaults.getValueOrDefault(row.get("cnt", Long.class), 0L))
+				.map((row, metadata) -> Defaults.getColumnValueOrDefault(row, "cnt", Long.class, 0L))
 				.one()
 				.defaultIfEmpty(0L);
 	}
@@ -109,7 +109,7 @@ public class R2dbcAppMetricsRepository {
 			sql = "select cast(sum(total_instances) as signed) as cnt from application_detail";
 		}
 		return client.execute(sql)
-				.map((row, metadata) -> Defaults.getValueOrDefault(row.get("cnt", Long.class), 0L))
+				.map((row, metadata) -> Defaults.getColumnValueOrDefault(row, "cnt", Long.class, 0L))
 				.one()
 				.defaultIfEmpty(0L);
 	}
@@ -120,7 +120,7 @@ public class R2dbcAppMetricsRepository {
 			sql = "select cast(sum(running_instances) as signed) as cnt from application_detail where requested_state = 'started'";
 		}
 		return client.execute(sql)
-				.map((row, metadata) -> Defaults.getValueOrDefault(row.get("cnt", Long.class), 0L))
+				.map((row, metadata) -> Defaults.getColumnValueOrDefault(row, "cnt", Long.class, 0L))
 				.one()
 				.defaultIfEmpty(0L);
 	}
@@ -128,7 +128,7 @@ public class R2dbcAppMetricsRepository {
 	public Mono<Long> totalCrashedApplicationInstances() {
 		String sql = "select count(running_instances) as cnt from application_detail where requested_state = 'started' and running_instances = 0";
 		return client.execute(sql)
-				.map((row, metadata) -> Defaults.getValueOrDefault(row.get("cnt", Long.class), 0L))
+				.map((row, metadata) -> Defaults.getColumnValueOrDefault(row, "cnt", Long.class, 0L))
 				.one()
 				.defaultIfEmpty(0L);
 	}
@@ -139,7 +139,7 @@ public class R2dbcAppMetricsRepository {
 			sql = "select cast(sum(total_instances) as signed) as cnt from application_detail where requested_state = 'stopped'";
 		}
 		return client.execute(sql)
-				.map((row, metadata) -> Defaults.getValueOrDefault(row.get("cnt", Long.class), 0L))
+				.map((row, metadata) -> Defaults.getColumnValueOrDefault(row, "cnt", Long.class, 0L))
 				.one()
 				.defaultIfEmpty(0L);
 	}
@@ -147,7 +147,7 @@ public class R2dbcAppMetricsRepository {
 	public Mono<Double> totalMemoryUsed() {
 		String sql = "select sum(memory_used) as tot from application_detail";
 		return client.execute(sql)
-				.map((row, metadata) -> Defaults.getValueOrDefault(row.get("tot", BigDecimal.class), BigDecimal.valueOf(0L)))
+				.map((row, metadata) -> Defaults.getColumnValueOrDefault(row, "tot", BigDecimal.class, BigDecimal.valueOf(0L)))
 				.one()
 				.map(r -> toGigabytes(r))
 				.defaultIfEmpty(0.0);
@@ -156,7 +156,7 @@ public class R2dbcAppMetricsRepository {
 	public Mono<Double> totalDiskUsed() {
 		String sql = "select sum(disk_used) as tot from application_detail";
 		return client.execute(sql)
-				.map((row, metadata) -> Defaults.getValueOrDefault(row.get("tot", BigDecimal.class), BigDecimal.valueOf(0L)))
+				.map((row, metadata) -> Defaults.getColumnValueOrDefault(row, "tot", BigDecimal.class, BigDecimal.valueOf(0L)))
 				.one()
 				.map(r -> toGigabytes(r))
 				.defaultIfEmpty(0.0);
