@@ -11,6 +11,7 @@ public enum ApplicationOperation {
 
     DELETE("delete"),
     SCALE_INSTANCES("scale-instances"),
+    STOP("stop"),
     CHANGE_STACK("change-stack");
 
     private final String name;

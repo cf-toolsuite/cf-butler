@@ -5,6 +5,7 @@ import static org.cloudfoundry.util.tuple.TupleUtils.function;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -169,7 +170,7 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
                 .flatMap(
                     e -> Mono.just(
                         AppEvent.builder().name(e.getEvent()).actor(e.getActor())
-                            .time(e.getTime() != null ? e.getTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime() : null)
+                            .time(nullSafeLocalDateTime(e.getTime()))
                             .build()));
     }
 
@@ -199,17 +200,23 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
                 .build();
     }
 
-	private LocalDateTime nullSafeLocalDateTime(String value) {
-        return StringUtils.isNotBlank(value) ? Instant.parse(value)
-                                    .atZone(ZoneId.systemDefault())
-                                    .toLocalDateTime() : null;
+	private static LocalDateTime nullSafeLocalDateTime(String value) {
+        return StringUtils.isNotBlank(value)
+            ? Instant.parse(value).atZone(ZoneId.systemDefault()).toLocalDateTime()
+            : null;
     }
 
-    private String nullSafeString(String value) {
+    private static LocalDateTime nullSafeLocalDateTime(Date value) {
+        return value != null
+            ? value.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
+            : null;
+    }
+
+    private static String nullSafeString(String value) {
         return value == null ? "": value;
     }
 
-    private Integer nullSafeInteger(Integer value) {
+    private static Integer nullSafeInteger(Integer value) {
         return value != null ? value: 0;
     }
 
@@ -221,7 +228,7 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
         return "unknown";
     }
 
-    private Long nullSafeMemoryUsage(ApplicationStatisticsResponse stats) {
+    private static Long nullSafeMemoryUsage(ApplicationStatisticsResponse stats) {
         Long result = 0L;
         Map<String, InstanceStatistics> instances = stats.getInstances();
         if (instances != null) {
@@ -240,7 +247,7 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
         return result;
 	}
 
-	private Long nullSafeDiskUsage(ApplicationStatisticsResponse stats) {
+	private static Long nullSafeDiskUsage(ApplicationStatisticsResponse stats) {
         Long result = 0L;
         Map<String, InstanceStatistics> instances = stats.getInstances();
         if (instances != null) {
