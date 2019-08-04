@@ -48,7 +48,7 @@ public class UserAccounts {
 		return String.join(",", wrap(getOrganization()), wrap(getSpace()), wrap(String.join(",", getAccounts() != null ? getAccounts(): Collections.emptyList())));
 	}
 
-	private String wrap(String value) {
+	private static String wrap(String value) {
 		return value != null ? StringUtils.wrap(value, '"') : StringUtils.wrap("", '"');
 	}
 

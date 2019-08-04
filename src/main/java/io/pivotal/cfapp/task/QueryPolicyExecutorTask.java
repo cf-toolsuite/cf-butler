@@ -127,9 +127,13 @@ public class QueryPolicyExecutorTask implements PolicyExecutorTask {
         List<String> rawValueList =
             columnNames
                 .stream()
-                    .map(columnName -> Defaults.getColumnValueOrDefault(tuple.getT1(), columnName, "").toString())
+                    .map(columnName -> wrap(Defaults.getColumnValueOrDefault(tuple.getT1(), columnName, "").toString()))
                     .collect(Collectors.toList());
         return Mono.just(Tuples.of(columnNames, String.join(",", rawValueList)));
+    }
+
+    private static String wrap(String value) {
+		return value != null ? StringUtils.wrap(value, '"') : StringUtils.wrap("", '"');
     }
 
     private static Map<String, String> toMap(List<Tuple2<String, String>> contents) {

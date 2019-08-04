@@ -40,7 +40,7 @@ public class HistoricalRecord {
 				wrap(getServiceInstanceId()), wrap(getType()), wrap(getName()));
 	}
 
-	private String wrap(String value) {
+	private static String wrap(String value) {
 		return value != null ? StringUtils.wrap(value, '"') : StringUtils.wrap("", '"');
 	}
 
