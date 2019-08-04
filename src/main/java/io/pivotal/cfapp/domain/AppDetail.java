@@ -81,7 +81,7 @@ public class AppDetail {
 			new String[] {
 				"pk", "organization", "space", "app_id", "app_name", "buildpack", "image",
 				"stack", "running_instances", "total_instances", "memory_used", "disk_used",
-				"urls", "last_pushed", "last_event", "last_event_actor", "last_event_time", 
+				"urls", "last_pushed", "last_event", "last_event_actor", "last_event_time",
 				"requested_state" };
 	}
 
