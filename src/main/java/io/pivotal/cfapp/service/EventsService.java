@@ -3,6 +3,8 @@ package io.pivotal.cfapp.service;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -13,9 +15,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import io.pivotal.cfapp.config.PasSettings;
-import io.pivotal.cfapp.domain.AppEvent;
+import io.pivotal.cfapp.domain.Event;
+import io.pivotal.cfapp.domain.event.EventType;
 import io.pivotal.cfapp.domain.event.Events;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
@@ -23,7 +27,8 @@ import reactor.core.publisher.Mono;
 
 @Slf4j
 @Service
-public class AppEventsService {
+// @see https://apidocs.cloudfoundry.org/287/events/list_all_events.html
+public class EventsService {
 
     private static final int EVENTS_PER_PAGE = 10;
     private final WebClient webClient;
@@ -33,7 +38,7 @@ public class AppEventsService {
     private final ObjectMapper mapper;
 
     @Autowired
-    public AppEventsService(
+    public EventsService(
         WebClient webClient,
         DefaultConnectionContext connectionContext,
         TokenProvider tokenProvider,
@@ -48,29 +53,84 @@ public class AppEventsService {
 
     public Mono<String> getEvents(String id, Integer numberOfEvents) {
         Assert.hasText(id, "Global unique identifier for application or service instance must not be blank or null!");
-        final String uri = "https://" + settings.getApiHost() + "/v2/events?q=actee:{id}&page=1&results-per-page{pageSize}&order-direction=desc&order-by=timestamp";
         final int pageSize = getPageSize(numberOfEvents);
+        final String uri = UriComponentsBuilder
+            .newInstance()
+                .scheme("https")
+                .host(settings.getApiHost())
+                .path("/v2/events")
+                .queryParam("q", "actee:{id}")
+                .queryParam("page", 1)
+                .queryParam("results-per-page", "{pageSize}")
+                .queryParam("order-direction", "desc")
+                .queryParam("order-by", "timestamp")
+                .buildAndExpand(id, pageSize)
+                .encode()
+                .toUriString();
         return
             getOauthToken()
                 .flatMap(t -> webClient
                                 .get()
-                                    .uri(uri, id, pageSize)
+                                    .uri(uri)
                                     .header(HttpHeaders.AUTHORIZATION, t)
                                         .retrieve()
                                             .bodyToMono(String.class));
     }
 
-    public Flux<AppEvent> toFlux(String json) {
-        Flux<AppEvent> result = Flux.empty();
+    public Mono<String> getEvents(String id, String type) {
+        Assert.hasText(id, "Global unique identifier for application or service instance must not be blank or null!");
+        EventType eventType = EventType.from(type);
+        final String uri = UriComponentsBuilder
+            .newInstance()
+                .scheme("https")
+                .host(settings.getApiHost())
+                .path("/v2/events")
+                .queryParam("q", "actee:{id}")
+                .queryParam("q", "type:{type}")
+                .queryParam("page", 1)
+                .queryParam("results-per-page", 1)
+                .queryParam("order-direction", "desc")
+                .queryParam("order-by", "timestamp")
+                .buildAndExpand(id, eventType.getId())
+                .encode()
+                .toUriString();
+        return
+            getOauthToken()
+                .flatMap(t -> webClient
+                                .get()
+                                    .uri(uri)
+                                    .header(HttpHeaders.AUTHORIZATION, t)
+                                        .retrieve()
+                                            .bodyToMono(String.class));
+    }
+
+    public Flux<Event> getEvents(String id, String[] types) {
+        return Flux
+                .fromArray(types)
+                .concatMap(type -> getEvents(id, type))
+                .flatMap(json -> toFlux(json));
+    }
+
+    public Mono<Boolean> isDormantApplication(String id, int daysSinceLastUpdate) {
+        String[] types = new String[] { EventType.AUDIT_APP_UPDATE.getId(), EventType.AUDIT_APP_RESTAGE.getId() };
+        return getEvents(id, types)
+                .filter(event -> ChronoUnit.DAYS.between(event.getTime(), LocalDateTime.now()) >= daysSinceLastUpdate)
+                .collect(Collectors.toList())
+                .map(list -> list.size() > 0);
+    }
+
+    public Flux<Event> toFlux(String json) {
+        Flux<Event> result = Flux.empty();
         try {
             Events events = mapper.readValue(json, Events.class);
             result =
                 Flux
                     .fromIterable(events.getResources())
                     .map(resource -> resource.getEntity())
-                    .map(entity -> AppEvent
+                    .map(entity -> Event
                                         .builder()
-                                            .name(entity.getType())
+                                            .type(entity.getType())
+                                            .actee(entity.getActee())
                                             .actor(entity.getActor())
                                             .time(
                                                 entity.getTimestamp() != null
@@ -85,7 +145,7 @@ public class AppEventsService {
     }
 
     private Mono<String> getOauthToken() {
-        tokenProvider.invalidate(connectionContext);
+        //tokenProvider.invalidate(connectionContext);
         return tokenProvider.getToken(connectionContext);
     }
 

@@ -764,6 +764,11 @@ organization,space,service instance id,name,service,description,plan,type,bound 
 ```
 
 ```
+GET /snapshot/detail/ai/dormant/{daysSinceLastUpdate}
+```
+> Provides a list of dormant application instances. An application instance is considered dormant when either an `audit.app.update` or `audit.app.restage` event has occurred greater than or equal to `daysSinceLastUpdate` from now.
+
+```
 GET /snapshot/detail/users
 ```
 > Provides a list of all space users (ignoring role) in comma-separated value format by organization and space, where multiple users in each space are comma-separated. Service accounts are filtered.

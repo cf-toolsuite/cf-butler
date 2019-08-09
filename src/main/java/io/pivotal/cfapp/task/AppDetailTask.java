@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component;
 
 import io.pivotal.cfapp.config.PasSettings;
 import io.pivotal.cfapp.domain.AppDetail;
-import io.pivotal.cfapp.domain.AppEvent;
+import io.pivotal.cfapp.domain.Event;
 import io.pivotal.cfapp.domain.Space;
 import io.pivotal.cfapp.domain.Stack;
 import io.pivotal.cfapp.event.AppDetailRetrievedEvent;
@@ -127,7 +127,7 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
                     : Mono.just(ApplicationStatisticsResponse.builder().build()),
                 settings.isApplicationEventsEnabled()
                     ? getLastAppEvent(getAppEvents(opsClient, summary.getName()))
-                    : Mono.just(AppEvent.builder().build())
+                    : Mono.just(Event.builder().build())
             )
             .onErrorResume(ex -> {
                 log.warn(
@@ -139,7 +139,7 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
                         Mono.just(summary),
                         getSummaryApplicationResponse(opsClient, summary.getId()),
                         Mono.just(ApplicationStatisticsResponse.builder().build()),
-                        Mono.just(AppEvent.builder().build()));
+                        Mono.just(Event.builder().build()));
             })
             .map(function(this::toAppDetail));
     }
@@ -164,12 +164,12 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
                     .getEvents(GetApplicationEventsRequest.builder().name(applicationName).maxNumberOfEvents(5).build());
     }
 
-    protected Mono<AppEvent> getLastAppEvent(Flux<ApplicationEvent> events) {
+    protected Mono<Event> getLastAppEvent(Flux<ApplicationEvent> events) {
         return events
                 .next()
                 .flatMap(
                     e -> Mono.just(
-                        AppEvent.builder().name(e.getEvent()).actor(e.getActor())
+                        Event.builder().type(e.getEvent()).actor(e.getActor())
                             .time(nullSafeLocalDateTime(e.getTime()))
                             .build()));
     }
@@ -177,7 +177,7 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
     private AppDetail toAppDetail(
         DefaultCloudFoundryOperations opsClient,
         ApplicationSummary summary, SummaryApplicationResponse detail,
-        ApplicationStatisticsResponse stats, AppEvent event) {
+        ApplicationStatisticsResponse stats, Event event) {
         return AppDetail
                 .builder()
                     .organization(opsClient.getOrganization())
@@ -192,7 +192,7 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
                     .diskUsage(nullSafeDiskUsage(stats))
                     .memoryUsage(nullSafeMemoryUsage(stats))
                     .urls(summary.getUrls())
-                    .lastEvent(event.getName())
+                    .lastEvent(event.getType())
                     .lastEventActor(event.getActor())
                     .lastEventTime(event.getTime())
                     .lastPushed(nullSafeLocalDateTime(detail.getPackageUpdatedAt()))

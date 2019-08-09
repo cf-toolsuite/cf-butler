@@ -21,6 +21,8 @@ cf:
   connectionPoolSize: 8
   organizationBlackList:
     - system
+    - credhub-service-broker-org
+    - p-spring-cloud-services
   policies:
     provider: dbms
     #provider: git
