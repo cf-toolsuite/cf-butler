@@ -145,11 +145,11 @@ public class EventsService {
     }
 
     private Mono<String> getOauthToken() {
-        //tokenProvider.invalidate(connectionContext);
+        tokenProvider.invalidate(connectionContext);
         return tokenProvider.getToken(connectionContext);
     }
 
-    private Integer getPageSize(Integer numberOfEvents) {
+    private static Integer getPageSize(Integer numberOfEvents) {
         int maxNumberOfEvents = 250;
         Integer result = EVENTS_PER_PAGE;
         if (numberOfEvents != null) {

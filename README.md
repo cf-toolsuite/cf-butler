@@ -552,6 +552,27 @@ GET /store/product/releases?q=all
 ```
 > Returns a list of all available releases for all products on Pivotal Network (includes buildpacks, stemcells and tiles)
 
+
+### Events
+
+Based off the [Events API](https://apidocs.cloudfoundry.org/287/events/list_all_events.html) and exposed only when the `spring.profiles.active` includes the `on-demand` profile.
+
+```
+GET /events/{id}
+```
+> Returns the last 10 events for an actee guid (e.g., application, service instance)
+
+```
+GET /events/{id}?numberOfEvents={n}
+```
+> Returns n events (up to a maximum of 250) for an actee guid (e.g., application, service instance)
+
+```
+GET /events/{id}?types[]={type1,type2,...,typen}
+```
+> Returns matching events for an actee guid (e.g., application, service instance).  An comma-separated array of valid event types must be specified.
+
+
 ### Snapshot
 
 ```
@@ -766,7 +787,7 @@ organization,space,service instance id,name,service,description,plan,type,bound 
 ```
 GET /snapshot/detail/ai/dormant/{daysSinceLastUpdate}
 ```
-> Provides a list of dormant application instances. An application instance is considered dormant when either an `audit.app.update` or `audit.app.restage` event has occurred greater than or equal to `daysSinceLastUpdate` from now.
+> Provides a list of dormant application instances. An application instance is considered dormant when the last occasion or either an `audit.app.update` or `audit.app.restage` event was `daysSinceLastUpdate` or longer from the time of request.
 
 ```
 GET /snapshot/detail/users
@@ -799,6 +820,7 @@ Sample output
   "total-service-accounts": 3
 }
 ```
+
 
 ### Accounting
 
@@ -977,6 +999,7 @@ GET /policies/report
 GET /policies/report?start={startDate}&end={endDate}
 ```
 > Produces `text/plain` historical output detailing what policies had an effect on applications and service instances constrained by date range.  `{startDate}` must be before `{endDate}`.  Both parameters are [LocalDate](https://docs.oracle.com/javase/8/docs/api/java/time/LocalDate.html).  (Does not track execution of query policies).
+
 
 ## Credits
 
