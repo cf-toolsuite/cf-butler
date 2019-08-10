@@ -60,6 +60,14 @@ public class R2dbcSpaceUsersService implements SpaceUsersService {
 	}
 
 	@Override
+	public Flux<SpaceUsers> findByAccountName(String name) {
+		return repo
+				.findAll()
+				.filter(su -> su.getUsers().contains(name));
+
+	}
+
+	@Override
 	public Mono<Map<String, Integer>> countByOrganization() {
 		// a single user may belong to multiple orgs/spaces
 		// iterate spaces collecting unique usernames, ignore assigned roles

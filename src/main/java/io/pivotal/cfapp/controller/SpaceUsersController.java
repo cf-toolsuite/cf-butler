@@ -29,6 +29,16 @@ public class SpaceUsersController {
 		this.util = new TkServiceUtil(tkService);
 	}
 
+	@GetMapping(value = { "/snapshot/spaces/users/{name}" })
+	public Mono<ResponseEntity<List<SpaceUsers>>> getSpacesForAccountName(@PathVariable("name") String name) {
+		return util.getHeaders()
+				.flatMap(h -> service
+								.findByAccountName(name)
+								.collectList()
+								.map(users -> new ResponseEntity<>(users, h, HttpStatus.OK)))
+								.defaultIfEmpty(ResponseEntity.notFound().build());
+	}
+
 	@GetMapping(value = { "/snapshot/spaces/users" })
 	public Mono<ResponseEntity<List<SpaceUsers>>> getAllSpaceUsers() {
 		return util.getHeaders()

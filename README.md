@@ -552,6 +552,27 @@ GET /store/product/releases?q=all
 ```
 > Returns a list of all available releases for all products on Pivotal Network (includes buildpacks, stemcells and tiles)
 
+
+### Events
+
+Based off the [Events API](https://apidocs.cloudfoundry.org/287/events/list_all_events.html) and exposed only when the `spring.profiles.active` includes the `on-demand` profile.
+
+```
+GET /events/{id}
+```
+> Returns the last 10 events for an actee guid (e.g., application, service instance)
+
+```
+GET /events/{id}?numberOfEvents={n}
+```
+> Returns n events (up to a maximum of 250) for an actee guid (e.g., application, service instance)
+
+```
+GET /events/{id}?types[]={type1,type2,...,typen}
+```
+> Returns matching events for an actee guid (e.g., application, service instance).  An comma-separated array of valid event types must be specified.
+
+
 ### Snapshot
 
 ```
@@ -608,6 +629,11 @@ Sample output
 ...
 ```
 > `users` is the unique subset of all users from each role in the organization/space
+
+```
+GET /snapshot/spaces/users/{name}
+```
+> Provides details and light metrics for a single user listing all organizations and spaces that user is associated with
 
 ```
 GET /snapshot/{organization}/{space}/users
@@ -764,6 +790,11 @@ organization,space,service instance id,name,service,description,plan,type,bound 
 ```
 
 ```
+GET /snapshot/detail/dormant/{daysSinceLastUpdate}
+```
+> Provides a list of dormant workloads. A workload is either an application or service instance.  An application is considered dormant when the last occasion of among `audit.app.create`, `audit.app.update` or `audit.app.restage` events transpired `daysSinceLastUpdate` or longer from the time of request.  A service instance is considered dormant when the last occasion of among `audit.service_instance.create`, `audit.service_instance.update`, `audit.user_provided_service_instance.create` or `audit.user_provided_service_instance.update` events transpired `daysSinceLastUpdate` or longer from the time of request.
+
+```
 GET /snapshot/detail/users
 ```
 > Provides a list of all space users (ignoring role) in comma-separated value format by organization and space, where multiple users in each space are comma-separated. Service accounts are filtered.
@@ -794,6 +825,7 @@ Sample output
   "total-service-accounts": 3
 }
 ```
+
 
 ### Accounting
 
@@ -972,6 +1004,7 @@ GET /policies/report
 GET /policies/report?start={startDate}&end={endDate}
 ```
 > Produces `text/plain` historical output detailing what policies had an effect on applications and service instances constrained by date range.  `{startDate}` must be before `{endDate}`.  Both parameters are [LocalDate](https://docs.oracle.com/javase/8/docs/api/java/time/LocalDate.html).  (Does not track execution of query policies).
+
 
 ## Credits
 
