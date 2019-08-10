@@ -785,9 +785,9 @@ organization,space,service instance id,name,service,description,plan,type,bound 
 ```
 
 ```
-GET /snapshot/detail/ai/dormant/{daysSinceLastUpdate}
+GET /snapshot/detail/dormant/{daysSinceLastUpdate}
 ```
-> Provides a list of dormant application instances. An application instance is considered dormant when the last occasion or either an `audit.app.update` or `audit.app.restage` event was `daysSinceLastUpdate` or longer from the time of request.
+> Provides a list of dormant workloads. A workload is either an application or service instance.  An application is considered dormant when the last occasion of among `audit.app.create`, `audit.app.update` or `audit.app.restage` events transpired `daysSinceLastUpdate` or longer from the time of request.  A service instance is considered dormant when the last occasion of among `audit.service_instance.create`, `audit.service_instance.update`, `audit.user_provided_service_instance.create` or `audit.user_provided_service_instance.update` events transpired `daysSinceLastUpdate` or longer from the time of request.
 
 ```
 GET /snapshot/detail/users
