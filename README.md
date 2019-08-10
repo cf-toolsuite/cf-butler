@@ -631,6 +631,11 @@ Sample output
 > `users` is the unique subset of all users from each role in the organization/space
 
 ```
+GET /snapshot/spaces/users/{name}
+```
+> Provides details and light metrics for a single user listing all organizations and spaces that user is associated with
+
+```
 GET /snapshot/{organization}/{space}/users
 ```
 > Provides details and light metrics for users by role within a targeted organization and space

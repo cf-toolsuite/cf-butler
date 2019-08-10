@@ -15,6 +15,8 @@ public interface SpaceUsersService {
 
 	Flux<SpaceUsers> findAll();
 
+	Flux<SpaceUsers> findByAccountName(String name);
+
 	Mono<SpaceUsers> findByOrganizationAndSpace(String organization, String space);
 
 	Mono<Long> totalUserAccounts();
