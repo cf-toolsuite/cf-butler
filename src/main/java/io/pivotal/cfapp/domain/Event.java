@@ -12,9 +12,10 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor(access=AccessLevel.PACKAGE)
 @NoArgsConstructor(access=AccessLevel.PACKAGE)
-public class AppEvent {
+public class Event {
 
-    private String name;
+    private String type;
+    private String actee;
     private String actor;
     private LocalDateTime time;
 }

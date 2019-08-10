@@ -63,7 +63,7 @@ public class PasSettings {
 	}
 
 	public String getBuildpack(String input, String image) {
-        if (!StringUtils.isBlank(image)) {
+        if (StringUtils.isNotBlank(image)) {
             return null;  // use Docker image
         } else if (StringUtils.isBlank(input)) {
             return "none";  // no Buildpack

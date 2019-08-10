@@ -17,22 +17,22 @@ import reactor.core.publisher.Mono;
 @RestController
 public class SnapshotController {
 
-	private final SnapshotService service;
+	private final SnapshotService snapshotService;
 	private final TkServiceUtil util;
 
 	@Autowired
 	public SnapshotController(
-		SnapshotService service,
+		SnapshotService snapshotService,
 		TkService tkService
 	) {
-		this.service = service;
+		this.snapshotService = snapshotService;
 		this.util = new TkServiceUtil(tkService);
 	}
 
 	@GetMapping("/snapshot/detail")
 	public Mono<ResponseEntity<SnapshotDetail>> getDetail() {
 		return util.getHeaders()
-				.flatMap(h -> service
+				.flatMap(h -> snapshotService
 								.assembleSnapshotDetail()
 								.map(detail -> new ResponseEntity<SnapshotDetail>(detail, h, HttpStatus.OK)))
 								.defaultIfEmpty(ResponseEntity.notFound().build());
@@ -41,7 +41,7 @@ public class SnapshotController {
 	@GetMapping("/snapshot/summary")
 	public Mono<ResponseEntity<SnapshotSummary>> getSummary() {
 		return util.getHeaders()
-				.flatMap(h -> service
+				.flatMap(h -> snapshotService
 								.assembleSnapshotSummary()
 								.map(summary -> new ResponseEntity<SnapshotSummary>(summary, h, HttpStatus.OK)))
 								.defaultIfEmpty(ResponseEntity.notFound().build());
@@ -50,7 +50,7 @@ public class SnapshotController {
 	@GetMapping(value = { "/snapshot/detail/si" }, produces = MediaType.TEXT_PLAIN_VALUE )
 	public Mono<ResponseEntity<String>> getServiceInstanceCsvReport() {
 		return util.getTimeCollected()
-				.flatMap(tc -> service
+				.flatMap(tc -> snapshotService
 								.assembleCsvSIReport(tc)
 								.map(r -> ResponseEntity.ok(r)))
 								.defaultIfEmpty(ResponseEntity.notFound().build());
@@ -59,7 +59,7 @@ public class SnapshotController {
 	@GetMapping(value = { "/snapshot/detail/ai" }, produces = MediaType.TEXT_PLAIN_VALUE )
 	public Mono<ResponseEntity<String>> getApplicationInstanceCsvReport() {
 		return util.getTimeCollected()
-				.flatMap(tc -> service
+				.flatMap(tc -> snapshotService
 								.assembleCsvAIReport(tc)
 								.map(r -> ResponseEntity.ok(r)))
 								.defaultIfEmpty(ResponseEntity.notFound().build());
@@ -68,10 +68,9 @@ public class SnapshotController {
 	@GetMapping(value = { "/snapshot/detail/users" }, produces = MediaType.TEXT_PLAIN_VALUE )
 	public Mono<ResponseEntity<String>> getUserAccountCsvReport() {
 		return util.getTimeCollected()
-				.flatMap(tc -> service
+				.flatMap(tc -> snapshotService
 								.assembleCsvUserAccountReport(tc)
 								.map(r -> ResponseEntity.ok(r)))
 								.defaultIfEmpty(ResponseEntity.notFound().build());
 	}
-
 }
