@@ -5,8 +5,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.ToString;
 
+@Getter
 @JsonPropertyOrder({"organization", "space"})
 @EqualsAndHashCode
 @ToString
@@ -26,11 +28,4 @@ public class Space {
             this.space = space;
     }
 
-    public String getOrganization() {
-        return organization;
-    }
-
-    public String getSpace() {
-        return space;
-    }
 }

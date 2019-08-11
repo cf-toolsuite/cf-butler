@@ -633,7 +633,7 @@ Sample output
 ```
 GET /snapshot/spaces/users/{name}
 ```
-> Provides details and light metrics for a single user listing all organizations and spaces that user is associated with
+> Provides a listing of all organizations/spaces associated with a single user account
 
 ```
 GET /snapshot/{organization}/{space}/users
