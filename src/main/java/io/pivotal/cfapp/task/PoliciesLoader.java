@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import io.pivotal.cfapp.client.GitClient;
 import io.pivotal.cfapp.config.PoliciesSettings;
 import io.pivotal.cfapp.domain.ApplicationPolicy;
+import io.pivotal.cfapp.domain.HygienePolicy;
 import io.pivotal.cfapp.domain.Policies;
 import io.pivotal.cfapp.domain.PoliciesValidator;
 import io.pivotal.cfapp.domain.QueryPolicy;
@@ -31,6 +32,7 @@ public class PoliciesLoader implements ApplicationListener<StacksRetrievedEvent>
 	private static final String APPLICATION_POLICY_SUFFIX = "-AP.json";
 	private static final String SERVICE_INSTANCE_POLICY_SUFFIX = "-SIP.json";
 	private static final String QUERY_POLICY_SUFFIX = "-QP.json";
+	private static final String HYGIENE_POLICY_SUFFIX = "-HP.json";
 
 	private final GitClient client;
 	private final PoliciesService service;
@@ -65,6 +67,7 @@ public class PoliciesLoader implements ApplicationListener<StacksRetrievedEvent>
 			List<ApplicationPolicy> applicationPolicies = new ArrayList<>();
 			List<ServiceInstancePolicy> serviceInstancePolicies = new ArrayList<>();
 			List<QueryPolicy> queryPolicies = new ArrayList<>();
+			List<HygienePolicy> hygienePolicies = new ArrayList<>();
 			String commit = client.orLatestCommit(settings.getCommit(), repo);
 			log.info("-- Fetching policies from {} using commit {}", settings.getUri(), commit);
 			settings
@@ -90,6 +93,11 @@ public class PoliciesLoader implements ApplicationListener<StacksRetrievedEvent>
 								if (validator.validate(policy)) {
 									queryPolicies.add(policy);
 								}
+							} else if (fp.endsWith(HYGIENE_POLICY_SUFFIX)) {
+								HygienePolicy policy = mapper.readValue(fileContent, HygienePolicy.class);
+								if (validator.validate(policy)) {
+									hygienePolicies.add(policy);
+								}
 							} else {
 								log.warn(
 										"Policy file {} does not adhere to naming convention. File name must end with either {} or {}.",
@@ -101,7 +109,7 @@ public class PoliciesLoader implements ApplicationListener<StacksRetrievedEvent>
 					});
 			service
 				.deleteAll()
-				.then(service.save(new Policies(applicationPolicies, serviceInstancePolicies, queryPolicies)))
+				.then(service.save(new Policies(applicationPolicies, serviceInstancePolicies, queryPolicies, hygienePolicies)))
 				.subscribe(
 					result -> {
 						log.info("PoliciesLoader completed");

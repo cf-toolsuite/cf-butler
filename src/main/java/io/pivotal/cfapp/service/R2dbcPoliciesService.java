@@ -58,8 +58,18 @@ public class R2dbcPoliciesService implements PoliciesService {
 	}
 
 	@Override
+	public Mono<Policies> findHygienePolicyById(String id) {
+		return repo.findHygienePolicyById(id);
+	}
+
+	@Override
 	public Mono<Policies> findAllQueryPolicies() {
 		return repo.findAllQueryPolicies();
+	}
+
+	@Override
+	public Mono<Policies> findAllHygienePolicies() {
+		return repo.findAllHygienePolicies();
 	}
 
 	@Override
@@ -87,6 +97,15 @@ public class R2dbcPoliciesService implements PoliciesService {
 			throw new UnsupportedOperationException(UNSUPPORTED_OP_MESSAGE);
 		}
 		return repo.deleteQueryPolicyById(id);
+	}
+
+	@Override
+	@Transactional
+	public Mono<Void> deleteHygienePolicyById(String id) {
+		if (settings.isVersionManaged()) {
+			throw new UnsupportedOperationException(UNSUPPORTED_OP_MESSAGE);
+		}
+		return repo.deleteHygienePolicyById(id);
 	}
 
 	@Override

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import io.pivotal.cfapp.client.GitClient;
 import io.pivotal.cfapp.config.PoliciesSettings;
 import io.pivotal.cfapp.domain.ApplicationPolicy;
+import io.pivotal.cfapp.domain.HygienePolicy;
 import io.pivotal.cfapp.domain.QueryPolicy;
 import io.pivotal.cfapp.domain.ServiceInstancePolicy;
 
@@ -42,6 +43,10 @@ public class PolicyIdProvider {
 
 	public QueryPolicy seedQueryPolicy(QueryPolicy policy) {
 		return settings.isVersionManaged() ? QueryPolicy.seedWith(policy, commit): QueryPolicy.seed(policy);
+    }
+
+    public HygienePolicy seedHygienePolicy(HygienePolicy policy) {
+		return settings.isVersionManaged() ? HygienePolicy.seedWith(policy, commit): HygienePolicy.seed(policy);
     }
 
 }

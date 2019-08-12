@@ -1,5 +1,6 @@
 package io.pivotal.cfapp.domain;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -12,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Builder.Default;
 
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -22,8 +24,9 @@ public class EmailNotificationTemplate {
     @JsonProperty("from")
     private String from;
 
+    @Default
     @JsonProperty("to")
-    private List<String> to;
+    private List<String> to = new ArrayList<>();
 
     @JsonProperty("subject")
     private String subject;
