@@ -34,6 +34,7 @@ public class DormantWorkloadsService {
                 .assembleSnapshotDetail()
                 .flatMapMany(sd -> Flux.fromIterable(sd.getApplications()))
                 .filter(app -> isBlacklisted(app.getOrganization()))
+		.filter(app -> app.getRequestedState().equalsIgnoreCase("started"))
                 // @see https://github.com/reactor/reactor-core/issues/498
                 .filterWhen(app -> eventsService.isDormantApplication(app.getAppId(), daysSinceLastUpdate))
                 .collectList();
