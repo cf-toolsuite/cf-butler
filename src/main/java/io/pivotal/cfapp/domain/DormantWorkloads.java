@@ -2,6 +2,7 @@ package io.pivotal.cfapp.domain;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -12,6 +13,7 @@ import lombok.Builder.Default;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
+
 
 @Builder
 @Getter
@@ -36,4 +38,25 @@ public class DormantWorkloads {
         this.applications = applications;
         this.serviceInstances = serviceInstances;
     }
+    
+    public DormantWorkloads match(List<Space> spaces) {
+        List<AppDetail> matchingApps = new ArrayList<>();
+        List<ServiceInstanceDetail> matchingServiceInstances = new ArrayList<>();
+        for (Space s: spaces) {
+            matchingApps.addAll(applications
+                    .stream()
+                        .filter(application -> 
+                            application.getOrganization().equalsIgnoreCase(s.getOrganization()) 
+                                && application.getSpace().equalsIgnoreCase(s.getSpace()))
+                        .collect(Collectors.toList()));
+            matchingServiceInstances.addAll(serviceInstances
+                    .stream()
+                        .filter(serviceInstance -> 
+                            serviceInstance.getOrganization().equalsIgnoreCase(s.getOrganization()) 
+                                && serviceInstance.getSpace().equalsIgnoreCase(s.getSpace()))
+                        .collect(Collectors.toList()));
+        }
+        return DormantWorkloads.builder().applications(matchingApps).serviceInstances(matchingServiceInstances).build();
+    }
+
 }
