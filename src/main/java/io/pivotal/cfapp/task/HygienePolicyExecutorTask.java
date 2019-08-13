@@ -19,7 +19,6 @@ import io.pivotal.cfapp.domain.DormantWorkloads.DormantWorkloadsBuilder;
 import io.pivotal.cfapp.domain.HygienePolicy;
 import io.pivotal.cfapp.domain.ServiceInstanceDetail;
 import io.pivotal.cfapp.domain.Space;
-import io.pivotal.cfapp.domain.SpaceUsers;
 import io.pivotal.cfapp.domain.UserSpaces;
 import io.pivotal.cfapp.event.EmailNotificationEvent;
 import io.pivotal.cfapp.service.DormantWorkloadsService;
@@ -62,23 +61,23 @@ public class HygienePolicyExecutorTask implements PolicyExecutorTask {
 
 	@Override
     public void execute() {
-	log.info("HygienePolicyExecutorTask started");
+	    log.info("HygienePolicyExecutorTask started");
         fetchHygienePolicies()
             .concatMap(hp -> executeHygienePolicy(hp.getDaysSinceLastUpdate()).map(result -> Tuples.of(hp, result)))
             .collectList()
 	    	.subscribe(
-		    results -> {
-		        results.forEach(tuple -> {
-			    notifyOperator(tuple);
-			    notifyUsers(tuple);
-		    });
-		    log.info("HygienePolicyExecutorTask completed");
-		    log.info("-- {} hygiene policies executed.", results.size());
-		},
-		error -> {
-		    log.error("HygienePolicyExecutorTask terminated with error", error);
-		}
-	);
+                results -> {
+                    results.forEach(tuple -> {
+                        notifyOperator(tuple);
+                        notifyUsers(tuple);
+                    });
+		            log.info("HygienePolicyExecutorTask completed");
+		            log.info("-- {} hygiene policies executed.", results.size());
+		        },
+		        error -> {
+		            log.error("HygienePolicyExecutorTask terminated with error", error);
+		        }
+	        );
     }
 
     private void notifyOperator(Tuple2<HygienePolicy, DormantWorkloads> tuple) {
@@ -94,33 +93,29 @@ public class HygienePolicyExecutorTask implements PolicyExecutorTask {
     }
 
     private void notifyUsers(Tuple2<HygienePolicy, DormantWorkloads> tuple) {
-        // pull distinct Set<Space> from dormant applications and service instances
-        Flux<Space> spaces = Flux.fromIterable(getSpaces(tuple.getT2()));
-        // for each Space in Set<Space>, obtain SpaceUsers#getUsers(),
-        Flux<SpaceUsers> spaceUsers = spaces.flatMap(space -> spaceUsersService.findByOrganizationAndSpace(space.getOrganization(), space.getSpace()));
+        // Pull distinct Set<Space> from dormant applications and service instances
+        Flux
+            .fromIterable(getSpaces(tuple.getT2()))
+        // For each Space in Set<Space>, obtain SpaceUsers#getUsers()
+            .flatMap(space -> spaceUsersService.findByOrganizationAndSpace(space.getOrganization(), space.getSpace()))
         // then pair with matching space(s) in dormant applications and service instances
-        Flux<String> users = spaceUsers.flatMap(spaceUser -> Flux.fromIterable(spaceUser.getUsers())).distinct();
-        Flux<UserSpaces> userSpaces = users.flatMap(user -> userSpacesService.getUserSpaces(user));
-        // create a list where each item is a tuple of user account and filtered dormant workloads
-        Flux<Tuple2<UserSpaces, DormantWorkloads>> filteredWorkloads = userSpaces.flatMap(userSpace -> filterDormantWorkloads(userSpace, tuple.getT2()));
-        filteredWorkloads.map(workload -> {
-                        publisher.publishEvent(
-                            new EmailNotificationEvent(this)
-                                .domain(settings.getAppsDomain())
-                                .from(tuple.getT1().getNotifyeeTemplate().getFrom())
-                                .recipients(Arrays.asList(new String[] { workload.getT1().getAccountName() }))
-                                .subject(tuple.getT1().getNotifyeeTemplate().getSubject())
-                                .body(tuple.getT1().getNotifyeeTemplate().getBody())
-                                .attachmentContents(buildAttachmentContents(workload.getT2()))
-                        );
-                        return workload;
+            .flatMap(spaceUser -> Flux.fromIterable(spaceUser.getUsers())).distinct()
+            .flatMap(userName -> userSpacesService.getUserSpaces(userName))
+        // Create a list where each item is a tuple of user account and filtered dormant workloads
+            .flatMap(userSpace -> filterDormantWorkloads(userSpace, tuple.getT2()))
+            .map(workload -> {
+                    publisher.publishEvent(
+                        new EmailNotificationEvent(this)
+                            .domain(settings.getAppsDomain())
+                            .from(tuple.getT1().getNotifyeeTemplate().getFrom())
+                            .recipients(Arrays.asList(new String[] { workload.getT1().getAccountName() }))
+                            .subject(tuple.getT1().getNotifyeeTemplate().getSubject())
+                            .body(tuple.getT1().getNotifyeeTemplate().getBody())
+                            .attachmentContents(buildAttachmentContents(workload.getT2()))
+                    );
+                    return workload;
         })
         .subscribe();
-    }
-
-    private Mono<Tuple2<UserSpaces, DormantWorkloads>> filterDormantWorkloads(UserSpaces userSpaces, DormantWorkloads workloads){
-        return Mono.just(Tuples.of(userSpaces, workloads.match(userSpaces.getSpaces())));
-
     }
 
     @Scheduled(cron = "${cron.execution}")
@@ -144,8 +139,13 @@ public class HygienePolicyExecutorTask implements PolicyExecutorTask {
             .map(list -> builder.serviceInstances(list).build());
     }
 
+    private static Mono<Tuple2<UserSpaces, DormantWorkloads>> filterDormantWorkloads(UserSpaces userSpaces, DormantWorkloads workloads){
+        return Mono.just(Tuples.of(userSpaces, workloads.match(userSpaces.getSpaces())));
+
+    }
+
     private static Map<String, String> buildAttachmentContents(DormantWorkloads workloads) {
-	String cr = System.getProperty("line.separator");
+	    String cr = System.getProperty("line.separator");
         Map<String, String> result = new HashMap<>();
         StringBuilder dormantApplications = new StringBuilder();
         StringBuilder dormantServiceInstances = new StringBuilder();
