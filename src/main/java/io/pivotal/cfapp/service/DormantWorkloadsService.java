@@ -30,7 +30,7 @@ public class DormantWorkloadsService {
     }
 
     public Mono<List<AppDetail>> getDormantApplications(Integer daysSinceLastUpdate) {
-		return snapshotService
+		    return snapshotService
                 .assembleSnapshotDetail()
                 .flatMapMany(sd -> Flux.fromIterable(sd.getApplications()))
                 .filter(app -> isBlacklisted(app.getOrganization()))
@@ -40,7 +40,7 @@ public class DormantWorkloadsService {
     }
 
     public Mono<List<ServiceInstanceDetail>> getDormantServiceInstances(Integer daysSinceLastUpdate) {
-		return snapshotService
+		    return snapshotService
                 .assembleSnapshotDetail()
                 .flatMapMany(sd -> Flux.fromIterable(sd.getServiceInstances()))
                 .filter(sid -> isBlacklisted(sid.getOrganization()))
@@ -50,6 +50,6 @@ public class DormantWorkloadsService {
     }
 
     private boolean isBlacklisted(String organization) {
-		return !settings.getOrganizationBlackList().contains(organization);
-	}
+        return !settings.getOrganizationBlackList().contains(organization);
+    }
 }
