@@ -145,7 +145,7 @@ public class HygienePolicyExecutorTask implements PolicyExecutorTask {
     }
 
     private static Map<String, String> buildAttachmentContents(DormantWorkloads workloads) {
-	String cr = Syste.getProperty("line.separator");
+	String cr = System.getProperty("line.separator");
         Map<String, String> result = new HashMap<>();
         StringBuilder dormantApplications = new StringBuilder();
         StringBuilder dormantServiceInstances = new StringBuilder();
