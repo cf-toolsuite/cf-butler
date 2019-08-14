@@ -1,5 +1,8 @@
 package io.pivotal.cfapp.domain;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -15,7 +18,7 @@ import lombok.Getter;
 
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({ "id", "days-since-last-update", "operator-email-template", "notifyee-email-template" })
+@JsonPropertyOrder({ "id", "days-since-last-update", "operator-email-template", "notifyee-email-template", "organization-whitelist" })
 @Getter
 public class HygienePolicy {
 
@@ -37,6 +40,9 @@ public class HygienePolicy {
     @JsonProperty("notifyee-email-template")
     private EmailNotificationTemplate notifyeeTemplate;
 
+	@Default
+	@JsonProperty("organization-whitelist")
+	private Set<String> organizationWhiteList = new HashSet<>();
 
     @JsonCreator
     public HygienePolicy(
@@ -44,13 +50,15 @@ public class HygienePolicy {
 		@JsonProperty("id") String id,
         @JsonProperty("days-since-last-update") Integer daysSinceLastUpdate,
         @JsonProperty("operator-email-template") EmailNotificationTemplate operatorTemplate,
-        @JsonProperty("notifyee-email-template") EmailNotificationTemplate notifyeeTemplate
+		@JsonProperty("notifyee-email-template") EmailNotificationTemplate notifyeeTemplate,
+		@JsonProperty("organization-whitelist") Set<String> organizationWhiteList
     ) {
         this.pk = pk;
 		this.id = id;
         this.daysSinceLastUpdate = daysSinceLastUpdate;
         this.operatorTemplate = operatorTemplate;
-        this.notifyeeTemplate = notifyeeTemplate;
+		this.notifyeeTemplate = notifyeeTemplate;
+		this.organizationWhiteList = organizationWhiteList;
     }
 
     @JsonIgnore
@@ -65,7 +73,7 @@ public class HygienePolicy {
 	public static String[] columnNames() {
 		return
 			new String[] {
-				"pk", "id", "days_since_last_update", "operator_email_template", "notifyee_email_template"
+				"pk", "id", "days_since_last_update", "operator_email_template", "notifyee_email_template", "organization_whitelist"
 			};
 	}
 
@@ -75,6 +83,7 @@ public class HygienePolicy {
 					.daysSinceLastUpdate(policy.getDaysSinceLastUpdate())
 					.operatorTemplate(policy.getOperatorTemplate())
 					.notifyeeTemplate(policy.getNotifyeeTemplate())
+					.organizationWhiteList(policy.getOrganizationWhiteList())
 					.build();
 	}
 
@@ -85,6 +94,7 @@ public class HygienePolicy {
 					.daysSinceLastUpdate(policy.getDaysSinceLastUpdate())
 					.operatorTemplate(policy.getOperatorTemplate())
 					.notifyeeTemplate(policy.getNotifyeeTemplate())
+					.organizationWhiteList(policy.getOrganizationWhiteList())
 					.build();
 	}
 }

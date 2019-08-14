@@ -154,7 +154,7 @@ public class PoliciesValidator {
         boolean hasDaysSinceLastUpdate = Optional.ofNullable(policy.getDaysSinceLastUpdate()).isPresent();
         boolean hasOperatorTemplate = Optional.ofNullable(policy.getOperatorTemplate()).isPresent();
         boolean hasNotifyeeTemplate = Optional.ofNullable(policy.getNotifyeeTemplate()).isPresent();
-        boolean valid = !hasId && hasDaysSinceLastUpdate && hasOperatorTemplate && hasNotifyeeTemplate;
+        boolean valid = !hasId && hasDaysSinceLastUpdate && hasOperatorTemplate;
         if (hasOperatorTemplate) {
             if (!policy.getOperatorTemplate().isValid()) {
                 valid = false;

@@ -171,6 +171,7 @@ public class R2dbcPoliciesRepository {
 									.daysSinceLastUpdate(row.get("days_since_last_update", Integer.class))
 									.operatorTemplate(readEmailNotificationTemplate(row.get("operator_email_template", String.class) == null ? "{}": row.get("operator_email_template_template", String.class)))
 									.notifyeeTemplate(readEmailNotificationTemplate(row.get("notifyee_email_template", String.class) == null ? "{}": row.get("notifyee_email_template", String.class)))
+									.organizationWhiteList(row.get("organization_whitelist", String.class) != null ? new HashSet<String>(Arrays.asList(row.get("organization_whitelist", String.class).split("\\s*,\\s*"))): new HashSet<>())
 									.build())
 						.all())
 				.map(hp -> hygienePolicies.add(hp))
@@ -182,7 +183,7 @@ public class R2dbcPoliciesRepository {
 		String selectAllApplicationPolicies = "select pk, id, operation, description, state, options, organization_whitelist from application_policy";
 		String selectAllServiceInstancePolicies = "select pk, id, operation, description, options, organization_whitelist from service_instance_policy";
 		String selectAllQueryPolicies = "select pk, id, description, queries, email_notification_template from query_policy";
-		String selectAllHygienePolicies = "select pk, id, days_since_last_update, operator_email_template, notifyee_email_template from hygiene_policy";
+		String selectAllHygienePolicies = "select pk, id, days_since_last_update, operator_email_template, notifyee_email_template, organization_whitelist from hygiene_policy";
 		List<ApplicationPolicy> applicationPolicies = new ArrayList<>();
 		List<ServiceInstancePolicy> serviceInstancePolicies = new ArrayList<>();
 		List<QueryPolicy> queryPolicies = new ArrayList<>();
@@ -243,6 +244,7 @@ public class R2dbcPoliciesRepository {
 												.daysSinceLastUpdate(row.get("days_since_last_update", Integer.class))
 												.operatorTemplate(readEmailNotificationTemplate(row.get("operator_email_template", String.class) == null ? "{}": row.get("operator_email_template_template", String.class)))
 												.notifyeeTemplate(readEmailNotificationTemplate(row.get("notifyee_email_template", String.class) == null ? "{}": row.get("notifyee_email_template", String.class)))
+												.organizationWhiteList(row.get("organization_whitelist", String.class) != null ? new HashSet<String>(Arrays.asList(row.get("organization_whitelist", String.class).split("\\s*,\\s*"))): new HashSet<>())
 												.build())
 									.all())
 							.map(hp -> hygienePolicies.add(hp)))
@@ -291,6 +293,7 @@ public class R2dbcPoliciesRepository {
 								.daysSinceLastUpdate(row.get("days_since_last_update", Integer.class))
 								.operatorTemplate(readEmailNotificationTemplate(row.get("operator_email_template", String.class) == null ? "{}": row.get("operator_email_template_template", String.class)))
 								.notifyeeTemplate(readEmailNotificationTemplate(row.get("notifyee_email_template", String.class) == null ? "{}": row.get("notifyee_email_template", String.class)))
+								.organizationWhiteList(row.get("organization_whitelist", String.class) != null ? new HashSet<String>(Arrays.asList(row.get("organization_whitelist", String.class).split("\\s*,\\s*"))): new HashSet<>())
 								.build())
 				.all()
 				.collectList()
@@ -478,6 +481,7 @@ public class R2dbcPoliciesRepository {
 		} else {
 			spec = spec.nullValue("notifyee_email_template");
 		}
+		spec = spec.value("organization_whitelist", String.join(",", hp.getOrganizationWhiteList()));
 		return spec.fetch().rowsUpdated();
 	}
 

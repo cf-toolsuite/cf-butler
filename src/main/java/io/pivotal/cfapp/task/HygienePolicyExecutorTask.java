@@ -63,7 +63,7 @@ public class HygienePolicyExecutorTask implements PolicyExecutorTask {
     public void execute() {
 	    log.info("HygienePolicyExecutorTask started");
         fetchHygienePolicies()
-            .concatMap(hp -> executeHygienePolicy(hp.getDaysSinceLastUpdate()).map(result -> Tuples.of(hp, result)))
+            .concatMap(hp -> executeHygienePolicy(hp).map(result -> Tuples.of(hp, result)))
             .collectList()
 	    	.subscribe(
                 results -> {
@@ -130,12 +130,12 @@ public class HygienePolicyExecutorTask implements PolicyExecutorTask {
                 .flatMapMany(policy -> Flux.fromIterable(policy.getHygienePolicies()));
     }
 
-    protected Mono<DormantWorkloads> executeHygienePolicy(Integer daysSinceLastUpdate) {
+    protected Mono<DormantWorkloads> executeHygienePolicy(HygienePolicy policy) {
         final DormantWorkloadsBuilder builder = DormantWorkloads.builder();
         return dormantWorkloadsService
-            .getDormantApplications(daysSinceLastUpdate)
+            .getDormantApplications(policy)
             .map(list -> builder.applications(list))
-            .then(dormantWorkloadsService.getDormantServiceInstances(daysSinceLastUpdate))
+            .then(dormantWorkloadsService.getDormantServiceInstances(policy))
             .map(list -> builder.serviceInstances(list).build());
     }
 
