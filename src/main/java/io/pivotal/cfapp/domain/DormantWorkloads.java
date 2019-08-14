@@ -38,21 +38,21 @@ public class DormantWorkloads {
         this.applications = applications;
         this.serviceInstances = serviceInstances;
     }
-    
+
     public DormantWorkloads match(List<Space> spaces) {
         List<AppDetail> matchingApps = new ArrayList<>();
         List<ServiceInstanceDetail> matchingServiceInstances = new ArrayList<>();
         for (Space s: spaces) {
             matchingApps.addAll(applications
                     .stream()
-                        .filter(application -> 
-                            application.getOrganization().equalsIgnoreCase(s.getOrganization()) 
+                        .filter(application ->
+                            application.getOrganization().equalsIgnoreCase(s.getOrganization())
                                 && application.getSpace().equalsIgnoreCase(s.getSpace()))
                         .collect(Collectors.toList()));
             matchingServiceInstances.addAll(serviceInstances
                     .stream()
-                        .filter(serviceInstance -> 
-                            serviceInstance.getOrganization().equalsIgnoreCase(s.getOrganization()) 
+                        .filter(serviceInstance ->
+                            serviceInstance.getOrganization().equalsIgnoreCase(s.getOrganization())
                                 && serviceInstance.getSpace().equalsIgnoreCase(s.getSpace()))
                         .collect(Collectors.toList()));
         }

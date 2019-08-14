@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import io.pivotal.cfapp.config.PasSettings;
 import io.pivotal.cfapp.domain.AppDetail;
 import io.pivotal.cfapp.domain.DormantWorkloads;
+import io.pivotal.cfapp.domain.EmailValidator;
 import io.pivotal.cfapp.domain.DormantWorkloads.DormantWorkloadsBuilder;
 import io.pivotal.cfapp.domain.HygienePolicy;
 import io.pivotal.cfapp.domain.ServiceInstanceDetail;
@@ -100,6 +101,8 @@ public class HygienePolicyExecutorTask implements PolicyExecutorTask {
             .flatMap(space -> spaceUsersService.findByOrganizationAndSpace(space.getOrganization(), space.getSpace()))
         // then pair with matching space(s) in dormant applications and service instances
             .flatMap(spaceUser -> Flux.fromIterable(spaceUser.getUsers())).distinct()
+        // filter out account names that are not email addresses
+            .filter(userName -> EmailValidator.isValid(userName))
             .flatMap(userName -> userSpacesService.getUserSpaces(userName))
         // Create a list where each item is a tuple of user account and filtered dormant workloads
             .flatMap(userSpace -> filterDormantWorkloads(userSpace, tuple.getT2()))
