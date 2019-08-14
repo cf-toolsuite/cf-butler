@@ -1,14 +1,23 @@
 package io.pivotal.cfapp.notifier;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationListener;
+import org.springframework.core.io.ClassPathResource;
 
 import io.pivotal.cfapp.event.EmailNotificationEvent;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public abstract class EmailNotifier implements ApplicationListener<EmailNotificationEvent> {
 
     public abstract void sendMail(String from, String to, String subject, String body, Map<String, String> attachmentContents);
@@ -18,14 +27,50 @@ public abstract class EmailNotifier implements ApplicationListener<EmailNotifica
         List<String> recipients = event.getRecipients();
         String from = event.getFrom();
         String footer =
-            String.format("[This email was sent from %s on %s]",
+            String.format("This email was sent from %s on %s",
                 event.getDomain(), DateTimeFormatter.ISO_DATE_TIME.format(LocalDateTime.now()));
-        String body = String.format("%s%n%n%s", event.getBody(), footer);
         String subject = event.getSubject();
+        String template = getEmailTemplate();
+        final String body = getBody(event, template, subject, footer);
+        log.trace("About to send email using ||> From: {}, To: {}, Subject: {}, Body: {}", from, recipients.toString(), subject, body);
         Map<String, String> attachmentContents = event.getAttachmentContents();
         recipients.forEach(recipient -> {
             sendMail(from, recipient, subject, body, attachmentContents);
         });
+    }
+
+    protected String getBody(EmailNotificationEvent event, String template, String subject, String footer) {
+        String body = "";
+        if (StringUtils.isNotBlank(template) && isEmailTemplate(template)) {
+            body = template.replace("{{header}}", subject).replace("{{body}}", event.getBody()).replace("{{footer}}", footer);
+        } else {
+            body = String.format("%s<br/><br/>%s", event.getBody(), footer);
+        }
+        return body;
+    }
+
+    protected String getEmailTemplate() {
+        String result = null;
+        try {
+            InputStream resource = new ClassPathResource("email-template.html").getInputStream();
+            try ( BufferedReader reader = new BufferedReader(new InputStreamReader(resource)) ) {
+                result =
+                    reader
+                        .lines()
+                        .collect(Collectors.joining("\n"));
+            }
+        } catch (IOException ioe) {
+            log.warn("Problem reading email-template.html. {}", ioe.getMessage());
+        }
+        return result;
+    }
+
+    protected boolean isEmailTemplate(String template) {
+        boolean result = false;
+        if (template.contains("{{header}}") && template.contains("{{body}}") && template.contains("{{footer}}")) {
+            result = true;
+        }
+        return result;
     }
 
 }
