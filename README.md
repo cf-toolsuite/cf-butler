@@ -157,6 +157,17 @@ Have a look at [secrets.pws.json](samples/secrets.pws.json) for an example of ho
 
 On startup `cf-butler` will read files from the repo and cache in a database.  Each policy's id will be set to the commit id.
 
+#### Hygiene Policies
+
+Hygiene policies are useful when you want to search for and report on dormant workloads, notifying both the operator and for each workload the author and/or his/her space compadres.  Workloads are running applications and service instances that have not been updated in N or more days from the date/time of the policy execution.
+
+As mentioned previously the policy file must adhere to a naming convention
+
+* a filename ending with `-HP.json` encapsulates an individual [HygienePolicy](src/main/java/io/pivotal/cfapp/domain/HygienePolicy.java)
+
+See additional property requirements in Query policies.
+
+
 #### Query policies
 
 Query policies are useful when you want to step out side the canned snapshot reporting capabilties and leverage the underlying [schema](https://github.com/pacphi/cf-butler/tree/master/src/main/resources/db) to author one or more of your own queries and have the results delivered as comma-separated value attachments using a defined email notification [template](https://github.com/pacphi/cf-butler/blob/master/src/main/java/io/pivotal/cfapp/domain/EmailNotificationTemplate.java).
@@ -937,11 +948,28 @@ POST /policies
               "sql": "select * from application_detail where running_instances > 0 and requested_state = 'started' and week(last_pushed) = week(current_date) -1 AND year(last_pushed) = year(current_date) and organization not in ('system')"
           }
       ],
-      "email-notification-template":{
+      "email-notification-template": {
         "from": "admin@nowhere.me",
         "to": [ "drwho@tardis.io" ],
         "subject": "Query Policy Sample Report",
         "body": "Results are herewith attached for your consideration."
+      }
+  ],
+  "hygiene-policies": [
+    {
+      "days-since-last-update": 14,
+      "operator-email-template": {
+        "from": "admin@nowhere.me",
+        "to": [ "cphillipson@pivotal.io" ],
+        "subject": "Hygiene Policy Platform Operator Report",
+        "body": "These are the dormant workloads in a single organization"
+      },
+      "notifyee-email-template": {
+        "from": "admin@nowhere.me",
+        "subject": "Hygiene Policy User Workloads Report",
+        "body": "You may want to revisit whether or not these workloads are useful.  Please take a moment to either stop and/or delete them if they aren't."
+      },
+      "organization-whitelist": [ "blast-radius" ]
     }
   ]
 }
@@ -976,6 +1004,11 @@ GET /policies/query/{id}
 > Obtain query policy details by id
 
 ```
+GET /policies/hygiene/{id}
+```
+> Obtain hygiene policy details by id
+
+```
 DELETE /policies/application/{id}
 ```
 > Delete an application policy by its id. This endpoint is only available when `cf.policies.provider` is set to `dbms`.
@@ -989,6 +1022,11 @@ DELETE /policies/serviceInstance/{id}
 DELETE /policies/query/{id}
 ```
 > Delete a query policy by its id. This endpoint is only available when `cf.policies.provider` is set to `dbms`.
+
+```
+DELETE /policies/hygiene/{id}
+```
+> Delete a hygiene policy by its id. This endpoint is only available when `cf.policies.provider` is set to `dbms`.
 
 ```
 POST /policies/refresh
