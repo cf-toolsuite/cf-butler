@@ -1,5 +1,6 @@
 package io.pivotal.cfapp.domain;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -10,8 +11,10 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import org.apache.commons.lang3.StringUtils;
 
+import io.jsonwebtoken.lang.Collections;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Builder.Default;
 
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -22,8 +25,9 @@ public class EmailNotificationTemplate {
     @JsonProperty("from")
     private String from;
 
+    @Default
     @JsonProperty("to")
-    private List<String> to;
+    private List<String> to = new ArrayList<>();
 
     @JsonProperty("subject")
     private String subject;
@@ -54,10 +58,12 @@ public class EmailNotificationTemplate {
 
     private static boolean areRecipientsValid(List<String> recipients) {
         boolean result = true;
-        for (String recipient: recipients) {
-            if (!EmailValidator.isValid(recipient)) {
-                result = false;
-                break;
+        if (!Collections.isEmpty(recipients)) {
+            for (String recipient: recipients) {
+                if (!EmailValidator.isValid(recipient)) {
+                    result = false;
+                    break;
+                }
             }
         }
         return result;

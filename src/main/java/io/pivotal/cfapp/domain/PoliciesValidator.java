@@ -149,4 +149,28 @@ public class PoliciesValidator {
         return valid;
     }
 
+    public boolean validate(HygienePolicy policy) {
+        boolean hasId = Optional.ofNullable(policy.getId()).isPresent();
+        boolean hasDaysSinceLastUpdate = Optional.ofNullable(policy.getDaysSinceLastUpdate()).isPresent();
+        boolean hasOperatorTemplate = Optional.ofNullable(policy.getOperatorTemplate()).isPresent();
+        boolean hasNotifyeeTemplate = Optional.ofNullable(policy.getNotifyeeTemplate()).isPresent();
+        boolean valid = !hasId && hasDaysSinceLastUpdate && hasOperatorTemplate;
+        if (hasOperatorTemplate) {
+            if (!policy.getOperatorTemplate().isValid()) {
+                valid = false;
+                log.warn(EMAIL_NOTIFICATION_TEMPLATE_REJECTED_MESSAGE, policy.toString());
+            }
+        }
+        if (hasNotifyeeTemplate) {
+            if (!policy.getNotifyeeTemplate().isValid()) {
+                valid = false;
+                log.warn(EMAIL_NOTIFICATION_TEMPLATE_REJECTED_MESSAGE, policy.toString());
+            }
+        }
+        if (valid == false) {
+            log.warn(REQUIRED_PROPERTIES_REJECTED_MESSAGE, policy.toString());
+        }
+        return valid;
+    }
+
 }
