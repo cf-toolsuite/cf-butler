@@ -1,5 +1,6 @@
 package io.pivotal.cfapp.domain;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -20,7 +21,7 @@ public class UserSpaces {
 
     @Default
     @JsonProperty("spaces")
-    private List<Space> spaces;
+    private List<Space> spaces = new ArrayList<>();
 
 
     @JsonCreator

@@ -32,7 +32,7 @@ public class SendGridNotifier extends EmailNotifier {
         try {
             Email from = new Email(originator);
             Email to = new Email(recipient);
-            Content content = new Content("text/plain", body);
+            Content content = new Content("text/html", body);
             Mail mail = new Mail(from, subject, to, content);
             addAttachments(mail, attachmentContents);
             Request request = new Request();
