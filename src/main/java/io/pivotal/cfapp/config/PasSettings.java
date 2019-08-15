@@ -75,7 +75,7 @@ public class PasSettings {
 					.collect(Collectors.reducing((a, b) -> null));
             return buildpack.orElse(input);
         }
-    }
+	}
 
     private Set<String> merge(Set<String> source, Set<String> defaultList) {
     	Set<String> result = new HashSet<>();

@@ -28,13 +28,15 @@ import org.springframework.stereotype.Component;
 
 import io.pivotal.cfapp.config.PasSettings;
 import io.pivotal.cfapp.domain.AppDetail;
+import io.pivotal.cfapp.domain.Buildpack;
 import io.pivotal.cfapp.domain.Event;
 import io.pivotal.cfapp.domain.Space;
 import io.pivotal.cfapp.domain.Stack;
 import io.pivotal.cfapp.event.AppDetailRetrievedEvent;
 import io.pivotal.cfapp.event.SpacesRetrievedEvent;
-import io.pivotal.cfapp.service.StacksCache;
 import io.pivotal.cfapp.service.AppDetailService;
+import io.pivotal.cfapp.service.BuildpacksCache;
+import io.pivotal.cfapp.service.StacksCache;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -48,6 +50,7 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
     private PasSettings settings;
     private DefaultCloudFoundryOperations opsClient;
     private AppDetailService service;
+    private BuildpacksCache buildpacksCache;
     private StacksCache stacksCache;
     private ApplicationEventPublisher publisher;
 
@@ -56,11 +59,13 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
             PasSettings settings,
     		DefaultCloudFoundryOperations opsClient,
             AppDetailService service,
+            BuildpacksCache buildpacksCache,
             StacksCache stacksCache,
     		ApplicationEventPublisher publisher) {
         this.settings = settings;
         this.opsClient = opsClient;
         this.service = service;
+        this.buildpacksCache = buildpacksCache;
         this.stacksCache = stacksCache;
         this.publisher = publisher;
     }
@@ -185,6 +190,7 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
                     .appId(summary.getId())
                     .appName(summary.getName())
                     .buildpack(settings.getBuildpack(detail.getBuildpack(), detail.getDockerImage()))
+                    .buildpackVersion(nullSafeBuildpackVersion(detail.getDetectedBuildpackId()))
                     .image(detail.getDockerImage())
                     .stack(nullSafeStack(detail.getStackId()))
                     .runningInstances(nullSafeInteger(detail.getRunningInstances()))
@@ -226,6 +232,14 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
             return stack.getName();
         }
         return "unknown";
+    }
+
+    private String nullSafeBuildpackVersion(String buildpackId) {
+        Buildpack buildpack = buildpacksCache.getBuildpackById(buildpackId);
+        if (buildpack != null) {
+            return buildpack.getVersion();
+        }
+        return "";
     }
 
     private static Long nullSafeMemoryUsage(ApplicationStatisticsResponse stats) {
