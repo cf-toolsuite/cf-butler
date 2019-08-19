@@ -1,8 +1,8 @@
 plugins {
-    id 'com.gorylenko.gradle-git-properties' version '2.0.0'
-    id 'org.springframework.boot' version '2.2.0.M4'
+    id 'com.gorylenko.gradle-git-properties' version '2.1.0'
+    id 'org.springframework.boot' version '2.2.0.M5'
     id 'io.spring.dependency-management' version '1.0.8.RELEASE'
-    id 'com.github.ben-manes.versions' version '0.21.0'
+    id 'com.github.ben-manes.versions' version '0.22.0'
     id 'io.franzbecker.gradle-lombok' version '3.1.0'
 	id 'java'
     id 'jacoco'
@@ -127,7 +127,7 @@ dependencies {
     implementation('io.r2dbc:r2dbc-h2:0.8.0.M8')
     runtime('io.r2dbc:r2dbc-postgresql:0.8.0.M8')
     runtime('com.github.mirromutth:r2dbc-mysql:0.2.0.M2')
-    implementation('org.eclipse.jgit:org.eclipse.jgit:5.4.0.201906121030-r')
+    implementation('org.eclipse.jgit:org.eclipse.jgit:5.3.2.201906051522-r')
     implementation('org.springframework.boot:spring-boot-starter-mail')
     implementation('com.sendgrid:sendgrid-java:4.4.1') {
         exclude group: 'org.apache.httpcomponents', module: 'httpclient'
