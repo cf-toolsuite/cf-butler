@@ -771,17 +771,17 @@ GET /snapshot/detail/ai
 Sample output
 
 ```
-Application inventory detail from api.sys.cf.zoo.labs.foo.org generated 2019-03-22T07:13:07.086572.
+Application inventory detail from api.sys.demo.ironleg.me generated 2019-08-19T05:39:46.659078.
 
 
-organization,space,application id,application name,buildpack,image,stack,running instances,total instances,urls,last pushed,last event,last event actor,last event time,requested state
-"credhub-service-broker-org","credhub-service-broker-space","1a908282-d83b-47c4-8674-f60c398d403e","credhub-broker-1.2.0","binary",,"cflinuxfs2","1","1","credhub-broker.cfapps.cf.cirrus.labs.mvptime.org","2019-03-04T00:00","audit.app.droplet.create","system_services","2019-03-04T00:00","started"
-"mvptime","default","5f7349ba-6431-4f4e-a1fa-5b8bbaa3fdef","bootiful-greeting","java",,"cflinuxfs2","2","2","bootiful-greeting-responsible-sable.cfapps.cf.zoo.labs.foo.org","2018-06-27T00:00",,,,"started"
-"mvptime","default","0af297a2-e886-42c4-a0bc-5a4cdffb327c","bootiful-hello","java",,"cflinuxfs2","3","3","bootiful-hello-brash-camel.cfapps.cf.zoo.labs.foo.org","2018-07-12T00:00","app.crash","bootiful-hello","2019-03-04T00:00","started"
-"mvptime","default","44694d3f-a278-4745-ac5d-aa693cb61b7b","bootiful-volume","java",,"cflinuxfs2","1","1","bootiful-volume.cfapps.cf.zoo.labs.foo.org","2018-05-28T00:00","app.crash","bootiful-volume","2019-03-04T00:00","started"
-"mvptime","default","3458d94d-f629-4f86-84a3-2b6e16409269","reactive-cassy","java",,"cflinuxfs2","1","1","reactive-cassy-anxious-klipspringer.cfapps.cf.zoo.labs.foo.org","2018-11-20T00:00",,,,"started"
-"planespotter","default","979da8bb-7a1b-434b-9aa3-fae5362ef15f","bootiful-hello","java",,"cflinuxfs2","1","1","bootiful-hello-chipper-buffalo.cfapps.cf.zoo.labs.foo.org","2018-10-17T00:00","audit.app.ssh-authorized","vmanoharan@pivotal.io","2019-03-20T00:00","started"
-"planespotter","default","a961e75f-ad6f-4eeb-9f80-90eefe2041fd","planespotter-alpha","java",,"cflinuxfs2","1","1","planespotter-alpha.cfapps.cf.zoo.labs.foo.org,planespotter.cfapps.cf.zoo.labs.foo.org","2018-10-11T00:00","audit.app.update","vmanoharan@pivotal.io","2019-03-21T00:00","started"
+organization,space,application id,application name,buildpack,buildpack version,image,stack,running instances,total instances,urls,last pushed,last event,last event actor,last event time,requested state
+"blast-radius","substratum","440c21b9-50c3-4135-8a1c-6e1623d27ba9","cf-butler","java","v4.18",,"cflinuxfs3","1","1","0.412717924","0.195510272","cf-butler.apps.demo.ironleg.me","2019-08-01T09:47:33","audit.app.droplet.create","admin","2019-08-01T09:58:55","started"
+"blast-radius","substratum","f34fdbcb-3cb8-4d76-90ad-aafb1e64b5b6","cf-hoover","java","v4.18",,"cflinuxfs3","1","1","0.241331355","0.187875328","cf-hoover.apps.demo.ironleg.me","2019-07-30T06:06:28","audit.app.droplet.create","admin","2019-07-30T06:18:42","started"
+"blast-radius","substratum","fdcc6a1c-d457-4418-b80c-9b630c59df92","cf-hoover-ui","java","v4.18",,"cflinuxfs3","1","1","0.376542052","0.213118976","cf-hoover-ui.apps.demo.ironleg.me","2019-07-30T06:22:27","audit.app.droplet.create","admin","2019-07-30T06:23:47","started"
+"credhub-service-broker-org","credhub-service-broker-space","8b71f3f7-e678-49a1-b33f-9602a361fd6f","credhub-broker-1.3.3","binary","v1.0.32",,"cflinuxfs3","1","1","0.015036871","0.009777152","credhub-broker.apps.demo.ironleg.me","2019-07-28T17:37:13","audit.app.droplet.create","system_services","2019-07-28T17:37:43","started"
+"killens","dev","b1406fd6-7394-4182-928a-e9e7c606f711","lighthouseweb","hwc","v3.1.10",,"windows","1","1","0.323162112","0.131223552","lighthouseweb.apps.demo.ironleg.me","2019-08-13T12:14:16","audit.app.droplet.create","mkillens@pivotal.io","2019-08-13T12:14:48","started"
+"p-spring-cloud-services","5095d5ca-a7cf-4456-b8ea-2cfd5549327c","a5508727-788c-446a-aa17-1f8c028196e8","config-server","java","v4.18",,"cflinuxfs3","1","1","0.246387556","0.169598976","config-server-8095d5ca-a7cf-4456-b8ea-2cfd5549327c.apps.demo.ironleg.me","2019-07-30T06:08:25","audit.app.droplet.create",,"2019-07-30T06:09:23","started"
+"p-spring-cloud-services","instances","c2917b8d-54e1-48c7-a3d4-38137d4623cb","eureka-29239c3f-b89e-4da1-b579-0338176146f8","java","v4.18",,"cflinuxfs3","1","1","0.372844233","0.198602752","eureka-24239c3f-b89e-4da1-b579-0338176146f8.apps.demo.ironleg.me","2019-07-30T06:08:46","audit.app.droplet.create",,"2019-07-30T06:11:14","started"
 ```
 
 ```

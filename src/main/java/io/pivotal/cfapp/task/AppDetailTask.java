@@ -189,7 +189,7 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
                     .space(opsClient.getSpace())
                     .appId(summary.getId())
                     .appName(summary.getName())
-                    .buildpack(settings.getBuildpack(detail.getBuildpack(), detail.getDockerImage()))
+                    .buildpack(detemineBuildpack(detail.getDetectedBuildpack(),detail.getBuildpack(), detail.getDockerImage()))
                     .buildpackVersion(nullSafeBuildpackVersion(detail.getDetectedBuildpackId()))
                     .image(detail.getDockerImage())
                     .stack(nullSafeStack(detail.getStackId()))
@@ -204,6 +204,12 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
                     .lastPushed(nullSafeLocalDateTime(detail.getPackageUpdatedAt()))
                     .requestedState(nullSafeString(summary.getRequestedState()).toLowerCase())
                 .build();
+    }
+
+    private String detemineBuildpack(String detectedBuildpack, String plainOldBuildpack, String dockerImage) {
+        String detected = settings.getBuildpack(detectedBuildpack, dockerImage);
+        String plainOld = settings.getBuildpack(plainOldBuildpack, dockerImage);
+        return detected.equals("none") ? plainOld : detected;
     }
 
 	private static LocalDateTime nullSafeLocalDateTime(String value) {

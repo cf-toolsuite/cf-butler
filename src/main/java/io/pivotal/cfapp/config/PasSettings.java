@@ -27,6 +27,7 @@ public class PasSettings {
 	private Set<String> buildpacks = DEFAULT_BUILDPACKS;
 	private boolean sslValidationSkipped;
 	private Integer connectionPoolSize;
+	private String connectionTimeout;
     private String username;
     private String password;
     // this is the value of RefreshToken within ~/.cf/config.json after one authenticates w/ cf login -a {api_endpoint} -sso
