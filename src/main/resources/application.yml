@@ -18,7 +18,8 @@ cf:
   username: replace_me
   password: replace_me
   sslValidationSkipped: false
-  connectionPoolSize: 8
+  connectionPoolSize: 128
+  connectionTimeout: PT5M
   organizationBlackList:
     - system
     - credhub-service-broker-org
@@ -153,7 +154,8 @@ cf:
   username: ${vcap.services.cf-butler-secrets.credentials.CF_USERNAME}
   password: ${vcap.services.cf-butler-secrets.credentials.CF_PASSWORD}
   sslValidationSkipped: ${vcap.services.cf-butler-secrets.credentials.CF_SKIP_SSL_VALIDATION:false}
-  connectionPoolSize: ${vcap.services.cf-butler-secrets.credentials.CF_CONNECTION_POOLSIZE:64}
+  connectionPoolSize: ${vcap.services.cf-butler-secrets.credentials.CF_CONNECTION_POOLSIZE:128}
+  connectionTimeout: ${vcap.services.cf-butler-secrets.credentials.CF_CONNECTION_TIMEOUT:PT5M}
   refreshToken: ${vcap.services.cf-butler-secrets.credentials.CF_REFRESH-TOKEN}
   organizationBlackList: ${vcap.services.cf-butler-secrets.credentials.CF_ORGANIZATION-BLACK-LIST:}
   accountRegex: ${vcap.services.cf-butler-secrets.credentials.CF_ACCOUNT-REGEX:}

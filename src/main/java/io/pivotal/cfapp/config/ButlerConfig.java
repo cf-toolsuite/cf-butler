@@ -31,8 +31,9 @@ public class ButlerConfig {
                 .builder()
                     .apiHost(settings.getApiHost())
                     .skipSslValidation(settings.isSslValidationSkipped())
+                    .keepAlive(true)
                     .connectionPoolSize(settings.getConnectionPoolSize())
-                    .connectTimeout(Duration.ofMinutes(3))
+                    .connectTimeout(Duration.parse(settings.getConnectionTimeout()))
                     .build();
     }
 
