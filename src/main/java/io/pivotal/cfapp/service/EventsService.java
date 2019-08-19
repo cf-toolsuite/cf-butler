@@ -113,6 +113,9 @@ public class EventsService {
 
     public Mono<Boolean> isDormantApplication(String id, int daysSinceLastUpdate) {
         String[] types = new String[] { EventType.AUDIT_APP_CREATE.getId(), EventType.AUDIT_APP_UPDATE.getId(), EventType.AUDIT_APP_RESTAGE.getId() };
+        if (daysSinceLastUpdate == -1) {
+            return Mono.just(Boolean.valueOf(true));
+        }
         return getEvents(id, types)
                 .filter(event -> ChronoUnit.DAYS.between(event.getTime(), LocalDateTime.now()) >= daysSinceLastUpdate)
                 .collect(Collectors.toList())
@@ -120,6 +123,9 @@ public class EventsService {
     }
 
     public Mono<Boolean> isDormantServiceInstance(String id, int daysSinceLastUpdate) {
+        if (daysSinceLastUpdate == -1) {
+            return Mono.just(Boolean.valueOf(true));
+        }
         String[] types = new String[] { EventType.AUDIT_SERVICE_INSTANCE_CREATE.getId(), EventType.AUDIT_SERVICE_INSTANCE_UPDATE.getId(),
             EventType.AUDIT_USER_PROVIDED_SERVICE_INSTANCE_CREATE.getId(), EventType.AUDIT_USER_PROVIDED_SERVICE_INSTANCE_UPDATE.getId() };
         return getEvents(id, types)

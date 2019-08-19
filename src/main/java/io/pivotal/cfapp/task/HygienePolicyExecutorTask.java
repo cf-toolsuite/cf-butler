@@ -89,7 +89,7 @@ public class HygienePolicyExecutorTask implements PolicyExecutorTask {
                 .recipients(tuple.getT1().getOperatorTemplate().getTo())
                 .subject(tuple.getT1().getOperatorTemplate().getSubject())
                 .body(tuple.getT1().getOperatorTemplate().getBody())
-                .attachmentContents(buildAttachmentContents(tuple.getT2()))
+                .attachmentContents(buildAttachmentContents(tuple))
         );
     }
 
@@ -114,7 +114,7 @@ public class HygienePolicyExecutorTask implements PolicyExecutorTask {
                             .recipients(Arrays.asList(new String[] { workload.getT1().getAccountName() }))
                             .subject(tuple.getT1().getNotifyeeTemplate().getSubject())
                             .body(tuple.getT1().getNotifyeeTemplate().getBody())
-                            .attachmentContents(buildAttachmentContents(workload.getT2()))
+                            .attachmentContents(buildAttachmentContents(tuple))
                     );
                     return workload;
         })
@@ -147,22 +147,30 @@ public class HygienePolicyExecutorTask implements PolicyExecutorTask {
 
     }
 
-    private static Map<String, String> buildAttachmentContents(DormantWorkloads workloads) {
+    private static Map<String, String> buildAttachmentContents(Tuple2<HygienePolicy, DormantWorkloads> tuple) {
 	    String cr = System.getProperty("line.separator");
         Map<String, String> result = new HashMap<>();
-        StringBuilder dormantApplications = new StringBuilder();
-        StringBuilder dormantServiceInstances = new StringBuilder();
-        dormantApplications.append(AppDetail.headers()).append(cr);
-        workloads
+        StringBuilder applications = new StringBuilder();
+        StringBuilder serviceInstances = new StringBuilder();
+        applications.append(AppDetail.headers()).append(cr);
+        tuple.getT2()
             .getApplications()
-                .forEach(app -> dormantApplications.append(app.toCsv()).append(cr));
-        dormantServiceInstances.append(ServiceInstanceDetail.headers()).append(cr);
-        workloads
+                .forEach(app -> applications.append(app.toCsv()).append(cr));
+        serviceInstances.append(ServiceInstanceDetail.headers()).append(cr);
+        tuple.getT2()
             .getServiceInstances()
-                .forEach(sid -> dormantServiceInstances.append(sid.toCsv()).append(cr));
-        result.put("dormant-applications", dormantApplications.toString());
-        result.put("dormant-service-instances", dormantServiceInstances.toString());
+                .forEach(sid -> serviceInstances.append(sid.toCsv()).append(cr));
+        result.put(getFileNamePrefix(tuple.getT1()) + "applications", applications.toString());
+        result.put(getFileNamePrefix(tuple.getT1()) + "service-instances", serviceInstances.toString());
         return result;
+    }
+
+    private static String getFileNamePrefix(HygienePolicy policy) {
+        String prefix = "";
+        if (policy.getDaysSinceLastUpdate() != -1) {
+            prefix = "dormant-";
+        }
+        return prefix;
     }
 
     private static Set<Space> getSpaces(DormantWorkloads workloads) {
