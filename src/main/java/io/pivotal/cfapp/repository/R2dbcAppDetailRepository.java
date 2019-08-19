@@ -45,6 +45,11 @@ public class R2dbcAppDetailRepository {
 		} else {
 			spec = spec.nullValue("buildpack");
 		}
+		if (entity.getBuildpackVersion() != null) {
+			spec = spec.value("buildpack_version", entity.getBuildpackVersion());
+		} else {
+			spec = spec.nullValue("buildpack_version");
+		}
 		if (entity.getImage() != null) {
 			spec = spec.value("image", entity.getImage());
 		} else {
@@ -220,6 +225,7 @@ public class R2dbcAppDetailRepository {
 					.appId(Defaults.getColumnValueOrDefault(row, "app_id", String.class, ""))
 					.appName(Defaults.getColumnValueOrDefault(row, "app_name", String.class, ""))
 					.buildpack(Defaults.getColumnValueOrDefault(row, "buildpack", String.class, ""))
+					.buildpackVersion(Defaults.getColumnValueOrDefault(row, "buildpack_version", String.class, ""))
 					.runningInstances(Defaults.getColumnValueOrDefault(row, "running_instances", Integer.class, 0))
 					.totalInstances(Defaults.getColumnValueOrDefault(row, "total_instances", Integer.class, 0))
 					.memoryUsage(Defaults.getColumnValueOrDefault(row, "memory_used", Long.class, 0L))
