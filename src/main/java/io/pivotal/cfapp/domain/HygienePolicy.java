@@ -1,5 +1,6 @@
 package io.pivotal.cfapp.domain;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -11,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.uuid.Generators;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.util.CollectionUtils;
 
 import lombok.Builder;
 import lombok.Builder.Default;
@@ -65,6 +67,10 @@ public class HygienePolicy {
 	public Long getPk() {
 		return pk;
     }
+
+	public Set<String> getOrganizationWhiteList() {
+		return CollectionUtils.isEmpty(organizationWhiteList) ? new HashSet<>() : Collections.unmodifiableSet(organizationWhiteList);
+	}
 
     public static String tableName() {
 		return "hygiene_policy";
