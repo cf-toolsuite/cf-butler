@@ -161,6 +161,8 @@ On startup `cf-butler` will read files from the repo and cache in a database.  E
 
 Hygiene policies are useful when you want to search for and report on dormant workloads, notifying both the operator and for each workload the author and/or his/her space compadres.  Workloads are running applications and service instances that have not been updated in N or more days from the date/time of the policy execution.
 
+> Note: hygiene policy configuration has a special case where if the `days-since-last-update` property value is set to `-1` then ALL workloads (minus the blacklist) are included in the respective notifications.
+
 As mentioned previously the policy file must adhere to a naming convention
 
 * a filename ending with `-HP.json` encapsulates an individual [HygienePolicy](src/main/java/io/pivotal/cfapp/domain/HygienePolicy.java)
