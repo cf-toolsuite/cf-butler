@@ -1,24 +1,23 @@
 package io.pivotal.cfapp.repository;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
+import io.pivotal.cfapp.domain.Defaults;
+import io.pivotal.cfapp.domain.SpaceUsers;
+import io.r2dbc.spi.Row;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.r2dbc.core.DatabaseClient;
 import org.springframework.data.r2dbc.core.DatabaseClient.GenericInsertSpec;
 import org.springframework.data.r2dbc.query.Criteria;
 import org.springframework.stereotype.Repository;
-
-import io.pivotal.cfapp.domain.Defaults;
-import io.pivotal.cfapp.domain.SpaceUsers;
-import io.r2dbc.spi.Row;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @Repository
 public class R2dbcSpaceUsersRepository {
@@ -55,7 +54,7 @@ public class R2dbcSpaceUsersRepository {
 		} else {
 			spec = spec.nullValue("auditors");
 		}
-		if (entity.getManagers() != null) {
+		if (entity.getDevelopers() != null) {
 			spec = spec.value("developers", toJson(entity.getDevelopers()));
 		} else {
 			spec = spec.nullValue("developers");
@@ -91,8 +90,10 @@ public class R2dbcSpaceUsersRepository {
 	}
 
 	private String toJson(List<String> list) {
+		List<String> destination = new ArrayList<>(list);
+		destination.replaceAll(String::toLowerCase);
 		try {
-			return mapper.writeValueAsString(list);
+			return mapper.writeValueAsString(destination);
 		} catch (JsonProcessingException jpe) {
 			throw new RuntimeException(jpe);
 		}
