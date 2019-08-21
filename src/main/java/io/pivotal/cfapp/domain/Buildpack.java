@@ -16,6 +16,11 @@ public class Buildpack {
     private String stack;
 
     public String getVersion() {
-        return filename.substring(filename.lastIndexOf('v')).replace(".zip", "");
+        String version = null;
+        int versionPosition = filename.lastIndexOf('v');
+        if (versionPosition >= 0) {
+            version = filename.substring(versionPosition).replace(".zip", "");
+        }
+        return version;
     }
 }

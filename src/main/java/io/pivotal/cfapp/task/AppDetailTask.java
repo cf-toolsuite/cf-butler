@@ -209,7 +209,7 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
     private String detemineBuildpack(String detectedBuildpack, String plainOldBuildpack, String dockerImage) {
         String detected = settings.getBuildpack(detectedBuildpack, dockerImage);
         String plainOld = settings.getBuildpack(plainOldBuildpack, dockerImage);
-        return detected.equals("none") ? plainOld : detected;
+        return detected != null && detected.equals("none") ? plainOld : detected;
     }
 
 	private static LocalDateTime nullSafeLocalDateTime(String value) {

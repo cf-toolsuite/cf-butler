@@ -33,7 +33,7 @@ public class GitClient {
 		Repository result = null;
 		Assert.hasText(uri, "URI of remote Git repository must be specified");
 		Assert.isTrue(uri.endsWith(".git"), "URI must end with .git");
-		String path = String.join(File.separator, "tmp", uri.substring(uri.lastIndexOf("/")).replace(".git",""));
+		String path = String.join(File.separator, "tmp", uri.substring(uri.lastIndexOf("/") + 1).replace(".git",""));
 		try {
 			File directory = new File(path);
 			Path p = Paths.get(directory.toURI());
@@ -43,13 +43,15 @@ public class GitClient {
 					.sorted(Comparator.reverseOrder())
 					.map(Path::toFile)
 					.forEach(File::delete);
-				}
+			}
+			p.toFile().delete();
 			Git
 				.cloneRepository()
 					.setURI(uri)
 					.setDirectory(directory)
 					.setCloneAllBranches(true)
-					.call();
+					.call()
+					.close();
 			result = Git.open(directory).getRepository();
 		} catch (GitAPIException | IOException e) {
 			log.warn(String.format("Cannot clone Git repository at %s", uri), e);
