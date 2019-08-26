@@ -1,25 +1,19 @@
 package io.pivotal.cfapp.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import java.time.LocalDateTime;
-import java.util.Arrays;
-
+import io.pivotal.cfapp.ButlerTest;
+import io.pivotal.cfapp.domain.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import io.pivotal.cfapp.ButlerTest;
-import io.pivotal.cfapp.domain.AppDetail;
-import io.pivotal.cfapp.domain.ApplicationCounts;
-import io.pivotal.cfapp.domain.ServiceInstanceCounts;
-import io.pivotal.cfapp.domain.ServiceInstanceDetail;
-import io.pivotal.cfapp.domain.SpaceUsers;
-import io.pivotal.cfapp.domain.UserCounts;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+
+import java.time.LocalDateTime;
+import java.util.Arrays;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 @ButlerTest
@@ -80,7 +74,7 @@ public class SnapshotServiceTest {
                             .builder()
                                 .auditors(Arrays.asList(new String[] { "marty@mcfly.org" }))
                                 .developers(Arrays.asList(new String[] { "bruce@wayneenterprises.com" }))
-                                .managers(Arrays.asList(new String[] { "nickfury@avengers.com" }))
+                                .managers(Arrays.asList(new String[] { "nickfury@avengers.com", "NickFury@avengers.com" }))
                                 .organization("zoo-labs")
                                 .space("dev")
                                 .build();
