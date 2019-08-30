@@ -4,7 +4,6 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Arrays;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +12,7 @@ import org.springframework.data.r2dbc.core.DatabaseClient;
 import org.springframework.data.r2dbc.core.DatabaseClient.GenericInsertSpec;
 import org.springframework.data.r2dbc.query.Criteria;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.CollectionUtils;
 
 import io.pivotal.cfapp.domain.AppDetail;
 import io.pivotal.cfapp.domain.ApplicationPolicy;
@@ -80,10 +80,10 @@ public class R2dbcAppDetailRepository {
 		} else {
 			spec = spec.nullValue("disk_used");
 		}
-		if (entity.getUrls() != null) {
-			spec = spec.value("urls", String.join(",", entity.getUrls()));
-		} else {
+		if (CollectionUtils.isEmpty(entity.getUrls())) {
 			spec = spec.nullValue("urls");
+		} else {
+			spec = spec.value("urls", String.join(",", entity.getUrls()));
 		}
 		if (entity.getLastPushed() != null) {
 			spec = spec.value("last_pushed", entity.getLastPushed());
@@ -220,24 +220,24 @@ public class R2dbcAppDetailRepository {
 			AppDetail
 				.builder()
 					.pk(row.get("pk", Long.class))
-					.organization(Defaults.getColumnValueOrDefault(row, "organization", String.class, ""))
-					.space(Defaults.getColumnValueOrDefault(row, "space", String.class, ""))
-					.appId(Defaults.getColumnValueOrDefault(row, "app_id", String.class, ""))
-					.appName(Defaults.getColumnValueOrDefault(row, "app_name", String.class, ""))
-					.buildpack(Defaults.getColumnValueOrDefault(row, "buildpack", String.class, ""))
-					.buildpackVersion(Defaults.getColumnValueOrDefault(row, "buildpack_version", String.class, ""))
+					.organization(Defaults.getColumnValue(row, "organization", String.class))
+					.space(Defaults.getColumnValue(row, "space", String.class))
+					.appId(Defaults.getColumnValue(row, "app_id", String.class))
+					.appName(Defaults.getColumnValue(row, "app_name", String.class))
+					.buildpack(Defaults.getColumnValue(row, "buildpack", String.class))
+					.buildpackVersion(Defaults.getColumnValue(row, "buildpack_version", String.class))
 					.runningInstances(Defaults.getColumnValueOrDefault(row, "running_instances", Integer.class, 0))
 					.totalInstances(Defaults.getColumnValueOrDefault(row, "total_instances", Integer.class, 0))
 					.memoryUsage(Defaults.getColumnValueOrDefault(row, "memory_used", Long.class, 0L))
 					.diskUsage(Defaults.getColumnValueOrDefault(row, "disk_used", Long.class, 0L))
-					.image(Defaults.getColumnValueOrDefault(row, "image", String.class, ""))
-					.stack(Defaults.getColumnValueOrDefault(row, "stack", String.class, ""))
-					.urls(Arrays.asList(Defaults.getColumnValueOrDefault(row, "urls", String.class, "").split("\\s*,\\s*")))
-					.lastPushed(Defaults.getColumnValueOrDefault(row, "last_pushed", LocalDateTime.class, null))
-					.lastEventTime(Defaults.getColumnValueOrDefault(row, "last_event_time", LocalDateTime.class, null))
-					.lastEvent(Defaults.getColumnValueOrDefault(row, "last_event", String.class, ""))
-					.lastEventActor(Defaults.getColumnValueOrDefault(row, "last_event_actor", String.class, ""))
-					.requestedState(Defaults.getColumnValueOrDefault(row, "requested_state", String.class, ""))
+					.image(Defaults.getColumnValue(row, "image", String.class))
+					.stack(Defaults.getColumnValue(row, "stack", String.class))
+					.urls(Defaults.getColumnListOfStringValue(row, "urls"))
+					.lastPushed(Defaults.getColumnValue(row, "last_pushed", LocalDateTime.class))
+					.lastEventTime(Defaults.getColumnValue(row, "last_event_time", LocalDateTime.class))
+					.lastEvent(Defaults.getColumnValue(row, "last_event", String.class))
+					.lastEventActor(Defaults.getColumnValue(row, "last_event_actor", String.class))
+					.requestedState(Defaults.getColumnValue(row, "requested_state", String.class))
 					.build();
 	}
 

@@ -40,6 +40,7 @@ public class SendGridNotifier extends EmailNotifier {
             request.setEndpoint("mail/send");
             request.setBody(mail.build());
             Response response = sendGrid.api(request);
+            log.info("Email sent to {} with subject: {}!", to, subject);
             log.info(HttpStatus.valueOf(response.getStatusCode()).getReasonPhrase());
         } catch (IOException ioe) {
             log.warn("Could not send email!", ioe);

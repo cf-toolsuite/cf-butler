@@ -18,7 +18,9 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import io.pivotal.cfapp.config.PasSettings;
+import io.pivotal.cfapp.domain.AppDetail;
 import io.pivotal.cfapp.domain.Event;
+import io.pivotal.cfapp.domain.ServiceInstanceDetail;
 import io.pivotal.cfapp.domain.event.EventType;
 import io.pivotal.cfapp.domain.event.Events;
 import lombok.extern.slf4j.Slf4j;
@@ -111,24 +113,40 @@ public class EventsService {
                 .flatMap(json -> toFlux(json));
     }
 
-    public Mono<Boolean> isDormantApplication(String id, int daysSinceLastUpdate) {
+    public Mono<Boolean> isDormantApplication(AppDetail detail, int daysSinceLastUpdate) {
+        // @see https://docs.cloudfoundry.org/running/managing-cf/audit-events.html#considerations
+        if (daysSinceLastUpdate > settings.getEventsRetentionInDays()) {
+            if (detail.getLastPushed() != null) {
+                return Mono.just(ChronoUnit.DAYS.between(detail.getLastPushed(), LocalDateTime.now()) >= daysSinceLastUpdate);
+            } else {
+                return Mono.just(Boolean.TRUE);
+            }
+        }
         String[] types = new String[] { EventType.AUDIT_APP_CREATE.getId(), EventType.AUDIT_APP_UPDATE.getId(), EventType.AUDIT_APP_RESTAGE.getId() };
         if (daysSinceLastUpdate == -1) {
-            return Mono.just(Boolean.valueOf(true));
+            return Mono.just(Boolean.TRUE);
         }
-        return getEvents(id, types)
+        return getEvents(detail.getAppId(), types)
                 .filter(event -> ChronoUnit.DAYS.between(event.getTime(), LocalDateTime.now()) >= daysSinceLastUpdate)
                 .collect(Collectors.toList())
                 .map(list -> list.size() > 0);
     }
 
-    public Mono<Boolean> isDormantServiceInstance(String id, int daysSinceLastUpdate) {
+    public Mono<Boolean> isDormantServiceInstance(ServiceInstanceDetail detail, int daysSinceLastUpdate) {
+        // @see https://docs.cloudfoundry.org/running/managing-cf/audit-events.html#considerations
+        if (daysSinceLastUpdate > settings.getEventsRetentionInDays()) {
+            if (detail.getLastUpdated() != null) {
+                return Mono.just(ChronoUnit.DAYS.between(detail.getLastUpdated(), LocalDateTime.now()) >= daysSinceLastUpdate);
+            } else {
+                return Mono.just(false);
+            }
+        }
         if (daysSinceLastUpdate == -1) {
-            return Mono.just(Boolean.valueOf(true));
+            return Mono.just(Boolean.TRUE);
         }
         String[] types = new String[] { EventType.AUDIT_SERVICE_INSTANCE_CREATE.getId(), EventType.AUDIT_SERVICE_INSTANCE_UPDATE.getId(),
             EventType.AUDIT_USER_PROVIDED_SERVICE_INSTANCE_CREATE.getId(), EventType.AUDIT_USER_PROVIDED_SERVICE_INSTANCE_UPDATE.getId() };
-        return getEvents(id, types)
+        return getEvents(detail.getServiceInstanceId(), types)
                 .filter(event -> ChronoUnit.DAYS.between(event.getTime(), LocalDateTime.now()) >= daysSinceLastUpdate)
                 .collect(Collectors.toList())
                 .map(list -> list.size() > 0);

@@ -1,6 +1,7 @@
 package io.pivotal.cfapp.domain;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -11,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.util.CollectionUtils;
 
 import lombok.Builder;
 import lombok.Builder.Default;
@@ -64,12 +66,24 @@ public class SpaceUsers {
 		this.managers = managers;
 	}
 
+	public List<String> getAuditors() {
+		return CollectionUtils.isEmpty(auditors) ? Collections.emptyList(): auditors;
+	}
+
+	public List<String> getDevelopers() {
+		return CollectionUtils.isEmpty(developers) ? Collections.emptyList(): developers;
+	}
+
+	public List<String> getManagers() {
+		return CollectionUtils.isEmpty(managers) ? Collections.emptyList(): managers;
+	}
+
 	@JsonProperty("users")
 	public Set<String> getUsers() {
 		Set<String> users = new HashSet<>();
-		users.addAll(auditors);
-		users.addAll(developers);
-		users.addAll(managers);
+		users.addAll(getAuditors());
+		users.addAll(getDevelopers());
+		users.addAll(getManagers());
 		return users;
 	}
 
@@ -77,4 +91,5 @@ public class SpaceUsers {
 	public Integer getUserCount() {
 		return getUsers().size();
 	}
+
 }
