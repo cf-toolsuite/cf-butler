@@ -11,11 +11,14 @@ import org.springframework.data.r2dbc.core.DatabaseClient;
 import org.springframework.data.r2dbc.core.DatabaseClient.GenericInsertSpec;
 import org.springframework.data.r2dbc.query.Criteria;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.CollectionUtils;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -44,20 +47,20 @@ public class R2dbcSpaceUsersRepository {
 		GenericInsertSpec<Map<String, Object>> spec = client.insert().into("space_users").value("organization",
 				entity.getOrganization());
 		spec = spec.value("space", entity.getSpace());
-		if (entity.getManagers() != null) {
-			spec = spec.value("managers", toJson(entity.getManagers()));
-		} else {
+		if (CollectionUtils.isEmpty(entity.getManagers())) {
 			spec = spec.nullValue("managers");
-		}
-		if (entity.getAuditors() != null) {
-			spec = spec.value("auditors", toJson(entity.getAuditors()));
 		} else {
+			spec = spec.value("managers", toJson(entity.getManagers()));
+		}
+		if (CollectionUtils.isEmpty(entity.getAuditors())) {
 			spec = spec.nullValue("auditors");
-		}
-		if (entity.getDevelopers() != null) {
-			spec = spec.value("developers", toJson(entity.getDevelopers()));
 		} else {
+			spec = spec.value("auditors", toJson(entity.getAuditors()));
+		}
+		if (CollectionUtils.isEmpty(entity.getDevelopers())) {
 			spec = spec.nullValue("developers");
+		} else {
+			spec = spec.value("developers", toJson(entity.getDevelopers()));
 		}
 		return spec.fetch().rowsUpdated().then(Mono.just(entity));
 	}
@@ -81,11 +84,11 @@ public class R2dbcSpaceUsersRepository {
 	private SpaceUsers fromRow(Row row) {
 		return SpaceUsers.builder()
 				.pk(row.get("pk", Long.class))
-				.organization(Defaults.getColumnValueOrDefault(row, "organization", String.class, ""))
-				.space(Defaults.getColumnValueOrDefault(row, "space", String.class, ""))
-				.auditors(toList(Defaults.getColumnValueOrDefault(row, "auditors", String.class, "")))
-				.developers(toList(Defaults.getColumnValueOrDefault(row, "developers", String.class, "")))
-				.managers(toList(Defaults.getColumnValueOrDefault(row, "managers", String.class, "")))
+				.organization(Defaults.getColumnValue(row, "organization", String.class))
+				.space(Defaults.getColumnValue(row, "space", String.class))
+				.auditors(toList(Defaults.getColumnValueOrDefault(row, "auditors", String.class, null)))
+				.developers(toList(Defaults.getColumnValueOrDefault(row, "developers", String.class, null)))
+				.managers(toList(Defaults.getColumnValueOrDefault(row, "managers", String.class, null)))
 				.build();
 	}
 
@@ -101,8 +104,12 @@ public class R2dbcSpaceUsersRepository {
 
 	private List<String> toList(String json) {
 		try {
-			return mapper.readValue(
-					json, new TypeReference<List<String>>() {});
+			if (json == null) {
+				return Collections.emptyList();
+			} else {
+				return mapper.readValue(
+						json, new TypeReference<List<String>>() {});
+			}
 		} catch (IOException ioe) {
 			throw new RuntimeException(ioe);
 		}

@@ -4,7 +4,6 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Arrays;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +12,7 @@ import org.springframework.data.r2dbc.core.DatabaseClient;
 import org.springframework.data.r2dbc.core.DatabaseClient.GenericInsertSpec;
 import org.springframework.data.r2dbc.query.Criteria;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.CollectionUtils;
 
 import io.pivotal.cfapp.domain.Defaults;
 import io.pivotal.cfapp.domain.ServiceInstanceDetail;
@@ -67,10 +67,10 @@ public class R2dbcServiceInstanceDetailRepository {
 		} else {
 			spec = spec.nullValue("type");
 		}
-		if (entity.getApplications() != null) {
-			spec = spec.value("bound_applications", String.join(",", entity.getApplications()));
-		} else {
+		if (CollectionUtils.isEmpty(entity.getApplications())) {
 			spec = spec.nullValue("bound_applications");
+		} else {
+			spec = spec.value("bound_applications", String.join(",", entity.getApplications()));
 		}
 		if (entity.getLastOperation() != null) {
 			spec = spec.value("last_operation", entity.getLastOperation());
@@ -109,20 +109,20 @@ public class R2dbcServiceInstanceDetailRepository {
 		return ServiceInstanceDetail
 				.builder()
 					.pk(row.get("pk", Long.class))
-					.organization(Defaults.getColumnValueOrDefault(row, "organization", String.class, ""))
-					.space(Defaults.getColumnValueOrDefault(row, "space", String.class, ""))
-					.serviceInstanceId(Defaults.getColumnValueOrDefault(row, "service_instance_id", String.class, ""))
-					.name(Defaults.getColumnValueOrDefault(row, "service_name", String.class, ""))
-					.service(Defaults.getColumnValueOrDefault(row, "service", String.class, ""))
-					.description(Defaults.getColumnValueOrDefault(row, "description", String.class, ""))
-					.type(Defaults.getColumnValueOrDefault(row, "type", String.class, ""))
-					.plan(Defaults.getColumnValueOrDefault(row, "plan", String.class, ""))
+					.organization(Defaults.getColumnValue(row, "organization", String.class))
+					.space(Defaults.getColumnValue(row, "space", String.class))
+					.serviceInstanceId(Defaults.getColumnValue(row, "service_instance_id", String.class))
+					.name(Defaults.getColumnValue(row, "service_name", String.class))
+					.service(Defaults.getColumnValue(row, "service", String.class))
+					.description(Defaults.getColumnValue(row, "description", String.class))
+					.type(Defaults.getColumnValue(row, "type", String.class))
+					.plan(Defaults.getColumnValue(row, "plan", String.class))
 					.applications(
-						Arrays.asList(Defaults.getColumnValueOrDefault(row, "bound_applications", String.class, "").split("\\s*,\\s*")))
-					.lastOperation(Defaults.getColumnValueOrDefault(row, "last_operation", String.class, ""))
-					.dashboardUrl(Defaults.getColumnValueOrDefault(row, "dashboard_url", String.class, ""))
-					.lastUpdated(Defaults.getColumnValueOrDefault(row, "last_updated", LocalDateTime.class, null))
-					.requestedState(Defaults.getColumnValueOrDefault(row, "requested_state", String.class, ""))
+						Defaults.getColumnListOfStringValue(row, "bound_applications"))
+					.lastOperation(Defaults.getColumnValue(row, "last_operation", String.class))
+					.dashboardUrl(Defaults.getColumnValue(row, "dashboard_url", String.class))
+					.lastUpdated(Defaults.getColumnValue(row, "last_updated", LocalDateTime.class))
+					.requestedState(Defaults.getColumnValue(row, "requested_state", String.class))
 					.build();
 	}
 

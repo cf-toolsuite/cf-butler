@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import org.springframework.data.r2dbc.core.DatabaseClient;
 import org.springframework.stereotype.Repository;
 
-import io.r2dbc.spi.Row;
 import reactor.core.publisher.Mono;
 
 @Repository
@@ -38,12 +37,8 @@ public class R2dbcTkRepository {
                 .select()
                 .from("time_keeper")
                 .project("collection_time")
-                .map((row, metadata) -> fromRow(row))
+                .map((row, metadata) -> row.get("collection_time", LocalDateTime.class))
                 .one();
-    }
-
-    private LocalDateTime fromRow(Row row) {
-        return row.get("collection_time", LocalDateTime.class);
     }
 
 }

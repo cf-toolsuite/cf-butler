@@ -49,7 +49,7 @@ public class DormantWorkloadsService {
                 .filter(app -> isBlacklisted(app.getOrganization()))
 		        .filter(app -> app.getRequestedState().equalsIgnoreCase("started"))
                 // @see https://github.com/reactor/reactor-core/issues/498
-                .filterWhen(app -> eventsService.isDormantApplication(app.getAppId(), policy.getDaysSinceLastUpdate()))
+                .filterWhen(app -> eventsService.isDormantApplication(app, policy.getDaysSinceLastUpdate()))
                 .collectList();
     }
 
@@ -60,7 +60,7 @@ public class DormantWorkloadsService {
                 .filter(sid -> isWhitelisted(policy, sid.getOrganization()))
                 .filter(sid -> isBlacklisted(sid.getOrganization()))
                 // @see https://github.com/reactor/reactor-core/issues/498
-                .filterWhen(sid -> eventsService.isDormantServiceInstance(sid.getServiceInstanceId(), policy.getDaysSinceLastUpdate()))
+                .filterWhen(sid -> eventsService.isDormantServiceInstance(sid, policy.getDaysSinceLastUpdate()))
                 .collectList();
     }
 

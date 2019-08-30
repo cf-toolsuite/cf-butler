@@ -33,7 +33,7 @@ public class JavaMailNotifier extends EmailNotifier {
             helper.setText(body, true);
             attachmentContents.entrySet().forEach(e -> addAttachment(helper, e.getKey(), e.getValue()));
             javaMailSender.send(message);
-            log.info("Email sent!");
+            log.info("Email sent to {} with subject: {}!", to, subject);
         } catch (MessagingException me) {
             log.warn("Could not send email!", me);
         }
