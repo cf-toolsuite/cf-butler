@@ -16,7 +16,7 @@ import lombok.Getter;
 @JsonPropertyOrder({
     "name", "type", "currently-installed-release-date", "currently-installed-version",
     "latest-available-release-date", "latest-available-version", "end-of-support-date",
-    "days-behind-latest-available-version", "end-of-life", "pre-release"
+    "days-behind-latest-available-version", "days-out-of-support", "end-of-life", "pre-release"
 })
 @EqualsAndHashCode
 public class ProductMetric {
@@ -66,6 +66,15 @@ public class ProductMetric {
         Long result = null;
         if (currentlyInstalledReleaseDate != null && latestAvailableReleaseDate != null) {
             result = ChronoUnit.DAYS.between(currentlyInstalledReleaseDate, latestAvailableReleaseDate);
+        }
+        return result;
+    }
+
+    @JsonProperty("days-out-of-support")
+    public Long getDaysOutOfSupport() {
+        Long result = null;
+        if (isEndOfLife()) {
+            result = ChronoUnit.DAYS.between(endOfSupportDate, LocalDate.now());
         }
         return result;
     }
