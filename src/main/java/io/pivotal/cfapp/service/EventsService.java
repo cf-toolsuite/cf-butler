@@ -138,7 +138,7 @@ public class EventsService {
             if (detail.getLastUpdated() != null) {
                 return Mono.just(ChronoUnit.DAYS.between(detail.getLastUpdated(), LocalDateTime.now()) >= daysSinceLastUpdate);
             } else {
-                return Mono.just(false);
+                return Mono.just(Boolean.TRUE);
             }
         }
         if (daysSinceLastUpdate == -1) {
