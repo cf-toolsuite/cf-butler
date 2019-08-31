@@ -11,6 +11,47 @@ Reaching out to each development team to tell them to clean-up has become a chor
 
 This is where `cf-butler` has your back.
 
+# Table of Contents
+
+  * [What does it do?](#what-does-it-do)
+      * [Tell me, don't show me](#tell-me-dont-show-me)
+      * [And what about Pivotal Telemetry Collector?](#and-what-about-pivotal-telemetry-collector)
+  * [Prerequisites](#prerequisites)
+  * [Tools](#tools)
+  * [Clone](#clone)
+  * [How to configure](#how-to-configure)
+      * [Managing secrets](#managing-secrets)
+      * [Minimum required keys](#minimum-required-keys)
+        * [Username and password](#username-and-password)
+        * [Single-sign on](#single-sign-on)
+      * [General configuration notes](#general-configuration-notes)
+      * [Using an external database](#using-an-external-database)
+      * [Managing policies](#managing-policies)
+        * [Hygiene Policies](#hygiene-policies)
+        * [Query policies](#query-policies)
+      * [To set the operations schedule](#to-set-the-operations-schedule)
+      * [To discriminate user from service accounts](#to-discriminate-user-from-service-accounts)
+      * [Filtering organizations](#filtering-organizations)
+        * [Blacklist](#blacklist)
+        * [Whitelist](#whitelist)
+      * [Integration w/ Operations Manager](#integration-w-operations-manager)
+  * [How to Build](#how-to-build)
+      * [Alternative build with MySQL support](#alternative-build-with-mysql-support)
+  * [How to Run with Gradle](#how-to-run-with-gradle)
+  * [How to Run with Docker](#how-to-run-with-docker)
+  * [How to deploy to Pivotal Application Service](#how-to-deploy-to-pivotal-application-service)
+      * [with Username and password authorization](#with-username-and-password-authorization)
+      * [with SSO authorization](#with-sso-authorization)
+      * [using scripts](#using-scripts)
+  * [Endpoints](#endpoints)
+      * [Operations Manager](#operations-manager)
+      * [Pivotal Network](#pivotal-network)
+      * [Events](#events)
+      * [Snapshot](#snapshot)
+      * [Accounting](#accounting)
+      * [Policies](#policies)
+  * [Credits](#credits)
+
 ## What does it do?
 
 Please take 5-10 mintues to view this short video demonstration to get a sense of what `cf-butler` can do.
@@ -285,7 +326,7 @@ Add entries in your `config/secrets.json` like
 ./gradlew build
 ```
 
-### alternative build with MySQL support
+### Alternative build with MySQL support
 
 If you want to target a MySQL database as your back-end you will need to use an alternate Gradle build file.  It adds a dependency on [r2dbc-mysql](https://github.com/mirromutth/r2dbc-mysql) which is sourced from a [jitpack.io](https://jitpack.io/#mirromutth/r2dbc-mysql/master-SNAPSHOT) repository.
 
