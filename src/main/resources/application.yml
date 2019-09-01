@@ -158,6 +158,7 @@ cf:
   connectionTimeout: ${vcap.services.cf-butler-secrets.credentials.CF_CONNECTION_TIMEOUT:PT5M}
   refreshToken: ${vcap.services.cf-butler-secrets.credentials.CF_REFRESH-TOKEN}
   organizationBlackList: ${vcap.services.cf-butler-secrets.credentials.CF_ORGANIZATION-BLACK-LIST:}
+  eventsRetentionInDays: ${vcap.services.cf-butler-secrets.credentials.CF_EVENTS_RETENTION_IN_DAYS:31}
   accountRegex: ${vcap.services.cf-butler-secrets.credentials.CF_ACCOUNT-REGEX:}
   policies:
     provider: ${vcap.services.cf-butler-secrets.credentials.CF_POLICIES_PROVIDER}
