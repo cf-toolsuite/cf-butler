@@ -1,11 +1,15 @@
 package io.pivotal.cfapp.repository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -63,7 +67,7 @@ public class R2dbcAppDetailRepositoryTest {
                 assertEquals("foo", ad.getAppName());
                 assertEquals("zoo-labs", ad.getOrganization());
                 assertEquals("dev", ad.getSpace());
-                assertEquals(now, ad.getLastPushed());
+                assertThat(now).isCloseTo(ad.getLastPushed(), within(1, ChronoUnit.SECONDS));
                 assertNull(ad.getBuildpackVersion());
                 assertEquals("java", ad.getBuildpack());
                 assertEquals("cflinuxfs3", ad.getStack());
