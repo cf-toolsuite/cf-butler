@@ -1,10 +1,14 @@
 package io.pivotal.cfapp.repository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -64,7 +68,7 @@ public class R2dbcServiceInstanceDetailRepositoryTest {
                 assertEquals("dev", sid.getSpace());
                 assertEquals("A MySQL database", sid.getDescription());
                 assertEquals("https://foobagger.com/dashboard/fc317c30-0a15-439c-8e46-e36eaa004420", sid.getDashboardUrl());
-                assertEquals(now, sid.getLastUpdated());
+                assertThat(now).isCloseTo(sid.getLastUpdated(), within(1, ChronoUnit.SECONDS));
                 assertEquals("mysql", sid.getType());
                 assertEquals("db-small", sid.getPlan());
                 assertEquals("p.mysql", sid.getService());
