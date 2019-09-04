@@ -1,5 +1,6 @@
 package io.pivotal.cfapp.task;
 
+import org.cloudfoundry.client.v3.organizations.ListOrganizationsRequest;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -57,11 +58,11 @@ public class OrganizationsTask implements ApplicationListener<TkRetrievedEvent> 
     }
 
     protected Flux<Organization> getOrganizations() {
-        return DefaultCloudFoundryOperations.builder()
-            .from(opsClient)
-            .build()
-                .organizations()
-                    .list()
+        return opsClient
+                .getCloudFoundryClient()
+                .organizationsV3()
+                    .list(ListOrganizationsRequest.builder().perPage(5000).build())
+                    .flatMapMany(lor -> Flux.fromIterable(lor.getResources()))
                     .map(os -> new Organization(os.getId(), os.getName()));
     }
 

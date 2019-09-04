@@ -2,6 +2,7 @@ package io.pivotal.cfapp.task;
 
 import java.util.List;
 
+import org.cloudfoundry.client.v3.spaces.ListSpacesRequest;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -61,13 +62,12 @@ public class SpacesTask implements ApplicationListener<OrganizationsRetrievedEve
     }
 
     protected Flux<Space> getSpaces(Organization organization) {
-        return DefaultCloudFoundryOperations.builder()
-			.from(opsClient)
-			.organization(organization.getName())
-            .build()
-                .spaces()
-                    .list()
-                    .map(s -> new Space(organization.getName(), s.getName()));
+        return opsClient
+                .getCloudFoundryClient()
+                    .spacesV3()
+                    .list(ListSpacesRequest.builder().perPage(5000).name(organization.getName()).build())
+                    .flatMapMany(lsr -> Flux.fromIterable(lsr.getResources()))
+                    .map(r -> new Space(organization.getName(), r.getName()));
     }
 
 }
