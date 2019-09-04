@@ -100,7 +100,8 @@ public class HygienePolicyExecutorTask implements PolicyExecutorTask {
         // For each Space in Set<Space>, obtain SpaceUsers#getUsers()
             .flatMap(space -> spaceUsersService.findByOrganizationAndSpace(space.getOrganization(), space.getSpace()))
         // then pair with matching space(s) in dormant applications and service instances
-            .flatMap(spaceUser -> Flux.fromIterable(spaceUser.getUsers())).distinct()
+            .flatMap(spaceUser -> Flux.fromIterable(spaceUser.getUsers()))
+            .distinct()
         // filter out account names that are not email addresses
             .filter(userName -> EmailValidator.isValid(userName))
             .flatMap(userName -> userSpacesService.getUserSpaces(userName))
