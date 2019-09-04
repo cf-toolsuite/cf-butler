@@ -125,14 +125,14 @@ public class ServiceInstanceDetailTask implements ApplicationListener<SpacesRetr
                     .service(summary.getService())
                     .plan(summary.getPlan())
                     .description(instance.getDescription())
-                    .type(instance.getType() != null ? instance.getType().getValue(): "")
+                    .type(instance.getType() != null ? instance.getType().getValue(): null)
                     .applications(summary.getApplications())
                     .lastOperation(instance.getLastOperation())
                     .lastUpdated(StringUtils.isNotBlank(instance.getUpdatedAt()) ? Instant.parse(instance.getUpdatedAt())
                                 .atZone(ZoneId.systemDefault())
                                 .toLocalDateTime() : null)
                     .dashboardUrl(instance.getDashboardUrl())
-                    .requestedState(StringUtils.isNotBlank(instance.getStatus()) ? instance.getStatus().toLowerCase(): "")
+                    .requestedState(StringUtils.isNotBlank(instance.getStatus()) ? instance.getStatus().toLowerCase(): null)
                     .build();
     }
 
