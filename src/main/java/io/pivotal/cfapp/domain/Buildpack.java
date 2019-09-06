@@ -2,9 +2,11 @@ package io.pivotal.cfapp.domain;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.ToString;
 
 @Builder
 @Getter
+@ToString
 public class Buildpack {
 
     private String id;

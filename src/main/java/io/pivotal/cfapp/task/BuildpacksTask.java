@@ -1,8 +1,5 @@
 package io.pivotal.cfapp.task;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.operations.buildpacks.Buildpack;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,18 +18,15 @@ import reactor.core.publisher.Flux;
 public class BuildpacksTask implements ApplicationListener<TkRetrievedEvent> {
 
     private final DefaultCloudFoundryOperations opsClient;
-    private final ObjectMapper mapper;
     private final BuildpacksCache cache;
     private final ApplicationEventPublisher publisher;
 
     @Autowired
     public BuildpacksTask(
         DefaultCloudFoundryOperations opsClient,
-        ObjectMapper mapper,
         BuildpacksCache cache,
         ApplicationEventPublisher publisher) {
         this.opsClient = opsClient;
-        this.mapper = mapper;
         this.cache = cache;
         this.publisher = publisher;
     }
@@ -51,7 +45,7 @@ public class BuildpacksTask implements ApplicationListener<TkRetrievedEvent> {
             .subscribe(
                 result -> {
                     publisher.publishEvent(new BuildpacksRetrievedEvent(this));
-                    log.trace(mapWithException("BuildpackCache", result));
+                    log.trace("Buildpack cache contains {}", result);
                     log.info("BuildpacksTask completed");
                     log.trace("Retrieved {} buildpacks", result.size());
                 },
@@ -66,12 +60,5 @@ public class BuildpacksTask implements ApplicationListener<TkRetrievedEvent> {
                     .list();
     }
 
-    private String mapWithException(String type, Object value) {
-        try {
-            return mapper.writeValueAsString(value);
-        } catch (JsonProcessingException jpe) {
-            throw new RuntimeException("Problem mapping " + type);
-        }
-    }
 
 }
