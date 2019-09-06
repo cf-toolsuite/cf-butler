@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import io.pivotal.cfapp.domain.Defaults;
 import io.pivotal.cfapp.domain.Organization;
+import io.pivotal.cfapp.domain.OrganizationShim;
 import io.r2dbc.spi.Row;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -30,11 +31,17 @@ public class R2dbcOrganizationRepository {
 	}
 
 	public Mono<Organization> save(Organization entity) {
+		OrganizationShim shim =
+			OrganizationShim
+				.builder()
+					.id(entity.getId())
+					.orgName(entity.getName())
+					.build();
 		return client
 				.insert()
-				.into(Organization.class)
+				.into(OrganizationShim.class)
 				.table(Organization.tableName())
-				.using(entity)
+				.using(shim)
 				.fetch()
 				.rowsUpdated()
 				.then(Mono.just(entity));

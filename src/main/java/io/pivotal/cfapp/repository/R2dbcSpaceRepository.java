@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import io.pivotal.cfapp.domain.Defaults;
 import io.pivotal.cfapp.domain.Space;
+import io.pivotal.cfapp.domain.SpaceShim;
 import io.r2dbc.spi.Row;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -30,11 +31,17 @@ public class R2dbcSpaceRepository {
 	}
 
 	public Mono<Space> save(Space entity) {
+		SpaceShim shim =
+			SpaceShim
+				.builder()
+					.orgName(entity.getOrganization())
+					.spaceName(entity.getSpace())
+					.build();
 		return client
 				.insert()
-				.into(Space.class)
+				.into(SpaceShim.class)
 				.table(Space.tableName())
-				.using(entity)
+				.using(shim)
 				.fetch()
 				.rowsUpdated()
 				.then(Mono.just(entity));
