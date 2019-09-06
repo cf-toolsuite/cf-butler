@@ -81,7 +81,7 @@ public class AppRelationshipTask implements ApplicationListener<ServiceInstanceD
                             .build()
                         .getCloudFoundryClient()
                             .applicationsV3()
-                                .list(ListApplicationsRequest.builder().addAllNames(Arrays.asList(new String[] { request.getApplicationName() })).build()));
+                                .list(ListApplicationsRequest.builder().page(page).addAllNames(Arrays.asList(new String[] { request.getApplicationName() })).build()));
         return resources
                 .next()
                 .map(ar -> AppRelationship
