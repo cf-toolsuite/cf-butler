@@ -12,6 +12,6 @@ public class HygienePolicyShim {
     private Integer daysSinceLastUpdate;
     private String operatorEmailTemplate;
     private String notifyeeEmailTemplate;
-	private String organizationWhiteList;
+	private String organizationWhitelist;
 
 }

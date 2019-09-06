@@ -404,7 +404,7 @@ public class R2dbcPoliciesRepository {
 					.options(
 						CollectionUtils.isEmpty(ap.getOptions()) ? null : writeOptions(ap.getOptions())
 					)
-					.organizationWhiteList(
+					.organizationWhitelist(
 						CollectionUtils.isEmpty(ap.getOrganizationWhiteList()) ? null: String.join(",", ap.getOrganizationWhiteList())
 					)
 					.build();
@@ -429,7 +429,7 @@ public class R2dbcPoliciesRepository {
 					.options(
 						CollectionUtils.isEmpty(sip.getOptions()) ? null : writeOptions(sip.getOptions())
 					)
-					.organizationWhiteList(
+					.organizationWhitelist(
 						CollectionUtils.isEmpty(sip.getOrganizationWhiteList()) ? null: String.join(",", sip.getOrganizationWhiteList())
 					)
 					.build();
@@ -480,7 +480,7 @@ public class R2dbcPoliciesRepository {
 					.notifyeeEmailTemplate(
 						hp.getNotifyeeTemplate() != null ? writeEmailNotificationTemplate(hp.getNotifyeeTemplate()) : null
 					)
-					.organizationWhiteList(
+					.organizationWhitelist(
 						CollectionUtils.isEmpty(hp.getOrganizationWhiteList()) ? null: String.join(",", hp.getOrganizationWhiteList())
 					)
 					.build();
