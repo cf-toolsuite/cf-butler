@@ -10,8 +10,8 @@ public class HygienePolicyShim {
 	private Long pk;
     private String id;
     private Integer daysSinceLastUpdate;
-    private String operatorTemplate;
-    private String notifyeeTemplate;
+    private String operatorEmailTemplate;
+    private String notifyeeEmailTemplate;
 	private String organizationWhiteList;
 
 }

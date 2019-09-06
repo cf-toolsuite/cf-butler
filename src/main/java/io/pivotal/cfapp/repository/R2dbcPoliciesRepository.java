@@ -474,10 +474,10 @@ public class R2dbcPoliciesRepository {
 					.pk(hp.getPk())
 					.id(hp.getId())
 					.daysSinceLastUpdate(hp.getDaysSinceLastUpdate())
-					.operatorTemplate(
+					.operatorEmailTemplate(
 						hp.getOperatorTemplate() != null ? writeEmailNotificationTemplate(hp.getOperatorTemplate()) : null
 					)
-					.notifyeeTemplate(
+					.notifyeeEmailTemplate(
 						hp.getNotifyeeTemplate() != null ? writeEmailNotificationTemplate(hp.getNotifyeeTemplate()) : null
 					)
 					.organizationWhiteList(
