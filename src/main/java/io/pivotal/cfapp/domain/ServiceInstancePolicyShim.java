@@ -12,6 +12,6 @@ public class ServiceInstancePolicyShim {
 	private String operation;
 	private String description;
 	private String options;
-	private String organizationWhiteList;
+	private String organizationWhitelist;
 
 }

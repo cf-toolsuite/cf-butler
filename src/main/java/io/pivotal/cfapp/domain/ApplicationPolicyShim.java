@@ -13,6 +13,6 @@ public class ApplicationPolicyShim {
 	private String description;
 	private String state;
 	private String options;
-	private String organizationWhiteList;
+	private String organizationWhitelist;
 
 }
