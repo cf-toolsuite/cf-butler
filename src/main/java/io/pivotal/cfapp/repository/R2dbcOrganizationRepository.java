@@ -21,16 +21,20 @@ public class R2dbcOrganizationRepository {
 	}
 
 	public Mono<Void> deleteAll() {
-		String deleteAll = "delete from organizations";
-		return client.execute(deleteAll).fetch().rowsUpdated().then();
+		return client
+				.delete()
+				.from(Organization.tableName())
+				.fetch()
+				.rowsUpdated()
+				.then();
 	}
 
 	public Mono<Organization> save(Organization entity) {
 		return client
 				.insert()
-					.into("organizations")
-					.value("id", entity.getId())
-					.value("org_name", entity.getName())
+				.into(Organization.class)
+				.table(Organization.tableName())
+				.using(entity)
 				.fetch()
 				.rowsUpdated()
 				.then(Mono.just(entity));

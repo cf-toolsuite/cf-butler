@@ -817,7 +817,7 @@ Sample output
 Application inventory detail from api.sys.demo.ironleg.me generated 2019-08-19T05:39:46.659078.
 
 
-organization,space,application id,application name,buildpack,buildpack version,image,stack,running instances,total instances,urls,last pushed,last event,last event actor,last event time,requested state
+organization,space,application id,application name,buildpack,buildpack version,image,stack,running instances,total instances,memory_used,disk_used,urls,last pushed,last event,last event actor,last event time,requested state
 "blast-radius","substratum","440c21b9-50c3-4135-8a1c-6e1623d27ba9","cf-butler","java","v4.18",,"cflinuxfs3","1","1","0.412717924","0.195510272","cf-butler.apps.demo.ironleg.me","2019-08-01T09:47:33","audit.app.droplet.create","admin","2019-08-01T09:58:55","started"
 "blast-radius","substratum","f34fdbcb-3cb8-4d76-90ad-aafb1e64b5b6","cf-hoover","java","v4.18",,"cflinuxfs3","1","1","0.241331355","0.187875328","cf-hoover.apps.demo.ironleg.me","2019-07-30T06:06:28","audit.app.droplet.create","admin","2019-07-30T06:18:42","started"
 "blast-radius","substratum","fdcc6a1c-d457-4418-b80c-9b630c59df92","cf-hoover-ui","java","v4.18",,"cflinuxfs3","1","1","0.376542052","0.213118976","cf-hoover-ui.apps.demo.ironleg.me","2019-07-30T06:22:27","audit.app.droplet.create","admin","2019-07-30T06:23:47","started"

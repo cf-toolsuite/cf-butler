@@ -23,7 +23,7 @@ public class R2dbcSpaceRepository {
 	public Mono<Void> deleteAll() {
 		return client
 				.delete()
-				.from("spaces")
+				.from(Space.tableName())
 				.fetch()
 				.rowsUpdated()
 				.then();
@@ -32,9 +32,9 @@ public class R2dbcSpaceRepository {
 	public Mono<Space> save(Space entity) {
 		return client
 				.insert()
-					.into("spaces")
-					.value("org_name", entity.getOrganization())
-					.value("space_name", entity.getSpace())
+				.into(Space.class)
+				.table(Space.tableName())
+				.using(entity)
 				.fetch()
 				.rowsUpdated()
 				.then(Mono.just(entity));

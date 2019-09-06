@@ -32,4 +32,8 @@ public class Organization {
             this.name = name;
     }
 
+    public static String tableName() {
+        return "organizations";
+    }
+
 }

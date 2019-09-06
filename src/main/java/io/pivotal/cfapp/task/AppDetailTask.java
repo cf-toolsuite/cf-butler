@@ -195,8 +195,8 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
                     .stack(nullSafeStack(detail.getStackId()))
                     .runningInstances(nullSafeInteger(detail.getRunningInstances()))
                     .totalInstances(nullSafeInteger(detail.getInstances()))
-                    .diskUsage(nullSafeDiskUsage(stats))
-                    .memoryUsage(nullSafeMemoryUsage(stats))
+                    .diskUsed(nullSafeDiskUsed(stats))
+                    .memoryUsed(nullSafeMemoryUsed(stats))
                     .urls(summary.getUrls())
                     .lastEvent(event.getType())
                     .lastEventActor(event.getActor())
@@ -248,7 +248,7 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
         return "";
     }
 
-    private static Long nullSafeMemoryUsage(ApplicationStatisticsResponse stats) {
+    private static Long nullSafeMemoryUsed(ApplicationStatisticsResponse stats) {
         Long result = 0L;
         Map<String, InstanceStatistics> instances = stats.getInstances();
         if (instances != null) {
@@ -267,7 +267,7 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
         return result;
 	}
 
-	private static Long nullSafeDiskUsage(ApplicationStatisticsResponse stats) {
+	private static Long nullSafeDiskUsed(ApplicationStatisticsResponse stats) {
         Long result = 0L;
         Map<String, InstanceStatistics> instances = stats.getInstances();
         if (instances != null) {

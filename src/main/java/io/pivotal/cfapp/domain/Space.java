@@ -28,4 +28,8 @@ public class Space {
             this.space = space;
     }
 
+    public static String tableName() {
+        return "spaces";
+    }
+
 }

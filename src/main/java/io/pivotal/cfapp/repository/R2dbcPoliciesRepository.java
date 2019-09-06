@@ -16,21 +16,24 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.r2dbc.core.DatabaseClient;
-import org.springframework.data.r2dbc.core.DatabaseClient.GenericInsertSpec;
 import org.springframework.data.r2dbc.query.Criteria;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
 
 import io.pivotal.cfapp.domain.ApplicationOperation;
 import io.pivotal.cfapp.domain.ApplicationPolicy;
+import io.pivotal.cfapp.domain.ApplicationPolicyShim;
 import io.pivotal.cfapp.domain.Defaults;
 import io.pivotal.cfapp.domain.EmailNotificationTemplate;
 import io.pivotal.cfapp.domain.HygienePolicy;
+import io.pivotal.cfapp.domain.HygienePolicyShim;
 import io.pivotal.cfapp.domain.Policies;
 import io.pivotal.cfapp.domain.Query;
 import io.pivotal.cfapp.domain.QueryPolicy;
+import io.pivotal.cfapp.domain.QueryPolicyShim;
 import io.pivotal.cfapp.domain.ServiceInstanceOperation;
 import io.pivotal.cfapp.domain.ServiceInstancePolicy;
+import io.pivotal.cfapp.domain.ServiceInstancePolicyShim;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -390,99 +393,105 @@ public class R2dbcPoliciesRepository {
 	}
 
 	private Mono<Integer> saveApplicationPolicy(ApplicationPolicy ap) {
-		GenericInsertSpec<Map<String, Object>> spec =
-			dbClient.insert().into(ApplicationPolicy.tableName())
-				.value("id", ap.getId());
-		if (ap.getDescription() != null) {
-			spec = spec.value("description", ap.getDescription());
-		} else {
-			spec = spec.nullValue("description");
-		}
-		if (ap.getState() != null) {
-			spec = spec.value("state", ap.getState());
-		} else {
-			spec = spec.nullValue("state");
-		}
-		if (ap.getOperation() != null) {
-			spec = spec.value("operation", ap.getOperation());
-		} else {
-			spec = spec.nullValue("operation");
-		}
-		if (!CollectionUtils.isEmpty(ap.getOptions())) {
-			spec = spec.value("options", writeOptions(ap.getOptions()));
-		} else {
-			spec = spec.nullValue("options");
-		}
-		spec = spec.value("organization_whitelist", String.join(",", ap.getOrganizationWhiteList()));
-		return spec.fetch().rowsUpdated();
+		ApplicationPolicyShim shim =
+			ApplicationPolicyShim
+				.builder()
+					.pk(ap.getPk())
+					.id(ap.getId())
+					.operation(ap.getOperation())
+					.state(ap.getState())
+					.description(ap.getDescription())
+					.options(
+						CollectionUtils.isEmpty(ap.getOptions()) ? null : writeOptions(ap.getOptions())
+					)
+					.organizationWhiteList(
+						CollectionUtils.isEmpty(ap.getOrganizationWhiteList()) ? null: String.join(",", ap.getOrganizationWhiteList())
+					)
+					.build();
+		return
+			dbClient
+				.insert()
+				.into(ApplicationPolicyShim.class)
+				.table(ApplicationPolicy.tableName())
+				.using(shim)
+				.fetch()
+				.rowsUpdated();
 	}
 
 	private Mono<Integer> saveServiceInstancePolicy(ServiceInstancePolicy sip) {
-		GenericInsertSpec<Map<String, Object>> spec =
-			dbClient.insert().into(ServiceInstancePolicy.tableName())
-				.value("id", sip.getId());
-		if (sip.getDescription() != null) {
-			spec = spec.value("description", sip.getDescription());
-		} else {
-			spec = spec.nullValue("description");
-		}
-		if (sip.getOperation() != null) {
-			spec = spec.value("operation", sip.getOperation());
-		} else {
-			spec = spec.nullValue("operation");
-		}
-		if (!CollectionUtils.isEmpty(sip.getOptions())) {
-			spec = spec.value("options", writeOptions(sip.getOptions()));
-		} else {
-			spec = spec.nullValue("options");
-		}
-		spec = spec.value("organization_whitelist", String.join(",", sip.getOrganizationWhiteList()));
-		return spec.fetch().rowsUpdated();
+		ServiceInstancePolicyShim shim =
+			ServiceInstancePolicyShim
+				.builder()
+					.pk(sip.getPk())
+					.id(sip.getId())
+					.operation(sip.getOperation())
+					.description(sip.getDescription())
+					.options(
+						CollectionUtils.isEmpty(sip.getOptions()) ? null : writeOptions(sip.getOptions())
+					)
+					.organizationWhiteList(
+						CollectionUtils.isEmpty(sip.getOrganizationWhiteList()) ? null: String.join(",", sip.getOrganizationWhiteList())
+					)
+					.build();
+		return
+			dbClient
+				.insert()
+				.into(ServiceInstancePolicyShim.class)
+				.table(ServiceInstancePolicy.tableName())
+				.using(shim)
+				.fetch()
+				.rowsUpdated();
 	}
 
 	private Mono<Integer> saveQueryPolicy(QueryPolicy qp) {
-		GenericInsertSpec<Map<String, Object>> spec =
-			dbClient.insert().into(QueryPolicy.tableName())
-				.value("id", qp.getId());
-		if (qp.getDescription() != null) {
-			spec = spec.value("description", qp.getDescription());
-		} else {
-			spec = spec.nullValue("description");
-		}
-		if (!CollectionUtils.isEmpty(qp.getQueries())) {
-			spec = spec.value("queries", writeQueries(qp.getQueries()));
-		} else {
-			spec = spec.nullValue("queries");
-		}
-		if (qp.getEmailNotificationTemplate() != null) {
-			spec = spec.value("email_notification_template", writeEmailNotificationTemplate(qp.getEmailNotificationTemplate()));
-		} else {
-			spec = spec.nullValue("email_notification_template");
-		}
-		return spec.fetch().rowsUpdated();
+		QueryPolicyShim shim =
+			QueryPolicyShim
+				.builder()
+					.pk(qp.getPk())
+					.id(qp.getId())
+					.description(qp.getDescription())
+					.queries(
+						CollectionUtils.isEmpty(qp.getQueries()) ? null : writeQueries(qp.getQueries())
+					)
+					.emailNotificationTemplate(
+						qp.getEmailNotificationTemplate() != null ? writeEmailNotificationTemplate(qp.getEmailNotificationTemplate()) : null
+					)
+					.build();
+		return
+			dbClient
+				.insert()
+				.into(QueryPolicyShim.class)
+				.table(QueryPolicy.tableName())
+				.using(shim)
+				.fetch()
+				.rowsUpdated();
 	}
 
 	private Mono<Integer> saveHygienePolicy(HygienePolicy hp) {
-		GenericInsertSpec<Map<String, Object>> spec =
-			dbClient.insert().into(HygienePolicy.tableName())
-				.value("id", hp.getId());
-		if (hp.getDaysSinceLastUpdate() != null) {
-			spec = spec.value("days_since_last_update", hp.getDaysSinceLastUpdate());
-		} else {
-			spec = spec.nullValue("days_since_last_update");
-		}
-		if (hp.getOperatorTemplate() != null) {
-			spec = spec.value("operator_email_template", writeEmailNotificationTemplate(hp.getOperatorTemplate()));
-		} else {
-			spec = spec.nullValue("operator_email_template");
-		}
-		if (hp.getNotifyeeTemplate() != null) {
-			spec = spec.value("notifyee_email_template", writeEmailNotificationTemplate(hp.getNotifyeeTemplate()));
-		} else {
-			spec = spec.nullValue("notifyee_email_template");
-		}
-		spec = spec.value("organization_whitelist", String.join(",", hp.getOrganizationWhiteList()));
-		return spec.fetch().rowsUpdated();
+		HygienePolicyShim shim =
+			HygienePolicyShim
+				.builder()
+					.pk(hp.getPk())
+					.id(hp.getId())
+					.daysSinceLastUpdate(hp.getDaysSinceLastUpdate())
+					.operatorTemplate(
+						hp.getOperatorTemplate() != null ? writeEmailNotificationTemplate(hp.getOperatorTemplate()) : null
+					)
+					.notifyeeTemplate(
+						hp.getNotifyeeTemplate() != null ? writeEmailNotificationTemplate(hp.getNotifyeeTemplate()) : null
+					)
+					.organizationWhiteList(
+						CollectionUtils.isEmpty(hp.getOrganizationWhiteList()) ? null: String.join(",", hp.getOrganizationWhiteList())
+					)
+					.build();
+		return
+			dbClient
+				.insert()
+				.into(HygienePolicyShim.class)
+				.table(HygienePolicy.tableName())
+				.using(shim)
+				.fetch()
+				.rowsUpdated();
 	}
 
 	public Mono<Policies> findByApplicationOperation(ApplicationOperation operation) {

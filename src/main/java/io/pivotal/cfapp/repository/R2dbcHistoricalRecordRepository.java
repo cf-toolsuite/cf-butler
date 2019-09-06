@@ -3,12 +3,10 @@ package io.pivotal.cfapp.repository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.r2dbc.core.DatabaseClient;
-import org.springframework.data.r2dbc.core.DatabaseClient.GenericInsertSpec;
 import org.springframework.data.r2dbc.query.Criteria;
 import org.springframework.stereotype.Repository;
 
@@ -27,29 +25,15 @@ public class R2dbcHistoricalRecordRepository {
 	}
 
 	public Mono<HistoricalRecord> save(HistoricalRecord entity) {
-		GenericInsertSpec<Map<String, Object>> spec =
-			client.insert().into("historical_record")
-				.value("transaction_datetime", entity.getTransactionDateTime());
-		spec = spec.value("action_taken", entity.getActionTaken());
-		spec = spec.value("organization", entity.getOrganization());
-		spec = spec.value("space", entity.getSpace());
-		if (entity.getAppId() != null) {
-			spec = spec.value("app_id", entity.getAppId());
-		} else {
-			spec = spec.nullValue("app_id");
-		}
-		if (entity.getServiceInstanceId() != null) {
-			spec = spec.value("service_instance_id", entity.getServiceInstanceId());
-		} else {
-			spec = spec.nullValue("service_instance_id");
-		}
-		spec = spec.value("type", entity.getType());
-		if (entity.getName() != null) {
-			spec = spec.value("name", entity.getName());
-		} else {
-			spec = spec.nullValue("name");
-		}
-		return spec.fetch().rowsUpdated().then(Mono.just(entity));
+		return
+			client
+				.insert()
+				.into(HistoricalRecord.class)
+				.table(HistoricalRecord.tableName())
+				.using(entity)
+				.fetch()
+				.rowsUpdated()
+				.then(Mono.just(entity));
 	}
 
 	public Flux<HistoricalRecord> findAll() {

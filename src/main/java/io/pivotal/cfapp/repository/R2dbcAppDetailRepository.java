@@ -4,17 +4,15 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.r2dbc.core.DatabaseClient;
-import org.springframework.data.r2dbc.core.DatabaseClient.GenericInsertSpec;
 import org.springframework.data.r2dbc.query.Criteria;
 import org.springframework.stereotype.Repository;
-import org.springframework.util.CollectionUtils;
 
 import io.pivotal.cfapp.domain.AppDetail;
+import io.pivotal.cfapp.domain.AppDetailShim;
 import io.pivotal.cfapp.domain.ApplicationPolicy;
 import io.pivotal.cfapp.domain.Defaults;
 import io.r2dbc.spi.Row;
@@ -34,83 +32,16 @@ public class R2dbcAppDetailRepository {
 	}
 
 	public Mono<AppDetail> save(AppDetail entity) {
-		GenericInsertSpec<Map<String, Object>> spec =
-			client.insert().into(AppDetail.tableName())
-				.value("organization", entity.getOrganization());
-		spec = spec.value("space", entity.getSpace());
-		spec = spec.value("app_id", entity.getAppId());
-		spec = spec.value("app_name", entity.getAppName());
-		if (entity.getBuildpack() != null) {
-			spec = spec.value("buildpack", entity.getBuildpack());
-		} else {
-			spec = spec.nullValue("buildpack");
-		}
-		if (entity.getBuildpackVersion() != null) {
-			spec = spec.value("buildpack_version", entity.getBuildpackVersion());
-		} else {
-			spec = spec.nullValue("buildpack_version");
-		}
-		if (entity.getImage() != null) {
-			spec = spec.value("image", entity.getImage());
-		} else {
-			spec = spec.nullValue("image");
-		}
-		if (entity.getStack() != null) {
-			spec = spec.value("stack", entity.getStack());
-		} else {
-			spec = spec.nullValue("stack");
-		}
-		if (entity.getRunningInstances() != null) {
-			spec = spec.value("running_instances",entity.getRunningInstances());
-		} else {
-			spec = spec.nullValue("running_instances");
-		}
-		if (entity.getTotalInstances() != null) {
-			spec = spec.value("total_instances", entity.getTotalInstances());
-		} else {
-			spec = spec.nullValue("total_instances");
-		}
-		if (entity.getMemoryUsage() != null) {
-			spec = spec.value("memory_used", entity.getMemoryUsage());
-		} else {
-			spec = spec.nullValue("memory_used");
-		}
-		if (entity.getDiskUsage() != null) {
-			spec = spec.value("disk_used", entity.getDiskUsage());
-		} else {
-			spec = spec.nullValue("disk_used");
-		}
-		if (CollectionUtils.isEmpty(entity.getUrls())) {
-			spec = spec.nullValue("urls");
-		} else {
-			spec = spec.value("urls", String.join(",", entity.getUrls()));
-		}
-		if (entity.getLastPushed() != null) {
-			spec = spec.value("last_pushed", entity.getLastPushed());
-		} else {
-			spec = spec.nullValue("last_pushed");
-		}
-		if (entity.getLastEvent() != null) {
-			spec = spec.value("last_event", entity.getLastEvent());
-		} else {
-			spec = spec.nullValue("last_event");
-		}
-		if (entity.getLastEventActor() != null) {
-			spec = spec.value("last_event_actor", entity.getLastEventActor());
-		} else {
-			spec = spec.nullValue("last_event_actor");
-		}
-		if (entity.getLastEventTime() != null) {
-			spec = spec.value("last_event_time", entity.getLastEventTime());
-		} else {
-			spec = spec.nullValue("last_event_time");
-		}
-		if (entity.getRequestedState() != null) {
-			spec = spec.value("requested_state", entity.getRequestedState());
-		} else {
-			spec = spec.nullValue("requested_state");
-		}
-		return spec.fetch().rowsUpdated().then(Mono.just(entity));
+		AppDetailShim shim = AppDetailShim.from(entity);
+		return
+			client
+				.insert()
+				.into(AppDetailShim.class)
+				.table(AppDetail.tableName())
+				.using(shim)
+				.fetch()
+				.rowsUpdated()
+				.then(Mono.just(entity));
 	}
 
 	public Flux<AppDetail> findAll() {
@@ -228,8 +159,8 @@ public class R2dbcAppDetailRepository {
 					.buildpackVersion(Defaults.getColumnValue(row, "buildpack_version", String.class))
 					.runningInstances(Defaults.getColumnValueOrDefault(row, "running_instances", Integer.class, 0))
 					.totalInstances(Defaults.getColumnValueOrDefault(row, "total_instances", Integer.class, 0))
-					.memoryUsage(Defaults.getColumnValueOrDefault(row, "memory_used", Long.class, 0L))
-					.diskUsage(Defaults.getColumnValueOrDefault(row, "disk_used", Long.class, 0L))
+					.memoryUsed(Defaults.getColumnValueOrDefault(row, "memory_used", Long.class, 0L))
+					.diskUsed(Defaults.getColumnValueOrDefault(row, "disk_used", Long.class, 0L))
 					.image(Defaults.getColumnValue(row, "image", String.class))
 					.stack(Defaults.getColumnValue(row, "stack", String.class))
 					.urls(Defaults.getColumnListOfStringValue(row, "urls"))

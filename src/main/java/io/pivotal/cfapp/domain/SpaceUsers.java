@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -66,16 +67,30 @@ public class SpaceUsers {
 		this.managers = managers;
 	}
 
+	// enforce consistent and distinct reporting of accounts by implementing a to lower-case policy and scrub for possible duplicates
+
 	public List<String> getAuditors() {
-		return CollectionUtils.isEmpty(auditors) ? Collections.emptyList(): auditors;
+		if (CollectionUtils.isEmpty(auditors)) {
+			return Collections.emptyList();
+		} else {
+			return new ArrayList<>(auditors.stream().map(String::toLowerCase).collect(Collectors.toSet()));
+		}
 	}
 
 	public List<String> getDevelopers() {
-		return CollectionUtils.isEmpty(developers) ? Collections.emptyList(): developers;
+		if (CollectionUtils.isEmpty(developers)) {
+			return Collections.emptyList();
+		} else {
+			return new ArrayList<>(developers.stream().map(String::toLowerCase).collect(Collectors.toSet()));
+		}
 	}
 
 	public List<String> getManagers() {
-		return CollectionUtils.isEmpty(managers) ? Collections.emptyList(): managers;
+		if (CollectionUtils.isEmpty(managers)) {
+			return Collections.emptyList();
+		} else {
+			return new ArrayList<>(managers.stream().map(String::toLowerCase).collect(Collectors.toSet()));
+		}
 	}
 
 	@JsonProperty("users")
@@ -90,6 +105,10 @@ public class SpaceUsers {
 	@JsonProperty("user-count")
 	public Integer getUserCount() {
 		return getUsers().size();
+	}
+
+	public static String tableName() {
+		return "space_users";
 	}
 
 }

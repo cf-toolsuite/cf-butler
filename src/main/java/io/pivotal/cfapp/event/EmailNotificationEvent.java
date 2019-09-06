@@ -1,5 +1,6 @@
 package io.pivotal.cfapp.event;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -27,6 +28,14 @@ public class EmailNotificationEvent extends ApplicationEvent {
 
     public String getDomain() {
         return domain;
+    }
+
+    public EmailNotificationEvent recipient(String recipient) {
+        if (this.recipients == null) {
+            this.recipients = new ArrayList<>();
+        }
+        this.recipients.add(recipient);
+        return this;
     }
 
     public EmailNotificationEvent recipients(List<String> recipients) {

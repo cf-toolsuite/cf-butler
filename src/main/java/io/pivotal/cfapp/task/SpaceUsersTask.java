@@ -77,14 +77,17 @@ public class SpaceUsersTask implements ApplicationListener<SpacesRetrievedEvent>
                                         .spaceName(opsClient.getSpace())
                                         .build()
                         )
-                		.flatMap(su -> Mono.just(SpaceUsers
-                                        .builder()
-                                            .organization(opsClient.getOrganization())
-                							.space(opsClient.getSpace())
-                							.auditors(su.getAuditors())
-                							.managers(su.getManagers())
-                							.developers(su.getDevelopers())
-                							.build())
+                        .flatMap(su ->
+                            Mono.just(
+                                SpaceUsers
+                                    .builder()
+                                        .organization(opsClient.getOrganization())
+                                        .space(opsClient.getSpace())
+                                        .auditors(su.getAuditors())
+                                        .managers(su.getManagers())
+                                        .developers(su.getDevelopers())
+                                        .build()
+                            )
                         );
     }
 

@@ -1,74 +1,53 @@
 package io.pivotal.cfapp.repository;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.pivotal.cfapp.domain.Defaults;
-import io.pivotal.cfapp.domain.SpaceUsers;
-import io.r2dbc.spi.Row;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.r2dbc.core.DatabaseClient;
-import org.springframework.data.r2dbc.core.DatabaseClient.GenericInsertSpec;
 import org.springframework.data.r2dbc.query.Criteria;
 import org.springframework.stereotype.Repository;
-import org.springframework.util.CollectionUtils;
 
+import io.pivotal.cfapp.domain.Defaults;
+import io.pivotal.cfapp.domain.SpaceUsers;
+import io.pivotal.cfapp.domain.SpaceUsersShim;
+import io.r2dbc.spi.Row;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 
 @Repository
 public class R2dbcSpaceUsersRepository {
 
 	private final DatabaseClient client;
-	private final ObjectMapper mapper;
 
 	@Autowired
-	public R2dbcSpaceUsersRepository(DatabaseClient client, ObjectMapper mapper) {
+	public R2dbcSpaceUsersRepository(DatabaseClient client) {
 		this.client = client;
-		this.mapper = mapper;
 	}
 
 	public Mono<Void> deleteAll() {
 		return client
 				.delete()
-				.from("space_users")
+				.from(SpaceUsers.tableName())
 				.fetch()
 				.rowsUpdated()
 				.then();
 	}
 
 	public Mono<SpaceUsers> save(SpaceUsers entity) {
-		GenericInsertSpec<Map<String, Object>> spec = client.insert().into("space_users").value("organization",
-				entity.getOrganization());
-		spec = spec.value("space", entity.getSpace());
-		if (CollectionUtils.isEmpty(entity.getManagers())) {
-			spec = spec.nullValue("managers");
-		} else {
-			spec = spec.value("managers", toJson(entity.getManagers()));
-		}
-		if (CollectionUtils.isEmpty(entity.getAuditors())) {
-			spec = spec.nullValue("auditors");
-		} else {
-			spec = spec.value("auditors", toJson(entity.getAuditors()));
-		}
-		if (CollectionUtils.isEmpty(entity.getDevelopers())) {
-			spec = spec.nullValue("developers");
-		} else {
-			spec = spec.value("developers", toJson(entity.getDevelopers()));
-		}
-		return spec.fetch().rowsUpdated().then(Mono.just(entity));
+		SpaceUsersShim shim = SpaceUsersShim.from(entity);
+		return
+			client
+				.insert()
+				.into(SpaceUsersShim.class)
+				.table(SpaceUsers.tableName())
+				.using(shim)
+				.fetch()
+				.rowsUpdated()
+				.then(Mono.just(entity));
 	}
 
 	public Mono<SpaceUsers> findByOrganizationAndSpace(String organization, String space) {
 		return client
 				.select()
-					.from("space_users")
+					.from(SpaceUsers.tableName())
 					.project("pk", "organization", "space", "auditors", "managers", "developers")
 					.matching(Criteria.where("organization").is(organization).and("space").is(space))
 					.as(SpaceUsers.class)
@@ -86,32 +65,10 @@ public class R2dbcSpaceUsersRepository {
 				.pk(row.get("pk", Long.class))
 				.organization(Defaults.getColumnValue(row, "organization", String.class))
 				.space(Defaults.getColumnValue(row, "space", String.class))
-				.auditors(toList(Defaults.getColumnValueOrDefault(row, "auditors", String.class, null)))
-				.developers(toList(Defaults.getColumnValueOrDefault(row, "developers", String.class, null)))
-				.managers(toList(Defaults.getColumnValueOrDefault(row, "managers", String.class, null)))
+				.auditors(Defaults.getColumnListOfStringValue(row, "auditors"))
+				.developers(Defaults.getColumnListOfStringValue(row, "developers"))
+				.managers(Defaults.getColumnListOfStringValue(row, "managers"))
 				.build();
 	}
 
-	private String toJson(List<String> list) {
-		List<String> destination = new ArrayList<>(list);
-		destination.replaceAll(String::toLowerCase);
-		try {
-			return mapper.writeValueAsString(destination);
-		} catch (JsonProcessingException jpe) {
-			throw new RuntimeException(jpe);
-		}
-	}
-
-	private List<String> toList(String json) {
-		try {
-			if (json == null) {
-				return Collections.emptyList();
-			} else {
-				return mapper.readValue(
-						json, new TypeReference<List<String>>() {});
-			}
-		} catch (IOException ioe) {
-			throw new RuntimeException(ioe);
-		}
-	}
 }

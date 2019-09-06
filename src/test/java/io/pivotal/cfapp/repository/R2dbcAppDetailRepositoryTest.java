@@ -55,8 +55,8 @@ public class R2dbcAppDetailRepositoryTest {
                                 .buildpack("java")
                                 .runningInstances(1)
                                 .totalInstances(1)
-                                .memoryUsage(1L)
-                                .diskUsage(1L)
+                                .memoryUsed(1L)
+                                .diskUsed(1L)
                                 .requestedState("stopped")
                                 .build();
         StepVerifier.create(detailRepo.save(entity)
@@ -73,8 +73,8 @@ public class R2dbcAppDetailRepositoryTest {
                 assertEquals("cflinuxfs3", ad.getStack());
                 assertEquals(1, ad.getRunningInstances());
                 assertEquals(1, ad.getTotalInstances());
-                assertEquals(1L, ad.getMemoryUsage());
-                assertEquals(1L, ad.getDiskUsage());
+                assertEquals(1L, ad.getMemoryUsed());
+                assertEquals(1L, ad.getDiskUsed());
                 assertNotNull(ad.getUrls());
                 assertTrue(ad.getUrls().isEmpty());
                 assertNull(ad.getLastEvent());
