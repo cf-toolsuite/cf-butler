@@ -1,8 +1,13 @@
 package io.pivotal.cfapp.task;
 
+import java.util.Arrays;
 import java.util.List;
 
+import org.cloudfoundry.client.v3.applications.ApplicationResource;
+import org.cloudfoundry.client.v3.applications.GetApplicationRequest;
+import org.cloudfoundry.client.v3.applications.ListApplicationsRequest;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
+import org.cloudfoundry.util.PaginationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
@@ -66,27 +71,30 @@ public class AppRelationshipTask implements ApplicationListener<ServiceInstanceD
     }
 
     protected Mono<AppRelationship> getAppRelationship(AppRelationshipRequest request) {
-        return DefaultCloudFoundryOperations
-                .builder()
-                    .from(opsClient)
-                    .organization(request.getOrganization())
-                    .space(request.getSpace())
-                    .build()
-                    .applications()
-                        .list()
-                        .filter(as -> as.getName().equals(request.getApplicationName()))
-                        .next()
-                        .map(as -> AppRelationship
-                                    .builder()
-                                        .organization(request.getOrganization())
-                                        .space(request.getSpace())
-                                        .appId(as.getId())
-                                        .appName(request.getApplicationName())
-                                        .serviceInstanceId(request.getServiceInstanceId())
-                                        .serviceName(request.getServiceName())
-                                        .servicePlan(request.getServicePlan())
-                                        .serviceType(request.getServiceType())
-                                        .build());
+        Flux<ApplicationResource> resources =
+            PaginationUtils.requestClientV3Resources(
+                page -> DefaultCloudFoundryOperations
+                        .builder()
+                            .from(opsClient)
+                            .organization(request.getOrganization())
+                            .space(request.getSpace())
+                            .build()
+                        .getCloudFoundryClient()
+                            .applicationsV3()
+                                .list(ListApplicationsRequest.builder().addAllNames(Arrays.asList(new String[] { request.getApplicationName() })).build()));
+        return resources
+                .next()
+                .map(ar -> AppRelationship
+                                .builder()
+                                    .organization(request.getOrganization())
+                                    .space(request.getSpace())
+                                    .appId(ar.getId())
+                                    .appName(request.getApplicationName())
+                                    .serviceInstanceId(request.getServiceInstanceId())
+                                    .serviceName(request.getServiceName())
+                                    .servicePlan(request.getServicePlan())
+                                    .serviceType(request.getServiceType())
+                                    .build());
     }
 
 }
