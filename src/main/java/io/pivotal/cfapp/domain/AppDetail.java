@@ -43,9 +43,9 @@ public class AppDetail {
 	@Default
 	private Integer totalInstances = 0;
 	@Default
-	private Long memoryUsage = 0L;
+	private Long memoryUsed = 0L;
 	@Default
-	private Long diskUsage = 0L;
+	private Long diskUsed = 0L;
 	@Default
 	private List<String> urls = new ArrayList<>();
 	private LocalDateTime lastPushed;
@@ -57,8 +57,8 @@ public class AppDetail {
 	public String toCsv() {
 		return String.join(",", wrap(getOrganization()), wrap(getSpace()), wrap(getAppId()), wrap(getAppName()),
 				wrap(getBuildpack()), wrap(getBuildpackVersion()), wrap(getImage()), wrap(getStack()), wrap(String.valueOf(getRunningInstances())),
-				wrap(String.valueOf(getTotalInstances())), wrap(Double.toString(toGigabytes(getMemoryUsage()))),
-				wrap(Double.toString(toGigabytes(getDiskUsage()))),
+				wrap(String.valueOf(getTotalInstances())), wrap(Double.toString(toGigabytes(getMemoryUsed()))),
+				wrap(Double.toString(toGigabytes(getDiskUsed()))),
 				(wrap(String.join(",", getUrls() != null ? getUrls(): Collections.emptyList()))),
 				wrap(getLastPushed() != null ? getLastPushed().toString() : ""), wrap(getLastEvent()),
 				wrap(getLastEventActor()), wrap(getLastEventTime() != null ? getLastEventTime().toString() : ""),
@@ -106,8 +106,8 @@ public class AppDetail {
 						.stack(detail.getStack())
 						.runningInstances(detail.getRunningInstances())
 						.totalInstances(detail.getTotalInstances())
-						.memoryUsage(detail.getMemoryUsage())
-						.diskUsage(detail.getDiskUsage())
+						.memoryUsed(detail.getMemoryUsed())
+						.diskUsed(detail.getDiskUsed())
 						.urls(detail.getUrls())
 						.lastPushed(detail.getLastPushed())
 						.lastEvent(detail.getLastEvent())

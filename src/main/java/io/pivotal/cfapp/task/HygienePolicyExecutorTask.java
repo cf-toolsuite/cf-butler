@@ -1,6 +1,5 @@
 package io.pivotal.cfapp.task;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -15,8 +14,8 @@ import org.springframework.stereotype.Component;
 import io.pivotal.cfapp.config.PasSettings;
 import io.pivotal.cfapp.domain.AppDetail;
 import io.pivotal.cfapp.domain.DormantWorkloads;
-import io.pivotal.cfapp.domain.EmailValidator;
 import io.pivotal.cfapp.domain.DormantWorkloads.DormantWorkloadsBuilder;
+import io.pivotal.cfapp.domain.EmailValidator;
 import io.pivotal.cfapp.domain.HygienePolicy;
 import io.pivotal.cfapp.domain.ServiceInstanceDetail;
 import io.pivotal.cfapp.domain.Space;
@@ -112,7 +111,7 @@ public class HygienePolicyExecutorTask implements PolicyExecutorTask {
                         new EmailNotificationEvent(this)
                             .domain(settings.getAppsDomain())
                             .from(tuple.getT1().getNotifyeeTemplate().getFrom())
-                            .recipients(Arrays.asList(new String[] { workload.getT1().getAccountName() }))
+                            .recipient(workload.getT1().getAccountName())
                             .subject(tuple.getT1().getNotifyeeTemplate().getSubject())
                             .body(tuple.getT1().getNotifyeeTemplate().getBody())
                             .attachmentContents(buildAttachmentContents(tuple))

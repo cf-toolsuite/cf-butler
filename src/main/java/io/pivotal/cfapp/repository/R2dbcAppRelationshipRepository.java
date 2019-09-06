@@ -1,11 +1,8 @@
 package io.pivotal.cfapp.repository;
 
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.r2dbc.core.DatabaseClient;
-import org.springframework.data.r2dbc.core.DatabaseClient.GenericInsertSpec;
 import org.springframework.data.r2dbc.query.Criteria;
 import org.springframework.stereotype.Repository;
 
@@ -24,33 +21,15 @@ public class R2dbcAppRelationshipRepository {
 	}
 
 	public Mono<AppRelationship> save(AppRelationship entity) {
-		GenericInsertSpec<Map<String, Object>> spec =
-			client.insert().into(AppRelationship.tableName())
-				.value("organization", entity.getOrganization());
-		spec = spec.value("space", entity.getSpace());
-		spec = spec.value("app_id", entity.getAppId());
-		if (entity.getAppName() != null) {
-			spec = spec.value("app_name", entity.getAppName());
-		} else {
-			spec = spec.nullValue("app_name");
-		}
-		spec = spec.value("service_instance_id", entity.getServiceInstanceId());
-		if (entity.getServiceName() != null) {
-			spec = spec.value("service_name", entity.getServiceName());
-		} else {
-			spec = spec.nullValue("service_name");
-		}
-		if (entity.getServicePlan() != null) {
-			spec = spec.value("service_plan", entity.getServicePlan());
-		} else {
-			spec = spec.nullValue("service_plan");
-		}
-		if (entity.getServiceType() != null) {
-			spec = spec.value("service_type", entity.getServiceType());
-		} else {
-			spec = spec.nullValue("service_type");
-		}
-		return spec.fetch().rowsUpdated().then(Mono.just(entity));
+		return
+			client
+				.insert()
+				.into(AppRelationship.class)
+				.table(AppRelationship.tableName())
+				.using(entity)
+				.fetch()
+				.rowsUpdated()
+				.then(Mono.just(entity));
 	}
 
 	public Flux<AppRelationship> findAll() {
