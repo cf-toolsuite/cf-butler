@@ -249,7 +249,7 @@ E.g, if you intended to use [sendgrid](https://www.sendgrid.com) as your email n
 
 ### To set the operations schedule
 
-Update the value of the `cron` properties in `application.yml`.  Consult this [article](https://www.baeldung.com/spring-scheduled-tasks) and the [Javadoc](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/scheduling/annotation/Scheduled.html#cron--) to understand how to tune it for your purposes.
+Update the value of the `cron` properties in `application.yml`.  Consult this [article](https://riptutorial.com/spring/example/21209/cron-expression) and the [Javadoc](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/scheduling/annotation/Scheduled.html#cron--) to understand how to tune it for your purposes.
 
 > `cron` has two sub-properties: `collection` and `execution`.  Make sure `execution` is scheduled to trigger after `collection`.
 
