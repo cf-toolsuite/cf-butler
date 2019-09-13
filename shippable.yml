@@ -8,7 +8,7 @@ build:
     - sdk use gradle 5.6.2
     - mkdir -p shippable/testresults
     - mkdir -p shippable/codecoverage
-    - gradle -b build.w-mysql.gradle clean build --force-dependencies
+    - gradle -b build.w-mysql.gradle clean build --refresh-dependencies
   on_failure:
     - gradle dependencies
   always:
