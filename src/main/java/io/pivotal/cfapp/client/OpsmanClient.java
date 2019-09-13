@@ -100,7 +100,7 @@ public class OpsmanClient {
             );
     }
 
-    private Mono<String> getOmVersion() {
+    public Mono<String> getOmVersion() {
         String uri = String.format(URI_TEMPLATE, settings.getApiHost(), "/api/v0/info");
         return
             client
