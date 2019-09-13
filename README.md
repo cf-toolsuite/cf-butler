@@ -642,6 +642,20 @@ PATCH /metadata/{type}/{id}
 ```
 > Update metadata associated with a resource id
 
+Sample body
+
+```
+{
+    "metadata": {
+        "labels": {
+        	"cost-center": "11009872"
+        },
+        "annotations": {
+        	"region": "us-west2"
+        }
+    }
+}
+```
 
 ### Snapshot
 
