@@ -24,15 +24,14 @@ public class Resource {
     private Instant updatedAt;
 
     @JsonProperty("metadata")
-    private Metadata metadata;
-
+    private EmbeddedMetadata metadata;
 
     @JsonCreator
     public Resource(
         @JsonProperty("guid") String guid,
         @JsonProperty("created_at") Instant createdAt,
         @JsonProperty("updated_at") Instant updatedAt,
-        @JsonProperty("metadata") Metadata metadata) {
+        @JsonProperty("metadata") EmbeddedMetadata metadata) {
         this.guid = guid;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;

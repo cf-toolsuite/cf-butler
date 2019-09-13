@@ -4,12 +4,12 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class MetadataTest {
+public class EmbeddedMetadataTest {
 
     @Test
-    public void assertThatMetadataWithLabelAndAnnotationIsValid() {
-        Metadata m =
-            Metadata
+    public void assertThatEmbeddedMetadataWithLabelAndAnnotationIsValid() {
+        EmbeddedMetadata m =
+            EmbeddedMetadata
                 .builder()
                     .label("label-name", "label-value")
                     .annotation("annotation-name", "annotation-value")
@@ -18,18 +18,18 @@ public class MetadataTest {
     }
 
     @Test
-    public void assertThatMetadataWithoutLabelsAndAnnotationsIsValid() {
-        Metadata m =
-            Metadata
+    public void assertThatEmbeddedMetadataWithoutLabelsAndAnnotationsIsValid() {
+        EmbeddedMetadata m =
+            EmbeddedMetadata
                 .builder()
                     .build();
         Assertions.assertTrue(m.isValid());
     }
 
     @Test
-    public void assertThatMetadataOnlyWithLabelIsValid() {
-        Metadata m =
-            Metadata
+    public void assertThatEmbeddedMetadataOnlyWithLabelIsValid() {
+        EmbeddedMetadata m =
+            EmbeddedMetadata
                 .builder()
                     .label("label-name", "label-value")
                     .build();
@@ -37,9 +37,9 @@ public class MetadataTest {
     }
 
     @Test
-    public void assertThatMetadataOnlyWithAnnotationIsValid() {
-        Metadata m =
-            Metadata
+    public void assertThatEmbeddedMetadataOnlyWithAnnotationIsValid() {
+        EmbeddedMetadata m =
+            EmbeddedMetadata
                 .builder()
                     .annotation("annotation-name", "annotation-value")
                     .build();
@@ -47,9 +47,9 @@ public class MetadataTest {
     }
 
     @Test
-    public void assertThatMetadataWithExceptionalLabelIsInvalid() {
-        Metadata m =
-            Metadata
+    public void assertThatEmbeddedMetadataWithExceptionalLabelIsInvalid() {
+        EmbeddedMetadata m =
+            EmbeddedMetadata
                 .builder()
                     .label("label&name", "label-value")
                     .build();
@@ -57,9 +57,9 @@ public class MetadataTest {
     }
 
     @Test
-    public void assertThatMetadataWithExceptionalAnnotationIsInvalid() {
-        Metadata m =
-            Metadata
+    public void assertThatEmbeddedMetadataWithExceptionalAnnotationIsInvalid() {
+        EmbeddedMetadata m =
+            EmbeddedMetadata
                 .builder()
                     .annotation("annotation&name", "annotation-value")
                     .build();
@@ -67,9 +67,9 @@ public class MetadataTest {
     }
 
     @Test
-    public void assertThatMetadataWithNamespacedKeyForLabelIsValid() {
-        Metadata m =
-            Metadata
+    public void assertThatEmbeddedMetadataWithNamespacedKeyForLabelIsValid() {
+        EmbeddedMetadata m =
+            EmbeddedMetadata
                 .builder()
                     .label("label.prefix/label-name", "label-value")
                     .build();
@@ -77,9 +77,9 @@ public class MetadataTest {
     }
 
     @Test
-    public void assertThatMetadataWithNamespacedKeyForAnnotationIsValid() {
-        Metadata m =
-            Metadata
+    public void assertThatEmbeddedMetadataWithNamespacedKeyForAnnotationIsValid() {
+        EmbeddedMetadata m =
+            EmbeddedMetadata
                 .builder()
                     .annotation("annotation.prefix/annotation-name", "annotation-value")
                     .build();
@@ -87,9 +87,9 @@ public class MetadataTest {
     }
 
     @Test
-    public void assertThatMetadataWithLongLabelKeyIsInvalid() {
-        Metadata m =
-            Metadata
+    public void assertThatEmbeddedMetadataWithLongLabelKeyIsInvalid() {
+        EmbeddedMetadata m =
+            EmbeddedMetadata
                 .builder()
                     .label(RandomStringUtils.randomAlphanumeric(100), "label-value")
                     .build();
@@ -97,9 +97,9 @@ public class MetadataTest {
     }
 
     @Test
-    public void assertThatMetadataWithLongAnnotationKeyIsInvalid() {
-        Metadata m =
-            Metadata
+    public void assertThatEmbeddedMetadataWithLongAnnotationKeyIsInvalid() {
+        EmbeddedMetadata m =
+            EmbeddedMetadata
                 .builder()
                     .annotation(RandomStringUtils.randomAlphanumeric(100), "annotation-value")
                     .build();
@@ -107,9 +107,9 @@ public class MetadataTest {
     }
 
     @Test
-    public void assertThatMetadataWithLongLabelValueIsInvalid() {
-        Metadata m =
-            Metadata
+    public void assertThatEmbeddedMetadataWithLongLabelValueIsInvalid() {
+        EmbeddedMetadata m =
+            EmbeddedMetadata
                 .builder()
                     .label(RandomStringUtils.randomAlphanumeric(15), RandomStringUtils.randomAlphanumeric(100))
                     .build();
@@ -117,9 +117,9 @@ public class MetadataTest {
     }
 
     @Test
-    public void assertThatMetadataWithLongAnnotationValueIsInvalid() {
-        Metadata m =
-            Metadata
+    public void assertThatEmbeddedMetadataWithLongAnnotationValueIsInvalid() {
+        EmbeddedMetadata m =
+            EmbeddedMetadata
                 .builder()
                     .annotation(RandomStringUtils.randomAlphanumeric(15), RandomStringUtils.randomAlphanumeric(7500))
                     .build();

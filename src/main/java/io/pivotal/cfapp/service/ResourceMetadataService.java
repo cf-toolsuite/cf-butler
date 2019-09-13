@@ -10,7 +10,9 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import io.pivotal.cfapp.config.PasSettings;
+import io.pivotal.cfapp.domain.Metadata;
 import io.pivotal.cfapp.domain.Resource;
+import io.pivotal.cfapp.domain.ResourceType;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -33,15 +35,16 @@ public class ResourceMetadataService {
         this.settings = settings;
     }
 
-    public Mono<Resource> getResource(String id) {
+    public Mono<Resource> getResource(String type, String id) {
         Assert.hasText(id, "Global unique identifier for application must not be blank or null!");
+        ResourceType rt = ResourceType.from(type);
         final String uri =
             UriComponentsBuilder
                 .newInstance()
                     .scheme("https")
                     .host(settings.getApiHost())
-                    .path("/v3/apps/{guid}")
-                    .buildAndExpand(id)
+                    .path("/v3/{type}/{guid}")
+                    .buildAndExpand(rt.getId(), id)
                     .encode()
                     .toUriString();
         return
@@ -54,26 +57,30 @@ public class ResourceMetadataService {
                                             .bodyToMono(Resource.class));
     }
 
-    public Mono<Resource> patchResource(Resource resource) {
-        Assert.hasText(resource.getGuid(), "Global unique identifier for application must not be blank or null!");
-        final String uri =
-            UriComponentsBuilder
-                .newInstance()
-                    .scheme("https")
-                    .host(settings.getApiHost())
-                    .path("/v3/apps/{guid}")
-                    .buildAndExpand(resource.getGuid())
-                    .encode()
-                    .toUriString();
-        return
-            getOauthToken()
-                .flatMap(t -> webClient
-                                .patch()
-                                    .uri(uri)
-                                    .body(resource)
-                                    .header(HttpHeaders.AUTHORIZATION, t)
-                                        .retrieve()
-                                            .bodyToMono(Resource.class));
+    public Mono<Metadata> updateResource(String type, String id, Metadata metadata) {
+        ResourceType rt = ResourceType.from(type);
+        if (metadata.isValid()) {
+            final String uri =
+                UriComponentsBuilder
+                    .newInstance()
+                        .scheme("https")
+                        .host(settings.getApiHost())
+                        .path("/v3/{type}/{id}")
+                        .buildAndExpand(rt.getId(), id)
+                        .encode()
+                        .toUriString();
+            return
+                getOauthToken()
+                    .flatMap(t -> webClient
+                                    .patch()
+                                        .uri(uri)
+                                        .body(metadata)
+                                        .header(HttpHeaders.AUTHORIZATION, t)
+                                            .retrieve()
+                                                .bodyToMono(Metadata.class));
+        } else {
+            return Mono.error(new IllegalArgumentException(String.format("Invalid metadata %s", metadata.toString())));
+        }
     }
 
     private Mono<String> getOauthToken() {

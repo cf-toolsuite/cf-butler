@@ -2,11 +2,10 @@ language: java
 
 jdk:
   - openjdk11
-  - oraclejdk11
 
 build:
   ci:
-    - sdk use gradle 5.5
+    - sdk use gradle 5.6.2
     - mkdir -p shippable/testresults
     - mkdir -p shippable/codecoverage
     - gradle -b build.w-mysql.gradle clean build publishToMavenLocal

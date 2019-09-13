@@ -47,6 +47,7 @@ This is where `cf-butler` has your back.
       * [Operations Manager](#operations-manager)
       * [Pivotal Network](#pivotal-network)
       * [Events](#events)
+      * [Metadata](#metadata)
       * [Snapshot](#snapshot)
       * [Accounting](#accounting)
       * [Policies](#policies)
@@ -625,6 +626,21 @@ GET /events/{id}?numberOfEvents={n}
 GET /events/{id}?types[]={type1,type2,...,typen}
 ```
 > Returns matching events for an actee guid (e.g., application, service instance).  An comma-separated array of valid event types must be specified.
+
+
+### Metadata
+
+Metadata is comprised of [labels](https://v3-apidocs.cloudfoundry.org/version/3.76.0/index.html#labels-and-selectors) and/or [annotations](https://v3-apidocs.cloudfoundry.org/version/3.76.0/index.html#annotations).  Labels work with selectors to subsequently help you lookup resources.
+
+```
+GET /metadata/{type}/{id}
+```
+> Return resource with id, created date, last updated date, and associated metadata; where `{type}` is the id field of a [ResourceType](https://github.com/pacphi/cf-butler/blob/master/src/main/java/io/pivotal/cfapp/domain/ResourceType.java) enum and `{id}` is the guid of a resource.
+
+```
+PATCH /metadata/{type}/{id}
+```
+> Update metadata associated with a resource id
 
 
 ### Snapshot

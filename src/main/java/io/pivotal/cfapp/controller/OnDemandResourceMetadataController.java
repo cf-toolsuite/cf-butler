@@ -7,9 +7,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.pivotal.cfapp.domain.Metadata;
 import io.pivotal.cfapp.domain.Resource;
 import io.pivotal.cfapp.service.ResourceMetadataService;
 import reactor.core.publisher.Mono;
@@ -28,20 +28,23 @@ public class OnDemandResourceMetadataController {
         this.service = service;
     }
 
-    @GetMapping("/metadata/{id}")
+    @GetMapping("/metadata/{type}/{id}")
     public Mono<ResponseEntity<Resource>> getResourceMetadata(
-        @PathVariable("id") String id
+    @PathVariable("type") String type,
+    @PathVariable("id") String id
     ) {
-        return service.getResource(id)
+        return service.getResource(type, id)
                         .map(r -> ResponseEntity.ok(r))
                         .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @PatchMapping("/metadata")
-    public Mono<ResponseEntity<Resource>> patchResourceMetadata(
-        @RequestBody Resource resource
+    @PatchMapping("/metadata/{type}/{id}")
+    public Mono<ResponseEntity<Metadata>> updateResourceMetadata(
+        @PathVariable("type") String type,
+        @PathVariable("id") String id,
+        @RequestBody Metadata metadata
     ) {
-        return service.patchResource(resource)
+        return service.updateResource(type, id, metadata)
                         .map(r -> ResponseEntity.ok(r))
                         .defaultIfEmpty(ResponseEntity.notFound().build());
     }
