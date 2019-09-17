@@ -90,7 +90,7 @@ public class DormantWorkloadsService {
     }
 
     private Mono<Boolean> areAnyRelationsDormant(ServiceInstanceDetail sid, Integer daysSinceLastUpdate) {
-        // see if service intance has any boound applications
+        // see if service instance has any bound applications
         Flux<AppRelationship> relations = relationshipService.findByServiceInstanceId(sid.getServiceInstanceId());
         return
             relations
