@@ -56,10 +56,10 @@ repositories {
 
 ext {
     set('springCloudServicesVersion', '2.1.4.RELEASE')
-	set('springCloudVersion', 'Hoxton.M1')
+	set('springCloudVersion', 'Hoxton.M2')
     // @see https://github.com/spring-projects/spring-boot/blob/master/spring-boot-project/spring-boot-dependencies/pom.xml
-    set('spring-data-releasetrain.version', 'Moore-M3')
-    set('spring-framework.version', '5.2.0.RC1')
+    set('spring-data-releasetrain.version', 'Moore-RC3')
+    set('spring-framework.version', '5.2.0.RC2')
 }
 
 dependencyManagement {
