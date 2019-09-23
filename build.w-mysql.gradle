@@ -121,6 +121,7 @@ dependencies {
     implementation('org.springframework.data:spring-data-r2dbc:1.0.0.BUILD-SNAPSHOT')
     // FIXME Seems like we shouldn't have a dependency on Spring JDBC
     implementation('org.springframework:spring-jdbc')
+    implementation('org.locationtech.jts:jts-core:1.16.1')
     implementation('io.r2dbc:r2dbc-spi:0.8.0.BUILD-SNAPSHOT')
     implementation('io.r2dbc:r2dbc-client:0.8.0.BUILD-SNAPSHOT')
     // FIXME r2dbc-pool does not appear ready for primetime when used with spring-boot-starter-data-r2dbc properties resolution
