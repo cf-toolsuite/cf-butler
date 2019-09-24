@@ -1,8 +1,8 @@
 plugins {
-    id 'com.gorylenko.gradle-git-properties' version '2.1.0'
+    id 'com.gorylenko.gradle-git-properties' version '2.2.0'
     id 'org.springframework.boot' version '2.2.0.M6'
     id 'io.spring.dependency-management' version '1.0.8.RELEASE'
-    id 'com.github.ben-manes.versions' version '0.24.0'
+    id 'com.github.ben-manes.versions' version '0.25.0'
     id 'io.franzbecker.gradle-lombok' version '3.1.0'
 	id 'java'
     id 'jacoco'
@@ -58,10 +58,10 @@ repositories {
 
 ext {
     set('springCloudServicesVersion', '2.1.4.RELEASE')
-	set('springCloudVersion', 'Hoxton.M1')
+	set('springCloudVersion', 'Hoxton.M2')
     // @see https://github.com/spring-projects/spring-boot/blob/master/spring-boot-project/spring-boot-dependencies/pom.xml
-    set('spring-data-releasetrain.version', 'Moore-M3')
-    set('spring-framework.version', '5.2.0.RC1')
+    set('spring-data-releasetrain.version', 'Moore-RC3')
+    set('spring-framework.version', '5.2.0.RC2')
 }
 
 dependencyManagement {
@@ -121,19 +121,20 @@ dependencies {
     implementation('org.springframework.data:spring-data-r2dbc:1.0.0.BUILD-SNAPSHOT')
     // FIXME Seems like we shouldn't have a dependency on Spring JDBC
     implementation('org.springframework:spring-jdbc')
+    implementation('org.locationtech.jts:jts-core:1.16.1')
     implementation('io.r2dbc:r2dbc-spi:0.8.0.BUILD-SNAPSHOT')
     implementation('io.r2dbc:r2dbc-client:0.8.0.BUILD-SNAPSHOT')
     // FIXME r2dbc-pool does not appear ready for primetime when used with spring-boot-starter-data-r2dbc properties resolution
     //runtime('io.r2dbc:r2dbc-pool:0.8.0.M8')
     implementation('io.r2dbc:r2dbc-h2:0.8.0.BUILD-SNAPSHOT')
     runtime('io.r2dbc:r2dbc-postgresql:0.8.0.BUILD-SNAPSHOT')
-    runtime('com.github.mirromutth:r2dbc-mysql:0.2.0.M2')
-    implementation('org.eclipse.jgit:org.eclipse.jgit:5.3.2.201906051522-r')
+    runtime('com.github.mirromutth:r2dbc-mysql:v0.2.0.M2')
+    implementation('org.eclipse.jgit:org.eclipse.jgit:5.5.0.201909110433-r')
     implementation('org.springframework.boot:spring-boot-starter-mail')
     implementation('com.sendgrid:sendgrid-java:4.4.1') {
         exclude group: 'org.apache.httpcomponents', module: 'httpclient'
     }
-    implementation('org.apache.httpcomponents:httpclient:4.5.9')
+    implementation('org.apache.httpcomponents:httpclient:4.5.10')
     implementation('org.cloudfoundry:cloudfoundry-client-reactor:3.15.0.RELEASE')
     implementation('org.cloudfoundry:cloudfoundry-operations:3.15.0.RELEASE')
     implementation('io.projectreactor:reactor-core:3.3.0.RC1')

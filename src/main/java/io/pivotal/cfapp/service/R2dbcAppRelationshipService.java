@@ -46,4 +46,9 @@ public class R2dbcAppRelationshipService implements AppRelationshipService {
 		return repo.findByApplicationId(applicationId);
 	}
 
+	@Override
+	public Flux<AppRelationship> findByServiceInstanceId(String serviceInstanceId) {
+		return repo.findByServiceInstanceId(serviceInstanceId);
+	}
+
 }

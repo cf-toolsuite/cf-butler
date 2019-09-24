@@ -55,6 +55,18 @@ public class R2dbcAppRelationshipRepository {
 				.all();
 	}
 
+	public Flux<AppRelationship> findByServiceInstanceId(String serviceInstanceId) {
+		return client
+				.select()
+					.from(AppRelationship.tableName())
+					.project(AppRelationship.columnNames())
+					.matching(Criteria.where("service_instance_id").is(serviceInstanceId))
+				.orderBy((Order.asc("organization")), Order.asc("space"), Order.asc("service_name"))
+				.as(AppRelationship.class)
+				.fetch()
+				.all();
+	}
+
 	public Mono<Void> deleteAll() {
 		return client
 				.delete()

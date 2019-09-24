@@ -14,4 +14,5 @@ public interface AppRelationshipService {
 
 	Flux<AppRelationship> findByApplicationId(String applicationId);
 
+	Flux<AppRelationship> findByServiceInstanceId(String serviceInstanceId);
 }

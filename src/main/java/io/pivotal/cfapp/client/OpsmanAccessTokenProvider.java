@@ -48,7 +48,7 @@ class OpsmanAccessTokenProvider {
         return client
                 .post()
                 .uri(get)
-                .body(request)
+                .bodyValue(request)
                 .retrieve()
                 .bodyToMono(GetTokenByPasswordResponse.class)
                 .map(r -> r.getAccessToken());

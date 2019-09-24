@@ -74,7 +74,7 @@ public class ResourceMetadataService {
                     .flatMap(t -> webClient
                                     .patch()
                                         .uri(uri)
-                                        .body(metadata)
+                                        .bodyValue(metadata)
                                         .header(HttpHeaders.AUTHORIZATION, t)
                                             .retrieve()
                                                 .bodyToMono(Metadata.class));
