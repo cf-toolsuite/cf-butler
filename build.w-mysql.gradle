@@ -134,7 +134,7 @@ dependencies {
     implementation('com.sendgrid:sendgrid-java:4.4.1') {
         exclude group: 'org.apache.httpcomponents', module: 'httpclient'
     }
-    implementation('org.apache.httpcomponents:httpclient:4.5.9')
+    implementation('org.apache.httpcomponents:httpclient:4.5.10')
     implementation('org.cloudfoundry:cloudfoundry-client-reactor:3.15.0.RELEASE')
     implementation('org.cloudfoundry:cloudfoundry-operations:3.15.0.RELEASE')
     implementation('io.projectreactor:reactor-core:3.3.0.RC1')
