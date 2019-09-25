@@ -107,17 +107,17 @@ public class HygienePolicyExecutorTask implements PolicyExecutorTask {
             .concatMap(userName -> userSpacesService.getUserSpaces(userName))
         // Create a list where each item is a tuple of user account and filtered dormant workloads
             .concatMap(userSpace -> filterDormantWorkloads(userSpace, tuple.getT2()))
-            .map(workload -> {
+            .map(userMatchedWorkloads -> {
                     publisher.publishEvent(
                         new EmailNotificationEvent(this)
                             .domain(settings.getAppsDomain())
                             .from(tuple.getT1().getNotifyeeTemplate().getFrom())
-                            .recipient(workload.getT1().getAccountName())
+                            .recipient(userMatchedWorkloads.getT1().getAccountName())
                             .subject(tuple.getT1().getNotifyeeTemplate().getSubject())
                             .body(tuple.getT1().getNotifyeeTemplate().getBody())
-                            .attachmentContents(buildAttachmentContents(Tuples.of(tuple.getT1(), workload))
+                            .attachmentContents(buildAttachmentContents(Tuples.of(tuple.getT1(), userMatchedWorkloads.getT2())))
                     );
-                    return workload;
+                    return userMatchedWorkloads;
             })
             .subscribe();
     }
