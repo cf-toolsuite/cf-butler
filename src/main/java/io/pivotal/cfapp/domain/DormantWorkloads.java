@@ -18,7 +18,6 @@ import lombok.ToString;
 @Builder
 @Getter
 @EqualsAndHashCode
-@ToString
 @JsonPropertyOrder({ "applications", "service-instances" })
 public class DormantWorkloads {
 
@@ -39,7 +38,7 @@ public class DormantWorkloads {
         this.serviceInstances = serviceInstances;
     }
 
-    public DormantWorkloads match(List<Space> spaces) {
+    public DormantWorkloads matchBySpace(List<Space> spaces) {
         List<AppDetail> matchingApps = new ArrayList<>();
         List<ServiceInstanceDetail> matchingServiceInstances = new ArrayList<>();
         for (Space s: spaces) {
@@ -59,4 +58,12 @@ public class DormantWorkloads {
         return DormantWorkloads.builder().applications(matchingApps).serviceInstances(matchingServiceInstances).build();
     }
 
+    public String toString() {
+        return String
+                .format(
+                    "Dormant Applications: [%s], Dormant Service Instances [%s]",
+                    String.join(",", getApplications().stream().map(a -> a.getAppName()).collect(Collectors.toList())),
+                    String.join(",", getServiceInstances().stream().map(s -> s.getName()).collect(Collectors.toList()))
+                );
+    }
 }

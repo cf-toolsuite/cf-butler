@@ -81,6 +81,7 @@ public class HygienePolicyExecutorTask implements PolicyExecutorTask {
     }
 
     private void notifyOperator(Tuple2<HygienePolicy, DormantWorkloads> tuple) {
+        log.trace("User: admin, " + tuple.getT2().toString());
         publisher.publishEvent(
             new EmailNotificationEvent(this)
                 .domain(settings.getAppsDomain())
@@ -97,15 +98,15 @@ public class HygienePolicyExecutorTask implements PolicyExecutorTask {
         Flux
             .fromIterable(getSpaces(tuple.getT2()))
         // For each Space in Set<Space>, obtain SpaceUsers#getUsers()
-            .flatMap(space -> spaceUsersService.findByOrganizationAndSpace(space.getOrganization(), space.getSpace()))
+            .concatMap(space -> spaceUsersService.findByOrganizationAndSpace(space.getOrganization(), space.getSpace()))
         // then pair with matching space(s) in dormant applications and service instances
-            .flatMap(spaceUser -> Flux.fromIterable(spaceUser.getUsers()))
+            .concatMap(spaceUser -> Flux.fromIterable(spaceUser.getUsers()))
             .distinct()
         // filter out account names that are not email addresses
             .filter(userName -> EmailValidator.isValid(userName))
-            .flatMap(userName -> userSpacesService.getUserSpaces(userName))
+            .concatMap(userName -> userSpacesService.getUserSpaces(userName))
         // Create a list where each item is a tuple of user account and filtered dormant workloads
-            .flatMap(userSpace -> filterDormantWorkloads(userSpace, tuple.getT2()))
+            .concatMap(userSpace -> filterDormantWorkloads(userSpace, tuple.getT2()))
             .map(workload -> {
                     publisher.publishEvent(
                         new EmailNotificationEvent(this)
@@ -117,8 +118,8 @@ public class HygienePolicyExecutorTask implements PolicyExecutorTask {
                             .attachmentContents(buildAttachmentContents(tuple))
                     );
                     return workload;
-        })
-        .subscribe();
+            })
+            .subscribe();
     }
 
     @Scheduled(cron = "${cron.execution}")
@@ -129,7 +130,7 @@ public class HygienePolicyExecutorTask implements PolicyExecutorTask {
 	protected Flux<HygienePolicy> fetchHygienePolicies() {
         return
             policiesService
-		.findAllHygienePolicies()
+		        .findAllHygienePolicies()
                 .flatMapMany(policy -> Flux.fromIterable(policy.getHygienePolicies()));
     }
 
@@ -143,7 +144,9 @@ public class HygienePolicyExecutorTask implements PolicyExecutorTask {
     }
 
     private static Mono<Tuple2<UserSpaces, DormantWorkloads>> filterDormantWorkloads(UserSpaces userSpaces, DormantWorkloads workloads){
-        return Mono.just(Tuples.of(userSpaces, workloads.match(userSpaces.getSpaces())));
+        DormantWorkloads dormantWorkloads = workloads.matchBySpace(userSpaces.getSpaces());
+        log.trace(userSpaces.toString() + ", " + dormantWorkloads.toString());
+        return Mono.just(Tuples.of(userSpaces, dormantWorkloads));
 
     }
 
