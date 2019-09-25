@@ -100,7 +100,7 @@ public class DormantWorkloadsService {
                 .flatMap(appDetail -> eventsService
                                         .isDormantApplication(appDetail, daysSinceLastUpdate))
                 .collectList()
-                // result is a union; service instance deemd not dormant if any one of the applications is not dormant
-                .map(list -> BooleanUtils.or(list.toArray(Boolean[]::new)));
+                // result is a union; service instance deemed not dormant if any one of the applications is not dormant
+                .map(list -> list.isEmpty() ? Boolean.FALSE : BooleanUtils.or(list.toArray(Boolean[]::new)));
     }
 }
