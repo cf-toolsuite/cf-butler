@@ -115,7 +115,7 @@ public class HygienePolicyExecutorTask implements PolicyExecutorTask {
                             .recipient(workload.getT1().getAccountName())
                             .subject(tuple.getT1().getNotifyeeTemplate().getSubject())
                             .body(tuple.getT1().getNotifyeeTemplate().getBody())
-                            .attachmentContents(buildAttachmentContents(tuple))
+                            .attachmentContents(buildAttachmentContents(Tuples.of(tuple.getT1(), workload))
                     );
                     return workload;
             })
