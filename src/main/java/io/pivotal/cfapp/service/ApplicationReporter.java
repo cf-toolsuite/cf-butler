@@ -16,19 +16,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import io.pivotal.cfapp.domain.accounting.service.NormalizedServicePlanMonthlyUsage;
-import io.pivotal.cfapp.domain.accounting.service.ServiceUsageReport;
+import io.pivotal.cfapp.domain.accounting.application.AppUsageMonthly;
+import io.pivotal.cfapp.domain.accounting.application.AppUsageReport;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-public class ServiceInstanceReporter {
+public class ApplicationReporter {
 
-    private static final String REPORT_HEADER = "foundation,environment,time_period,service_name,service_guid,service_plan_name,service_plan_guid,average_instances,maximum_instances,instance_hours\n";
+    private static final String REPORT_HEADER = "foundation,time_period,maximum_instances,average_instances,instance_hours\n";
     private final ObjectMapper mapper;
 
     @Autowired
-    public ServiceInstanceReporter(ObjectMapper mapper) {
+    public ApplicationReporter(ObjectMapper mapper) {
         this.mapper = mapper;
     }
 
@@ -60,18 +60,18 @@ public class ServiceInstanceReporter {
         Integer year = Integer.valueOf(period.split("-")[0]);
         Integer month = Integer.valueOf(period.split("-")[1]);
         try {
-            ServiceUsageReport report = readServiceUsageReport(filename);
-            List<NormalizedServicePlanMonthlyUsage> usage = NormalizedServicePlanMonthlyUsage.listOf(report);
-            List<NormalizedServicePlanMonthlyUsage> filtered =
+            AppUsageReport report = readAppUsageReport(filename);
+            List<AppUsageMonthly> usage = report.getMonthlyReports();
+            List<AppUsageMonthly> filtered =
                 usage
                     .stream()
                     .filter(u -> u.getYear().equals(year) && u.getMonth().equals(month))
                     .collect(Collectors.toList());
-            for (NormalizedServicePlanMonthlyUsage u: filtered) {
-                result.append(foundation + "," + environment + "," + period + "," + u.getServiceName() + "," + u.getServiceGuid() + "," + u.getServicePlanName() + "," + u.getServicePlanGuid() + "," + u.getAverageInstances() + "," + u.getMaximumInstances() + "," + u.getDurationInHours() + "\n");
+            for (AppUsageMonthly u: filtered) {
+                result.append(foundation + "," + period + "," + u.getMaximumAppInstances() + "," + u.getAverageAppInstances() + "," + u.getAppInstanceHours() + "\n");
             }
 		} catch (JsonParseException jpe) {
-			log.warn(String.format("Could not parse file contents of %s into a ServiceUsageReport!", filename), jpe);
+			log.warn(String.format("Could not parse file contents of %s into a AppUsageReport!", filename), jpe);
 		} catch (JsonMappingException jme) {
 			log.warn(String.format("Could not map file contents in %s into JSON!", filename), jme);
 		} catch (IOException ioe) {
@@ -80,9 +80,9 @@ public class ServiceInstanceReporter {
         return result.toString();
     }
 
-    protected ServiceUsageReport readServiceUsageReport(String filename) throws JsonParseException, JsonMappingException, IOException {
+    protected AppUsageReport readAppUsageReport(String filename) throws JsonParseException, JsonMappingException, IOException {
         String content = readFile(filename);
-        return mapper.readValue(content, ServiceUsageReport.class);
+        return mapper.readValue(content, AppUsageReport.class);
     }
 
     protected String readFile(String filename) {
