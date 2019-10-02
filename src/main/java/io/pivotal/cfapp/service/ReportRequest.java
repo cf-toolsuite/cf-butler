@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Builder
 @Getter
-class ServiceInstanceReportRequest {
+class ReportRequest {
     private String foundation;
     private String environment;
     private String period;
