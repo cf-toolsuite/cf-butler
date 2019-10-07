@@ -36,7 +36,7 @@ tasks.withType(com.github.spotbugs.SpotBugsTask) {
 
 group = 'io.pivotal'
 version = '0.1-SNAPSHOT'
-sourceCompatibility = JavaVersion.VERSION_11
+//sourceCompatibility = JavaVersion.VERSION_11
 
 task sourcesJar(type: Jar) {
     from sourceSets.main.allJava
@@ -56,7 +56,7 @@ repositories {
 
 ext {
     set('springCloudServicesVersion', '2.1.4.RELEASE')
-	set('springCloudVersion', 'Hoxton.M2')
+	set('springCloudVersion', 'Hoxton.M3')
     // @see https://github.com/spring-projects/spring-boot/blob/master/spring-boot-project/spring-boot-dependencies/pom.xml
     set('spring-data-releasetrain.version', 'Moore-RC3')
     set('spring-framework.version', '5.2.0.RC2')
@@ -134,8 +134,9 @@ dependencies {
     implementation('org.apache.httpcomponents:httpclient:4.5.10')
     implementation('org.cloudfoundry:cloudfoundry-client-reactor:3.16.0.RELEASE')
     implementation('org.cloudfoundry:cloudfoundry-operations:3.16.0.RELEASE')
-    implementation('io.projectreactor:reactor-core:3.3.0.RC1')
-    implementation('io.projectreactor.netty:reactor-netty:0.9.0.RC1')
+    implementation('io.projectreactor:reactor-core:3.3.0.RELEASE')
+    implementation('io.projectreactor:reactor-tools:3.3.0.RELEASE')
+    implementation('io.projectreactor.netty:reactor-netty:0.9.0.RELEASE')
     implementation('io.micrometer:micrometer-registry-prometheus')
     testImplementation('io.projectreactor:reactor-test')
     testImplementation('org.assertj:assertj-core:3.13.2')
@@ -144,6 +145,7 @@ dependencies {
     testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine')
     testImplementation('org.mockito:mockito-core')
     testImplementation('org.mockito:mockito-junit-jupiter')
+    testImplementation('io.projectreactor.tools:blockhound:1.0.0.RELEASE')
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
 	    exclude group: 'junit', module: 'junit'
