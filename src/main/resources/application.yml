@@ -47,6 +47,7 @@ cf:
     - liberty
     - markdown
     - mendix
+    - meta
     - meteor
     - nginx
     - nodejs

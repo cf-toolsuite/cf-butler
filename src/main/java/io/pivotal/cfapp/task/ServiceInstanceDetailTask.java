@@ -74,7 +74,6 @@ public class ServiceInstanceDetailTask implements ApplicationListener<SpacesRetr
     }
 
     private Mono<DefaultCloudFoundryOperations> buildClient(Space target) {
-        log.trace("Targeting org={} and space={}", target.getOrganization(), target.getSpace());
         return Mono
                 .just(DefaultCloudFoundryOperations
                         .builder()
@@ -103,7 +102,7 @@ public class ServiceInstanceDetailTask implements ApplicationListener<SpacesRetr
     ) {
         DefaultCloudFoundryOperations opsClient = tuple.getT1();
         ServiceInstanceSummary summary = tuple.getT2();
-        log.trace("Fetching service instance details for id={}, name={}", summary.getId(), summary.getName());
+        log.trace("Fetching service instance details for org={}, space={}, id={}, name={}", opsClient.getOrganization(), opsClient.getSpace(), summary.getId(), summary.getName());
         return
             Mono.zip(
                 Mono.just(opsClient),

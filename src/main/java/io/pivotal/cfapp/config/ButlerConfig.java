@@ -34,6 +34,7 @@ public class ButlerConfig {
                     .keepAlive(true)
                     .connectionPoolSize(settings.getConnectionPoolSize())
                     .connectTimeout(Duration.parse(settings.getConnectionTimeout()))
+                    .sslHandshakeTimeout(Duration.ofSeconds(30))
                     .build();
     }
 
@@ -84,7 +85,7 @@ public class ButlerConfig {
     }
 
     @Bean
-    public DefaultCloudFoundryOperations opsClient(ReactorCloudFoundryClient cloudFoundryClient, 
+    public DefaultCloudFoundryOperations opsClient(ReactorCloudFoundryClient cloudFoundryClient,
             ReactorDopplerClient dopplerClient, ReactorUaaClient uaaClient) {
         return DefaultCloudFoundryOperations
                 .builder()
@@ -101,7 +102,5 @@ public class ButlerConfig {
         eventMulticaster.setTaskExecutor(new SimpleAsyncTaskExecutor());
         return eventMulticaster;
     }
-
-    
 
 }
