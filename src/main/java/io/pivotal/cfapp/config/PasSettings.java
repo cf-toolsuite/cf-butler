@@ -17,7 +17,7 @@ public class PasSettings {
 
 	public static final String SYSTEM_ORG = "system";
 	private static final Set<String> DEFAULT_BLACKLIST = Set.of(SYSTEM_ORG);
-	private static final String[] KNOWN_BUILDPACKS = "apt,binary,clojure,dotnet,elixir,emberjs,erlang,go,haskell,hwc,java,jboss,jetty,liberty,markdown,mendix,meteor,nginx,nodejs,php,pyspark,python,r_buildpack,ruby,rust,staticfile,swift,tc,tomcat,tomee,virgo,weblogic".split(",");
+	private static final String[] KNOWN_BUILDPACKS = "apt,binary,clojure,dotnet,elixir,emberjs,erlang,go,haskell,hwc,java,jboss,jetty,liberty,markdown,mendix,meta,meteor,nginx,nodejs,php,pyspark,python,r_buildpack,ruby,rust,staticfile,swift,tc,tomcat,tomee,virgo,weblogic".split(",");
 	private static final Set<String> DEFAULT_BUILDPACKS = Set.of(KNOWN_BUILDPACKS);
 	// user accounts are typically email addresses, so we'll define a regex to match on recognizable email pattern
 	// @see https://howtodoinjava.com/regex/java-regex-validate-email-address/
@@ -64,19 +64,17 @@ public class PasSettings {
     	return merge(nonEmptyBuildpacks, DEFAULT_BUILDPACKS);
 	}
 
-	public String getBuildpack(String input, String image) {
-        if (StringUtils.isNotBlank(image)) {
-            return null;  // use Docker image
-        } else if (StringUtils.isBlank(input)) {
-            return "none";  // no Buildpack
-        } else {  // detect and standardize reporting of Buildpack, otherwise use input
+	public String getBuildpack(String input) {
+		String result = null;
+		if (StringUtils.isNotBlank(input)) {// detect and standardize reporting of Buildpack, otherwise use input
 			Optional<String> buildpack =
 				getBuildpacks()
 					.stream()
 					.filter(b -> input.contains(b))
 					.collect(Collectors.reducing((a, b) -> null));
-            return buildpack.orElse(input);
-        }
+            result = buildpack.orElse(input);
+		}
+		return result;
 	}
 
     private Set<String> merge(Set<String> source, Set<String> defaultList) {

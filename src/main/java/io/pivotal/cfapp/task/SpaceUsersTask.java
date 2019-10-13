@@ -58,7 +58,6 @@ public class SpaceUsersTask implements ApplicationListener<SpacesRetrievedEvent>
     }
 
     private Mono<DefaultCloudFoundryOperations> buildClient(Space target) {
-        log.trace("Targeting org={} and space={}", target.getOrganization(), target.getSpace());
         return Mono.just(DefaultCloudFoundryOperations
                             .builder()
                             .from(opsClient)
@@ -68,6 +67,7 @@ public class SpaceUsersTask implements ApplicationListener<SpacesRetrievedEvent>
     }
 
     protected Mono<SpaceUsers> getSpaceUsers(DefaultCloudFoundryOperations opsClient) {
+        log.trace("Fetching space users in org={} and space={}", opsClient.getOrganization(), opsClient.getSpace());
         return opsClient
                 	.userAdmin()
                 		.listSpaceUsers(
