@@ -215,7 +215,7 @@ See additional property requirements in Query policies and the aforementioned sa
 
 #### Legacy Policies
 
-Legacy policies are useful when you want to search for and report on applications deployed to a legacy stack, notifying both the operator and for each application the author and/or his/her space compadres.
+Legacy policies are useful when you want to search for and report on applications deployed to a legacy stack (e.g., windows2012R2, cflinuxfs2), notifying both the operator and for each application the author and/or his/her space compadres.
 
 As mentioned previously the policy file must adhere to a naming convention
 
@@ -1074,14 +1074,14 @@ POST /policies
   "legacy-policies": [
     {
       "notifyee-email-template": {
-        "body": "<h3>The attached workloads have been flagged as legacy</h3><p>To avoid repeated notification:</p><ul><li>for each application please execute a cf push and update the stack to a modern alternative or cf delete</li></ul><p>depending on whether or not you want to keep the workload running.</p>",
+        "body": "<h3>TThese applications are deployed to a legacy stack</h3><p>To avoid repeated notification:</p><ul><li>for each application please execute a cf push and update the stack to a modern alternative or cf delete</li></ul><p>depending on whether or not you want to keep the workload running.</p>",
         "from": "admin@pcf.demo.ironleg.me",
         "subject": "Legacy Policy Sample Report"
       },
       "operator-email-template": {
-        "body": "<h3>These workloads have been flagged as legacy</h3><p>Results are herewith attached for your consideration.</p>",
+        "body": "<h3>These applications are deployed to a legacy stack</h3><p>Results are herewith attached for your consideration.</p>",
         "from": "admin@pcf.demo.ironleg.me",
-        "subject": "Hygiene Policy Sample Report",
+        "subject": "Legacy Policy Sample Report",
         "to": [
           "cphillipson@pivotal.io"
         ]
