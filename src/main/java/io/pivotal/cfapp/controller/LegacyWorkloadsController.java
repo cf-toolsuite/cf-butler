@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.pivotal.cfapp.domain.Workloads;
@@ -28,8 +28,8 @@ public class LegacyWorkloadsController {
         this.util = new TkServiceUtil(tkService);
     }
 
-    @GetMapping(value = { "/snapshot/detail/legacy/{stacks}" } )
-	public Mono<ResponseEntity<Workloads>> getLegacyWorkloads(@PathVariable("stacks") String stacks) {
+    @GetMapping(value = { "/snapshot/detail/legacy" } )
+	public Mono<ResponseEntity<Workloads>> getLegacyWorkloads(@RequestParam("stacks") String stacks) {
         final WorkloadsBuilder builder = Workloads.builder();
         return service
                 .getLegacyApplications(stacks)
