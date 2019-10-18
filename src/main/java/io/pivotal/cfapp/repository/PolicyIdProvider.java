@@ -8,6 +8,7 @@ import io.pivotal.cfapp.client.GitClient;
 import io.pivotal.cfapp.config.PoliciesSettings;
 import io.pivotal.cfapp.domain.ApplicationPolicy;
 import io.pivotal.cfapp.domain.HygienePolicy;
+import io.pivotal.cfapp.domain.LegacyPolicy;
 import io.pivotal.cfapp.domain.QueryPolicy;
 import io.pivotal.cfapp.domain.ServiceInstancePolicy;
 
@@ -47,6 +48,10 @@ public class PolicyIdProvider {
 
     public HygienePolicy seedHygienePolicy(HygienePolicy policy) {
 		return settings.isVersionManaged() ? HygienePolicy.seedWith(policy, commit): HygienePolicy.seed(policy);
+    }
+
+    public LegacyPolicy seedLegacyPolicy(LegacyPolicy policy) {
+		return settings.isVersionManaged() ? LegacyPolicy.seedWith(policy, commit): LegacyPolicy.seed(policy);
     }
 
 }

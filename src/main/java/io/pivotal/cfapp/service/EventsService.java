@@ -79,7 +79,7 @@ public class EventsService {
                                             .bodyToMono(String.class));
     }
 
-    public Mono<String> getEvents(String id, String type) {
+    public Mono<String> getEvent(String id, String type) {
         Assert.hasText(id, "Global unique identifier for application or service instance must not be blank or null!");
         EventType eventType = EventType.from(type);
         final String uri = UriComponentsBuilder
@@ -109,47 +109,47 @@ public class EventsService {
     public Flux<Event> getEvents(String id, String[] types) {
         return Flux
                 .fromArray(types)
-                .concatMap(type -> getEvents(id, type))
+                .concatMap(type -> getEvent(id, type))
                 .flatMap(json -> toFlux(json));
     }
 
     public Mono<Boolean> isDormantApplication(AppDetail detail, int daysSinceLastUpdate) {
         // @see https://docs.cloudfoundry.org/running/managing-cf/audit-events.html#considerations
-        if (daysSinceLastUpdate > settings.getEventsRetentionInDays()) {
-            if (detail.getLastPushed() != null) {
-                return Mono.just(ChronoUnit.DAYS.between(detail.getLastPushed(), LocalDateTime.now()) >= daysSinceLastUpdate);
-            } else {
-                return Mono.just(Boolean.TRUE);
-            }
-        }
-        String[] types = new String[] { EventType.AUDIT_APP_CREATE.getId(), EventType.AUDIT_APP_UPDATE.getId(), EventType.AUDIT_APP_RESTAGE.getId() };
+        Mono<Boolean> result = Mono.just(Boolean.FALSE);
         if (daysSinceLastUpdate == -1) {
-            return Mono.just(Boolean.TRUE);
+            result = Mono.just(Boolean.TRUE);
+        } else if (daysSinceLastUpdate > settings.getEventsRetentionInDays()) {
+            if (detail.getLastEventTime() != null) {
+                result =  Mono.just(ChronoUnit.DAYS.between(detail.getLastPushed(), LocalDateTime.now()) >= daysSinceLastUpdate);
+            }
+        } else {
+            String[] types = new String[] { EventType.AUDIT_APP_CREATE.getId(), EventType.AUDIT_APP_UPDATE.getId(), EventType.AUDIT_APP_RESTAGE.getId() };
+            result = getEvents(detail.getAppId(), types)
+                        .filter(event -> ChronoUnit.DAYS.between(event.getTime(), LocalDateTime.now()) >= daysSinceLastUpdate)
+                        .collect(Collectors.toList())
+                        .map(list -> list.size() > 0);
         }
-        return getEvents(detail.getAppId(), types)
-                .filter(event -> ChronoUnit.DAYS.between(event.getTime(), LocalDateTime.now()) >= daysSinceLastUpdate)
-                .collect(Collectors.toList())
-                .map(list -> list.size() > 0);
+        return result;
     }
 
     public Mono<Boolean> isDormantServiceInstance(ServiceInstanceDetail detail, int daysSinceLastUpdate) {
         // @see https://docs.cloudfoundry.org/running/managing-cf/audit-events.html#considerations
-        if (daysSinceLastUpdate > settings.getEventsRetentionInDays()) {
-            if (detail.getLastUpdated() != null) {
-                return Mono.just(ChronoUnit.DAYS.between(detail.getLastUpdated(), LocalDateTime.now()) >= daysSinceLastUpdate);
-            } else {
-                return Mono.just(Boolean.TRUE);
-            }
-        }
+        Mono<Boolean> result = Mono.just(Boolean.FALSE);
         if (daysSinceLastUpdate == -1) {
-            return Mono.just(Boolean.TRUE);
+            result = Mono.just(Boolean.TRUE);
+        } else if (daysSinceLastUpdate > settings.getEventsRetentionInDays()) {
+            if (detail.getLastUpdated() != null) {
+                result = Mono.just(ChronoUnit.DAYS.between(detail.getLastUpdated(), LocalDateTime.now()) >= daysSinceLastUpdate);
+            }
+        } else {
+            String[] types = new String[] { EventType.AUDIT_SERVICE_INSTANCE_CREATE.getId(), EventType.AUDIT_SERVICE_INSTANCE_UPDATE.getId(),
+                EventType.AUDIT_USER_PROVIDED_SERVICE_INSTANCE_CREATE.getId(), EventType.AUDIT_USER_PROVIDED_SERVICE_INSTANCE_UPDATE.getId() };
+            result = getEvents(detail.getServiceInstanceId(), types)
+                        .filter(event -> ChronoUnit.DAYS.between(event.getTime(), LocalDateTime.now()) >= daysSinceLastUpdate)
+                        .collect(Collectors.toList())
+                        .map(list -> list.size() > 0);
         }
-        String[] types = new String[] { EventType.AUDIT_SERVICE_INSTANCE_CREATE.getId(), EventType.AUDIT_SERVICE_INSTANCE_UPDATE.getId(),
-            EventType.AUDIT_USER_PROVIDED_SERVICE_INSTANCE_CREATE.getId(), EventType.AUDIT_USER_PROVIDED_SERVICE_INSTANCE_UPDATE.getId() };
-        return getEvents(detail.getServiceInstanceId(), types)
-                .filter(event -> ChronoUnit.DAYS.between(event.getTime(), LocalDateTime.now()) >= daysSinceLastUpdate)
-                .collect(Collectors.toList())
-                .map(list -> list.size() > 0);
+        return result;
     }
 
     public Flux<Event> toFlux(String json) {

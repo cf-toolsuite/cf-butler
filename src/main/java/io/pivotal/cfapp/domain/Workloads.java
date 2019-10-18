@@ -18,7 +18,7 @@ import lombok.Getter;
 @Getter
 @EqualsAndHashCode
 @JsonPropertyOrder({ "applications", "service-instances" })
-public class DormantWorkloads {
+public class Workloads {
 
     @Default
     @JsonProperty("applications")
@@ -29,7 +29,7 @@ public class DormantWorkloads {
     private List<ServiceInstanceDetail> serviceInstances = new ArrayList<>();
 
     @JsonCreator
-    public DormantWorkloads(
+    public Workloads(
         @JsonProperty("applications") List<AppDetail> applications,
         @JsonProperty("service-instances") List<ServiceInstanceDetail> serviceInstances
     ) {
@@ -37,7 +37,7 @@ public class DormantWorkloads {
         this.serviceInstances = serviceInstances;
     }
 
-    public DormantWorkloads matchBySpace(List<Space> spaces) {
+    public Workloads matchBySpace(List<Space> spaces) {
         List<AppDetail> matchingApps = new ArrayList<>();
         List<ServiceInstanceDetail> matchingServiceInstances = new ArrayList<>();
         for (Space s: spaces) {
@@ -54,13 +54,13 @@ public class DormantWorkloads {
                                 && serviceInstance.getSpace().equalsIgnoreCase(s.getSpace()))
                         .collect(Collectors.toList()));
         }
-        return DormantWorkloads.builder().applications(matchingApps).serviceInstances(matchingServiceInstances).build();
+        return Workloads.builder().applications(matchingApps).serviceInstances(matchingServiceInstances).build();
     }
 
     public String toString() {
         return String
                 .format(
-                    "Dormant Applications: [%s], Dormant Service Instances [%s]",
+                    "Workloads comprised of... \n\tApplications: [%s],\n\tService Instances [%s]",
                     String.join(",", getApplications().stream().map(a -> a.getAppName()).collect(Collectors.toList())),
                     String.join(",", getServiceInstances().stream().map(s -> s.getName()).collect(Collectors.toList()))
                 );

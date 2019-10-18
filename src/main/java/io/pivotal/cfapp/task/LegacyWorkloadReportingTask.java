@@ -13,15 +13,14 @@ import org.springframework.stereotype.Component;
 
 import io.pivotal.cfapp.config.PasSettings;
 import io.pivotal.cfapp.domain.AppDetail;
-import io.pivotal.cfapp.domain.Workloads;
-import io.pivotal.cfapp.domain.Workloads.WorkloadsBuilder;
 import io.pivotal.cfapp.domain.EmailValidator;
-import io.pivotal.cfapp.domain.HygienePolicy;
-import io.pivotal.cfapp.domain.ServiceInstanceDetail;
+import io.pivotal.cfapp.domain.LegacyPolicy;
 import io.pivotal.cfapp.domain.Space;
 import io.pivotal.cfapp.domain.UserSpaces;
+import io.pivotal.cfapp.domain.Workloads;
+import io.pivotal.cfapp.domain.Workloads.WorkloadsBuilder;
 import io.pivotal.cfapp.event.EmailNotificationEvent;
-import io.pivotal.cfapp.service.DormantWorkloadsService;
+import io.pivotal.cfapp.service.LegacyWorkloadsService;
 import io.pivotal.cfapp.service.PoliciesService;
 import io.pivotal.cfapp.service.SpaceUsersService;
 import io.pivotal.cfapp.service.UserSpacesService;
@@ -33,37 +32,37 @@ import reactor.util.function.Tuples;
 
 @Slf4j
 @Component
-public class HygienePolicyExecutorTask implements PolicyExecutorTask {
+public class LegacyWorkloadReportingTask implements PolicyExecutorTask {
 
     private final PasSettings settings;
     private final PoliciesService policiesService;
     private final SpaceUsersService spaceUsersService;
     private final UserSpacesService userSpacesService;
-    private final DormantWorkloadsService dormantWorkloadsService;
+    private final LegacyWorkloadsService legacyWorkloadsService;
     private final ApplicationEventPublisher publisher;
 
     @Autowired
-    public HygienePolicyExecutorTask(
+    public LegacyWorkloadReportingTask(
         PasSettings settings,
         PoliciesService policiesService,
         SpaceUsersService spaceUsersService,
         UserSpacesService userSpacesService,
-        DormantWorkloadsService dormantWorkloadsService,
+        LegacyWorkloadsService legacyWorkloadsService,
         ApplicationEventPublisher publisher
     ) {
         this.settings = settings;
         this.policiesService = policiesService;
         this.spaceUsersService = spaceUsersService;
         this.userSpacesService = userSpacesService;
-        this.dormantWorkloadsService = dormantWorkloadsService;
+        this.legacyWorkloadsService = legacyWorkloadsService;
         this.publisher = publisher;
     }
 
 	@Override
     public void execute() {
-	    log.info("HygienePolicyExecutorTask started");
-        fetchHygienePolicies()
-            .concatMap(hp -> executeHygienePolicy(hp).map(result -> Tuples.of(hp, result)))
+	    log.info("LegacyWorkloadReportingTask started");
+        fetchLegacyPolicies()
+            .concatMap(hp -> executePolicy(hp).map(result -> Tuples.of(hp, result)))
             .collectList()
 	    	.subscribe(
                 results -> {
@@ -71,16 +70,16 @@ public class HygienePolicyExecutorTask implements PolicyExecutorTask {
                         notifyOperator(tuple);
                         notifyUsers(tuple);
                     });
-		            log.info("HygienePolicyExecutorTask completed");
-		            log.info("-- {} hygiene policies executed.", results.size());
+		            log.info("LegacyWorkloadReportingTask completed");
+		            log.info("-- {} legacy workload policies executed.", results.size());
 		        },
 		        error -> {
-		            log.error("HygienePolicyExecutorTask terminated with error", error);
+		            log.error("LegacyWorkloadReportingTask terminated with error", error);
 		        }
 	        );
     }
 
-    private void notifyOperator(Tuple2<HygienePolicy, Workloads> tuple) {
+    private void notifyOperator(Tuple2<LegacyPolicy, Workloads> tuple) {
         log.trace("User: admin, " + tuple.getT2().toString());
         publisher.publishEvent(
             new EmailNotificationEvent(this)
@@ -93,7 +92,7 @@ public class HygienePolicyExecutorTask implements PolicyExecutorTask {
         );
     }
 
-    private void notifyUsers(Tuple2<HygienePolicy, Workloads> tuple) {
+    private void notifyUsers(Tuple2<LegacyPolicy, Workloads> tuple) {
         // Pull distinct Set<Space> from applications and service instances
         Flux
             .fromIterable(getSpaces(tuple.getT2()))
@@ -127,20 +126,18 @@ public class HygienePolicyExecutorTask implements PolicyExecutorTask {
     	execute();
     }
 
-	protected Flux<HygienePolicy> fetchHygienePolicies() {
+	protected Flux<LegacyPolicy> fetchLegacyPolicies() {
         return
             policiesService
-		        .findAllHygienePolicies()
-                .flatMapMany(policy -> Flux.fromIterable(policy.getHygienePolicies()));
+		        .findAllLegacyPolicies()
+                .flatMapMany(policy -> Flux.fromIterable(policy.getLegacyPolicies()));
     }
 
-    protected Mono<Workloads> executeHygienePolicy(HygienePolicy policy) {
+    protected Mono<Workloads> executePolicy(LegacyPolicy policy) {
         final WorkloadsBuilder builder = Workloads.builder();
-        return dormantWorkloadsService
-            .getDormantApplications(policy)
-            .map(list -> builder.applications(list))
-            .then(dormantWorkloadsService.getDormantServiceInstances(policy))
-            .map(list -> builder.serviceInstances(list).build());
+        return legacyWorkloadsService
+            .getLegacyApplications(policy)
+            .map(list -> builder.applications(list).build());
     }
 
     private static Mono<Tuple2<UserSpaces, Workloads>> filterWorkloads(UserSpaces userSpaces, Workloads input){
@@ -150,30 +147,20 @@ public class HygienePolicyExecutorTask implements PolicyExecutorTask {
 
     }
 
-    private static Map<String, String> buildAttachmentContents(Tuple2<HygienePolicy, Workloads> tuple) {
+    private static Map<String, String> buildAttachmentContents(Tuple2<LegacyPolicy, Workloads> tuple) {
 	    String cr = System.getProperty("line.separator");
         Map<String, String> result = new HashMap<>();
         StringBuilder applications = new StringBuilder();
-        StringBuilder serviceInstances = new StringBuilder();
         applications.append(AppDetail.headers()).append(cr);
         tuple.getT2()
             .getApplications()
                 .forEach(app -> applications.append(app.toCsv()).append(cr));
-        serviceInstances.append(ServiceInstanceDetail.headers()).append(cr);
-        tuple.getT2()
-            .getServiceInstances()
-                .forEach(sid -> serviceInstances.append(sid.toCsv()).append(cr));
         result.put(getFileNamePrefix(tuple.getT1()) + "applications", applications.toString());
-        result.put(getFileNamePrefix(tuple.getT1()) + "service-instances", serviceInstances.toString());
         return result;
     }
 
-    private static String getFileNamePrefix(HygienePolicy policy) {
-        String prefix = "";
-        if (policy.getDaysSinceLastUpdate() != -1) {
-            prefix = "dormant-";
-        }
-        return prefix;
+    private static String getFileNamePrefix(LegacyPolicy policy) {
+        return "legacy-";
     }
 
     private static Set<Space> getSpaces(Workloads workloads) {
@@ -183,15 +170,8 @@ public class HygienePolicyExecutorTask implements PolicyExecutorTask {
                     .stream()
                         .map(app -> new Space(app.getOrganization(), app.getSpace()))
                         .collect(Collectors.toSet());
-        Set<Space> serviceInstanceSpaces =
-            workloads
-                .getServiceInstances()
-                    .stream()
-                        .map(app -> new Space(app.getOrganization(), app.getSpace()))
-                        .collect(Collectors.toSet());
         Set<Space> result = new HashSet<>();
         result.addAll(applicationSpaces);
-        result.addAll(serviceInstanceSpaces);
         return result;
     }
 

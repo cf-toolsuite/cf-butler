@@ -9,9 +9,11 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import lombok.Builder;
 
+@Builder
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-@JsonPropertyOrder({ "application-policies", "service-instance-policies", "query-policies", "hygiene-policies" })
+@JsonPropertyOrder({ "application-policies", "service-instance-policies", "query-policies", "hygiene-policies", "legacy-policies" })
 public class Policies {
 
 	@JsonProperty("application-policies")
@@ -26,16 +28,21 @@ public class Policies {
 	@JsonProperty("hygiene-policies")
 	private List<HygienePolicy> hygienePolicies;
 
+	@JsonProperty("legacy-policies")
+	private List<LegacyPolicy> legacyPolicies;
+
 	@JsonCreator
-	public Policies(
+	Policies(
 			@JsonProperty("application-policies") List<ApplicationPolicy> applicationPolicies,
 			@JsonProperty("service-instance-policies") List<ServiceInstancePolicy> serviceInstancePolicies,
 			@JsonProperty("query-policies") List<QueryPolicy> queryPolicies,
-			@JsonProperty("hygiene-policies") List<HygienePolicy> hygienePolicies) {
+			@JsonProperty("hygiene-policies") List<HygienePolicy> hygienePolicies,
+			@JsonProperty("legacy-policies") List<LegacyPolicy> legacyPolicies) {
 		this.applicationPolicies = applicationPolicies;
 		this.serviceInstancePolicies = serviceInstancePolicies;
 		this.queryPolicies = queryPolicies;
 		this.hygienePolicies = hygienePolicies;
+		this.legacyPolicies = legacyPolicies;
 	}
 
 	public List<ApplicationPolicy> getApplicationPolicies() {
@@ -54,12 +61,17 @@ public class Policies {
 		return hygienePolicies != null ? hygienePolicies: Collections.emptyList();
 	}
 
+	public List<LegacyPolicy> getLegacyPolicies() {
+		return legacyPolicies != null ? legacyPolicies: Collections.emptyList();
+	}
+
 	@JsonIgnore
 	public boolean isEmpty() {
 		return getApplicationPolicies().isEmpty()
 				&& getServiceInstancePolicies().isEmpty()
 				&& getQueryPolicies().isEmpty()
-				&& getHygienePolicies().isEmpty();
+				&& getHygienePolicies().isEmpty()
+				&& getLegacyPolicies().isEmpty();
 	}
 
 }
