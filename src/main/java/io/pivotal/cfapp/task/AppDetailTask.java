@@ -3,7 +3,6 @@ package io.pivotal.cfapp.task;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -154,26 +153,22 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
     }
 
     protected Mono<AppDetail> getLastEvent(AppDetail fragment) {
-        if (ChronoUnit.DAYS.between(fragment.getLastPushed(), LocalDateTime.now()) > settings.getEventsRetentionInDays()) {
-            return Mono.just(fragment);
-        } else {
-            log.trace("Fetching last event of application for org={}, space={}, id={}, name={}", fragment.getOrganization(), fragment.getSpace(), fragment.getAppId(), fragment.getAppName());
-            return buildClient(new Space(fragment.getOrganization(), fragment.getSpace()))
-                    .applications()
-                        .getEvents(GetApplicationEventsRequest.builder().name(fragment.getAppName()).maxNumberOfEvents(5).build())
-                        .next()
-                        .flatMap(
-                            e -> Mono.just(
-                                Event.builder().type(e.getEvent()).actor(e.getActor())
-                                    .time(nullSafeLocalDateTime(e.getTime()))
-                                    .build()))
-                        .map(e -> AppDetail
-                                    .from(fragment)
-                                        .lastEvent(e.getType())
-                                        .lastEventActor(e.getActor())
-                                        .lastEventTime(e.getTime())
-                                    .build());
-        }
+        log.trace("Fetching last event for application id={}, name={} in org={}, space={}", fragment.getAppId(), fragment.getAppName(), fragment.getOrganization(), fragment.getSpace());
+        return buildClient(new Space(fragment.getOrganization(), fragment.getSpace()))
+                .applications()
+                    .getEvents(GetApplicationEventsRequest.builder().name(fragment.getAppName()).maxNumberOfEvents(1).build())
+                    .next()
+                    .flatMap(
+                        e -> Mono.just(
+                            Event.builder().type(e.getEvent()).actor(e.getActor())
+                                .time(nullSafeLocalDateTime(e.getTime()))
+                                .build()))
+                    .map(e -> AppDetail
+                                .from(fragment)
+                                    .lastEvent(e.getType())
+                                    .lastEventActor(e.getActor())
+                                    .lastEventTime(e.getTime())
+                                .build());
     }
 
     private String getBuildpack(String buildpackId) {

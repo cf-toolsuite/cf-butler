@@ -28,6 +28,7 @@ This is where `cf-butler` has your back.
       * [Using an external database](#using-an-external-database)
       * [Managing policies](#managing-policies)
         * [Hygiene Policies](#hygiene-policies)
+        * [Legacy policies](#legacy-policies)
         * [Query policies](#query-policies)
       * [To set the operations schedule](#to-set-the-operations-schedule)
       * [To discriminate user from service accounts](#to-discriminate-user-from-service-accounts)
@@ -209,7 +210,18 @@ As mentioned previously the policy file must adhere to a naming convention
 
 * a filename ending with `-HP.json` encapsulates an individual [HygienePolicy](src/main/java/io/pivotal/cfapp/domain/HygienePolicy.java)
 
-See additional property requirements in Query policies.
+See additional property requirements in Query policies and the aforementioned sample Github repository.
+
+
+#### Legacy Policies
+
+Legacy policies are useful when you want to search for and report on applications deployed to a legacy stack, notifying both the operator and for each application the author and/or his/her space compadres.
+
+As mentioned previously the policy file must adhere to a naming convention
+
+* a filename ending with `-LP.json` encapsulates an individual [LegacyPolicy](src/main/java/io/pivotal/cfapp/domain/LegacyPolicy.java)
+
+See additional property requirements in Query policies and the aforementioned sample Github repository.
 
 
 #### Query policies
@@ -879,6 +891,11 @@ GET /snapshot/detail/dormant/{daysSinceLastUpdate}
 > Provides a list of dormant workloads. A workload is either an application or service instance.  An application is considered dormant when the last occasion of among `audit.app.create`, `audit.app.update` or `audit.app.restage` events transpired `daysSinceLastUpdate` or longer from the time of request.  A service instance is considered dormant when the last occasion of among `audit.service_instance.create`, `audit.service_instance.update`, `audit.user_provided_service_instance.create` or `audit.user_provided_service_instance.update` events transpired `daysSinceLastUpdate` or longer from the time of request.
 
 ```
+GET /snapshot/detail/legacy/{stacks}
+```
+> Returns a list of all applications that have been deployed on legacy stacks like `windows2012R2`, `cflinusfs2`.
+
+```
 GET /snapshot/detail/users
 ```
 > Provides a list of all space users (ignoring role) in comma-separated value format by organization and space, where multiple users in each space are comma-separated. Service accounts are filtered.
@@ -959,7 +976,7 @@ POST /policies
   "application-policies": [
     {
       "description": "Remove stopped applications that are older than some date/time from now and restricted to whitelisted organizations",
-      "operation":"delete",
+      "operation": "delete",
       "state": "stopped",
       "options": {
         "from-datime": "2019-07-01T12:30:00",
@@ -990,14 +1007,16 @@ POST /policies
         "stack-to": "cflinuxfs3"
       },
       "organization-whitelist": [
-        "zoo-labs","jujubees","full-beaker"
+        "zoo-labs",
+        "jujubees",
+        "full-beaker"
       ]
     }
   ],
   "service-instance-policies": [
     {
       "description": "Remove orphaned services that are older than some duration from now and restricted to whitelisted organizations",
-      "operation":"delete",
+      "operation": "delete",
       "options": {
         "from-duration": "P1D"
       },
@@ -1008,32 +1027,37 @@ POST /policies
   ],
   "query-policies": [
     {
-      "description":"Query policy that will run two queries and email the results as per the template configuration.",
+      "description": "Query policy that will run two queries and email the results as per the template configuration.",
       "queries": [
-          {
-              "name": "docker-images",
-              "description": "Find all running Docker image based containers",
-              "sql": "select * from application_detail where running_instances > 0 and requested_state = 'started' and image is not null"
-          },
-          {
-              "name": "all-apps-pushed-and-still-running-in-the-last-week",
-              "description": "Find all running applications pushed in the last week not including the system organization",
-              "sql": "select * from application_detail where running_instances > 0 and requested_state = 'started' and week(last_pushed) = week(current_date) -1 AND year(last_pushed) = year(current_date) and organization not in ('system')"
-          }
+        {
+          "name": "docker-images",
+          "description": "Find all running Docker image based containers",
+          "sql": "select * from application_detail where running_instances > 0 and requested_state = 'started' and image is not null"
+        },
+        {
+          "name": "all-apps-pushed-and-still-running-in-the-last-week",
+          "description": "Find all running applications pushed in the last week not including the system organization",
+          "sql": "select * from application_detail where running_instances > 0 and requested_state = 'started' and week(last_pushed) = week(current_date) -1 AND year(last_pushed) = year(current_date) and organization not in ('system')"
+        }
       ],
       "email-notification-template": {
         "from": "admin@nowhere.me",
-        "to": [ "drwho@tardis.io" ],
+        "to": [
+          "drwho@tardis.io"
+        ],
         "subject": "Query Policy Sample Report",
         "body": "Results are herewith attached for your consideration."
       }
+    }
   ],
   "hygiene-policies": [
     {
       "days-since-last-update": 14,
       "operator-email-template": {
         "from": "admin@nowhere.me",
-        "to": [ "cphillipson@pivotal.io" ],
+        "to": [
+          "cphillipson@pivotal.io"
+        ],
         "subject": "Hygiene Policy Platform Operator Report",
         "body": "These are the dormant workloads in a single organization"
       },
@@ -1042,7 +1066,31 @@ POST /policies
         "subject": "Hygiene Policy User Workloads Report",
         "body": "You may want to revisit whether or not these workloads are useful.  Please take a moment to either stop and/or delete them if they aren't."
       },
-      "organization-whitelist": [ "blast-radius" ]
+      "organization-whitelist": [
+        "blast-radius"
+      ]
+    }
+  ],
+  "legacy-policies": [
+    {
+      "notifyee-email-template": {
+        "body": "<h3>The attached workloads have been flagged as legacy</h3><p>To avoid repeated notification:</p><ul><li>for each application please execute a cf push and update the stack to a modern alternative or cf delete</li></ul><p>depending on whether or not you want to keep the workload running.</p>",
+        "from": "admin@pcf.demo.ironleg.me",
+        "subject": "Legacy Policy Sample Report"
+      },
+      "operator-email-template": {
+        "body": "<h3>These workloads have been flagged as legacy</h3><p>Results are herewith attached for your consideration.</p>",
+        "from": "admin@pcf.demo.ironleg.me",
+        "subject": "Hygiene Policy Sample Report",
+        "to": [
+          "cphillipson@pivotal.io"
+        ]
+      },
+      "organization-whitelist": [],
+      "stacks": [
+        "cflinuxfs2",
+        "windows2012R2"
+      ]
     }
   ]
 }

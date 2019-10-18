@@ -2,12 +2,14 @@ plugins {
     id 'com.gorylenko.gradle-git-properties' version '2.2.0'
     id 'org.springframework.boot' version '2.2.0.M6'
     id 'io.spring.dependency-management' version '1.0.8.RELEASE'
-    id 'com.github.ben-manes.versions' version '0.25.0'
-    id 'io.franzbecker.gradle-lombok' version '3.1.0'
+    id 'com.github.ben-manes.versions' version '0.26.0'
+    id 'io.franzbecker.gradle-lombok' version '3.2.0'
 	id 'java'
     id 'jacoco'
+    id 'com.google.cloud.tools.jib' version '1.6.1'
     id 'maven-publish'
     id 'com.github.spotbugs' version '2.0.0'
+    id 'info.solidsoft.pitest' version '1.4.5'
 }
 
 gitProperties {
@@ -93,7 +95,7 @@ test {
 }
 
 jacoco {
-	toolVersion = "0.8.4"
+	toolVersion = "0.8.5"
 }
 
 jacocoTestReport {
@@ -102,6 +104,14 @@ jacocoTestReport {
 		html.enabled = true
 		csv.enabled = false
 	}
+}
+
+pitest {
+    testPlugin = "junit5"
+    jvmArgs = ['-Xmx1024m']
+    threads = 5
+    targetClasses = ['io.pivotal.cfapp.*']
+    outputFormats = ['XML', 'HTML']
 }
 
 dependencies {
@@ -146,11 +156,11 @@ dependencies {
     testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine')
     testImplementation('org.mockito:mockito-core')
     testImplementation('org.mockito:mockito-junit-jupiter')
-    testImplementation('io.projectreactor.tools:blockhound:1.0.0.RELEASE')
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
 	    exclude group: 'junit', module: 'junit'
     }
+    testImplementation('org.pitest:pitest-junit5-plugin:0.9')
 }
 
 publishing {
@@ -218,4 +228,4 @@ javadoc {
     }
 }
 
-check.dependsOn jacocoTestReport
+check.dependsOn jacocoTestReport, javadoc

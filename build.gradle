@@ -6,8 +6,10 @@ plugins {
     id 'io.franzbecker.gradle-lombok' version '3.2.0'
 	id 'java'
     id 'jacoco'
+    id 'com.google.cloud.tools.jib' version '1.6.1'
     id 'maven-publish'
     id 'com.github.spotbugs' version '2.0.0'
+    id 'info.solidsoft.pitest' version '1.4.5'
 }
 
 gitProperties {
@@ -36,7 +38,7 @@ tasks.withType(com.github.spotbugs.SpotBugsTask) {
 
 group = 'io.pivotal'
 version = '0.1-SNAPSHOT'
-//sourceCompatibility = JavaVersion.VERSION_11
+sourceCompatibility = JavaVersion.VERSION_11
 
 task sourcesJar(type: Jar) {
     from sourceSets.main.allJava
@@ -52,6 +54,8 @@ repositories {
 	mavenCentral()
     maven { url "https://repo.spring.io/snapshot" }
 	maven { url "https://repo.spring.io/milestone" }
+    maven { url "https://jitpack.io" }
+    mavenLocal()
 }
 
 ext {
@@ -91,7 +95,7 @@ test {
 }
 
 jacoco {
-	toolVersion = "0.8.4"
+	toolVersion = "0.8.5"
 }
 
 jacocoTestReport {
@@ -100,6 +104,14 @@ jacocoTestReport {
 		html.enabled = true
 		csv.enabled = false
 	}
+}
+
+pitest {
+    testPlugin = "junit5"
+    jvmArgs = ['-Xmx1024m']
+    threads = 5
+    targetClasses = ['io.pivotal.cfapp.*']
+    outputFormats = ['XML', 'HTML']
 }
 
 dependencies {
@@ -144,11 +156,11 @@ dependencies {
     testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine')
     testImplementation('org.mockito:mockito-core')
     testImplementation('org.mockito:mockito-junit-jupiter')
-    testImplementation('io.projectreactor.tools:blockhound:1.0.0.RELEASE')
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
 	    exclude group: 'junit', module: 'junit'
     }
+    testImplementation('org.pitest:pitest-junit5-plugin:0.9')
 }
 
 publishing {
@@ -216,4 +228,4 @@ javadoc {
     }
 }
 
-check.dependsOn jacocoTestReport
+check.dependsOn jacocoTestReport, javadoc

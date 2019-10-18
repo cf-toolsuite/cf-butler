@@ -3,7 +3,6 @@ package io.pivotal.cfapp.repository;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -23,10 +22,11 @@ import org.springframework.util.CollectionUtils;
 import io.pivotal.cfapp.domain.ApplicationOperation;
 import io.pivotal.cfapp.domain.ApplicationPolicy;
 import io.pivotal.cfapp.domain.ApplicationPolicyShim;
-import io.pivotal.cfapp.domain.Defaults;
 import io.pivotal.cfapp.domain.EmailNotificationTemplate;
 import io.pivotal.cfapp.domain.HygienePolicy;
 import io.pivotal.cfapp.domain.HygienePolicyShim;
+import io.pivotal.cfapp.domain.LegacyPolicy;
+import io.pivotal.cfapp.domain.LegacyPolicyShim;
 import io.pivotal.cfapp.domain.Policies;
 import io.pivotal.cfapp.domain.Query;
 import io.pivotal.cfapp.domain.QueryPolicy;
@@ -71,6 +71,10 @@ public class R2dbcPoliciesRepository {
 			entity.getHygienePolicies().stream()
 				.map(p -> idProvider.seedHygienePolicy(p)).collect(Collectors.toList());
 
+		List<LegacyPolicy> legacyPolicies =
+				entity.getLegacyPolicies().stream()
+					.map(p -> idProvider.seedLegacyPolicy(p)).collect(Collectors.toList());
+
 		return Flux.fromIterable(applicationPolicies)
 					.concatMap(ap -> saveApplicationPolicy(ap))
 					.thenMany(Flux.fromIterable(serviceInstancePolicies)
@@ -79,7 +83,9 @@ public class R2dbcPoliciesRepository {
 					.concatMap(qp -> saveQueryPolicy(qp)))
 					.thenMany(Flux.fromIterable(hygienePolicies)
 					.concatMap(hp -> saveHygienePolicy(hp)))
-					.then(Mono.just(new Policies(applicationPolicies, serviceInstancePolicies, queryPolicies, hygienePolicies)));
+					.thenMany(Flux.fromIterable(legacyPolicies)
+					.concatMap(lp -> saveLegacyPolicy(lp)))
+					.then(Mono.just(Policies.builder().applicationPolicies(applicationPolicies).serviceInstancePolicies(serviceInstancePolicies).queryPolicies(queryPolicies).hygienePolicies(hygienePolicies).legacyPolicies(legacyPolicies).build()));
 	}
 
 	public Mono<Policies> findServiceInstancePolicyById(String id) {
@@ -97,13 +103,13 @@ public class R2dbcPoliciesRepository {
 									.pk(row.get("pk", Long.class))
 									.id(row.get("id", String.class))
 									.operation(row.get("operation", String.class))
-									.description(Defaults.getColumnValueOrDefault(row, "description", String.class, ""))
+									.description(row.get("description", String.class))
 									.options(readOptions(row.get("options", String.class) == null ? "{}" : row.get("options", String.class)))
 									.organizationWhiteList(row.get("organization_whitelist", String.class) != null ? new HashSet<String>(Arrays.asList(row.get("organization_whitelist", String.class).split("\\s*,\\s*"))): new HashSet<>())
 									.build())
 						.all())
 				.map(sp -> serviceInstancePolicies.add(sp))
-				.then(Mono.just(new Policies(Collections.emptyList(), serviceInstancePolicies, Collections.emptyList(), Collections.emptyList())))
+				.then(Mono.just(Policies.builder().serviceInstancePolicies(serviceInstancePolicies).build()))
 				.flatMap(p -> p.isEmpty() ? Mono.empty(): Mono.just(p));
 	}
 
@@ -122,14 +128,14 @@ public class R2dbcPoliciesRepository {
 									.pk(row.get("pk", Long.class))
 									.id(row.get("id", String.class))
 									.operation(row.get("operation", String.class))
-									.description(Defaults.getColumnValueOrDefault(row, "description", String.class, ""))
+									.description(row.get("description", String.class))
 									.options(readOptions(row.get("options", String.class) == null ? "{}" : row.get("options", String.class)))
 									.organizationWhiteList(row.get("organization_whitelist", String.class) != null ? new HashSet<String>(Arrays.asList(row.get("organization_whitelist", String.class).split("\\s*,\\s*"))): new HashSet<>())
 									.state(row.get("state", String.class))
 									.build())
 						.all())
 				.map(ap -> applicationPolicies.add(ap))
-				.then(Mono.just(new Policies(applicationPolicies, Collections.emptyList(), Collections.emptyList(), Collections.emptyList())))
+				.then(Mono.just(Policies.builder().applicationPolicies(applicationPolicies).build()))
 				.flatMap(p -> p.isEmpty() ? Mono.empty(): Mono.just(p));
 	}
 
@@ -147,13 +153,13 @@ public class R2dbcPoliciesRepository {
 								.builder()
 									.pk(row.get("pk", Long.class))
 									.id(row.get("id", String.class))
-									.description(Defaults.getColumnValueOrDefault(row, "description", String.class, ""))
+									.description(row.get("description", String.class))
 									.queries(readQueries(row.get("queries", String.class) == null ? "{}" : row.get("queries", String.class)))
 									.emailNotificationTemplate(readEmailNotificationTemplate(row.get("email_notification_template", String.class) == null ? "{}": row.get("email_notification_template", String.class)))
 									.build())
 						.all())
 				.map(qp -> queryPolicies.add(qp))
-				.then(Mono.just(new Policies(Collections.emptyList(), Collections.emptyList(), queryPolicies, Collections.emptyList())))
+				.then(Mono.just(Policies.builder().queryPolicies(queryPolicies).build()))
 				.flatMap(p -> p.isEmpty() ? Mono.empty(): Mono.just(p));
 	}
 
@@ -178,7 +184,32 @@ public class R2dbcPoliciesRepository {
 									.build())
 						.all())
 				.map(hp -> hygienePolicies.add(hp))
-				.then(Mono.just(new Policies(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), hygienePolicies)))
+				.then(Mono.just(Policies.builder().hygienePolicies(hygienePolicies).build()))
+				.flatMap(p -> p.isEmpty() ? Mono.empty(): Mono.just(p));
+	}
+
+	public Mono<Policies> findLegacyPolicyById(String id) {
+		List<LegacyPolicy> legacyPolicies = new ArrayList<>();
+		return
+			Flux
+				.from(dbClient
+						.select()
+							.from(LegacyPolicy.tableName())
+							.project(LegacyPolicy.columnNames())
+							.matching(Criteria.where("id").is(id))
+						.map((row, metadata) ->
+							LegacyPolicy
+								.builder()
+									.pk(row.get("pk", Long.class))
+									.id(row.get("id", String.class))
+									.stacks(row.get("stacks", String.class) != null ? new HashSet<String>(Arrays.asList(row.get("stacks", String.class).split("\\s*,\\s*"))): new HashSet<>())
+									.operatorTemplate(readEmailNotificationTemplate(row.get("operator_email_template", String.class) == null ? "{}": row.get("operator_email_template", String.class)))
+									.notifyeeTemplate(readEmailNotificationTemplate(row.get("notifyee_email_template", String.class) == null ? "{}": row.get("notifyee_email_template", String.class)))
+									.organizationWhiteList(row.get("organization_whitelist", String.class) != null ? new HashSet<String>(Arrays.asList(row.get("organization_whitelist", String.class).split("\\s*,\\s*"))): new HashSet<>())
+									.build())
+						.all())
+				.map(lp -> legacyPolicies.add(lp))
+				.then(Mono.just(Policies.builder().legacyPolicies(legacyPolicies).build()))
 				.flatMap(p -> p.isEmpty() ? Mono.empty(): Mono.just(p));
 	}
 
@@ -187,10 +218,12 @@ public class R2dbcPoliciesRepository {
 		String selectAllServiceInstancePolicies = "select pk, id, operation, description, options, organization_whitelist from service_instance_policy";
 		String selectAllQueryPolicies = "select pk, id, description, queries, email_notification_template from query_policy";
 		String selectAllHygienePolicies = "select pk, id, days_since_last_update, operator_email_template, notifyee_email_template, organization_whitelist from hygiene_policy";
+		String selectAllLegacyPolicies = "select pk, id, stacks, operator_email_template, notifyee_email_template, organization_whitelist from legacy_policy";
 		List<ApplicationPolicy> applicationPolicies = new ArrayList<>();
 		List<ServiceInstancePolicy> serviceInstancePolicies = new ArrayList<>();
 		List<QueryPolicy> queryPolicies = new ArrayList<>();
 		List<HygienePolicy> hygienePolicies = new ArrayList<>();
+		List<LegacyPolicy> legacyPolicies = new ArrayList<>();
 		return
 				Flux
 					.from(dbClient.execute(selectAllApplicationPolicies)
@@ -216,7 +249,7 @@ public class R2dbcPoliciesRepository {
 												.pk(row.get("pk", Long.class))
 												.id(row.get("id", String.class))
 												.operation(row.get("operation", String.class))
-												.description(Defaults.getColumnValueOrDefault(row, "description", String.class, ""))
+												.description(row.get("description", String.class))
 												.options(readOptions(row.get("options", String.class) == null ? "{}" : row.get("options", String.class)))
 												.organizationWhiteList(row.get("organization_whitelist", String.class) != null ? new HashSet<String>(Arrays.asList(row.get("organization_whitelist", String.class).split("\\s*,\\s*"))): new HashSet<>())
 												.build())
@@ -230,7 +263,7 @@ public class R2dbcPoliciesRepository {
 											.builder()
 												.pk(row.get("pk", Long.class))
 												.id(row.get("id", String.class))
-												.description(Defaults.getColumnValueOrDefault(row, "description", String.class, ""))
+												.description(row.get("description", String.class))
 												.queries(readQueries(row.get("queries", String.class) == null ? "[]" : row.get("queries", String.class)))
 												.emailNotificationTemplate(readEmailNotificationTemplate(row.get("email_notification_template", String.class) == null ? "{}": row.get("email_notification_template", String.class)))
 												.build())
@@ -251,7 +284,22 @@ public class R2dbcPoliciesRepository {
 												.build())
 									.all())
 							.map(hp -> hygienePolicies.add(hp)))
-					.then(Mono.just(new Policies(applicationPolicies, serviceInstancePolicies, queryPolicies, hygienePolicies)))
+					.thenMany(
+						Flux
+							.from(dbClient.execute(selectAllLegacyPolicies)
+									.map((row, metadata) ->
+										LegacyPolicy
+											.builder()
+												.pk(row.get("pk", Long.class))
+												.id(row.get("id", String.class))
+												.stacks(row.get("stacks", String.class) != null ? new HashSet<String>(Arrays.asList(row.get("stacks", String.class).split("\\s*,\\s*"))): new HashSet<>())
+												.operatorTemplate(readEmailNotificationTemplate(row.get("operator_email_template", String.class) == null ? "{}": row.get("operator_email_template", String.class)))
+												.notifyeeTemplate(readEmailNotificationTemplate(row.get("notifyee_email_template", String.class) == null ? "{}": row.get("notifyee_email_template", String.class)))
+												.organizationWhiteList(row.get("organization_whitelist", String.class) != null ? new HashSet<String>(Arrays.asList(row.get("organization_whitelist", String.class).split("\\s*,\\s*"))): new HashSet<>())
+												.build())
+									.all())
+							.map(lp -> legacyPolicies.add(lp)))
+					.then(Mono.just(Policies.builder().applicationPolicies(applicationPolicies).serviceInstancePolicies(serviceInstancePolicies).queryPolicies(queryPolicies).hygienePolicies(hygienePolicies).legacyPolicies(legacyPolicies).build()))
 					.flatMap(p -> p.isEmpty() ? Mono.empty(): Mono.just(p));
 	}
 
@@ -267,7 +315,7 @@ public class R2dbcPoliciesRepository {
 							.builder()
 								.pk(row.get("pk", Long.class))
 								.id(row.get("id", String.class))
-								.description(Defaults.getColumnValueOrDefault(row, "description", String.class, ""))
+								.description(row.get("description", String.class))
 								.queries(readQueries(row.get("queries", String.class) == null ? "[]" : row.get("queries", String.class)))
 								.emailNotificationTemplate(
 									readEmailNotificationTemplate(
@@ -277,7 +325,7 @@ public class R2dbcPoliciesRepository {
 							.build())
 				.all()
 				.collectList()
-				.map(qps -> new Policies(Collections.emptyList(), Collections.emptyList(), qps, Collections.emptyList()))
+				.map(qps -> Policies.builder().queryPolicies(qps).build())
 				.flatMap(p -> p.isEmpty() ? Mono.empty(): Mono.just(p));
 	}
 
@@ -300,7 +348,30 @@ public class R2dbcPoliciesRepository {
 								.build())
 				.all()
 				.collectList()
-				.map(hps -> new Policies(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), hps))
+				.map(hps -> Policies.builder().hygienePolicies(hps).build())
+				.flatMap(p -> p.isEmpty() ? Mono.empty(): Mono.just(p));
+	}
+
+	public Mono<Policies> findAllLegacyPolicies() {
+		return
+			dbClient
+				.select()
+				.from(LegacyPolicy.tableName())
+				.project(LegacyPolicy.columnNames())
+				.map(
+					(row, metadata) ->
+						LegacyPolicy
+							.builder()
+								.pk(row.get("pk", Long.class))
+								.id(row.get("id", String.class))
+								.stacks(row.get("stacks", String.class) != null ? new HashSet<String>(Arrays.asList(row.get("stacks", String.class).split("\\s*,\\s*"))): new HashSet<>())
+								.operatorTemplate(readEmailNotificationTemplate(row.get("operator_email_template", String.class) == null ? "{}": row.get("operator_email_template", String.class)))
+								.notifyeeTemplate(readEmailNotificationTemplate(row.get("notifyee_email_template", String.class) == null ? "{}": row.get("notifyee_email_template", String.class)))
+								.organizationWhiteList(row.get("organization_whitelist", String.class) != null ? new HashSet<String>(Arrays.asList(row.get("organization_whitelist", String.class).split("\\s*,\\s*"))): new HashSet<>())
+								.build())
+				.all()
+				.collectList()
+				.map(lps -> Policies.builder().legacyPolicies(lps).build())
 				.flatMap(p -> p.isEmpty() ? Mono.empty(): Mono.just(p));
 	}
 
@@ -352,6 +423,18 @@ public class R2dbcPoliciesRepository {
 				.then();
 	}
 
+	public Mono<Void> deleteLegacyPolicyById(String id) {
+		return
+			Flux
+				.from(dbClient
+						.delete()
+							.from(LegacyPolicy.tableName())
+							.matching(Criteria.where("id").is(id))
+						.fetch()
+						.rowsUpdated())
+				.then();
+	}
+
 	public Mono<Void> deleteAll() {
 		return
 			Flux
@@ -386,6 +469,15 @@ public class R2dbcPoliciesRepository {
 							dbClient
 								.delete()
 								.from(HygienePolicy.tableName())
+								.fetch()
+								.rowsUpdated())
+						)
+				.thenMany(
+					Flux
+						.from(
+							dbClient
+								.delete()
+								.from(LegacyPolicy.tableName())
 								.fetch()
 								.rowsUpdated())
 						)
@@ -494,6 +586,33 @@ public class R2dbcPoliciesRepository {
 				.rowsUpdated();
 	}
 
+	private Mono<Integer> saveLegacyPolicy(LegacyPolicy lp) {
+		LegacyPolicyShim shim =
+			LegacyPolicyShim
+				.builder()
+					.pk(lp.getPk())
+					.id(lp.getId())
+					.stacks(CollectionUtils.isEmpty(lp.getStacks()) ? null: String.join(",", lp.getStacks()))
+					.operatorEmailTemplate(
+						lp.getOperatorTemplate() != null ? writeEmailNotificationTemplate(lp.getOperatorTemplate()) : null
+					)
+					.notifyeeEmailTemplate(
+						lp.getNotifyeeTemplate() != null ? writeEmailNotificationTemplate(lp.getNotifyeeTemplate()) : null
+					)
+					.organizationWhitelist(
+						CollectionUtils.isEmpty(lp.getOrganizationWhiteList()) ? null: String.join(",", lp.getOrganizationWhiteList())
+					)
+					.build();
+		return
+			dbClient
+				.insert()
+				.into(LegacyPolicyShim.class)
+				.table(LegacyPolicy.tableName())
+				.using(shim)
+				.fetch()
+				.rowsUpdated();
+	}
+
 	public Mono<Policies> findByApplicationOperation(ApplicationOperation operation) {
 		List<ApplicationPolicy> applicationPolicies = new ArrayList<>();
 		return
@@ -516,7 +635,7 @@ public class R2dbcPoliciesRepository {
 										.build())
 							.all())
 					.map(ap -> applicationPolicies.add(ap))
-					.then(Mono.just(new Policies(applicationPolicies, Collections.emptyList(), Collections.emptyList(), Collections.emptyList())))
+					.then(Mono.just(Policies.builder().applicationPolicies(applicationPolicies).build()))
 					.flatMap(p -> p.isEmpty() ? Mono.empty(): Mono.just(p));
 	}
 
@@ -535,13 +654,13 @@ public class R2dbcPoliciesRepository {
 										.pk(row.get("pk", Long.class))
 										.id(row.get("id", String.class))
 										.operation(row.get("operation", String.class))
-										.description(Defaults.getColumnValueOrDefault(row, "description", String.class, ""))
+										.description(row.get("description", String.class))
 										.options(readOptions(row.get("options", String.class) == null ? "{}" : row.get("options", String.class)))
 										.organizationWhiteList(row.get("organization_whitelist", String.class) != null ? new HashSet<String>(Arrays.asList(row.get("organization_whitelist", String.class).split("\\s*,\\s*"))): new HashSet<>())
 										.build())
 							.all())
 					.map(sp -> serviceInstancePolicies.add(sp))
-					.then(Mono.just(new Policies(Collections.emptyList(), serviceInstancePolicies, Collections.emptyList(), Collections.emptyList())))
+					.then(Mono.just(Policies.builder().serviceInstancePolicies(serviceInstancePolicies).build()))
 					.flatMap(p -> p.isEmpty() ? Mono.empty(): Mono.just(p));
 	}
 

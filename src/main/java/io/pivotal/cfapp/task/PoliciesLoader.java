@@ -16,6 +16,7 @@ import io.pivotal.cfapp.client.GitClient;
 import io.pivotal.cfapp.config.PoliciesSettings;
 import io.pivotal.cfapp.domain.ApplicationPolicy;
 import io.pivotal.cfapp.domain.HygienePolicy;
+import io.pivotal.cfapp.domain.LegacyPolicy;
 import io.pivotal.cfapp.domain.Policies;
 import io.pivotal.cfapp.domain.PoliciesValidator;
 import io.pivotal.cfapp.domain.QueryPolicy;
@@ -33,6 +34,7 @@ public class PoliciesLoader implements ApplicationListener<StacksRetrievedEvent>
 	private static final String SERVICE_INSTANCE_POLICY_SUFFIX = "-SIP.json";
 	private static final String QUERY_POLICY_SUFFIX = "-QP.json";
 	private static final String HYGIENE_POLICY_SUFFIX = "-HP.json";
+	private static final String LEGACY_POLICY_SUFFIX = "-LP.json";
 
 	private final GitClient client;
 	private final PoliciesService service;
@@ -68,6 +70,7 @@ public class PoliciesLoader implements ApplicationListener<StacksRetrievedEvent>
 			List<ServiceInstancePolicy> serviceInstancePolicies = new ArrayList<>();
 			List<QueryPolicy> queryPolicies = new ArrayList<>();
 			List<HygienePolicy> hygienePolicies = new ArrayList<>();
+			List<LegacyPolicy> legacyPolicies = new ArrayList<>();
 			String commit = client.orLatestCommit(settings.getCommit(), repo);
 			log.info("-- Fetching policies from {} using commit {}", settings.getUri(), commit);
 			settings
@@ -98,10 +101,15 @@ public class PoliciesLoader implements ApplicationListener<StacksRetrievedEvent>
 								if (validator.validate(policy)) {
 									hygienePolicies.add(policy);
 								}
+							} else if (fp.endsWith(LEGACY_POLICY_SUFFIX)) {
+								LegacyPolicy policy = mapper.readValue(fileContent, LegacyPolicy.class);
+								if (validator.validate(policy)) {
+									legacyPolicies.add(policy);
+								}
 							} else {
 								log.warn(
-										"Policy file {} does not adhere to naming convention. File name must end with either {} or {}.",
-										fp, APPLICATION_POLICY_SUFFIX, SERVICE_INSTANCE_POLICY_SUFFIX);
+									"Policy file {} does not adhere to naming convention. File name must end with one of {}.",
+									fp, List.of(APPLICATION_POLICY_SUFFIX, SERVICE_INSTANCE_POLICY_SUFFIX, QUERY_POLICY_SUFFIX, HYGIENE_POLICY_SUFFIX, LEGACY_POLICY_SUFFIX));
 							}
 						} catch (IOException e1) {
 							log.warn("Could not read {} from {} with commit {} ", fp, settings.getUri(), settings.getCommit());
@@ -109,16 +117,19 @@ public class PoliciesLoader implements ApplicationListener<StacksRetrievedEvent>
 					});
 			service
 				.deleteAll()
-				.then(service.save(new Policies(applicationPolicies, serviceInstancePolicies, queryPolicies, hygienePolicies)))
+				.then(service.save(
+					Policies.builder().applicationPolicies(applicationPolicies).serviceInstancePolicies(serviceInstancePolicies).queryPolicies(queryPolicies).hygienePolicies(hygienePolicies).legacyPolicies(legacyPolicies).build()
+				))
 				.subscribe(
 					result -> {
 						log.info("PoliciesLoader completed");
 						log.info(
-							String.format("-- Loaded %d application policies, %d service instance policies, %d query policies, and %d hygiene policies.",
+							String.format("-- Loaded %d application policies, %d service instance policies, %d query policies, %d hygiene policies, and %d legacy policies.",
 								result.getApplicationPolicies().size(),
 								result.getServiceInstancePolicies().size(),
 								result.getQueryPolicies().size(),
-								result.getHygienePolicies().size()
+								result.getHygienePolicies().size(),
+								result.getLegacyPolicies().size()
 							)
 						);
 					},

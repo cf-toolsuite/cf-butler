@@ -21,6 +21,7 @@ public class PoliciesValidator {
     private static final String PARSING_REJECTED_MESSAGE = "-- {} was rejected because one or more of its properties could be parsed succesfully. {}";
     private static final String DUAL_TIME_CONSTRAINTS_REJECTED_MESSAGE = "-- {} was rejected because it contained both from-datetime and from-duration in options. Choose only one time constraint.";
     private static final String HYGIENE_REJECTED_MESSAGE = "{} was rejected because days-since-last-update must be > 0 or equal to -1";
+    private static final String LEGACY_REJECTED_MESSAGE = "{} was rejected because stacks must not be empty and must be a valid/installed stack";
     private static final String QUERY_REJECTED_MESSAGE = "-- {} was rejected because either name or sql was blank or sql did not start with SELECT.";
     private static final String EMAIL_NOTIFICATION_TEMPLATE_REJECTED_MESSAGE = "-- {} was rejected because either the email template did not contain valid email addresses for from/to or the subject/body was blank.";
 
@@ -160,6 +161,45 @@ public class PoliciesValidator {
             if (policy.getDaysSinceLastUpdate() == 0 || policy.getDaysSinceLastUpdate() < -1) {
                 valid = false;
                 log.warn(HYGIENE_REJECTED_MESSAGE, policy.toString());
+            }
+        }
+        if (hasOperatorTemplate) {
+            if (!policy.getOperatorTemplate().isValid()) {
+                valid = false;
+                log.warn(EMAIL_NOTIFICATION_TEMPLATE_REJECTED_MESSAGE, policy.toString());
+            }
+        }
+        if (hasNotifyeeTemplate) {
+            if (!policy.getNotifyeeTemplate().isValid()) {
+                valid = false;
+                log.warn(EMAIL_NOTIFICATION_TEMPLATE_REJECTED_MESSAGE, policy.toString());
+            }
+        }
+        if (valid == false) {
+            log.warn(REQUIRED_PROPERTIES_REJECTED_MESSAGE, policy.toString());
+        }
+        return valid;
+    }
+
+    public boolean validate(LegacyPolicy policy) {
+        boolean hasId = Optional.ofNullable(policy.getId()).isPresent();
+        boolean hasStacks = Optional.ofNullable(policy.getStacks()).isPresent();
+        boolean hasOperatorTemplate = Optional.ofNullable(policy.getOperatorTemplate()).isPresent();
+        boolean hasNotifyeeTemplate = Optional.ofNullable(policy.getNotifyeeTemplate()).isPresent();
+        boolean valid = !hasId && hasStacks && hasOperatorTemplate;
+        if (hasStacks) {
+            if (policy.getStacks().isEmpty()) {
+                valid = false;
+            } else {
+                for (String stack: policy.getStacks()) {
+                    if (!stacksCache.contains(stack) ) {
+                        valid = false;
+                        break;
+                    }
+                }
+            }
+            if (valid == false) {
+                log.warn(LEGACY_REJECTED_MESSAGE, policy.toString());
             }
         }
         if (hasOperatorTemplate) {
