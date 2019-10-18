@@ -893,7 +893,7 @@ GET /snapshot/detail/dormant/{daysSinceLastUpdate}
 ```
 GET /snapshot/detail/legacy/{stacks}
 ```
-> Returns a list of all applications that have been deployed on legacy stacks like `windows2012R2`, `cflinusfs2`.
+> Returns a list of all applications that have been deployed on legacy stacks like `windows2012R2`, `cflinuxfs2`.
 
 ```
 GET /snapshot/detail/users
