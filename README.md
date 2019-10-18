@@ -891,9 +891,9 @@ GET /snapshot/detail/dormant/{daysSinceLastUpdate}
 > Provides a list of dormant workloads. A workload is either an application or service instance.  An application is considered dormant when the last occasion of among `audit.app.create`, `audit.app.update` or `audit.app.restage` events transpired `daysSinceLastUpdate` or longer from the time of request.  A service instance is considered dormant when the last occasion of among `audit.service_instance.create`, `audit.service_instance.update`, `audit.user_provided_service_instance.create` or `audit.user_provided_service_instance.update` events transpired `daysSinceLastUpdate` or longer from the time of request.
 
 ```
-GET /snapshot/detail/legacy/{stacks}
+GET /snapshot/detail/legacy?stacks={stacks}
 ```
-> Returns a list of all applications that have been deployed on legacy stacks like `windows2012R2`, `cflinuxfs2`.
+> Returns a list of all applications that have been deployed on legacy stacks. Replace `{stacks}` request parameter-value above with a comma-separated list of legacy stacks like `windows2012R2,cflinuxfs2`.
 
 ```
 GET /snapshot/detail/users
