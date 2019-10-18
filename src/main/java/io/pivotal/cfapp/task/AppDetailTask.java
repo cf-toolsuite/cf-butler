@@ -128,7 +128,7 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
                                     .from(fragment)
                                         .buildpack(getBuildpack(sar.getDetectedBuildpackId()))
                                         .buildpackVersion(getBuildpackVersion(sar.getDetectedBuildpackId()))
-                                        .image(nullSafeString(sar.getDockerImage()))
+                                        .image(sar.getDockerImage())
                                         .stack(nullSafeStack(sar.getStackId()))
                                         .lastPushed(nullSafeLocalDateTime(sar.getPackageUpdatedAt()))
                                     .build());
@@ -176,7 +176,7 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
         if (buildpack != null) {
             return settings.getBuildpack(buildpack.getName());
         }
-        return "";
+        return null;
     }
 
     private String getBuildpackVersion(String buildpackId) {
@@ -184,7 +184,7 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
         if (buildpack != null) {
             return buildpack.getVersion();
         }
-        return "";
+        return null;
     }
 
 	private static LocalDateTime nullSafeLocalDateTime(String value) {
