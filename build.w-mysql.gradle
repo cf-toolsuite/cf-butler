@@ -145,7 +145,7 @@ dependencies {
     implementation('org.cloudfoundry:cloudfoundry-client-reactor:3.17.0.BUILD-SNAPSHOT')
     implementation('org.cloudfoundry:cloudfoundry-operations:3.17.0.BUILD-SNAPSHOT')
     implementation('io.projectreactor:reactor-core:3.3.0.RELEASE')
-    implementation('io.projectreactor:reactor-tools:3.3.0.RELEASE')
+    //implementation('io.projectreactor:reactor-tools:3.3.0.RELEASE')
     //implementation('io.projectreactor.tools:blockhound:1.0.0.RELEASE')
     implementation('io.projectreactor.netty:reactor-netty:0.9.0.RELEASE')
     implementation('io.micrometer:micrometer-registry-prometheus')
