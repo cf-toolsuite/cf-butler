@@ -134,7 +134,7 @@ dependencies {
     implementation('io.r2dbc:r2dbc-spi:0.8.0.RC2')
     implementation('io.r2dbc:r2dbc-client:0.8.0.RC2')
     runtime('io.r2dbc:r2dbc-pool:0.8.0.RC2')
-    runtime('io.r2dbc:r2dbc-h2:0.8.0.RC2')
+    implementation('io.r2dbc:r2dbc-h2:0.8.0.RC2')
     runtime('com.github.mirromutth:r2dbc-mysql:v0.2.0.M2')
     implementation('org.eclipse.jgit:org.eclipse.jgit:5.5.0.201909110433-r')
     implementation('org.springframework.boot:spring-boot-starter-mail')
