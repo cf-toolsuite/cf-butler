@@ -1130,6 +1130,11 @@ GET /policies/hygiene/{id}
 > Obtain hygiene policy details by id
 
 ```
+GET /policies/legacy/{id}
+```
+> Obtain legacy policy details by id
+
+```
 DELETE /policies/application/{id}
 ```
 > Delete an application policy by its id. This endpoint is only available when `cf.policies.provider` is set to `dbms`.
@@ -1148,6 +1153,11 @@ DELETE /policies/query/{id}
 DELETE /policies/hygiene/{id}
 ```
 > Delete a hygiene policy by its id. This endpoint is only available when `cf.policies.provider` is set to `dbms`.
+
+```
+DELETE /policies/legacy/{id}
+```
+> Delete a legacy policy by its id. This endpoint is only available when `cf.policies.provider` is set to `dbms`.
 
 ```
 POST /policies/refresh
