@@ -3,25 +3,37 @@ package io.pivotal.cfapp.config;
 import java.util.Set;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.ConstructorBinding;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 
-import lombok.Builder;
-import lombok.Builder.Default;
 import lombok.Getter;
 
-@Builder
+
 @Getter
+@ConstructorBinding
 @ConfigurationProperties(prefix = "cf.policies")
 public class PoliciesSettings {
 
-    @Default
-    private String provider = "dbms";
-    private String uri;
-    private String commit;
-    private Set<String> filePaths;
+    private final String provider;
+    private final String uri;
+    private final String commit;
+    private final Set<String> filePaths;
+
+
+    public PoliciesSettings(
+        @DefaultValue(value="dbms") String provider,
+        String uri,
+        String commit,
+        Set<String> filePaths
+    ) {
+        this.provider = provider;
+        this.uri = uri;
+        this.commit = commit;
+        this.filePaths = filePaths;
+    }
 
     public boolean isVersionManaged() {
         return getProvider().equalsIgnoreCase("git");
     }
-
 
 }
