@@ -228,4 +228,4 @@ javadoc {
     }
 }
 
-check.dependsOn jacocoTestReport, javadoc
+check.dependsOn jacocoTestReport, publishToMavenLocal
