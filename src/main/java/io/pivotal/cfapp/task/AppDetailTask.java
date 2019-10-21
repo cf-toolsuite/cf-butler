@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.cloudfoundry.client.v2.ClientV2Exception;
 import org.cloudfoundry.client.v2.applications.ApplicationStatisticsRequest;
 import org.cloudfoundry.client.v2.applications.ApplicationStatisticsResponse;
 import org.cloudfoundry.client.v2.applications.InstanceStatistics;
@@ -135,21 +136,19 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
     }
 
     protected Mono<AppDetail> getStatistics(AppDetail fragment) {
-        if (fragment.getRequestedState().equals("started")) {
-            log.trace("Fetching application statistics for org={}, space={}, id={}, name={}", fragment.getOrganization(), fragment.getSpace(), fragment.getAppId(), fragment.getAppName());
-            return buildClient(new Space(fragment.getOrganization(), fragment.getSpace()))
-                    .getCloudFoundryClient()
-                        .applicationsV2()
-                            .statistics(ApplicationStatisticsRequest.builder().applicationId(fragment.getAppId()).build())
-                            .map(stats -> AppDetail
-                                            .from(fragment)
-                                                .diskUsed(nullSafeDiskUsed(stats))
-                                                .memoryUsed(nullSafeMemoryUsed(stats))
-                                            .build()
-                            );
-        } else {
-            return Mono.just(fragment);
-        }
+        log.trace("Fetching application statistics for org={}, space={}, id={}, name={}", fragment.getOrganization(), fragment.getSpace(), fragment.getAppId(), fragment.getAppName());
+        return buildClient(new Space(fragment.getOrganization(), fragment.getSpace()))
+                .getCloudFoundryClient()
+                    .applicationsV2()
+                        .statistics(ApplicationStatisticsRequest.builder().applicationId(fragment.getAppId()).build())
+                        .map(stats -> AppDetail
+                                        .from(fragment)
+                                            .diskUsed(nullSafeDiskUsed(stats))
+                                            .memoryUsed(nullSafeMemoryUsed(stats))
+                                        .build()
+                        )
+                        .onErrorResume(ClientV2Exception.class, e -> Mono.just(fragment));
+
     }
 
     protected Mono<AppDetail> getLastEvent(AppDetail fragment) {
@@ -168,7 +167,8 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
                                     .lastEvent(e.getType())
                                     .lastEventActor(e.getActor())
                                     .lastEventTime(e.getTime())
-                                .build());
+                                .build())
+                    .onErrorResume(ClientV2Exception.class, e -> Mono.just(fragment));
     }
 
     private String getBuildpack(String buildpackId) {
@@ -197,10 +197,6 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
         return value != null
             ? value.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
             : null;
-    }
-
-    private static String nullSafeString(String value) {
-        return value == null ? "": value;
     }
 
     private static Integer nullSafeInteger(Integer value) {
