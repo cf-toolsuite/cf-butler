@@ -34,7 +34,6 @@ public class PasSettings {
 	private String refreshToken;
 	private String accountRegex;
 	private Set<String> organizationBlackList = DEFAULT_BLACKLIST;
-	private Integer eventsRetentionInDays = 31;
 	private boolean applicationStatisticsEnabled;
 	private boolean applicationEventsEnabled;
 
