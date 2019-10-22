@@ -168,7 +168,7 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
                                     .lastEventActor(e.getActor())
                                     .lastEventTime(e.getTime())
                                 .build())
-                    .onErrorResume(ClientV2Exception.class, e -> Mono.just(fragment));
+                    .defaultIfEmpty(fragment);
     }
 
     private String getBuildpack(String buildpackId) {

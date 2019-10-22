@@ -1,12 +1,9 @@
 package io.pivotal.cfapp.service;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.stream.Collectors;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.cloudfoundry.reactor.DefaultConnectionContext;
 import org.cloudfoundry.reactor.TokenProvider;
@@ -37,23 +34,20 @@ public class EventsService {
     private final DefaultConnectionContext connectionContext;
     private final TokenProvider tokenProvider;
     private final PasSettings settings;
-    private final ObjectMapper mapper;
 
     @Autowired
     public EventsService(
         WebClient webClient,
         DefaultConnectionContext connectionContext,
         TokenProvider tokenProvider,
-        PasSettings settings,
-        ObjectMapper mapper) {
+        PasSettings settings) {
         this.webClient = webClient;
         this.connectionContext = connectionContext;
         this.tokenProvider = tokenProvider;
         this.settings = settings;
-        this.mapper = mapper;
     }
 
-    public Mono<String> getEvents(String id, Integer numberOfEvents) {
+    public Mono<Events> getEvents(String id, Integer numberOfEvents) {
         Assert.hasText(id, "Global unique identifier for application or service instance must not be blank or null!");
         final int pageSize = getPageSize(numberOfEvents);
         final String uri = UriComponentsBuilder
@@ -76,10 +70,10 @@ public class EventsService {
                                     .uri(uri)
                                     .header(HttpHeaders.AUTHORIZATION, t)
                                         .retrieve()
-                                            .bodyToMono(String.class));
+                                            .bodyToMono(Events.class));
     }
 
-    public Mono<String> getEvent(String id, String type) {
+    public Mono<Events> getEvent(String id, String type) {
         Assert.hasText(id, "Global unique identifier for application or service instance must not be blank or null!");
         EventType eventType = EventType.from(type);
         final String uri = UriComponentsBuilder
@@ -103,7 +97,7 @@ public class EventsService {
                                     .uri(uri)
                                     .header(HttpHeaders.AUTHORIZATION, t)
                                         .retrieve()
-                                            .bodyToMono(String.class));
+                                            .bodyToMono(Events.class));
     }
 
     public Flux<Event> getEvents(String id, String[] types) {
@@ -118,10 +112,14 @@ public class EventsService {
             return Mono.just(Boolean.TRUE);
         } else {
             return getEvents(detail.getAppId(), 1)
-                        .flatMapMany(s -> toFlux(s))
-                        .filter(event -> ChronoUnit.DAYS.between(event.getTime(), LocalDateTime.now()) >= daysSinceLastUpdate)
-                        .collect(Collectors.toList())
-                        .map(list -> list.size() > 0);
+                        .flatMap(
+                            envelope -> envelope.hasNoEvents()
+                                            ? Mono.just(ChronoUnit.DAYS.between(detail.getLastPushed(), LocalDateTime.now()) >= daysSinceLastUpdate)
+                                            : toFlux(envelope)
+                                                .filter(event -> ChronoUnit.DAYS.between(event.getTime(), LocalDateTime.now()) >= daysSinceLastUpdate)
+                                                .collect(Collectors.toList())
+                                                .map(list -> list.size() > 0)
+                        );
         }
     }
 
@@ -130,36 +128,33 @@ public class EventsService {
             return Mono.just(Boolean.TRUE);
         } else {
             return getEvents(detail.getServiceInstanceId(), 1)
-                        .flatMapMany(s -> toFlux(s))
-                        .filter(event -> ChronoUnit.DAYS.between(event.getTime(), LocalDateTime.now()) >= daysSinceLastUpdate)
-                        .collect(Collectors.toList())
-                        .map(list -> list.size() > 0);
+                        .flatMap(
+                            envelope -> envelope.hasNoEvents()
+                                            ? Mono.just(ChronoUnit.DAYS.between(detail.getLastUpdated(), LocalDateTime.now()) >= daysSinceLastUpdate)
+                                            : toFlux(envelope)
+                                                .filter(event -> ChronoUnit.DAYS.between(event.getTime(), LocalDateTime.now()) >= daysSinceLastUpdate)
+                                                .collect(Collectors.toList())
+                                                .map(list -> list.size() > 0)
+                        );
         }
     }
 
-    public Flux<Event> toFlux(String json) {
-        Flux<Event> result = Flux.empty();
-        try {
-            Events events = mapper.readValue(json, Events.class);
-            result =
-                Flux
-                    .fromIterable(events.getResources())
-                    .map(resource -> resource.getEntity())
-                    .map(entity -> Event
-                                        .builder()
-                                            .type(entity.getType())
-                                            .actee(entity.getActee())
-                                            .actor(entity.getActor())
-                                            .time(
-                                                entity.getTimestamp() != null
-                                                    ? LocalDateTime.ofInstant(entity.getTimestamp(), ZoneOffset.UTC)
-                                                    : null)
-                                        .build()
-                    );
-        } catch (IOException ioe) {
-            log.warn("Trouble mapping events. {}", ioe.getMessage());
-        }
-        return result;
+    public Flux<Event> toFlux(Events envelope) {
+        return
+            Flux
+                .fromIterable(envelope.getResources())
+                .map(resource -> resource.getEntity())
+                .map(entity -> Event
+                                .builder()
+                                    .type(entity.getType())
+                                    .actee(entity.getActee())
+                                    .actor(entity.getActor())
+                                    .time(
+                                        entity.getTimestamp() != null
+                                            ? LocalDateTime.ofInstant(entity.getTimestamp(), ZoneOffset.UTC)
+                                            : null)
+                                .build()
+                );
     }
 
     private Mono<String> getOauthToken() {
