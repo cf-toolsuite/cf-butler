@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
 
 import lombok.Builder;
 import lombok.Getter;
@@ -55,6 +57,11 @@ public class Events {
         this.resources = resources;
         this.totalPages = totalPages;
         this.totalResults = totalResults;
+    }
+
+    @JsonIgnore
+    public boolean hasNoEvents() {
+        return resources.isEmpty();
     }
 
 }
