@@ -114,7 +114,7 @@ public class EventsService {
             return getEvents(detail.getAppId(), 1)
                         .flatMap(
                             envelope -> envelope.hasNoEvents()
-                                            ? Mono.just(ChronoUnit.DAYS.between(detail.getLastPushed(), LocalDateTime.now()) >= daysSinceLastUpdate)
+                                            ? isDormant(detail.getLastPushed(), daysSinceLastUpdate)
                                             : toFlux(envelope)
                                                 .filter(event -> ChronoUnit.DAYS.between(event.getTime(), LocalDateTime.now()) >= daysSinceLastUpdate)
                                                 .collect(Collectors.toList())
@@ -130,13 +130,21 @@ public class EventsService {
             return getEvents(detail.getServiceInstanceId(), 1)
                         .flatMap(
                             envelope -> envelope.hasNoEvents()
-                                            ? Mono.just(ChronoUnit.DAYS.between(detail.getLastUpdated(), LocalDateTime.now()) >= daysSinceLastUpdate)
+                                            ? isDormant(detail.getLastUpdated(), daysSinceLastUpdate)
                                             : toFlux(envelope)
                                                 .filter(event -> ChronoUnit.DAYS.between(event.getTime(), LocalDateTime.now()) >= daysSinceLastUpdate)
                                                 .collect(Collectors.toList())
                                                 .map(list -> list.size() > 0)
                         );
         }
+    }
+
+    private static Mono<Boolean> isDormant(LocalDateTime dateTime, int daysSinceLastUpdate) {
+        Mono<Boolean> result = Mono.just(Boolean.TRUE);
+        if (dateTime != null) {
+            result = Mono.just(ChronoUnit.DAYS.between(dateTime, LocalDateTime.now()) >= daysSinceLastUpdate);
+        }
+        return result;
     }
 
     public Flux<Event> toFlux(Events envelope) {
