@@ -18,7 +18,7 @@ cf:
   username: replace_me
   password: replace_me
   sslValidationSkipped: false
-  connectionPoolSize: 128
+  connectionPoolSize: 250
   connectionTimeout: PT10M
   organizationBlackList:
     - system

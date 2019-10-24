@@ -41,8 +41,7 @@ public class SpaceUsersTask implements ApplicationListener<SpacesRetrievedEvent>
     	service
             .deleteAll()
             .thenMany(Flux.fromIterable(spaces))
-            .flatMap(space -> buildClient(space))
-            .flatMap(client -> getSpaceUsers(client))
+            .flatMap(space -> getSpaceUsers(space))
             .flatMap(service::save)
             .thenMany(service.findAll())
                 .collectList()
@@ -57,32 +56,23 @@ public class SpaceUsersTask implements ApplicationListener<SpacesRetrievedEvent>
                 );
     }
 
-    private Mono<DefaultCloudFoundryOperations> buildClient(Space target) {
-        return Mono.just(DefaultCloudFoundryOperations
-                            .builder()
-                            .from(opsClient)
-                            .organization(target.getOrganization())
-                            .space(target.getSpace())
-                            .build());
-    }
-
-    protected Mono<SpaceUsers> getSpaceUsers(DefaultCloudFoundryOperations opsClient) {
-        log.trace("Fetching space users in org={} and space={}", opsClient.getOrganization(), opsClient.getSpace());
+    protected Mono<SpaceUsers> getSpaceUsers(Space space) {
+        log.trace("Fetching space users in org={} and space={}", space.getOrganization(), space.getSpace());
         return opsClient
                 	.userAdmin()
                 		.listSpaceUsers(
                 				ListSpaceUsersRequest
                 					.builder()
-                						.organizationName(opsClient.getOrganization())
-                                        .spaceName(opsClient.getSpace())
-                                        .build()
+                						.organizationName(space.getOrganization())
+                                        .spaceName(space.getSpace())
+                                    .build()
                         )
                         .flatMap(su ->
                             Mono.just(
                                 SpaceUsers
                                     .builder()
-                                        .organization(opsClient.getOrganization())
-                                        .space(opsClient.getSpace())
+                                        .organization(space.getOrganization())
+                                        .space(space.getSpace())
                                         .auditors(su.getAuditors())
                                         .managers(su.getManagers())
                                         .developers(su.getDevelopers())
