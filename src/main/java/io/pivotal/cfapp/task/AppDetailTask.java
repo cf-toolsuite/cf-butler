@@ -106,7 +106,9 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
             buildClient(target)
                 .applications()
                     .list()
-                    .map(as -> AppDetail
+                    .flatMap(as ->
+                        Mono
+                            .just(AppDetail
                                 .builder()
                                     .appId(as.getId())
                                     .appName(as.getName())
@@ -116,7 +118,9 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
                                     .totalInstances(nullSafeInteger(as.getInstances()))
                                     .requestedState(as.getRequestedState().toLowerCase())
                                     .urls(as.getUrls())
-                                .build());
+                                .build()
+                            )
+                    );
     }
 
     protected Mono<AppDetail> getSummaryInfo(AppDetail fragment) {
@@ -125,14 +129,18 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
                 .getCloudFoundryClient()
                     .applicationsV2()
                         .summary(SummaryApplicationRequest.builder().applicationId(fragment.getAppId()).build())
-                        .map(sar -> AppDetail
-                                    .from(fragment)
-                                        .buildpack(getBuildpack(sar.getDetectedBuildpackId()))
-                                        .buildpackVersion(getBuildpackVersion(sar.getDetectedBuildpackId()))
-                                        .image(sar.getDockerImage())
-                                        .stack(nullSafeStack(sar.getStackId()))
-                                        .lastPushed(nullSafeLocalDateTime(sar.getPackageUpdatedAt()))
-                                    .build());
+                        .flatMap(sar ->
+                            Mono
+                                .just(AppDetail
+                                        .from(fragment)
+                                            .buildpack(getBuildpack(sar.getDetectedBuildpackId()))
+                                            .buildpackVersion(getBuildpackVersion(sar.getDetectedBuildpackId()))
+                                            .image(sar.getDockerImage())
+                                            .stack(nullSafeStack(sar.getStackId()))
+                                            .lastPushed(nullSafeLocalDateTime(sar.getPackageUpdatedAt()))
+                                        .build()
+                                )
+                        );
     }
 
     protected Mono<AppDetail> getStatistics(AppDetail fragment) {
@@ -141,11 +149,14 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
                 .getCloudFoundryClient()
                     .applicationsV2()
                         .statistics(ApplicationStatisticsRequest.builder().applicationId(fragment.getAppId()).build())
-                        .map(stats -> AppDetail
+                        .flatMap(stats ->
+                            Mono
+                                .just(AppDetail
                                         .from(fragment)
                                             .diskUsed(nullSafeDiskUsed(stats))
                                             .memoryUsed(nullSafeMemoryUsed(stats))
                                         .build()
+                                )
                         )
                         .onErrorResume(ClientV2Exception.class, e -> Mono.just(fragment));
 
@@ -162,12 +173,14 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
                             Event.builder().type(e.getEvent()).actor(e.getActor())
                                 .time(nullSafeLocalDateTime(e.getTime()))
                                 .build()))
-                    .map(e -> AppDetail
+                    .flatMap(
+                        e -> Mono.just(
+                            AppDetail
                                 .from(fragment)
                                     .lastEvent(e.getType())
                                     .lastEventActor(e.getActor())
                                     .lastEventTime(e.getTime())
-                                .build())
+                                .build()))
                     .defaultIfEmpty(fragment);
     }
 
