@@ -20,11 +20,9 @@ import io.pivotal.cfapp.domain.Event;
 import io.pivotal.cfapp.domain.ServiceInstanceDetail;
 import io.pivotal.cfapp.domain.event.EventType;
 import io.pivotal.cfapp.domain.event.Events;
-import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-@Slf4j
 @Service
 // @see https://apidocs.cloudfoundry.org/287/events/list_all_events.html
 public class EventsService {
