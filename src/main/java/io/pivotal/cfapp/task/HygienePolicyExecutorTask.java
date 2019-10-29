@@ -13,13 +13,13 @@ import org.springframework.stereotype.Component;
 
 import io.pivotal.cfapp.config.PasSettings;
 import io.pivotal.cfapp.domain.AppDetail;
-import io.pivotal.cfapp.domain.Workloads;
-import io.pivotal.cfapp.domain.Workloads.WorkloadsBuilder;
 import io.pivotal.cfapp.domain.EmailValidator;
 import io.pivotal.cfapp.domain.HygienePolicy;
 import io.pivotal.cfapp.domain.ServiceInstanceDetail;
 import io.pivotal.cfapp.domain.Space;
 import io.pivotal.cfapp.domain.UserSpaces;
+import io.pivotal.cfapp.domain.Workloads;
+import io.pivotal.cfapp.domain.Workloads.WorkloadsBuilder;
 import io.pivotal.cfapp.event.EmailNotificationEvent;
 import io.pivotal.cfapp.service.DormantWorkloadsService;
 import io.pivotal.cfapp.service.PoliciesService;
@@ -98,7 +98,7 @@ public class HygienePolicyExecutorTask implements PolicyExecutorTask {
         Flux
             .fromIterable(getSpaces(tuple.getT2()))
         // For each Space in Set<Space>, obtain SpaceUsers#getUsers()
-            .concatMap(space -> spaceUsersService.findByOrganizationAndSpace(space.getOrganization(), space.getSpace()))
+            .concatMap(space -> spaceUsersService.findByOrganizationAndSpace(space.getOrganizationName(), space.getSpaceName()))
         // then pair with matching space(s) that contain applications and service instances
             .concatMap(spaceUser -> Flux.fromIterable(spaceUser.getUsers()))
             .distinct()
@@ -176,18 +176,26 @@ public class HygienePolicyExecutorTask implements PolicyExecutorTask {
         return prefix;
     }
 
+    private static Space buildSpace(String organization, String space) {
+        return Space
+                .builder()
+                    .organizationName(organization)
+                    .spaceName(space)
+                .build();
+    }
+
     private static Set<Space> getSpaces(Workloads workloads) {
         Set<Space> applicationSpaces =
             workloads
                 .getApplications()
                     .stream()
-                        .map(app -> new Space(app.getOrganization(), app.getSpace()))
+                        .map(app -> buildSpace(app.getOrganization(), app.getSpace()))
                         .collect(Collectors.toSet());
         Set<Space> serviceInstanceSpaces =
             workloads
                 .getServiceInstances()
                     .stream()
-                        .map(app -> new Space(app.getOrganization(), app.getSpace()))
+                        .map(app -> buildSpace(app.getOrganization(), app.getSpace()))
                         .collect(Collectors.toSet());
         Set<Space> result = new HashSet<>();
         result.addAll(applicationSpaces);

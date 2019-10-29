@@ -1,10 +1,10 @@
 package io.pivotal.cfapp.repository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.r2dbc.core.DatabaseClient;
 import org.springframework.stereotype.Repository;
 
-import io.pivotal.cfapp.domain.Defaults;
 import io.pivotal.cfapp.domain.Space;
 import io.pivotal.cfapp.domain.SpaceShim;
 import io.r2dbc.spi.Row;
@@ -34,9 +34,11 @@ public class R2dbcSpaceRepository {
 		SpaceShim shim =
 			SpaceShim
 				.builder()
-					.orgName(entity.getOrganization())
-					.spaceName(entity.getSpace())
-					.build();
+					.orgId(entity.getOrganizationId())
+					.orgName(entity.getOrganizationName())
+					.spaceId(entity.getSpaceId())
+					.spaceName(entity.getSpaceName())
+				.build();
 		return client
 				.insert()
 				.into(SpaceShim.class)
@@ -48,11 +50,23 @@ public class R2dbcSpaceRepository {
 	}
 
 	public Flux<Space> findAll() {
-		String selectAll = "select org_name, space_name from spaces order by org_name, space_name";
-		return client.execute(selectAll).map((row, metadata) -> fromRow(row)).all();
+		return client
+				.select()
+				.from(Space.tableName())
+				.project(Space.columnNames())
+				.orderBy(Order.asc("org_name"), Order.asc("space_name"))
+				.map((row, metadata) -> fromRow(row))
+				.all();
 	}
 
 	private Space fromRow(Row row) {
-		return new Space(row.get("org_name", String.class), Defaults.getColumnValue(row, "space_name", String.class));
+		return
+			Space
+				.builder()
+					.organizationId(row.get("org_id", String.class))
+					.organizationName(row.get("org_name", String.class))
+					.spaceId(row.get("space_id", String.class))
+					.spaceName(row.get("space_name", String.class))
+				.build();
 	}
 }

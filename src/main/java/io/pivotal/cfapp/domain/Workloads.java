@@ -44,14 +44,14 @@ public class Workloads {
             matchingApps.addAll(applications
                     .stream()
                         .filter(application ->
-                            application.getOrganization().equalsIgnoreCase(s.getOrganization())
-                                && application.getSpace().equalsIgnoreCase(s.getSpace()))
+                            application.getOrganization().equalsIgnoreCase(s.getOrganizationName())
+                                && application.getSpace().equalsIgnoreCase(s.getSpaceName()))
                         .collect(Collectors.toList()));
             matchingServiceInstances.addAll(serviceInstances
                     .stream()
                         .filter(serviceInstance ->
-                            serviceInstance.getOrganization().equalsIgnoreCase(s.getOrganization())
-                                && serviceInstance.getSpace().equalsIgnoreCase(s.getSpace()))
+                            serviceInstance.getOrganization().equalsIgnoreCase(s.getOrganizationName())
+                                && serviceInstance.getSpace().equalsIgnoreCase(s.getSpaceName()))
                         .collect(Collectors.toList()));
         }
         return Workloads.builder().applications(matchingApps).serviceInstances(matchingServiceInstances).build();

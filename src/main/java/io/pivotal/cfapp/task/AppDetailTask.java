@@ -74,7 +74,7 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
         service
             .deleteAll()
             .thenMany(Flux.fromIterable(spaces))
-            .flatMap(space -> listApplications(space))
+            .concatMap(space -> listApplications(space))
             .flatMap(fragment -> getSummaryInfo(fragment))
             .flatMap(fragment -> getStatistics(fragment))
             .flatMap(fragment -> getLastEvent(fragment))
@@ -96,8 +96,16 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
         return DefaultCloudFoundryOperations
                 .builder()
                 .from(opsClient)
-                .organization(target.getOrganization())
-                .space(target.getSpace())
+                .organization(target.getOrganizationName())
+                .space(target.getSpaceName())
+                .build();
+    }
+
+    private static Space buildSpace(String organization, String space) {
+        return Space
+                .builder()
+                    .organizationName(organization)
+                    .spaceName(space)
                 .build();
     }
 
@@ -112,8 +120,8 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
                                 .builder()
                                     .appId(as.getId())
                                     .appName(as.getName())
-                                    .organization(target.getOrganization())
-                                    .space(target.getSpace())
+                                    .organization(target.getOrganizationName())
+                                    .space(target.getSpaceName())
                                     .runningInstances(nullSafeInteger(as.getRunningInstances()))
                                     .totalInstances(nullSafeInteger(as.getInstances()))
                                     .requestedState(as.getRequestedState().toLowerCase())
@@ -145,7 +153,7 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
 
     protected Mono<AppDetail> getStatistics(AppDetail fragment) {
         log.trace("Fetching application statistics for org={}, space={}, id={}, name={}", fragment.getOrganization(), fragment.getSpace(), fragment.getAppId(), fragment.getAppName());
-        return buildClient(new Space(fragment.getOrganization(), fragment.getSpace()))
+        return buildClient(buildSpace(fragment.getOrganization(), fragment.getSpace()))
                 .getCloudFoundryClient()
                     .applicationsV2()
                         .statistics(ApplicationStatisticsRequest.builder().applicationId(fragment.getAppId()).build())
@@ -164,7 +172,7 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
 
     protected Mono<AppDetail> getLastEvent(AppDetail fragment) {
         log.trace("Fetching last event for application id={}, name={} in org={}, space={}", fragment.getAppId(), fragment.getAppName(), fragment.getOrganization(), fragment.getSpace());
-        return buildClient(new Space(fragment.getOrganization(), fragment.getSpace()))
+        return buildClient(buildSpace(fragment.getOrganization(), fragment.getSpace()))
                 .applications()
                     .getEvents(GetApplicationEventsRequest.builder().name(fragment.getAppName()).maxNumberOfEvents(1).build())
                     .next()
