@@ -68,7 +68,13 @@ public class SpacesTask implements ApplicationListener<OrganizationsRetrievedEve
                         .getCloudFoundryClient()
                         .spacesV3()
                             .list(ListSpacesRequest.builder().page(page).organizationIds(new String[] { organization.getId() }).build()))
-                            .map(r -> new Space(organization.getName(), r.getName()));
+                            .map(response -> Space
+                                                .builder()
+                                                    .organizationId(organization.getId())
+                                                    .organizationName(organization.getName())
+                                                    .spaceId(response.getId())
+                                                    .spaceName(response.getName())
+                                                .build());
     }
 
 }

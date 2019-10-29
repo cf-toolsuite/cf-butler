@@ -57,8 +57,8 @@ public class ServiceInstanceDetailTask implements ApplicationListener<SpacesRetr
             .deleteAll()
             .thenMany(Flux.fromIterable(spaces))
             .flatMap(space -> buildClient(space))
-            .flatMap(client -> getServiceInstanceSummary(client))
-            .flatMap(tuple -> getServiceInstanceDetail(tuple))
+            .concatMap(client -> getServiceInstanceSummary(client))
+            .concatMap(tuple -> getServiceInstanceDetail(tuple))
             .flatMap(service::save)
             .thenMany(service.findAll())
                 .collectList()
@@ -78,8 +78,8 @@ public class ServiceInstanceDetailTask implements ApplicationListener<SpacesRetr
                 .just(DefaultCloudFoundryOperations
                         .builder()
                         .from(opsClient)
-                        .organization(target.getOrganization())
-		                .space(target.getSpace())
+                        .organization(target.getOrganizationName())
+		                .space(target.getSpaceName())
 		                .build());
 	}
 
