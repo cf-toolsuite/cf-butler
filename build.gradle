@@ -147,7 +147,7 @@ dependencies {
     implementation('io.projectreactor:reactor-core:3.3.0.RELEASE')
     //implementation('io.projectreactor:reactor-tools:3.3.0.RELEASE')
     //implementation('io.projectreactor.tools:blockhound:1.0.0.RELEASE')
-    implementation('io.projectreactor.netty:reactor-netty:0.9.0.RELEASE')
+    implementation('io.projectreactor.netty:reactor-netty:0.9.1.RELEASE')
     implementation('io.micrometer:micrometer-registry-prometheus')
     testImplementation('io.projectreactor:reactor-test')
     testImplementation('org.assertj:assertj-core:3.14.0')
