@@ -7,6 +7,8 @@ import lombok.Getter;
 @Getter
 public class SpaceShim {
 
+    private String orgId;
+    private String spaceId;
     private String orgName;
     private String spaceName;
 

@@ -20,8 +20,16 @@ public class UserSpacesService {
     public Mono<UserSpaces> getUserSpaces(String name) {
         return service
                 .findByAccountName(name)
-                .map(su -> new Space(su.getOrganization(), su.getSpace()))
+                .map(su -> buildSpace(su.getOrganization(), su.getSpace()))
                 .collectList()
                 .map(spaces -> UserSpaces.builder().accountName(name).spaces(spaces).build());
+    }
+
+    private static Space buildSpace(String organization, String space) {
+        return Space
+                .builder()
+                    .organizationName(organization)
+                    .spaceName(space)
+                .build();
     }
 }

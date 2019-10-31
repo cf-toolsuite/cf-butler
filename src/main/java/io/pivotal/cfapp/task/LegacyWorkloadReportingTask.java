@@ -97,7 +97,7 @@ public class LegacyWorkloadReportingTask implements PolicyExecutorTask {
         Flux
             .fromIterable(getSpaces(tuple.getT2()))
         // For each Space in Set<Space>, obtain SpaceUsers#getUsers()
-            .concatMap(space -> spaceUsersService.findByOrganizationAndSpace(space.getOrganization(), space.getSpace()))
+            .concatMap(space -> spaceUsersService.findByOrganizationAndSpace(space.getOrganizationName(), space.getSpaceName()))
         // then pair with matching space(s) that contain applications and service instances
             .concatMap(spaceUser -> Flux.fromIterable(spaceUser.getUsers()))
             .distinct()
@@ -168,7 +168,11 @@ public class LegacyWorkloadReportingTask implements PolicyExecutorTask {
             workloads
                 .getApplications()
                     .stream()
-                        .map(app -> new Space(app.getOrganization(), app.getSpace()))
+                        .map(app -> Space
+                                        .builder()
+                                            .organizationName(app.getOrganization())
+                                            .spaceName(app.getSpace())
+                                        .build())
                         .collect(Collectors.toSet());
         Set<Space> result = new HashSet<>();
         result.addAll(applicationSpaces);

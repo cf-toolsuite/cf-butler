@@ -41,7 +41,7 @@ public class UserSpaces {
             String.join(",", getSpaces()
                                 .stream()
                                 .map(s ->
-                                    String.join("/", s.getOrganization(), s.getSpace())
+                                    String.join("/", s.getOrganizationName(), s.getSpaceName())
                                 )
                                 .collect(Collectors.toList())));
     }
