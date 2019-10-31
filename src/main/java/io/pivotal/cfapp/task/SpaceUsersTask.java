@@ -41,8 +41,8 @@ public class SpaceUsersTask implements ApplicationListener<SpacesRetrievedEvent>
     	service
             .deleteAll()
             .thenMany(Flux.fromIterable(spaces))
-            .flatMap(space -> getSpaceUsers(space))
-            .flatMap(service::save)
+            .concatMap(space -> getSpaceUsers(space))
+            .concatMap(service::save)
             .thenMany(service.findAll())
                 .collectList()
                 .subscribe(
@@ -57,27 +57,25 @@ public class SpaceUsersTask implements ApplicationListener<SpacesRetrievedEvent>
     }
 
     protected Mono<SpaceUsers> getSpaceUsers(Space space) {
-        log.trace("Fetching space users in org={} and space={}", space.getOrganization(), space.getSpace());
+        log.trace("Fetching space users in org={} and space={}", space.getOrganizationName(), space.getSpaceName());
         return opsClient
                 	.userAdmin()
                 		.listSpaceUsers(
                 				ListSpaceUsersRequest
                 					.builder()
-                						.organizationName(space.getOrganization())
-                                        .spaceName(space.getSpace())
+                						.organizationName(space.getOrganizationName())
+                                        .spaceName(space.getSpaceName())
                                     .build()
                         )
-                        .flatMap(su ->
-                            Mono.just(
+                        .map(su ->
                                 SpaceUsers
                                     .builder()
-                                        .organization(space.getOrganization())
-                                        .space(space.getSpace())
+                                        .organization(space.getOrganizationName())
+                                        .space(space.getSpaceName())
                                         .auditors(su.getAuditors())
                                         .managers(su.getManagers())
                                         .developers(su.getDevelopers())
                                         .build()
-                            )
                         );
     }
 
