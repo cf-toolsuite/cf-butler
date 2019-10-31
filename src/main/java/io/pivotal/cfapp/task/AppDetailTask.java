@@ -78,7 +78,7 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
         appDetailsService
             .deleteAll()
             .thenMany(Flux.fromIterable(spaces))
-            .flatMap(space -> listApplications(space))
+            .concatMap(space -> listApplications(space))
             .flatMap(fragment -> getSummaryInfo(fragment))
             .flatMap(fragment -> getStatistics(fragment))
             .flatMap(fragment -> getLastEvent(fragment))
