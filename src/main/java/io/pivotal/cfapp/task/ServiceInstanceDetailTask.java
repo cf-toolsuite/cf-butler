@@ -56,7 +56,7 @@ public class ServiceInstanceDetailTask implements ApplicationListener<SpacesRetr
     	service
             .deleteAll()
             .thenMany(Flux.fromIterable(spaces))
-            .flatMap(space -> buildClient(space))
+            .concatMap(space -> buildClient(space))
             .flatMap(client -> getServiceInstanceSummary(client))
             .flatMap(tuple -> getServiceInstanceDetail(tuple))
             .flatMap(service::save)
