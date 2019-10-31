@@ -32,6 +32,7 @@ import io.pivotal.cfapp.event.AppDetailRetrievedEvent;
 import io.pivotal.cfapp.event.SpacesRetrievedEvent;
 import io.pivotal.cfapp.service.AppDetailService;
 import io.pivotal.cfapp.service.BuildpacksCache;
+import io.pivotal.cfapp.service.EventsService;
 import io.pivotal.cfapp.service.StacksCache;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
@@ -41,24 +42,27 @@ import reactor.core.publisher.Mono;
 @Component
 public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> {
 
-    private PasSettings settings;
-    private DefaultCloudFoundryOperations opsClient;
-    private AppDetailService service;
-    private BuildpacksCache buildpacksCache;
-    private StacksCache stacksCache;
-    private ApplicationEventPublisher publisher;
+    private final PasSettings settings;
+    private final DefaultCloudFoundryOperations opsClient;
+    private final AppDetailService appDetailsService;
+    private final EventsService eventsService;
+    private final BuildpacksCache buildpacksCache;
+    private final StacksCache stacksCache;
+    private final ApplicationEventPublisher publisher;
 
     @Autowired
     public AppDetailTask(
             PasSettings settings,
     		DefaultCloudFoundryOperations opsClient,
-            AppDetailService service,
+            AppDetailService appDetailsService,
+            EventsService eventsService,
             BuildpacksCache buildpacksCache,
             StacksCache stacksCache,
     		ApplicationEventPublisher publisher) {
         this.settings = settings;
         this.opsClient = opsClient;
-        this.service = service;
+        this.appDetailsService = appDetailsService;
+        this.eventsService = eventsService;
         this.buildpacksCache = buildpacksCache;
         this.stacksCache = stacksCache;
         this.publisher = publisher;
@@ -71,15 +75,15 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
 
     public void collect(List<Space> spaces) {
         log.info("AppDetailTask started");
-        service
+        appDetailsService
             .deleteAll()
             .thenMany(Flux.fromIterable(spaces))
             .concatMap(space -> listApplications(space))
             .flatMap(fragment -> getSummaryInfo(fragment))
             .flatMap(fragment -> getStatistics(fragment))
             .flatMap(fragment -> getLastEvent(fragment))
-            .flatMap(service::save)
-            .thenMany(service.findAll())
+            .flatMap(appDetailsService::save)
+            .thenMany(appDetailsService.findAll())
                 .collectList()
                 .subscribe(
                     result -> {
@@ -172,15 +176,9 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
 
     protected Mono<AppDetail> getLastEvent(AppDetail fragment) {
         log.trace("Fetching last event for application id={}, name={} in org={}, space={}", fragment.getAppId(), fragment.getAppName(), fragment.getOrganization(), fragment.getSpace());
-        return buildClient(buildSpace(fragment.getOrganization(), fragment.getSpace()))
-                .applications()
-                    .getEvents(GetApplicationEventsRequest.builder().name(fragment.getAppName()).maxNumberOfEvents(1).build())
+        return eventsService.getEvents(fragment.getAppId(), 1)
+                    .flatMapMany(envelope -> eventsService.toFlux(envelope))
                     .next()
-                    .flatMap(
-                        e -> Mono.just(
-                            Event.builder().type(e.getEvent()).actor(e.getActor())
-                                .time(nullSafeLocalDateTime(e.getTime()))
-                                .build()))
                     .flatMap(
                         e -> Mono.just(
                             AppDetail
