@@ -3,7 +3,6 @@ package io.pivotal.cfapp.task;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -16,7 +15,6 @@ import org.cloudfoundry.client.v2.applications.Statistics;
 import org.cloudfoundry.client.v2.applications.SummaryApplicationRequest;
 import org.cloudfoundry.client.v2.applications.Usage;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
-import org.cloudfoundry.operations.applications.GetApplicationEventsRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
@@ -25,7 +23,6 @@ import org.springframework.stereotype.Component;
 import io.pivotal.cfapp.config.PasSettings;
 import io.pivotal.cfapp.domain.AppDetail;
 import io.pivotal.cfapp.domain.Buildpack;
-import io.pivotal.cfapp.domain.Event;
 import io.pivotal.cfapp.domain.Space;
 import io.pivotal.cfapp.domain.Stack;
 import io.pivotal.cfapp.event.AppDetailRetrievedEvent;
@@ -152,7 +149,8 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
                                             .lastPushed(nullSafeLocalDateTime(sar.getPackageUpdatedAt()))
                                         .build()
                                 )
-                        );
+                        )
+                        .onErrorResume(ClientV2Exception.class, e -> Mono.just(fragment));
     }
 
     protected Mono<AppDetail> getStatistics(AppDetail fragment) {
@@ -209,12 +207,6 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
 	private static LocalDateTime nullSafeLocalDateTime(String value) {
         return StringUtils.isNotBlank(value)
             ? Instant.parse(value).atZone(ZoneId.systemDefault()).toLocalDateTime()
-            : null;
-    }
-
-    private static LocalDateTime nullSafeLocalDateTime(Date value) {
-        return value != null
-            ? value.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
             : null;
     }
 
