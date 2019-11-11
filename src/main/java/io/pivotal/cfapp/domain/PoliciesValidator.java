@@ -45,7 +45,7 @@ public class PoliciesValidator {
                 if (op.equals(ApplicationOperation.SCALE_INSTANCES)) {
                     Integer instancesFrom = policy.getOption("instances-from", Integer.class);
                     Integer instancesTo = policy.getOption("instances-to", Integer.class);
-                    if (instancesFrom == null || instancesTo == null || instancesFrom < 1 || instancesTo < 1 || instancesFrom == instancesTo) {
+                    if (instancesFrom == null || instancesTo == null || instancesFrom < 1 || instancesTo < 1 || instancesFrom.equals(instancesTo)) {
                         valid = false;
                         log.warn(SCALE_INSTANCES_REJECTED_MESSAGE, policy.toString());
                     }

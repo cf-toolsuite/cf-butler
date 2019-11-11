@@ -1,5 +1,6 @@
 package io.pivotal.cfapp.task;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -115,6 +116,7 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
             buildClient(target)
                 .applications()
                     .list()
+                    .delayElements(Duration.ofMillis(250))
                     .flatMap(as ->
                         Mono
                             .just(AppDetail
