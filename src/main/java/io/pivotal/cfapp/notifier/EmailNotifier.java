@@ -7,20 +7,20 @@ import java.io.InputStreamReader;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.io.ClassPathResource;
 
+import io.pivotal.cfapp.domain.EmailAttachment;
 import io.pivotal.cfapp.event.EmailNotificationEvent;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public abstract class EmailNotifier implements ApplicationListener<EmailNotificationEvent> {
 
-    public abstract void sendMail(String from, String to, String subject, String body, Map<String, String> attachmentContents);
+    public abstract void sendMail(String from, String to, String subject, String body, List<EmailAttachment> attachments);
 
     @Override
     public void onApplicationEvent(EmailNotificationEvent event) {
@@ -33,9 +33,12 @@ public abstract class EmailNotifier implements ApplicationListener<EmailNotifica
         String template = getEmailTemplate();
         final String body = getBody(event, template, subject, footer);
         log.trace("About to send email using ||> From: {}, To: {}, Subject: {}, Body: {}", from, recipients.toString(), subject, body);
-        Map<String, String> attachmentContents = event.getAttachmentContents();
+        List<EmailAttachment> prunedAttachments = event.getAttachments().stream().filter(ea -> ea.hasContent()).collect(Collectors.toList());
+        boolean shouldSend = !prunedAttachments.isEmpty();
         recipients.forEach(recipient -> {
-            sendMail(from, recipient, subject, body, attachmentContents);
+            if (shouldSend) {
+                sendMail(from, recipient, subject, body, prunedAttachments);
+            }
         });
     }
 

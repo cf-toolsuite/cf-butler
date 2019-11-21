@@ -2,9 +2,7 @@ package io.pivotal.cfapp.task;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -15,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import io.pivotal.cfapp.config.PasSettings;
 import io.pivotal.cfapp.domain.Defaults;
+import io.pivotal.cfapp.domain.EmailAttachment;
 import io.pivotal.cfapp.domain.Query;
 import io.pivotal.cfapp.domain.QueryPolicy;
 import io.pivotal.cfapp.event.EmailNotificationEvent;
@@ -67,7 +66,7 @@ public class QueryPolicyExecutorTask implements PolicyExecutorTask {
                                     .recipients(result.getT1().getEmailNotificationTemplate().getTo())
                                     .subject(result.getT1().getEmailNotificationTemplate().getSubject())
                                     .body(result.getT1().getEmailNotificationTemplate().getBody())
-                                    .attachmentContents(toMap(result.getT2()))
+                                    .attachments(buildAttachments(result.getT2()))
                             )
                     );
 					log.info("QueryPolicyExecutorTask completed");
@@ -136,13 +135,13 @@ public class QueryPolicyExecutorTask implements PolicyExecutorTask {
 		return value != null ? StringUtils.wrap(value, '"') : StringUtils.wrap("", '"');
     }
 
-    private static Map<String, String> toMap(List<Tuple2<String, String>> contents) {
-        Map<String, String> result = new HashMap<>();
-        for (Tuple2<String, String> c: contents) {
-            if (StringUtils.isNotBlank(c.getT2())) {
-                result.put(c.getT1(), c.getT2());
+    private static List<EmailAttachment> buildAttachments(List<Tuple2<String, String>> tuples) {
+        List<EmailAttachment> result = new ArrayList<>();
+        for (Tuple2<String, String> t: tuples) {
+            if (StringUtils.isNotBlank(t.getT2())) {
+                result.add(EmailAttachment.builder().filename(t.getT1()).content(t.getT2()).build());
             } else {
-                result.put(c.getT1(), "No results.");
+                result.add(EmailAttachment.builder().filename(t.getT1()).content("No results.").build());
             }
         }
         return result;
