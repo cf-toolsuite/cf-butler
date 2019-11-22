@@ -1,8 +1,8 @@
 package io.pivotal.cfapp.task;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Map;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import io.pivotal.cfapp.config.PasSettings;
 import io.pivotal.cfapp.domain.AppDetail;
+import io.pivotal.cfapp.domain.EmailAttachment;
 import io.pivotal.cfapp.domain.EmailValidator;
 import io.pivotal.cfapp.domain.HygienePolicy;
 import io.pivotal.cfapp.domain.ServiceInstanceDetail;
@@ -89,7 +90,7 @@ public class HygienePolicyExecutorTask implements PolicyExecutorTask {
                 .recipients(tuple.getT1().getOperatorTemplate().getTo())
                 .subject(tuple.getT1().getOperatorTemplate().getSubject())
                 .body(tuple.getT1().getOperatorTemplate().getBody())
-                .attachmentContents(buildAttachmentContents(tuple))
+                .attachments(buildAttachments(tuple))
         );
     }
 
@@ -115,7 +116,7 @@ public class HygienePolicyExecutorTask implements PolicyExecutorTask {
                             .recipient(userMatchedWorkloads.getT1().getAccountName())
                             .subject(tuple.getT1().getNotifyeeTemplate().getSubject())
                             .body(tuple.getT1().getNotifyeeTemplate().getBody())
-                            .attachmentContents(buildAttachmentContents(Tuples.of(tuple.getT1(), userMatchedWorkloads.getT2())))
+                            .attachments(buildAttachments(Tuples.of(tuple.getT1(), userMatchedWorkloads.getT2())))
                     );
                     return userMatchedWorkloads;
             })
@@ -150,21 +151,19 @@ public class HygienePolicyExecutorTask implements PolicyExecutorTask {
 
     }
 
-    private static Map<String, String> buildAttachmentContents(Tuple2<HygienePolicy, Workloads> tuple) {
+    private static List<EmailAttachment> buildAttachments(Tuple2<HygienePolicy, Workloads> tuple) {
 	    String cr = System.getProperty("line.separator");
-        Map<String, String> result = new HashMap<>();
+        List<EmailAttachment> result = new ArrayList<>();
         StringBuilder applications = new StringBuilder();
         StringBuilder serviceInstances = new StringBuilder();
-        applications.append(AppDetail.headers()).append(cr);
         tuple.getT2()
             .getApplications()
                 .forEach(app -> applications.append(app.toCsv()).append(cr));
-        serviceInstances.append(ServiceInstanceDetail.headers()).append(cr);
         tuple.getT2()
             .getServiceInstances()
                 .forEach(sid -> serviceInstances.append(sid.toCsv()).append(cr));
-        result.put(getFileNamePrefix(tuple.getT1()) + "applications", applications.toString());
-        result.put(getFileNamePrefix(tuple.getT1()) + "service-instances", serviceInstances.toString());
+        result.add(EmailAttachment.builder().filename(getFileNamePrefix(tuple.getT1()) + "applications").content(applications.toString()).headers(AppDetail.headers()).build());
+        result.add(EmailAttachment.builder().filename(getFileNamePrefix(tuple.getT1()) + "service-instances").content(serviceInstances.toString()).headers(ServiceInstanceDetail.headers()).build());
         return result;
     }
 
