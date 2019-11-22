@@ -2,9 +2,10 @@ package io.pivotal.cfapp.event;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.context.ApplicationEvent;
+
+import io.pivotal.cfapp.domain.EmailAttachment;
 
 public class EmailNotificationEvent extends ApplicationEvent {
 
@@ -15,7 +16,7 @@ public class EmailNotificationEvent extends ApplicationEvent {
     private String from;
     private String subject;
     private String body;
-    private Map<String, String> attachmentContents;
+    private List<EmailAttachment> attachments;
 
     public EmailNotificationEvent(Object source) {
         super(source);
@@ -74,13 +75,13 @@ public class EmailNotificationEvent extends ApplicationEvent {
         return body;
     }
 
-    public EmailNotificationEvent attachmentContents(Map<String, String> attachmentContents) {
-        this.attachmentContents = attachmentContents;
+    public EmailNotificationEvent attachments(List<EmailAttachment> attachments) {
+        this.attachments = attachments;
         return this;
     }
 
-    public Map<String, String> getAttachmentContents() {
-        return attachmentContents;
+    public List<EmailAttachment> getAttachments() {
+        return attachments;
     }
 
 }

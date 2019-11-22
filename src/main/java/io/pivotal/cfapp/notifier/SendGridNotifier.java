@@ -2,7 +2,7 @@ package io.pivotal.cfapp.notifier;
 
 import java.io.IOException;
 import java.util.Base64;
-import java.util.Map;
+import java.util.List;
 import java.util.UUID;
 
 import com.sendgrid.Method;
@@ -16,6 +16,7 @@ import com.sendgrid.helpers.mail.objects.Email;
 
 import org.springframework.http.HttpStatus;
 
+import io.pivotal.cfapp.domain.EmailAttachment;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -28,13 +29,13 @@ public class SendGridNotifier extends EmailNotifier {
         this.sendGrid = sendGrid;
     }
 
-    public void sendMail(String originator, String recipient, String subject, String body, Map<String, String> attachmentContents) {
+    public void sendMail(String originator, String recipient, String subject, String body, List<EmailAttachment> attachments) {
         try {
             Email from = new Email(originator);
             Email to = new Email(recipient);
             Content content = new Content("text/html", body);
             Mail mail = new Mail(from, subject, to, content);
-            addAttachments(mail, attachmentContents);
+            addAttachments(mail, attachments);
             Request request = new Request();
             request.setMethod(Method.POST);
             request.setEndpoint("mail/send");
@@ -47,12 +48,12 @@ public class SendGridNotifier extends EmailNotifier {
         }
     }
 
-	private static void addAttachments(Mail mail, Map<String, String> attachmentContents) {
-        attachmentContents.entrySet().forEach(e -> {
+	private static void addAttachments(Mail mail, List<EmailAttachment> attachments) {
+        attachments.forEach(ea -> {
             Attachments payload = new Attachments();
-            payload.setContent(new String(Base64.getEncoder().encode(e.getValue().getBytes())));
+            payload.setContent(new String(Base64.getEncoder().encode(ea.getHeadedContent().getBytes())));
             payload.setType("text/csv");
-            payload.setFilename(e.getKey() + ".csv");
+            payload.setFilename(ea.getFilename() + ".csv");
             payload.setDisposition("attachment");
             payload.setContentId(UUID.randomUUID().toString());
             mail.addAttachments(payload);
