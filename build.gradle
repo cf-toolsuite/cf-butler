@@ -129,7 +129,7 @@ dependencies {
     // @see https://spring.io/blog/2019/05/15/spring-data-r2dbc-1-0-m2-and-spring-boot-starter-released
     implementation('org.springframework.boot.experimental:spring-boot-starter-data-r2dbc:0.1.0.M2')
     implementation('org.springframework.boot.experimental:spring-boot-actuator-autoconfigure-r2dbc:0.1.0.M2')
-    implementation('org.springframework.data:spring-data-r2dbc:1.0.0.RC1')
+    implementation('org.springframework.data:spring-data-r2dbc:1.0.0.gh-235-SNAPSHOT')
     implementation('org.locationtech.jts:jts-core:1.16.1')
     implementation('io.r2dbc:r2dbc-spi:0.8.0.RC2')
     implementation('io.r2dbc:r2dbc-client:0.8.0.RC2')
