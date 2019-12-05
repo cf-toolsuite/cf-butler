@@ -7,6 +7,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,8 +34,12 @@ public class ApplicationReporterTest {
 
     @Test
     public void testReportGeneration() throws JsonParseException, JsonMappingException, IOException {
-        ReportRequestSpec spec = mapper.readValue(new File(System.getProperty("user.home") + "/app-reporting-config.json"), ReportRequestSpec.class);
-        reporter.createReport(spec.getOutput(), spec.getInput());
+        File file = new File(System.getProperty("user.home") + "/app-reporting-config.json");
+        if (file.exists()) {
+            ReportRequestSpec spec = mapper.readValue(file, ReportRequestSpec.class);
+            reporter.createReport(spec.getOutput(), spec.getInput());
+            Assertions.assertThat(new File(spec.getOutput()).exists()).isTrue();
+        }
     }
 
 }
