@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -43,6 +44,7 @@ public class ServiceInstanceReporter {
 
     public String createReport(ReportRequest[] requests) {
         List<ReportRequest> list = Arrays.asList(requests);
+        try { log.info(mapper.writeValueAsString(list)); } catch (JsonProcessingException jpe) {}
         StringBuilder result = new StringBuilder();
         result.append(REPORT_HEADER);
         for (ReportRequest r: list) {
@@ -53,7 +55,7 @@ public class ServiceInstanceReporter {
 
     public String createReport(String foundation, String environment, String period, String filename) {
         Assert.hasText(foundation, "Foundation must be specified!");
-        Assert.hasText(environment, "Environmnent must be specified!");
+        Assert.hasText(environment, "Environment must be specified!");
         Assert.hasText(period, "Time period must be specified! It should have the form YYYY-MM");
         Assert.hasText(filename, "Filename must be specified!");
         StringBuilder result = new StringBuilder();
