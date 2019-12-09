@@ -131,7 +131,6 @@ dependencies {
     implementation('org.springframework.data:spring-data-r2dbc:1.0.0.RELEASE')
     implementation('org.locationtech.jts:jts-core:1.16.1')
     implementation('io.r2dbc:r2dbc-spi:0.8.0.RELEASE')
-    implementation('io.r2dbc:r2dbc-client:0.8.0.RC2')
     runtime('io.r2dbc:r2dbc-pool:0.8.0.RELEASE')
     implementation('io.r2dbc:r2dbc-h2:0.8.0.RELEASE')
     runtime('com.github.mirromutth:r2dbc-mysql:v0.8.0.RELEASE')
