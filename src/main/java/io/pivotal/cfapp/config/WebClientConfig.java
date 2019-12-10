@@ -21,7 +21,7 @@ public class WebClientConfig {
 
     @Bean
     @ConditionalOnProperty(name = "cf.sslValidationSkipped", havingValue="true")
-    public WebClient insecureWebClient() throws SSLException {
+    public WebClient insecureWebClient(WebClient.Builder builder) throws SSLException {
         SslContext sslContext =
             SslContextBuilder
                 .forClient()
@@ -29,17 +29,15 @@ public class WebClientConfig {
                 .build();
         TcpClient tcpClient = TcpClient.create().secure(sslProviderBuilder -> sslProviderBuilder.sslContext(sslContext));
         HttpClient httpClient = HttpClient.from(tcpClient);
-        return WebClient
-                .builder()
+        return builder
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .build();
     }
 
     @Bean
     @ConditionalOnProperty(name = "cf.sslValidationSkipped", havingValue="false", matchIfMissing=true)
-    public WebClient secureWebClient() {
-          return WebClient
-                    .builder()
+    public WebClient secureWebClient(WebClient.Builder builder) {
+          return builder
                     .build();
     }
 }

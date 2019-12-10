@@ -11,10 +11,6 @@ Reaching out to each development team to tell them to clean-up has become a chor
 
 This is where `cf-butler` has your back.
 
-# Announcements
-
-* 2019-12-09 H2 support on master is currently in broken state and depends on this [issue](https://github.com/r2dbc/r2dbc-h2/issues/129) being addressed.
-
 # Table of Contents
 
   * [What does it do?](#what-does-it-do)
