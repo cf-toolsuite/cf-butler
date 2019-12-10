@@ -42,7 +42,7 @@ public class SpaceUsersTask implements ApplicationListener<SpacesRetrievedEvent>
             .deleteAll()
             .thenMany(Flux.fromIterable(spaces))
             .concatMap(space -> getSpaceUsers(space))
-            .concatMap(service::save)
+            .flatMap(service::save)
             .thenMany(service.findAll())
                 .collectList()
                 .subscribe(

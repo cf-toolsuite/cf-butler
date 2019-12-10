@@ -92,6 +92,8 @@ notification:
   engine: none
 
 spring:
+  codec:
+    max-in-memory-size: 512000000
   r2dbc:
     url: r2dbc:h2:mem:///cf-butler?options=DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false
     name: cf-butler

@@ -1,14 +1,14 @@
 plugins {
     id 'com.gorylenko.gradle-git-properties' version '2.2.0'
-    id 'org.springframework.boot' version '2.2.1.RELEASE'
+    id 'org.springframework.boot' version '2.2.2.RELEASE'
     id 'io.spring.dependency-management' version '1.0.8.RELEASE'
-    id 'com.github.ben-manes.versions' version '0.26.0'
+    id 'com.github.ben-manes.versions' version '0.27.0'
     id 'io.franzbecker.gradle-lombok' version '3.2.0'
 	id 'java'
     id 'jacoco'
     id 'com.google.cloud.tools.jib' version '1.8.0'
     id 'maven-publish'
-    id 'com.github.spotbugs' version '2.0.1'
+    id 'com.github.spotbugs' version '3.0.0'
     id 'info.solidsoft.pitest' version '1.4.5'
 }
 
@@ -132,7 +132,7 @@ dependencies {
     implementation('org.locationtech.jts:jts-core:1.16.1')
     implementation('io.r2dbc:r2dbc-spi:0.8.0.RELEASE')
     runtime('io.r2dbc:r2dbc-pool:0.8.0.RELEASE')
-    implementation('io.r2dbc:r2dbc-h2:0.8.0.RELEASE')
+    implementation('io.r2dbc:r2dbc-h2:0.8.1.RELEASE')
     runtime('com.github.mirromutth:r2dbc-mysql:v0.8.0.RELEASE')
     implementation('org.eclipse.jgit:org.eclipse.jgit:5.5.0.201909110433-r')
     implementation('org.springframework.boot:spring-boot-starter-mail')
@@ -140,15 +140,15 @@ dependencies {
         exclude group: 'org.apache.httpcomponents', module: 'httpclient'
     }
     implementation('org.apache.httpcomponents:httpclient:4.5.10')
-    implementation('org.cloudfoundry:cloudfoundry-client-reactor:4.0.1.RELEASE')
-    implementation('org.cloudfoundry:cloudfoundry-operations:4.0.1.RELEASE')
-    implementation('io.projectreactor:reactor-core:3.3.0.RELEASE')
+    implementation('org.cloudfoundry:cloudfoundry-client-reactor:4.2.0.RELEASE')
+    implementation('org.cloudfoundry:cloudfoundry-operations:4.2.0.RELEASE')
+    implementation('io.projectreactor:reactor-core:3.3.1.RELEASE')
     //implementation('io.projectreactor:reactor-tools:3.3.0.RELEASE')
     //implementation('io.projectreactor.tools:blockhound:1.0.0.RELEASE')
-    implementation('io.projectreactor.netty:reactor-netty:0.9.0.RELEASE')
+    implementation('io.projectreactor.netty:reactor-netty:0.9.2.RELEASE')
     implementation('io.micrometer:micrometer-registry-prometheus')
     testImplementation('io.projectreactor:reactor-test')
-    testImplementation('org.assertj:assertj-core:3.13.2')
+    testImplementation('org.assertj:assertj-core:3.14.0')
     testImplementation('org.junit.jupiter:junit-jupiter-api')
     testImplementation('org.junit.jupiter:junit-jupiter-params')
     testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine')
