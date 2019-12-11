@@ -134,7 +134,7 @@ dependencies {
     runtime('io.r2dbc:r2dbc-pool:0.8.0.RELEASE')
     implementation('io.r2dbc:r2dbc-h2:0.8.1.RELEASE')
     runtime('io.r2dbc:r2dbc-postgresql:0.8.0.RELEASE')
-    implementation('org.eclipse.jgit:org.eclipse.jgit:5.5.1.201910021850-r')
+    implementation('org.eclipse.jgit:org.eclipse.jgit:5.6.0.201912101111-r')
     implementation('org.springframework.boot:spring-boot-starter-mail')
     implementation('com.sendgrid:sendgrid-java:4.4.1') {
         exclude group: 'org.apache.httpcomponents', module: 'httpclient'
