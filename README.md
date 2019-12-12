@@ -619,6 +619,11 @@ GET /store/product/releases?q=all
 ```
 > Returns a list of all available releases for all products on Pivotal Network (includes buildpacks, stemcells and tiles)
 
+```
+GET /store/product/releases?q=recent
+```
+> Returns a list of releases released within the last 7 days for all products on Pivotal Network (includes buildpacks, stemcells and tiles)
+
 
 ### Events
 
