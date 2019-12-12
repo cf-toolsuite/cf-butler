@@ -1,6 +1,8 @@
 package io.pivotal.cfapp.controller;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -49,6 +51,15 @@ public class PivnetController {
             } else if (option.equalsIgnoreCase("all")) {
                 return util.getHeaders()
                         .map(h -> new ResponseEntity<>(cache.getAllProductReleases(), h, HttpStatus.OK))
+                        .defaultIfEmpty(ResponseEntity.notFound().build());
+            } else if (option.equalsIgnoreCase("recent")) {
+                List<Release> recentReleases = cache
+                                                .getAllProductReleases()
+                                                    .stream()
+                                                    .filter(r -> r.getReleaseDate().isAfter(LocalDate.now().minusDays(7)))
+                                                    .collect(Collectors.toList());
+                return util.getHeaders()
+                        .map(h -> new ResponseEntity<>(recentReleases, h, HttpStatus.OK))
                         .defaultIfEmpty(ResponseEntity.notFound().build());
             } else {
                 return Mono.just(ResponseEntity.badRequest().build());
