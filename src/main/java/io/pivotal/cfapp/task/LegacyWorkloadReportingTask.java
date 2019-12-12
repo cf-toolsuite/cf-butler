@@ -94,32 +94,34 @@ public class LegacyWorkloadReportingTask implements PolicyExecutorTask {
     }
 
     private void notifyUsers(Tuple2<LegacyPolicy, Workloads> tuple) {
-        // Pull distinct Set<Space> from applications and service instances
-        Flux
-            .fromIterable(getSpaces(tuple.getT2()))
-        // For each Space in Set<Space>, obtain SpaceUsers#getUsers()
-            .concatMap(space -> spaceUsersService.findByOrganizationAndSpace(space.getOrganizationName(), space.getSpaceName()))
-        // then pair with matching space(s) that contain applications and service instances
-            .concatMap(spaceUser -> Flux.fromIterable(spaceUser.getUsers()))
-            .distinct()
-        // filter out account names that are not email addresses
-            .filter(userName -> EmailValidator.isValid(userName))
-            .concatMap(userName -> userSpacesService.getUserSpaces(userName))
-        // Create a list where each item is a tuple of user account and filtered workloads
-            .concatMap(userSpace -> filterWorkloads(userSpace, tuple.getT2()))
-            .map(userMatchedWorkloads -> {
-                    publisher.publishEvent(
-                        new EmailNotificationEvent(this)
-                            .domain(settings.getAppsDomain())
-                            .from(tuple.getT1().getNotifyeeTemplate().getFrom())
-                            .recipient(userMatchedWorkloads.getT1().getAccountName())
-                            .subject(tuple.getT1().getNotifyeeTemplate().getSubject())
-                            .body(tuple.getT1().getNotifyeeTemplate().getBody())
-                            .attachments(buildAttachments(Tuples.of(tuple.getT1(), userMatchedWorkloads.getT2())))
-                    );
-                    return userMatchedWorkloads;
-            })
-            .subscribe();
+        if (tuple.getT1().getNotifyeeTemplate() != null) {
+            // Pull distinct Set<Space> from applications and service instances
+            Flux
+                .fromIterable(getSpaces(tuple.getT2()))
+            // For each Space in Set<Space>, obtain SpaceUsers#getUsers()
+                .concatMap(space -> spaceUsersService.findByOrganizationAndSpace(space.getOrganizationName(), space.getSpaceName()))
+            // then pair with matching space(s) that contain applications and service instances
+                .concatMap(spaceUser -> Flux.fromIterable(spaceUser.getUsers()))
+                .distinct()
+            // filter out account names that are not email addresses
+                .filter(userName -> EmailValidator.isValid(userName))
+                .concatMap(userName -> userSpacesService.getUserSpaces(userName))
+            // Create a list where each item is a tuple of user account and filtered workloads
+                .concatMap(userSpace -> filterWorkloads(userSpace, tuple.getT2()))
+                .map(userMatchedWorkloads -> {
+                        publisher.publishEvent(
+                            new EmailNotificationEvent(this)
+                                .domain(settings.getAppsDomain())
+                                .from(tuple.getT1().getNotifyeeTemplate().getFrom())
+                                .recipient(userMatchedWorkloads.getT1().getAccountName())
+                                .subject(tuple.getT1().getNotifyeeTemplate().getSubject())
+                                .body(tuple.getT1().getNotifyeeTemplate().getBody())
+                                .attachments(buildAttachments(Tuples.of(tuple.getT1(), userMatchedWorkloads.getT2())))
+                        );
+                        return userMatchedWorkloads;
+                })
+                .subscribe();
+        }
     }
 
     @Scheduled(cron = "${cron.execution}")
