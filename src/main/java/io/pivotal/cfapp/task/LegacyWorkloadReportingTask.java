@@ -1,5 +1,6 @@
 package io.pivotal.cfapp.task;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -108,6 +109,7 @@ public class LegacyWorkloadReportingTask implements PolicyExecutorTask {
                 .concatMap(userName -> userSpacesService.getUserSpaces(userName))
             // Create a list where each item is a tuple of user account and filtered workloads
                 .concatMap(userSpace -> filterWorkloads(userSpace, tuple.getT2()))
+                .delayElements(Duration.ofMillis(250))
                 .doOnNext(
                         userWorkloads -> {
                                     publisher.publishEvent(
