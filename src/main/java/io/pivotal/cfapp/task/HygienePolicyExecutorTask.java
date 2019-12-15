@@ -109,18 +109,19 @@ public class HygienePolicyExecutorTask implements PolicyExecutorTask {
                 .concatMap(userName -> userSpacesService.getUserSpaces(userName))
             // Create a list where each item is a tuple of user account and filtered workloads
                 .concatMap(userSpace -> filterWorkloads(userSpace, tuple.getT2()))
-                .map(userMatchedWorkloads -> {
-                        publisher.publishEvent(
-                            new EmailNotificationEvent(this)
-                                .domain(settings.getAppsDomain())
-                                .from(tuple.getT1().getNotifyeeTemplate().getFrom())
-                                .recipient(userMatchedWorkloads.getT1().getAccountName())
-                                .subject(tuple.getT1().getNotifyeeTemplate().getSubject())
-                                .body(tuple.getT1().getNotifyeeTemplate().getBody())
-                                .attachments(buildAttachments(Tuples.of(tuple.getT1(), userMatchedWorkloads.getT2())))
-                        );
-                        return userMatchedWorkloads;
-                })
+                .doOnNext(
+                        userWorkloads -> {
+                                    publisher.publishEvent(
+                                        new EmailNotificationEvent(this)
+                                            .domain(settings.getAppsDomain())
+                                            .from(tuple.getT1().getNotifyeeTemplate().getFrom())
+                                            .recipient(userWorkloads.getT1().getAccountName())
+                                            .subject(tuple.getT1().getNotifyeeTemplate().getSubject())
+                                            .body(tuple.getT1().getNotifyeeTemplate().getBody())
+                                            .attachments(buildAttachments(Tuples.of(tuple.getT1(), userWorkloads.getT2())))
+                                    );
+                        }
+                )
                 .subscribe();
         }
     }
