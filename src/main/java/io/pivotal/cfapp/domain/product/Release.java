@@ -7,6 +7,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import org.apache.commons.lang3.StringUtils;
+
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Builder.Default;
@@ -119,6 +121,24 @@ public class Release {
 
     public static Release empty() {
         return Release.builder().build();
+    }
+
+    public static String headers() {
+        return String.join(",", "id", "slug", "version", "release_type", "release_date",
+            "release_notes_url", "availability", "description", "eccn", "license_exception", "updated_at",
+            "software_files_updated_at");
+    }
+
+    private static String wrap(String value) {
+		return value != null ? StringUtils.wrap(value, '"') : StringUtils.wrap("", '"');
+    }
+
+    public String toCsv() {
+        return String.join(",", wrap(String.valueOf(getId())), wrap(getSlug()), wrap(getVersion()),
+            wrap(getReleaseType()), wrap(getReleaseDate() != null ? getReleaseDate().toString(): ""),
+            wrap(getReleaseNotesUrl()), wrap(getAvailability()), wrap(getDescription()),
+            wrap(getEccn()), wrap(getLicenseException()), wrap(getUpdatedAt() != null ? getUpdatedAt().toString(): ""),
+            wrap(getSoftwareFilesUpdatedAt() != null ? getSoftwareFilesUpdatedAt().toString(): ""));
     }
 
 }
