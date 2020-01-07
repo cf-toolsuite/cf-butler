@@ -161,7 +161,16 @@ public class LegacyWorkloadReportingTask implements PolicyExecutorTask {
         tuple.getT2()
             .getApplications()
                 .forEach(app -> applications.append(app.toCsv()).append(cr));
-                result.add(EmailAttachment.builder().filename(getFileNamePrefix(tuple.getT1()) + "applications").content(applications.toString()).headers(AppDetail.headers()).build());
+        result.add(
+            EmailAttachment
+                .builder()
+                    .filename(getFileNamePrefix(tuple.getT1()) + "applications")
+                    .extension(".csv")
+                    .mimeType("text/csv")
+                    .content(applications.toString())
+                    .headers(AppDetail.headers())
+                    .build()
+        );
         return result;
     }
 

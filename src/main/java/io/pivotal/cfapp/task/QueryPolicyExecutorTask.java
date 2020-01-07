@@ -139,9 +139,25 @@ public class QueryPolicyExecutorTask implements PolicyExecutorTask {
         List<EmailAttachment> result = new ArrayList<>();
         for (Tuple2<String, String> t: tuples) {
             if (StringUtils.isNotBlank(t.getT2())) {
-                result.add(EmailAttachment.builder().filename(t.getT1()).content(t.getT2()).build());
+                result.add(
+                    EmailAttachment
+                        .builder()
+                            .filename(t.getT1())
+                            .content(t.getT2())
+                            .extension(".csv")
+                            .mimeType("text/csv")
+                            .build()
+                );
             } else {
-                result.add(EmailAttachment.builder().filename(t.getT1()).content("No results.").build());
+                result.add(
+                    EmailAttachment
+                        .builder()
+                            .filename(t.getT1())
+                            .content("No results.")
+                            .extension(".csv")
+                            .mimeType("text/csv")
+                            .build()
+                );
             }
         }
         return result;

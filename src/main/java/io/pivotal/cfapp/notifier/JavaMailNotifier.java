@@ -32,7 +32,7 @@ public class JavaMailNotifier extends EmailNotifier {
             helper.setSubject(subject);
             helper.setTo(to);
             helper.setText(body, true);
-            attachments.forEach(ea -> addAttachment(helper, ea.getFilename(), ea.getHeadedContent()));
+            attachments.forEach(ea -> addAttachment(helper, ea));
             javaMailSender.send(message);
             log.info("Email sent to {} with subject: {}!", to, subject);
         } catch (MessagingException me) {
@@ -40,10 +40,10 @@ public class JavaMailNotifier extends EmailNotifier {
         }
     }
 
-    private static void addAttachment(MimeMessageHelper helper, String filename, String content) {
+    private static void addAttachment(MimeMessageHelper helper, EmailAttachment ea) {
         try {
-            DataSource ds = new ByteArrayDataSource(content, "text/csv");
-            helper.addAttachment(filename + ".csv", ds);
+            DataSource ds = new ByteArrayDataSource(ea.getContent(), ea.getMimeType());
+            helper.addAttachment(ea.getFilename() + ea.getExtension(), ds);
         } catch (MessagingException | IOException e) {
             log.warn("Could not add attachment to email!", e);
         }
