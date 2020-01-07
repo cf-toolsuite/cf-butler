@@ -7,6 +7,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import org.apache.commons.lang3.StringUtils;
+
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -97,5 +99,26 @@ public class ProductMetric {
         }
         return result;
     }
+
+    public static String headers() {
+        return String.join("name", "type", "currently-installed-release-date", "currently-installed-version",
+        "latest-available-release-date", "latest-available-version", "end-of-support-date",
+        "days-behind-latest-available-version", "days-out-of-support", "end-of-life", "pre-release");
+    }
+
+    private static String wrap(String value) {
+		return value != null ? StringUtils.wrap(value, '"') : StringUtils.wrap("", '"');
+    }
+
+    public String toCsv() {
+        return String.join(",", wrap(getName()), wrap(getType().getId()),
+            wrap(getCurrentlyInstalledReleaseDate() != null ? getCurrentlyInstalledReleaseDate().toString(): ""),
+            wrap(getCurrentlyInstalledVersion()), wrap(getLatestAvailableReleaseDate() != null ? getLatestAvailableReleaseDate().toString(): ""),
+            wrap(getLatestAvailableVersion()), wrap(getEndOfSupportDate() != null ? getEndOfSupportDate().toString(): ""),
+            wrap(getDaysBehindLatestAvailableVersion() != null ? String.valueOf(getDaysBehindLatestAvailableVersion()): ""),
+            wrap(getDaysOutOfSupport() != null ? String.valueOf(getDaysOutOfSupport()): ""),
+            wrap(String.valueOf(isEndOfLife())), wrap(String.valueOf(isPreRelease()))
+        );
+	}
 
 }
