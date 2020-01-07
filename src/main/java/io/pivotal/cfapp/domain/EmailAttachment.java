@@ -12,6 +12,8 @@ public class EmailAttachment {
     private final String headers;
     private final String content;
     private final String filename;
+    private final String mimeType;
+    private final String extension;
 
     public String getHeadedContent() {
         String headers = hasHeaders() ? getHeaders() : "";

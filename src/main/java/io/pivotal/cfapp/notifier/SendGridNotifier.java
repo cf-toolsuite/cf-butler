@@ -52,8 +52,8 @@ public class SendGridNotifier extends EmailNotifier {
         attachments.forEach(ea -> {
             Attachments payload = new Attachments();
             payload.setContent(new String(Base64.getEncoder().encode(ea.getHeadedContent().getBytes())));
-            payload.setType("text/csv");
-            payload.setFilename(ea.getFilename() + ".csv");
+            payload.setType(ea.getMimeType());
+            payload.setFilename(ea.getFilename() + ea.getExtension());
             payload.setDisposition("attachment");
             payload.setContentId(UUID.randomUUID().toString());
             mail.addAttachments(payload);
