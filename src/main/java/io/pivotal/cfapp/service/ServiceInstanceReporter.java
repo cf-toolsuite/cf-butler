@@ -1,9 +1,11 @@
 package io.pivotal.cfapp.service;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -11,13 +13,18 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvParser;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import io.pivotal.cfapp.domain.accounting.service.NormalizedServicePlanMonthlyUsage;
+import io.pivotal.cfapp.domain.accounting.service.NormalizedServicePlanMonthlyUsage.NormalizedServicePlanMonthlyUsageBuilder;
 import io.pivotal.cfapp.domain.accounting.service.ServiceUsageReport;
 import lombok.extern.slf4j.Slf4j;
 
@@ -62,12 +69,11 @@ public class ServiceInstanceReporter {
         Integer year = Integer.valueOf(period.split("-")[0]);
         Integer month = Integer.valueOf(period.split("-")[1]);
         try {
-            ServiceUsageReport report = readServiceUsageReport(filename);
-            List<NormalizedServicePlanMonthlyUsage> usage = NormalizedServicePlanMonthlyUsage.listOf(report);
+            List<NormalizedServicePlanMonthlyUsage> usage = readServiceUsageReport(filename);
             List<NormalizedServicePlanMonthlyUsage> filtered =
                 usage
                     .stream()
-                    .filter(u -> u.getYear().equals(year) && u.getMonth().equals(month))
+                    .filter(u -> u.getYear().equals(year) && u.getMonth() != null && u.getMonth().equals(month))
                     .collect(Collectors.toList());
             for (NormalizedServicePlanMonthlyUsage u: filtered) {
                 result.append(foundation + "," + environment + "," + period + "," + u.getServiceName() + "," + u.getServiceGuid() + "," + u.getServicePlanName() + "," + u.getServicePlanGuid() + "," + u.getAverageInstances() + "," + u.getMaximumInstances() + "," + u.getDurationInHours() + "\n");
@@ -82,9 +88,62 @@ public class ServiceInstanceReporter {
         return result.toString();
     }
 
-    protected ServiceUsageReport readServiceUsageReport(String filename) throws JsonParseException, JsonMappingException, IOException {
+    protected List<NormalizedServicePlanMonthlyUsage> readServiceUsageReport(String filename) throws JsonParseException, JsonMappingException, IOException {
         String content = readFile(filename);
-        return mapper.readValue(content, ServiceUsageReport.class);
+        if (filename.endsWith(".json")) {
+            return NormalizedServicePlanMonthlyUsage.listOf(mapper.readValue(content, ServiceUsageReport.class));
+        } else if (filename.endsWith(".csv")) {
+            CsvMapper csvMapper = new CsvMapper();
+            csvMapper.enable(CsvParser.Feature.WRAP_AS_ARRAY);
+            File csvFile = new File(filename);
+            MappingIterator<String[]> it = csvMapper.readerFor(String[].class).readValues(csvFile);
+            List<NormalizedServicePlanMonthlyUsage> reports = new ArrayList<>();
+            int rowNum = 0;
+            while (it.hasNext()) {
+                String[] row = it.next();
+                if (rowNum > 0) {
+                    NormalizedServicePlanMonthlyUsageBuilder amb = NormalizedServicePlanMonthlyUsage.builder();
+                    for (int i = 0; i < row.length; i++) {
+                        if (i == 0) {
+                            String[] period = row[i].split("-");
+                            if (period.length == 2) {
+                                amb.month(Integer.valueOf(period[1]));
+                            }
+                            amb.year(Integer.valueOf(period[0]));
+                        }
+                        if (i == 1) {
+                            amb.serviceName(row[i]);
+                        }
+                        if (i == 2) {
+                            amb.serviceGuid(row[i]);
+                        }
+                        if (i == 3) {
+                            amb.servicePlanName(row[i]);
+                        }
+                        if (i == 4) {
+                            amb.servicePlanGuid(row[i]);
+                        }
+                        if (i == 5) {
+                            amb.averageInstances(Double.valueOf(row[i]));
+                        }
+                        if (i == 6) {
+                            amb.maximumInstances(Integer.valueOf(row[i]));
+                        }
+                        if (i == 7) {
+                            amb.durationInHours(Double.valueOf(row[i]));
+                        }
+                    }
+                    NormalizedServicePlanMonthlyUsage usage = amb.build();
+                    if (StringUtils.isNotBlank(usage.getServicePlanGuid())) {
+                        reports.add(usage);
+                    }
+                }
+                rowNum++;
+            }
+            return reports;
+        } else {
+            return NormalizedServicePlanMonthlyUsage.listOf(ServiceUsageReport.builder().build());
+        }
     }
 
     protected String readFile(String filename) {
