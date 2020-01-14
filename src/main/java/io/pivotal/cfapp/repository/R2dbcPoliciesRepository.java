@@ -23,6 +23,8 @@ import io.pivotal.cfapp.domain.ApplicationOperation;
 import io.pivotal.cfapp.domain.ApplicationPolicy;
 import io.pivotal.cfapp.domain.ApplicationPolicyShim;
 import io.pivotal.cfapp.domain.EmailNotificationTemplate;
+import io.pivotal.cfapp.domain.EndpointPolicy;
+import io.pivotal.cfapp.domain.EndpointPolicyShim;
 import io.pivotal.cfapp.domain.HygienePolicy;
 import io.pivotal.cfapp.domain.HygienePolicyShim;
 import io.pivotal.cfapp.domain.LegacyPolicy;
@@ -63,6 +65,10 @@ public class R2dbcPoliciesRepository {
 			entity.getServiceInstancePolicies().stream()
 				.map(p -> idProvider.seedServiceInstancePolicy(p)).collect(Collectors.toList());
 
+		List<EndpointPolicy> endpointPolicies =
+			entity.getEndpointPolicies().stream()
+				.map(p -> idProvider.seedEndpointPolicy(p)).collect(Collectors.toList());
+
 		List<QueryPolicy> queryPolicies =
 			entity.getQueryPolicies().stream()
 				.map(p -> idProvider.seedQueryPolicy(p)).collect(Collectors.toList());
@@ -79,13 +85,27 @@ public class R2dbcPoliciesRepository {
 					.concatMap(ap -> saveApplicationPolicy(ap))
 					.thenMany(Flux.fromIterable(serviceInstancePolicies)
 					.concatMap(sip -> saveServiceInstancePolicy(sip)))
+					.thenMany(Flux.fromIterable(endpointPolicies)
+					.concatMap(ep -> saveEndpointPolicy(ep)))
 					.thenMany(Flux.fromIterable(queryPolicies)
 					.concatMap(qp -> saveQueryPolicy(qp)))
 					.thenMany(Flux.fromIterable(hygienePolicies)
 					.concatMap(hp -> saveHygienePolicy(hp)))
 					.thenMany(Flux.fromIterable(legacyPolicies)
 					.concatMap(lp -> saveLegacyPolicy(lp)))
-					.then(Mono.just(Policies.builder().applicationPolicies(applicationPolicies).serviceInstancePolicies(serviceInstancePolicies).queryPolicies(queryPolicies).hygienePolicies(hygienePolicies).legacyPolicies(legacyPolicies).build()));
+					.then(
+						Mono.just(
+							Policies
+								.builder()
+									.applicationPolicies(applicationPolicies)
+									.serviceInstancePolicies(serviceInstancePolicies)
+									.endpointPolicies(endpointPolicies)
+									.queryPolicies(queryPolicies)
+									.hygienePolicies(hygienePolicies)
+									.legacyPolicies(legacyPolicies)
+									.build()
+						)
+					);
 	}
 
 	public Mono<Policies> findServiceInstancePolicyById(String id) {
@@ -139,6 +159,30 @@ public class R2dbcPoliciesRepository {
 				.flatMap(p -> p.isEmpty() ? Mono.empty(): Mono.just(p));
 	}
 
+	public Mono<Policies> findEndpointPolicyById(String id) {
+		List<EndpointPolicy> endpointPolicies = new ArrayList<>();
+		return
+			Flux
+				.from(dbClient
+						.select()
+							.from(EndpointPolicy.tableName())
+							.project(EndpointPolicy.columnNames())
+							.matching(Criteria.where("id").is(id))
+						.map((row, metadata) ->
+							EndpointPolicy
+								.builder()
+									.pk(row.get("pk", Long.class))
+									.id(row.get("id", String.class))
+									.description(row.get("description", String.class))
+									.endpoints(readEndpoints(row.get("endpoints", String.class) == null ? "[]" : row.get("endpoints", String.class)))
+									.emailNotificationTemplate(readEmailNotificationTemplate(row.get("email_notification_template", String.class) == null ? "{}": row.get("email_notification_template", String.class)))
+									.build())
+						.all())
+				.map(ep -> endpointPolicies.add(ep))
+				.then(Mono.just(Policies.builder().endpointPolicies(endpointPolicies).build()))
+				.flatMap(p -> p.isEmpty() ? Mono.empty(): Mono.just(p));
+	}
+
 	public Mono<Policies> findQueryPolicyById(String id) {
 		List<QueryPolicy> queryPolicies = new ArrayList<>();
 		return
@@ -154,7 +198,7 @@ public class R2dbcPoliciesRepository {
 									.pk(row.get("pk", Long.class))
 									.id(row.get("id", String.class))
 									.description(row.get("description", String.class))
-									.queries(readQueries(row.get("queries", String.class) == null ? "{}" : row.get("queries", String.class)))
+									.queries(readQueries(row.get("queries", String.class) == null ? "[]" : row.get("queries", String.class)))
 									.emailNotificationTemplate(readEmailNotificationTemplate(row.get("email_notification_template", String.class) == null ? "{}": row.get("email_notification_template", String.class)))
 									.build())
 						.all())
@@ -216,11 +260,13 @@ public class R2dbcPoliciesRepository {
 	public Mono<Policies> findAll() {
 		String selectAllApplicationPolicies = "select pk, id, operation, description, state, options, organization_whitelist from application_policy";
 		String selectAllServiceInstancePolicies = "select pk, id, operation, description, options, organization_whitelist from service_instance_policy";
+		String selectAllEndpointPolicies = "select pk, id, description, endpoints, email_notification_template, cron_schedule from endpoint_policy";
 		String selectAllQueryPolicies = "select pk, id, description, queries, email_notification_template from query_policy";
 		String selectAllHygienePolicies = "select pk, id, days_since_last_update, operator_email_template, notifyee_email_template, organization_whitelist from hygiene_policy";
 		String selectAllLegacyPolicies = "select pk, id, stacks, operator_email_template, notifyee_email_template, organization_whitelist from legacy_policy";
 		List<ApplicationPolicy> applicationPolicies = new ArrayList<>();
 		List<ServiceInstancePolicy> serviceInstancePolicies = new ArrayList<>();
+		List<EndpointPolicy> endpointPolicies = new ArrayList<>();
 		List<QueryPolicy> queryPolicies = new ArrayList<>();
 		List<HygienePolicy> hygienePolicies = new ArrayList<>();
 		List<LegacyPolicy> legacyPolicies = new ArrayList<>();
@@ -255,6 +301,20 @@ public class R2dbcPoliciesRepository {
 												.build())
 									.all())
 							.map(sp -> serviceInstancePolicies.add(sp)))
+					.thenMany(
+						Flux
+							.from(dbClient.execute(selectAllEndpointPolicies)
+									.map((row, metadata) ->
+										EndpointPolicy
+											.builder()
+												.pk(row.get("pk", Long.class))
+												.id(row.get("id", String.class))
+												.description(row.get("description", String.class))
+												.endpoints(readEndpoints(row.get("endpoints", String.class) == null ? "[]" : row.get("endpoints", String.class)))
+												.emailNotificationTemplate(readEmailNotificationTemplate(row.get("email_notification_template", String.class) == null ? "{}": row.get("email_notification_template", String.class)))
+												.build())
+									.all())
+							.map(ep -> endpointPolicies.add(ep)))
 					.thenMany(
 						Flux
 							.from(dbClient.execute(selectAllQueryPolicies)
@@ -301,6 +361,32 @@ public class R2dbcPoliciesRepository {
 							.map(lp -> legacyPolicies.add(lp)))
 					.then(Mono.just(Policies.builder().applicationPolicies(applicationPolicies).serviceInstancePolicies(serviceInstancePolicies).queryPolicies(queryPolicies).hygienePolicies(hygienePolicies).legacyPolicies(legacyPolicies).build()))
 					.flatMap(p -> p.isEmpty() ? Mono.empty(): Mono.just(p));
+	}
+
+	public Mono<Policies> findAllEndpointPolicies() {
+		return
+			dbClient
+				.select()
+				.from(EndpointPolicy.tableName())
+				.project(EndpointPolicy.columnNames())
+				.map(
+					(row, metadata) ->
+					EndpointPolicy
+							.builder()
+								.pk(row.get("pk", Long.class))
+								.id(row.get("id", String.class))
+								.description(row.get("description", String.class))
+								.endpoints(readEndpoints(row.get("endpoints", String.class) == null ? "[]" : row.get("endpoints", String.class)))
+								.emailNotificationTemplate(
+									readEmailNotificationTemplate(
+										row.get("email_notification_template", String.class) == null
+											? "{}"
+											: row.get("email_notification_template", String.class)))
+							.build())
+				.all()
+				.collectList()
+				.map(eps -> Policies.builder().endpointPolicies(eps).build())
+				.flatMap(p -> p.isEmpty() ? Mono.empty(): Mono.just(p));
 	}
 
 	public Mono<Policies> findAllQueryPolicies() {
@@ -399,6 +485,18 @@ public class R2dbcPoliciesRepository {
 				.then();
 	}
 
+	public Mono<Void> deleteEndpointPolicyById(String id) {
+		return
+			Flux
+				.from(dbClient
+						.delete()
+							.from(EndpointPolicy.tableName())
+							.matching(Criteria.where("id").is(id))
+						.fetch()
+						.rowsUpdated())
+				.then();
+	}
+
 	public Mono<Void> deleteQueryPolicyById(String id) {
 		return
 			Flux
@@ -451,6 +549,15 @@ public class R2dbcPoliciesRepository {
 							dbClient
 								.delete()
 								.from(ServiceInstancePolicy.tableName())
+								.fetch()
+								.rowsUpdated())
+						)
+				.thenMany(
+					Flux
+						.from(
+							dbClient
+								.delete()
+								.from(EndpointPolicy.tableName())
 								.fetch()
 								.rowsUpdated())
 						)
@@ -530,6 +637,30 @@ public class R2dbcPoliciesRepository {
 				.insert()
 				.into(ServiceInstancePolicyShim.class)
 				.table(ServiceInstancePolicy.tableName())
+				.using(shim)
+				.fetch()
+				.rowsUpdated();
+	}
+
+	private Mono<Integer> saveEndpointPolicy(EndpointPolicy ep) {
+		EndpointPolicyShim shim =
+			EndpointPolicyShim
+				.builder()
+					.pk(ep.getPk())
+					.id(ep.getId())
+					.description(ep.getDescription())
+					.endpoints(
+						CollectionUtils.isEmpty(ep.getEndpoints()) ? null : writeEndpoints(ep.getEndpoints())
+					)
+					.emailNotificationTemplate(
+						ep.getEmailNotificationTemplate() != null ? writeEmailNotificationTemplate(ep.getEmailNotificationTemplate()) : null
+					)
+					.build();
+		return
+			dbClient
+				.insert()
+				.into(EndpointPolicyShim.class)
+				.table(EndpointPolicy.tableName())
 				.using(shim)
 				.fetch()
 				.rowsUpdated();
@@ -664,6 +795,14 @@ public class R2dbcPoliciesRepository {
 					.flatMap(p -> p.isEmpty() ? Mono.empty(): Mono.just(p));
 	}
 
+	private String writeEndpoints(Set<String> value) {
+        try {
+            return mapper.writeValueAsString(value);
+        } catch (JsonProcessingException jpe) {
+            throw new RuntimeException("Problem writing endpoints", jpe);
+        }
+	}
+
 	private String writeQueries(Set<Query> value) {
         try {
             return mapper.writeValueAsString(value);
@@ -693,6 +832,14 @@ public class R2dbcPoliciesRepository {
             return mapper.readValue(value, new TypeReference<Map<String, Object>>() {});
         } catch (IOException ioe) {
             throw new RuntimeException("Problem reading options", ioe);
+        }
+	}
+
+	private Set<String> readEndpoints(String value) {
+        try {
+            return mapper.readValue(value, new TypeReference<Set<String>>() {});
+        } catch (IOException ioe) {
+            throw new RuntimeException("Problem reading endpoints", ioe);
         }
 	}
 

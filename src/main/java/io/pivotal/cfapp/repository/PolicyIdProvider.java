@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import io.pivotal.cfapp.client.GitClient;
 import io.pivotal.cfapp.config.PoliciesSettings;
 import io.pivotal.cfapp.domain.ApplicationPolicy;
+import io.pivotal.cfapp.domain.EndpointPolicy;
 import io.pivotal.cfapp.domain.HygienePolicy;
 import io.pivotal.cfapp.domain.LegacyPolicy;
 import io.pivotal.cfapp.domain.QueryPolicy;
@@ -34,24 +35,28 @@ public class PolicyIdProvider {
         }
     }
 
-    public ApplicationPolicy seedApplicationPolicy(ApplicationPolicy policy) {
-		return settings.isVersionManaged() ? ApplicationPolicy.seedWith(policy, commit): ApplicationPolicy.seed(policy);
-	}
+  public ApplicationPolicy seedApplicationPolicy(ApplicationPolicy policy) {
+      return settings.isVersionManaged() ? ApplicationPolicy.seedWith(policy, commit): ApplicationPolicy.seed(policy);
+  }
 
 	public ServiceInstancePolicy seedServiceInstancePolicy(ServiceInstancePolicy policy) {
-		return settings.isVersionManaged() ? ServiceInstancePolicy.seedWith(policy, commit): ServiceInstancePolicy.seed(policy);
+		  return settings.isVersionManaged() ? ServiceInstancePolicy.seedWith(policy, commit): ServiceInstancePolicy.seed(policy);
 	}
 
+  public EndpointPolicy seedEndpointPolicy(EndpointPolicy policy) {
+      return settings.isVersionManaged() ? EndpointPolicy.seedWith(policy, commit): EndpointPolicy.seed(policy);
+  }
+
 	public QueryPolicy seedQueryPolicy(QueryPolicy policy) {
-		return settings.isVersionManaged() ? QueryPolicy.seedWith(policy, commit): QueryPolicy.seed(policy);
-    }
+		  return settings.isVersionManaged() ? QueryPolicy.seedWith(policy, commit): QueryPolicy.seed(policy);
+  }
 
-    public HygienePolicy seedHygienePolicy(HygienePolicy policy) {
-		return settings.isVersionManaged() ? HygienePolicy.seedWith(policy, commit): HygienePolicy.seed(policy);
-    }
+  public HygienePolicy seedHygienePolicy(HygienePolicy policy) {
+		  return settings.isVersionManaged() ? HygienePolicy.seedWith(policy, commit): HygienePolicy.seed(policy);
+  }
 
-    public LegacyPolicy seedLegacyPolicy(LegacyPolicy policy) {
-		return settings.isVersionManaged() ? LegacyPolicy.seedWith(policy, commit): LegacyPolicy.seed(policy);
-    }
+  public LegacyPolicy seedLegacyPolicy(LegacyPolicy policy) {
+		  return settings.isVersionManaged() ? LegacyPolicy.seedWith(policy, commit): LegacyPolicy.seed(policy);
+  }
 
 }

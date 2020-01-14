@@ -13,7 +13,7 @@ import lombok.Builder;
 
 @Builder
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-@JsonPropertyOrder({ "application-policies", "service-instance-policies", "query-policies", "hygiene-policies", "legacy-policies" })
+@JsonPropertyOrder({ "application-policies", "service-instance-policies", "endpoint-policies", "query-policies", "hygiene-policies", "legacy-policies" })
 public class Policies {
 
 	@JsonProperty("application-policies")
@@ -21,6 +21,9 @@ public class Policies {
 
 	@JsonProperty("service-instance-policies")
 	private List<ServiceInstancePolicy> serviceInstancePolicies;
+
+	@JsonProperty("endpoint-policies")
+	private List<EndpointPolicy> endpointPolicies;
 
 	@JsonProperty("query-policies")
 	private List<QueryPolicy> queryPolicies;
@@ -35,11 +38,13 @@ public class Policies {
 	Policies(
 			@JsonProperty("application-policies") List<ApplicationPolicy> applicationPolicies,
 			@JsonProperty("service-instance-policies") List<ServiceInstancePolicy> serviceInstancePolicies,
+			@JsonProperty("endpoint-policies") List<EndpointPolicy> endpointPolicies,
 			@JsonProperty("query-policies") List<QueryPolicy> queryPolicies,
 			@JsonProperty("hygiene-policies") List<HygienePolicy> hygienePolicies,
 			@JsonProperty("legacy-policies") List<LegacyPolicy> legacyPolicies) {
 		this.applicationPolicies = applicationPolicies;
 		this.serviceInstancePolicies = serviceInstancePolicies;
+		this.endpointPolicies = endpointPolicies;
 		this.queryPolicies = queryPolicies;
 		this.hygienePolicies = hygienePolicies;
 		this.legacyPolicies = legacyPolicies;
@@ -51,6 +56,10 @@ public class Policies {
 
 	public List<ServiceInstancePolicy> getServiceInstancePolicies() {
 		return serviceInstancePolicies != null ? serviceInstancePolicies: Collections.emptyList();
+	}
+
+	public List<EndpointPolicy> getEndpointPolicies() {
+		return endpointPolicies != null ? endpointPolicies: Collections.emptyList();
 	}
 
 	public List<QueryPolicy> getQueryPolicies() {
@@ -69,6 +78,7 @@ public class Policies {
 	public boolean isEmpty() {
 		return getApplicationPolicies().isEmpty()
 				&& getServiceInstancePolicies().isEmpty()
+				&& getEndpointPolicies().isEmpty()
 				&& getQueryPolicies().isEmpty()
 				&& getHygienePolicies().isEmpty()
 				&& getLegacyPolicies().isEmpty();
