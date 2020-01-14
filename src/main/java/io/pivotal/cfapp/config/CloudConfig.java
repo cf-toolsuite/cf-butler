@@ -73,7 +73,7 @@ class CloudConfig {
             properties.setUsername(username);
             properties.setPassword(password);
             StringBuilder builder = new StringBuilder();
-            builder.append(String.format("r2dbc:%s://", scheme));
+            builder.append(String.format("r2dbc:pool:%s://", scheme));
             builder.append(uri.getHost());
             if (uri.getPort() != -1) {
                 builder.append(":" + uri.getPort());
