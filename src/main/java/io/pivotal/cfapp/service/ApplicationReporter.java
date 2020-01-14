@@ -1,9 +1,11 @@
 package io.pivotal.cfapp.service;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -11,7 +13,11 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvParser;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,6 +25,8 @@ import org.springframework.util.Assert;
 
 import io.pivotal.cfapp.domain.accounting.application.AppUsageMonthly;
 import io.pivotal.cfapp.domain.accounting.application.AppUsageReport;
+import io.pivotal.cfapp.domain.accounting.application.AppUsageMonthly.AppUsageMonthlyBuilder;
+import io.pivotal.cfapp.domain.accounting.application.AppUsageReport.AppUsageReportBuilder;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -67,7 +75,7 @@ public class ApplicationReporter {
             List<AppUsageMonthly> filtered =
                 usage
                     .stream()
-                    .filter(u -> u.getYear().equals(year) && u.getMonth().equals(month))
+                    .filter(u -> u.getYear().equals(year) && u.getMonth() != null && u.getMonth().equals(month))
                     .collect(Collectors.toList());
             for (AppUsageMonthly u: filtered) {
                 result.append(foundation + "," + period + "," + u.getMaximumAppInstances() + "," + u.getAverageAppInstances() + "," + u.getAppInstanceHours() + "\n");
@@ -84,7 +92,47 @@ public class ApplicationReporter {
 
     protected AppUsageReport readAppUsageReport(String filename) throws JsonParseException, JsonMappingException, IOException {
         String content = readFile(filename);
-        return mapper.readValue(content, AppUsageReport.class);
+        if (filename.endsWith(".json")) {
+            return mapper.readValue(content, AppUsageReport.class);
+        } else if (filename.endsWith(".csv")) {
+            CsvMapper csvMapper = new CsvMapper();
+            csvMapper.enable(CsvParser.Feature.WRAP_AS_ARRAY);
+            File csvFile = new File(filename);
+            MappingIterator<String[]> it = csvMapper.readerFor(String[].class).readValues(csvFile);
+            AppUsageReportBuilder builder = AppUsageReport.builder();
+            List<AppUsageMonthly> reports = new ArrayList<>();
+            int rowNum = 0;
+            while (it.hasNext()) {
+                String[] row = it.next();
+                if (rowNum > 0) {
+                    AppUsageMonthlyBuilder amb = AppUsageMonthly.builder();
+                    for (int i = 0; i < row.length; i++) {
+                        if (i == 0) {
+                            String[] period = row[i].split("-");
+                            if (period.length == 2) {
+                                amb.month(Integer.valueOf(period[1]));
+                            }
+                            amb.year(Integer.valueOf(period[0]));
+                        }
+                        if (i == 1) {
+                            amb.averageAppInstances(Double.valueOf(row[i]));
+                        }
+                        if (i == 2) {
+                            amb.maximumAppInstances(Integer.valueOf(row[i]));
+                        }
+                        if (i == 3) {
+                            amb.appInstanceHours(Double.valueOf(row[i]));
+                        }
+                    }
+                    reports.add(amb.build());
+                }
+                rowNum++;
+            }
+            builder.monthlyReports(reports);
+            return builder.build();
+        } else {
+            return AppUsageReport.builder().build();
+        }
     }
 
     protected String readFile(String filename) {
