@@ -29,6 +29,7 @@ This is where `cf-butler` has your back.
       * [Managing policies](#managing-policies)
         * [Hygiene Policies](#hygiene-policies)
         * [Legacy policies](#legacy-policies)
+        * [Endpoint policies](#endpoint-policies)
         * [Query policies](#query-policies)
       * [To set the operations schedule](#to-set-the-operations-schedule)
       * [To discriminate user from service accounts](#to-discriminate-user-from-service-accounts)
@@ -220,6 +221,17 @@ Legacy policies are useful when you want to search for and report on application
 As mentioned previously the policy file must adhere to a naming convention
 
 * a filename ending with `-LP.json` encapsulates an individual [LegacyPolicy](src/main/java/io/pivotal/cfapp/domain/LegacyPolicy.java)
+
+See additional property requirements in Query policies and the aforementioned sample Github repository.
+
+
+#### Endpoint Policies
+
+Endpoint policies are useful when you want to exercise any of the available GET endpoints and have the results sent to one or more designated email recipients.
+
+As mentioned previously the policy file must adhere to a naming convention
+
+* a filename ending with `-EP.json` encapsulates an individual [EndpointPolicy](src/main/java/io/pivotal/cfapp/domain/EndpointPolicy.java)
 
 See additional property requirements in Query policies and the aforementioned sample Github repository.
 
@@ -1028,6 +1040,21 @@ POST /policies
       "organization-whitelist": [
         "zoo-labs"
       ]
+    }
+  ],
+  "endpoint-policies": [
+    {
+      "description": "Sample endpoint policy that will fetch data from available /snapshot endpoints.",
+      "endpoints": [
+        "/snapshot/summary",
+        "/snapshot/detail"
+      ],
+      "email-notification-template": {
+        "from": "admin@nowhere.me",
+        "to": [ "captainmarvel@theuniverse.io" ],
+        "subject": "Endpoint Policy Sample Report",
+        "body": "Results are herewith attached for your consideration."
+      }
     }
   ],
   "query-policies": [

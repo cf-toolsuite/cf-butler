@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import io.pivotal.cfapp.client.GitClient;
 import io.pivotal.cfapp.config.PoliciesSettings;
 import io.pivotal.cfapp.domain.ApplicationPolicy;
+import io.pivotal.cfapp.domain.EndpointPolicy;
 import io.pivotal.cfapp.domain.HygienePolicy;
 import io.pivotal.cfapp.domain.LegacyPolicy;
 import io.pivotal.cfapp.domain.Policies;
@@ -32,6 +33,7 @@ public class PoliciesLoader implements ApplicationListener<StacksRetrievedEvent>
 
 	private static final String APPLICATION_POLICY_SUFFIX = "-AP.json";
 	private static final String SERVICE_INSTANCE_POLICY_SUFFIX = "-SIP.json";
+	private static final String ENDPOINT_POLICY_SUFFIX = "-EP.json";
 	private static final String QUERY_POLICY_SUFFIX = "-QP.json";
 	private static final String HYGIENE_POLICY_SUFFIX = "-HP.json";
 	private static final String LEGACY_POLICY_SUFFIX = "-LP.json";
@@ -68,6 +70,7 @@ public class PoliciesLoader implements ApplicationListener<StacksRetrievedEvent>
 		if (repo != null) {
 			List<ApplicationPolicy> applicationPolicies = new ArrayList<>();
 			List<ServiceInstancePolicy> serviceInstancePolicies = new ArrayList<>();
+			List<EndpointPolicy> endpointPolicies = new ArrayList<>();
 			List<QueryPolicy> queryPolicies = new ArrayList<>();
 			List<HygienePolicy> hygienePolicies = new ArrayList<>();
 			List<LegacyPolicy> legacyPolicies = new ArrayList<>();
@@ -90,6 +93,11 @@ public class PoliciesLoader implements ApplicationListener<StacksRetrievedEvent>
 								ServiceInstancePolicy policy = mapper.readValue(fileContent, ServiceInstancePolicy.class);
 								if (validator.validate(policy)) {
 									serviceInstancePolicies.add(policy);
+								}
+							} else if (fp.endsWith(ENDPOINT_POLICY_SUFFIX)) {
+								EndpointPolicy policy = mapper.readValue(fileContent, EndpointPolicy.class);
+								if (validator.validate(policy)) {
+									endpointPolicies.add(policy);
 								}
 							} else if (fp.endsWith(QUERY_POLICY_SUFFIX)) {
 								QueryPolicy policy = mapper.readValue(fileContent, QueryPolicy.class);
@@ -118,15 +126,24 @@ public class PoliciesLoader implements ApplicationListener<StacksRetrievedEvent>
 			service
 				.deleteAll()
 				.then(service.save(
-					Policies.builder().applicationPolicies(applicationPolicies).serviceInstancePolicies(serviceInstancePolicies).queryPolicies(queryPolicies).hygienePolicies(hygienePolicies).legacyPolicies(legacyPolicies).build()
+					Policies
+						.builder()
+							.applicationPolicies(applicationPolicies)
+							.serviceInstancePolicies(serviceInstancePolicies)
+							.endpointPolicies(endpointPolicies)
+							.queryPolicies(queryPolicies)
+							.hygienePolicies(hygienePolicies)
+							.legacyPolicies(legacyPolicies)
+							.build()
 				))
 				.subscribe(
 					result -> {
 						log.info("PoliciesLoader completed");
 						log.info(
-							String.format("-- Loaded %d application policies, %d service instance policies, %d query policies, %d hygiene policies, and %d legacy policies.",
+							String.format("-- Loaded %d application policies, %d service instance policies, %d endpoint policies, %d query policies, %d hygiene policies, and %d legacy policies.",
 								result.getApplicationPolicies().size(),
 								result.getServiceInstancePolicies().size(),
+								result.getEndpointPolicies().size(),
 								result.getQueryPolicies().size(),
 								result.getHygienePolicies().size(),
 								result.getLegacyPolicies().size()

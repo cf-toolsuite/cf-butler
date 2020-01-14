@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -18,10 +19,11 @@ public class PoliciesValidator {
     private static final String REQUIRED_PROPERTIES_REJECTED_MESSAGE = "-- {} was rejected because required properties failed validation.";
     private static final String SCALE_INSTANCES_REJECTED_MESSAGE = "-- {} was rejected because instances-from and/or instances-to in options failed validation.";
     private static final String CHANGE_STACK_REJECTED_MESSAGE = "-- {} was rejected because stack-from and/or stack-to in options failed validation.";
-    private static final String PARSING_REJECTED_MESSAGE = "-- {} was rejected because one or more of its properties could be parsed succesfully. {}";
+    private static final String PARSING_REJECTED_MESSAGE = "-- {} was rejected because one or more of its properties could be parsed successfully. {}";
     private static final String DUAL_TIME_CONSTRAINTS_REJECTED_MESSAGE = "-- {} was rejected because it contained both from-datetime and from-duration in options. Choose only one time constraint.";
     private static final String HYGIENE_REJECTED_MESSAGE = "{} was rejected because days-since-last-update must be > 0 or equal to -1";
     private static final String LEGACY_REJECTED_MESSAGE = "{} was rejected because stacks must not be empty and must be a valid/installed stack";
+    private static final String ENDPOINT_REJECTED_MESSAGE = "{} was rejected because endpoint must not be empty and must start with a /";
     private static final String QUERY_REJECTED_MESSAGE = "-- {} was rejected because either name or sql was blank or sql did not start with SELECT.";
     private static final String EMAIL_NOTIFICATION_TEMPLATE_REJECTED_MESSAGE = "-- {} was rejected because either the email template did not contain valid email addresses for from/to or the subject/body was blank.";
 
@@ -113,6 +115,36 @@ public class PoliciesValidator {
             } catch (DateTimeParseException dtpe) {
                 valid = false;
                 log.warn(PARSING_REJECTED_MESSAGE, policy.toString(), dtpe.getMessage());
+            }
+        }
+        if (valid == false) {
+            log.warn(REQUIRED_PROPERTIES_REJECTED_MESSAGE, policy.toString());
+        }
+        return valid;
+    }
+
+    public boolean validate(EndpointPolicy policy) {
+        boolean hasId = Optional.ofNullable(policy.getId()).isPresent();
+        boolean hasEndpoints = Optional.ofNullable(policy.getEndpoints()).isPresent();
+        boolean hasEmailNotificationTemplate = Optional.ofNullable(policy.getEmailNotificationTemplate()).isPresent();
+        boolean valid = !hasId && hasEndpoints && hasEmailNotificationTemplate;
+        if (hasEndpoints) {
+            if (Collections.isEmpty(policy.getEndpoints())) {
+                valid = false;
+            } else {
+                for (String e: policy.getEndpoints()) {
+                    if (StringUtils.isBlank(e) || !e.startsWith("/")) {
+                        valid = false;
+                        log.warn(ENDPOINT_REJECTED_MESSAGE, policy.toString());
+                        break;
+                    }
+                }
+            }
+        }
+        if (hasEmailNotificationTemplate) {
+            if (!policy.getEmailNotificationTemplate().isValid()) {
+                valid = false;
+                log.warn(EMAIL_NOTIFICATION_TEMPLATE_REJECTED_MESSAGE, policy.toString());
             }
         }
         if (valid == false) {
