@@ -260,7 +260,7 @@ public class R2dbcPoliciesRepository {
 	public Mono<Policies> findAll() {
 		String selectAllApplicationPolicies = "select pk, id, operation, description, state, options, organization_whitelist from application_policy";
 		String selectAllServiceInstancePolicies = "select pk, id, operation, description, options, organization_whitelist from service_instance_policy";
-		String selectAllEndpointPolicies = "select pk, id, description, endpoints, email_notification_template, cron_schedule from endpoint_policy";
+		String selectAllEndpointPolicies = "select pk, id, description, endpoints, email_notification_template from endpoint_policy";
 		String selectAllQueryPolicies = "select pk, id, description, queries, email_notification_template from query_policy";
 		String selectAllHygienePolicies = "select pk, id, days_since_last_update, operator_email_template, notifyee_email_template, organization_whitelist from hygiene_policy";
 		String selectAllLegacyPolicies = "select pk, id, stacks, operator_email_template, notifyee_email_template, organization_whitelist from legacy_policy";
