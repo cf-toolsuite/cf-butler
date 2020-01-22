@@ -32,7 +32,7 @@ public abstract class EmailNotifier implements ApplicationListener<EmailNotifica
             String.format("This email was sent from %s on %s",
                 event.getDomain(), DateTimeFormatter.ISO_DATE_TIME.format(LocalDateTime.now()));
         String subject = event.getSubject();
-        final String body = getBody(event, template, subject, footer);
+        final String body = buildBody(template, event.getBody(), subject, footer);
         log.trace("About to send email using ||> From: {}, To: {}, Subject: {}, Body: {}", from, recipients.toString(), subject, body);
         List<EmailAttachment> prunedAttachments = event.getAttachments().stream().filter(ea -> ea.hasContent()).collect(Collectors.toList());
         boolean shouldSend = !prunedAttachments.isEmpty();
@@ -43,14 +43,14 @@ public abstract class EmailNotifier implements ApplicationListener<EmailNotifica
         });
     }
 
-    protected String getBody(EmailNotificationEvent event, String template, String subject, String footer) {
-        String body = "";
+    protected String buildBody(String template, String body, String subject, String footer) {
+        String result = "";
         if (StringUtils.isNotBlank(template) && isEmailTemplate(template)) {
-            body = template.replace("{{header}}", subject).replace("{{body}}", event.getBody()).replace("{{footer}}", footer);
+            result = template.replace("{{header}}", subject).replace("{{body}}", body).replace("{{footer}}", footer);
         } else {
-            body = String.format("%s<br/><br/>%s", event.getBody(), footer);
+            result = String.format("%s<br/><br/>%s", body, footer);
         }
-        return body;
+        return result;
     }
 
     private String getEmailTemplate() {
