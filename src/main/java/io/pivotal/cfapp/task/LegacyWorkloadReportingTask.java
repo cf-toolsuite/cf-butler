@@ -166,7 +166,7 @@ public class LegacyWorkloadReportingTask implements PolicyExecutorTask {
                 .builder()
                     .filename(getFileNamePrefix(tuple.getT1()) + "applications")
                     .extension(".csv")
-                    .mimeType("text/csv")
+                    .mimeType("text/plain;charset=UTF-8")
                     .content(applications.toString())
                     .headers(AppDetail.headers())
                     .build()
