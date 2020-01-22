@@ -41,7 +41,7 @@ public class R2dbcHistoricalRecordRepository {
 				.select()
 				.from(HistoricalRecord.tableName())
 				.project(HistoricalRecord.columnNames())
-				.orderBy(Order.desc("transaction_datetime"))
+				.orderBy(Order.desc("transaction_date_time"))
 				.as(HistoricalRecord.class)
 				.fetch()
 				.all();
@@ -52,8 +52,8 @@ public class R2dbcHistoricalRecordRepository {
 				.select()
 				.from(HistoricalRecord.tableName())
 				.project(HistoricalRecord.columnNames())
-				.matching(Criteria.where("transaction_datetime").lessThanOrEquals(LocalDateTime.of(end, LocalTime.MAX)).and("transaction_datetime").greaterThan(LocalDateTime.of(start, LocalTime.MIDNIGHT)))
-				.orderBy(Order.desc("transaction_datetime"))
+				.matching(Criteria.where("transaction_date_time").lessThanOrEquals(LocalDateTime.of(end, LocalTime.MAX)).and("transaction_date_time").greaterThan(LocalDateTime.of(start, LocalTime.MIDNIGHT)))
+				.orderBy(Order.desc("transaction_date_time"))
 				.as(HistoricalRecord.class)
 				.fetch()
 				.all();

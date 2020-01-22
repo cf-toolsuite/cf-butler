@@ -51,7 +51,7 @@ public class HistoricalRecord {
 	public static String[] columnNames() {
 		return
 			new String[] {
-				"pk", "transaction_datetime", "action_taken", "organization", "space", "app_id",
+				"pk", "transaction_date_time", "action_taken", "organization", "space", "app_id",
 				"service_instance_id", "type", "name" };
 	}
 
