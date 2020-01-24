@@ -42,7 +42,7 @@ public class JavaMailNotifier extends EmailNotifier {
 
     private static void addAttachment(MimeMessageHelper helper, EmailAttachment ea) {
         try {
-            DataSource ds = new ByteArrayDataSource(ea.getContent(), ea.getMimeType());
+            DataSource ds = new ByteArrayDataSource(ea.getHeadedContent(), ea.getMimeType());
             helper.addAttachment(ea.getFilename() + ea.getExtension(), ds);
         } catch (MessagingException | IOException e) {
             log.warn("Could not add attachment to email!", e);
