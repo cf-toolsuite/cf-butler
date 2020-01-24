@@ -1,7 +1,7 @@
 plugins {
     id 'com.gorylenko.gradle-git-properties' version '2.2.0'
     id 'org.springframework.boot' version '2.2.4.RELEASE'
-    id 'io.spring.dependency-management' version '1.0.8.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.9.RELEASE'
     id 'com.github.ben-manes.versions' version '0.27.0'
     id 'io.franzbecker.gradle-lombok' version '3.2.0'
 	id 'java'
@@ -146,7 +146,7 @@ dependencies {
     implementation('io.projectreactor:reactor-core:3.3.2.RELEASE')
     //implementation('io.projectreactor:reactor-tools:3.3.0.RELEASE')
     //implementation('io.projectreactor.tools:blockhound:1.0.0.RELEASE')
-    implementation('io.projectreactor.netty:reactor-netty:0.9.3.RELEASE')
+    implementation('io.projectreactor.netty:reactor-netty:0.9.4.RELEASE')
     implementation('io.micrometer:micrometer-registry-prometheus')
     testImplementation('io.projectreactor:reactor-test')
     testImplementation('org.assertj:assertj-core:3.14.0')
