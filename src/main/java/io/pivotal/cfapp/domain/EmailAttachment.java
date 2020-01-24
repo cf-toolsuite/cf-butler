@@ -16,9 +16,15 @@ public class EmailAttachment {
     private final String extension;
 
     public String getHeadedContent() {
-        String headers = hasHeaders() ? getHeaders() : "";
-        String content = hasContent() ? getContent(): "";
-        return headers + System.getProperty("line.separator") + content;
+        StringBuilder result = new StringBuilder();
+        if (hasHeaders()) {
+            result.append(getHeaders());
+            result.append(System.getProperty("line.separator"));
+        }
+        if (hasContent()) {
+            result.append(getContent());
+        }
+        return result.toString();
     }
 
     public boolean hasContent() {
