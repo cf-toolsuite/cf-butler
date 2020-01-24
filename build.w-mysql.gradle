@@ -59,7 +59,7 @@ repositories {
 }
 
 ext {
-    set('springCloudServicesVersion', '3.0.1.RELEASE')
+    set('springCloudServicesVersion', '3.1.1.RELEASE')
 	set('springCloudVersion', 'Hoxton.SR1')
     // @see https://github.com/spring-projects/spring-boot/blob/master/spring-boot-project/spring-boot-dependencies/pom.xml
     set('spring-data-releasetrain.version', 'Moore-SR3')
