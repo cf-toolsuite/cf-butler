@@ -98,7 +98,13 @@ public class EndpointPolicyExecutorTask implements PolicyExecutorTask {
     }
 
     private String determineName(String endpoint) {
-        return endpoint.replaceFirst("/", "").replace("/", "-");
+        return endpoint
+                .replaceFirst("/", "")
+                .replace("/", "-")
+                .replace("?q=", "-")
+                .replace("?", "-")
+                .replace("[]", "")
+                .replace("=", "-equal-");
     }
 
     protected Mono<ResponseEntity<String>> exerciseEndpoint(String endpoint) {
