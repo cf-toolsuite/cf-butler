@@ -13,12 +13,14 @@ import io.pivotal.cfapp.domain.ServiceInstanceCounts;
 import io.pivotal.cfapp.domain.SnapshotDetail;
 import io.pivotal.cfapp.domain.SnapshotSummary;
 import io.pivotal.cfapp.domain.UserCounts;
-import io.pivotal.cfapp.report.AppDetailCsvReport;
-import io.pivotal.cfapp.report.ServiceInstanceDetailCsvReport;
-import io.pivotal.cfapp.report.UserAccountsCsvReport;
 import io.pivotal.cfapp.event.AppDetailRetrievedEvent;
+import io.pivotal.cfapp.event.AppRelationshipRetrievedEvent;
 import io.pivotal.cfapp.event.ServiceInstanceDetailRetrievedEvent;
 import io.pivotal.cfapp.event.UserAccountsRetrievedEvent;
+import io.pivotal.cfapp.report.AppDetailCsvReport;
+import io.pivotal.cfapp.report.AppRelationshipCsvReport;
+import io.pivotal.cfapp.report.ServiceInstanceDetailCsvReport;
+import io.pivotal.cfapp.report.UserAccountsCsvReport;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 
@@ -33,6 +35,7 @@ public class SnapshotService {
     private final ServiceInstanceMetricsService siMetricsService;
     private final AppDetailCsvReport appDetailCsvReport;
     private final ServiceInstanceDetailCsvReport siDetailCsvReport;
+    private final AppRelationshipCsvReport appRelationsCsvReport;
     private final UserAccountsCsvReport uaCsvReport;
 
     @Autowired
@@ -52,6 +55,7 @@ public class SnapshotService {
         this.appMetricsService = appMetricsService;
         this.siMetricsService = siMetricsService;
         this.appDetailCsvReport = new AppDetailCsvReport(settings);
+        this.appRelationsCsvReport = new AppRelationshipCsvReport(settings);
         this.siDetailCsvReport = new ServiceInstanceDetailCsvReport(settings);
         this.uaCsvReport = new UserAccountsCsvReport(settings);
     }
@@ -68,6 +72,20 @@ public class SnapshotService {
 		        			"\n\n",
 		        			appDetailCsvReport.generatePreamble(collectionTime),
 		        			appDetailCsvReport.generateDetail(event)));
+    }
+
+    public Mono<String> assembleCsvRelationshipsReport(LocalDateTime collectionTime) {
+        return appRelationshipService
+				.findAll()
+				.collectList()
+		        .map(r -> new AppRelationshipRetrievedEvent(this)
+							.relations(r)
+				)
+		        .map(event ->
+		        	String.join(
+		        			"\n\n",
+		        			appRelationsCsvReport.generatePreamble(collectionTime),
+		        			appRelationsCsvReport.generateDetail(event)));
     }
 
     public Mono<String> assembleCsvUserAccountReport(LocalDateTime collectionTime) {
