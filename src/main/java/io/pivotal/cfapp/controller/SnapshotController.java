@@ -65,6 +65,15 @@ public class SnapshotController {
 								.defaultIfEmpty(ResponseEntity.notFound().build());
 	}
 
+	@GetMapping(value = { "/snapshot/detail/relations" }, produces = MediaType.TEXT_PLAIN_VALUE )
+	public Mono<ResponseEntity<String>> getApplicationRelationshipsCsvReport() {
+		return util.getTimeCollected()
+				.flatMap(tc -> snapshotService
+								.assembleCsvRelationshipsReport(tc)
+								.map(r -> ResponseEntity.ok(r)))
+								.defaultIfEmpty(ResponseEntity.notFound().build());
+	}
+
 	@GetMapping(value = { "/snapshot/detail/users" }, produces = MediaType.TEXT_PLAIN_VALUE )
 	public Mono<ResponseEntity<String>> getUserAccountCsvReport() {
 		return util.getTimeCollected()

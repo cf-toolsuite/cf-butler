@@ -903,6 +903,23 @@ organization,space,service instance id,name,service,description,plan,type,bound 
 ```
 
 ```
+GET /snapshot/detail/relations
+```
+> Provides a list of all application to service instance relationships in comma-separated value format
+
+Sample output
+
+```
+Application relationships from api.run.pcfone.io collected 2020-01-31T11:11:39.524239 and generated 2020-01-31T11:13:34.472712.
+
+
+organization,space,application id,application name,service instance id,service name,service plan,service type
+"pivot-cphillipson","dev","6a7714e4-ada4-47cf-b27c-2a2a57b89d5e","cloud-native-spring","5cac3347-f9bc-4123-90f3-06e359c247cd","autoscale-dev","standard","managed_service_instance"
+"pivot-cphillipson","dev","6a7714e4-ada4-47cf-b27c-2a2a57b89d5e","cloud-native-spring","89d8579d-c7a8-4ce1-bda9-a68ca2b88683","config-server","standard","managed_service_instance"
+"pivot-cphillipson","dev","6a7714e4-ada4-47cf-b27c-2a2a57b89d5e","cloud-native-spring","5071e7f8-bcf1-4d7c-a31b-fe4ce48d2a82","service-registry","standard","managed_service_instance"
+```
+
+```
 GET /snapshot/detail/dormant/{daysSinceLastUpdate}
 ```
 > Provides a list of dormant workloads. A workload is either an application or service instance.  An application is considered dormant when the last retained event transpired `daysSinceLastUpdate` or longer from the time of request.  A service instance is considered dormant when the last retained event transpired `daysSinceLastUpdate` or longer from the time of request.  Note: audit events are [retained](https://docs.cloudfoundry.org/running/managing-cf/audit-events.html#considerations) for up to 31 days.
