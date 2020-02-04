@@ -157,7 +157,6 @@ public class LegacyWorkloadReportingTask implements PolicyExecutorTask {
 	    String cr = System.getProperty("line.separator");
         List<EmailAttachment> result = new ArrayList<>();
         StringBuilder applications = new StringBuilder();
-        applications.append(AppDetail.headers()).append(cr);
         tuple.getT2()
             .getApplications()
                 .forEach(app -> applications.append(app.toCsv()).append(cr));
