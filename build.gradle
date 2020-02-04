@@ -131,7 +131,7 @@ dependencies {
     implementation('org.springframework.boot.experimental:spring-boot-actuator-autoconfigure-r2dbc:0.1.0.M3')
     implementation('org.springframework.data:spring-data-r2dbc:1.0.0.RELEASE')
     implementation('org.locationtech.jts:jts-core:1.16.1')
-    implementation('io.r2dbc:r2dbc-spi:0.8.0.RELEASE')
+    implementation('io.r2dbc:r2dbc-spi:0.8.1.RELEASE')
     runtime('io.r2dbc:r2dbc-pool:0.8.0.RELEASE')
     implementation('io.r2dbc:r2dbc-h2:0.8.1.RELEASE')
     runtime('io.r2dbc:r2dbc-postgresql:0.8.0.RELEASE')
