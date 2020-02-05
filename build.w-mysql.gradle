@@ -6,10 +6,10 @@ plugins {
     id 'io.franzbecker.gradle-lombok' version '3.2.0'
 	id 'java'
     id 'jacoco'
-    id 'com.google.cloud.tools.jib' version '1.8.0'
+    id 'com.google.cloud.tools.jib' version '2.0.0'
     id 'maven-publish'
     id 'com.github.spotbugs' version '3.0.0'
-    id 'info.solidsoft.pitest' version '1.4.5'
+    id 'info.solidsoft.pitest' version '1.4.6'
 }
 
 gitProperties {
@@ -131,10 +131,10 @@ dependencies {
     implementation('org.springframework.boot.experimental:spring-boot-actuator-autoconfigure-r2dbc:0.1.0.M3')
     implementation('org.springframework.data:spring-data-r2dbc:1.0.0.RELEASE')
     implementation('org.locationtech.jts:jts-core:1.16.1')
-    implementation('io.r2dbc:r2dbc-spi:0.8.0.RELEASE')
-    runtime('io.r2dbc:r2dbc-pool:0.8.0.RELEASE')
-    implementation('io.r2dbc:r2dbc-h2:0.8.1.RELEASE')
-    runtime('com.github.mirromutth:r2dbc-mysql:v0.8.0.RELEASE')
+    implementation('io.r2dbc:r2dbc-spi:0.8.1.RELEASE')
+    runtime('io.r2dbc:r2dbc-pool:0.8.1.RELEASE')
+    implementation('io.r2dbc:r2dbc-h2:0.8.2.RELEASE')
+    runtime('com.github.mirromutth:r2dbc-mysql:v0.8.1.RELEASE')
     implementation('org.eclipse.jgit:org.eclipse.jgit:5.5.0.201909110433-r')
     implementation('org.springframework.boot:spring-boot-starter-mail')
     implementation('com.sendgrid:sendgrid-java:4.4.1') {
@@ -144,8 +144,6 @@ dependencies {
     implementation('org.cloudfoundry:cloudfoundry-client-reactor:4.0.1.RELEASE')
     implementation('org.cloudfoundry:cloudfoundry-operations:4.0.1.RELEASE')
     implementation('io.projectreactor:reactor-core:3.3.2.RELEASE')
-    //implementation('io.projectreactor:reactor-tools:3.3.0.RELEASE')
-    //implementation('io.projectreactor.tools:blockhound:1.0.0.RELEASE')
     implementation('io.projectreactor.netty:reactor-netty:0.9.4.RELEASE')
     implementation('io.micrometer:micrometer-registry-prometheus')
     testImplementation('io.projectreactor:reactor-test')
