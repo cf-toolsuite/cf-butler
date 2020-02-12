@@ -63,8 +63,6 @@ cf:
     - tomcat
     - tomee
     - weblogic
-  applicationStatisticsEnabled: true
-  applicationEventsEnabled: true
 
 # Set schedule for this task to adhere to
 # @see https://crontab.guru for help, first parameter is seconds
