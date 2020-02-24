@@ -2,7 +2,7 @@ plugins {
     id 'com.gorylenko.gradle-git-properties' version '2.2.1'
     id 'org.springframework.boot' version '2.2.4.RELEASE'
     id 'io.spring.dependency-management' version '1.0.9.RELEASE'
-    id 'com.github.ben-manes.versions' version '0.27.0'
+    id 'com.github.ben-manes.versions' version '0.28.0'
     id 'io.franzbecker.gradle-lombok' version '3.3.0'
 	id 'java'
     id 'jacoco'
