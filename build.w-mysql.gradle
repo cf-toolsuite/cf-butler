@@ -1,8 +1,8 @@
 plugins {
-    id 'com.gorylenko.gradle-git-properties' version '2.2.1'
+    id 'com.gorylenko.gradle-git-properties' version '2.2.2'
     id 'org.springframework.boot' version '2.2.4.RELEASE'
     id 'io.spring.dependency-management' version '1.0.9.RELEASE'
-    id 'com.github.ben-manes.versions' version '0.27.0'
+    id 'com.github.ben-manes.versions' version '0.28.0'
     id 'io.franzbecker.gradle-lombok' version '3.3.0'
 	id 'java'
     id 'jacoco'
@@ -120,7 +120,7 @@ dependencies {
     implementation('org.apache.commons:commons-lang3')
     implementation('com.fasterxml.jackson.datatype:jackson-datatype-jsr310')
     implementation('com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.10.2')
-    implementation('com.fasterxml.uuid:java-uuid-generator:3.3.0')
+    implementation('com.fasterxml.uuid:java-uuid-generator:4.0')
     implementation('org.springframework.credhub:spring-credhub-cloud-connector:2.0.1.RELEASE')
     implementation('org.springframework.boot:spring-boot-starter-actuator')
     implementation('org.springframework.boot:spring-boot-starter-webflux')
@@ -135,9 +135,9 @@ dependencies {
     runtime('io.r2dbc:r2dbc-pool:0.8.1.RELEASE')
     implementation('io.r2dbc:r2dbc-h2:0.8.2.RELEASE')
     runtime('com.github.mirromutth:r2dbc-mysql:v0.8.1.RELEASE')
-    implementation('org.eclipse.jgit:org.eclipse.jgit:5.6.0.201912101111-r')
+    implementation('org.eclipse.jgit:org.eclipse.jgit:5.6.1.202002131546-r')
     implementation('org.springframework.boot:spring-boot-starter-mail')
-    implementation('com.sendgrid:sendgrid-java:4.4.4') {
+    implementation('com.sendgrid:sendgrid-java:4.4.5') {
         exclude group: 'org.apache.httpcomponents', module: 'httpclient'
     }
     implementation('org.apache.httpcomponents:httpclient:4.5.11')
