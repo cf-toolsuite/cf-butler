@@ -6,7 +6,7 @@ plugins {
     id 'io.franzbecker.gradle-lombok' version '3.3.0'
 	id 'java'
     id 'jacoco'
-    id 'com.google.cloud.tools.jib' version '2.0.0'
+    id 'com.google.cloud.tools.jib' version '2.1.0'
     id 'maven-publish'
     id 'com.github.spotbugs' version '3.0.0'
     id 'info.solidsoft.pitest' version '1.4.6'
@@ -143,8 +143,8 @@ dependencies {
     implementation('org.apache.httpcomponents:httpclient:4.5.11')
     implementation('org.cloudfoundry:cloudfoundry-client-reactor:4.0.1.RELEASE')
     implementation('org.cloudfoundry:cloudfoundry-operations:4.0.1.RELEASE')
-    implementation('io.projectreactor:reactor-core:3.3.2.RELEASE')
-    implementation('io.projectreactor.netty:reactor-netty:0.9.4.RELEASE')
+    implementation('io.projectreactor:reactor-core:3.3.3.RELEASE')
+    implementation('io.projectreactor.netty:reactor-netty:0.9.5.RELEASE')
     implementation('io.micrometer:micrometer-registry-prometheus')
     testImplementation('io.projectreactor:reactor-test')
     testImplementation('org.assertj:assertj-core:3.15.0')
