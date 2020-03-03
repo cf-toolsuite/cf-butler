@@ -25,13 +25,15 @@ spotbugs {
     showProgress = true
 }
 
-tasks.withType(com.github.spotbugs.SpotBugsTask) {
+spotbugsMain {
     reports {
         html {
             enabled = true
+            destination = file("$buildDir/reports/spotbugs/main/spotbugs.html")
         }
         xml {
-            enabled = false
+            enabled = true
+            destination = file("$buildDir/reports/spotbugs/main/spotbugs.xml")
         }
     }
 }
@@ -225,4 +227,9 @@ javadoc {
     }
 }
 
-check.dependsOn jacocoTestReport, publishToMavenLocal
+bootJar.enabled = true
+jar.enabled = false
+
+test.finalizedBy jacocoTestReport
+check.finalizedBy spotbugsMain
+build.finalizedBy publishToMavenLocal
