@@ -17,21 +17,27 @@ import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.eclipse.jgit.treewalk.TreeWalk;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
+import io.pivotal.cfapp.config.GitSettings;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
-@ConditionalOnProperty(prefix = "cf.policies", name = "provider", havingValue = "git")
+@ConditionalOnExpression(
+    "${cf.policies.git.isVersionManaged():false}"
+)
 public class GitClient {
 
-	public Repository getRepository(String uri) {
+	public Repository getRepository(GitSettings settings) {
 		Repository result = null;
+		String uri = settings.getUri();
 		Assert.hasText(uri, "URI of remote Git repository must be specified");
+		Assert.isTrue(uri.startsWith("https://"), "URI scheme must be https");
 		Assert.isTrue(uri.endsWith(".git"), "URI must end with .git");
 		String path = String.join(File.separator, "tmp", uri.substring(uri.lastIndexOf("/") + 1).replace(".git",""));
 		try {
@@ -45,13 +51,26 @@ public class GitClient {
 					.forEach(File::delete);
 			}
 			p.toFile().delete();
-			Git
-				.cloneRepository()
-					.setURI(uri)
-					.setDirectory(directory)
-					.setCloneAllBranches(true)
-					.call()
-					.close();
+			if (settings.isAuthenticated()) {
+				String username = settings.getUsername();
+				String password = settings.getPassword();
+				Git
+					.cloneRepository()
+						.setURI(uri)
+						.setCredentialsProvider(new UsernamePasswordCredentialsProvider(username, password))
+						.setDirectory(directory)
+						.setCloneAllBranches(true)
+						.call()
+						.close();
+			} else {
+				Git
+					.cloneRepository()
+						.setURI(uri)
+						.setDirectory(directory)
+						.setCloneAllBranches(true)
+						.call()
+						.close();
+			}
 			result = Git.open(directory).getRepository();
 		} catch (GitAPIException | IOException e) {
 			log.warn(String.format("Cannot clone Git repository at %s", uri), e);

@@ -1144,7 +1144,7 @@ POST /policies
   ]
 }
 ```
-> Establish policies to delete and scale applications, delete service instances, and query for anything from schema. This endpoint is only available when `cf.policies.provider` is set to `dbms`.
+> Establish policies to delete and scale applications, delete service instances, and query for anything from schema. This endpoint is only available when `cf.policies.git.uri` is set to an empty string.
 
 > Consult the [java.time.Duration](https://docs.oracle.com/javase/8/docs/api/java/time/Duration.html#parse-java.lang.CharSequence-) javadoc for other examples of what you can specify when setting values for `from-duration` properties above.
 
@@ -1156,7 +1156,7 @@ GET /policies
 ```
 DELETE /policies
 ```
-> Delete all established policies. This endpoint is only available when `cf.policies.provider` is set to `dbms`.
+> Delete all established policies. This endpoint is only available when `cf.policies.git.uri` is set to an empty string.
 
 ```
 GET /policies/application/{id}
@@ -1186,27 +1186,27 @@ GET /policies/legacy/{id}
 ```
 DELETE /policies/application/{id}
 ```
-> Delete an application policy by its id. This endpoint is only available when `cf.policies.provider` is set to `dbms`.
+> Delete an application policy by its id. This endpoint is only available when `cf.policies.git.uri` is set to an empty string.
 
 ```
 DELETE /policies/serviceInstance/{id}
 ```
-> Delete a service instance policy by its id. This endpoint is only available when `cf.policies.provider` is set to `dbms`.
+> Delete a service instance policy by its id. This endpoint is only available when `cf.policies.git.uri` is set to an empty string.
 
 ```
 DELETE /policies/query/{id}
 ```
-> Delete a query policy by its id. This endpoint is only available when `cf.policies.provider` is set to `dbms`.
+> Delete a query policy by its id. This endpoint is only available when `cf.policies.git.uri` is set to an empty string.
 
 ```
 DELETE /policies/hygiene/{id}
 ```
-> Delete a hygiene policy by its id. This endpoint is only available when `cf.policies.provider` is set to `dbms`.
+> Delete a hygiene policy by its id. This endpoint is only available when `cf.policies.git.uri` is set to an empty string.
 
 ```
 DELETE /policies/legacy/{id}
 ```
-> Delete a legacy policy by its id. This endpoint is only available when `cf.policies.provider` is set to `dbms`.
+> Delete a legacy policy by its id. This endpoint is only available when `cf.policies.git.uri` is set to an empty string.
 
 ```
 POST /policies/refresh
