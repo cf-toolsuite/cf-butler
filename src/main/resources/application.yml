@@ -24,12 +24,6 @@ cf:
     - system
     - credhub-service-broker-org
     - p-spring-cloud-services
-  policies:
-    provider: dbms
-    #provider: git
-    #uri:
-    #commit:
-    #filePaths:
   buildpacks:
     - apt
     - binary
@@ -163,13 +157,13 @@ cf:
   eventsRetentionInDays: ${vcap.services.cf-butler-secrets.credentials.CF_EVENTS_RETENTION_IN_DAYS:31}
   accountRegex: ${vcap.services.cf-butler-secrets.credentials.CF_ACCOUNT-REGEX:}
   policies:
-    provider: ${vcap.services.cf-butler-secrets.credentials.CF_POLICIES_PROVIDER}
-    uri: ${vcap.services.cf-butler-secrets.credentials.CF_POLICIES_URI}
-    commit: ${vcap.services.cf-butler-secrets.credentials.CF_POLICIES_COMMIT:}
-    filePaths: ${vcap.services.cf-butler-secrets.credentials.CF_POLICIES_FILE-PATHS}
+    git:
+      uri: ${vcap.services.cf-butler-secrets.credentials.CF_POLICIES_GIT_URI}
+      username: ${vcap.services.cf-butler-secrets.credentials.CF_POLICIES_GIT_USERNAME:}
+      password: ${vcap.services.cf-butler-secrets.credentials.CF_POLICIES_GIT_PASSWORD:""}
+      commit: ${vcap.services.cf-butler-secrets.credentials.CF_POLICIES_GIT_COMMIT:}
+      filePaths: ${vcap.services.cf-butler-secrets.credentials.CF_POLICIES_GIT_FILE-PATHS}
   buildpacks: ${vcap.services.cf-butler-secrets.credentials.CF_BUILDPACKS:}
-  applicationStatisticsEnabled: ${vcap.services.cf-butler-secrets.credentials.CF_APP_STATS_ENABLED:true}
-  applicationEventsEnabled: ${vcap.services.cf-butler-secrets.credentials.CF_APP_EVENTS_ENABLED:true}
 
 om:
   apiHost: ${vcap.services.cf-butler-secrets.credentials.OM_API-HOST}

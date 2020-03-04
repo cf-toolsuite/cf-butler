@@ -14,7 +14,7 @@ import io.pivotal.cfapp.service.PoliciesService;
 import reactor.core.publisher.Mono;
 
 @RestController
-@ConditionalOnProperty(name = "cf.policies.provider", havingValue = "dbms")
+@ConditionalOnProperty(prefix = "cf.policies.git", name = "uri")
 public class DbmsOnlyPoliciesController {
 
 	private final PoliciesService policiesService;

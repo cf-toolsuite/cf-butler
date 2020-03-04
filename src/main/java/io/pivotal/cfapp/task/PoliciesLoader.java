@@ -8,12 +8,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.eclipse.jgit.lib.Repository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 import io.pivotal.cfapp.client.GitClient;
-import io.pivotal.cfapp.config.PoliciesSettings;
+import io.pivotal.cfapp.config.GitSettings;
 import io.pivotal.cfapp.domain.ApplicationPolicy;
 import io.pivotal.cfapp.domain.EndpointPolicy;
 import io.pivotal.cfapp.domain.HygienePolicy;
@@ -28,7 +28,9 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
-@ConditionalOnProperty(name = "cf.policies.provider", havingValue = "git")
+@ConditionalOnExpression(
+    "${cf.policies.git.isVersionManaged():false}"
+)
 public class PoliciesLoader implements ApplicationListener<StacksRetrievedEvent> {
 
 	private static final String APPLICATION_POLICY_SUFFIX = "-AP.json";
@@ -40,7 +42,7 @@ public class PoliciesLoader implements ApplicationListener<StacksRetrievedEvent>
 
 	private final GitClient client;
 	private final PoliciesService service;
-	private final PoliciesSettings settings;
+	private final GitSettings settings;
 	private final PoliciesValidator validator;
 	private final ObjectMapper mapper;
 
@@ -48,7 +50,7 @@ public class PoliciesLoader implements ApplicationListener<StacksRetrievedEvent>
 	public PoliciesLoader(
 			GitClient client,
 			PoliciesService service,
-			PoliciesSettings settings,
+			GitSettings settings,
 			PoliciesValidator validator,
 			ObjectMapper mapper
 			) {
@@ -66,8 +68,9 @@ public class PoliciesLoader implements ApplicationListener<StacksRetrievedEvent>
 
 	public void load() {
 		log.info("PoliciesLoader started");
-		Repository repo = client.getRepository(settings.getUri());
+		Repository repo = client.getRepository(settings);
 		if (repo != null) {
+			String uri = settings.getUri();
 			List<ApplicationPolicy> applicationPolicies = new ArrayList<>();
 			List<ServiceInstancePolicy> serviceInstancePolicies = new ArrayList<>();
 			List<EndpointPolicy> endpointPolicies = new ArrayList<>();
@@ -75,7 +78,7 @@ public class PoliciesLoader implements ApplicationListener<StacksRetrievedEvent>
 			List<HygienePolicy> hygienePolicies = new ArrayList<>();
 			List<LegacyPolicy> legacyPolicies = new ArrayList<>();
 			String commit = client.orLatestCommit(settings.getCommit(), repo);
-			log.info("-- Fetching policies from {} using commit {}", settings.getUri(), commit);
+			log.info("-- Fetching policies from {} using commit {}", uri, commit);
 			settings
 				.getFilePaths()
 					.stream()
@@ -120,7 +123,7 @@ public class PoliciesLoader implements ApplicationListener<StacksRetrievedEvent>
 									fp, List.of(APPLICATION_POLICY_SUFFIX, SERVICE_INSTANCE_POLICY_SUFFIX, QUERY_POLICY_SUFFIX, HYGIENE_POLICY_SUFFIX, LEGACY_POLICY_SUFFIX));
 							}
 						} catch (IOException e1) {
-							log.warn("Could not read {} from {} with commit {} ", fp, settings.getUri(), settings.getCommit());
+							log.warn("Could not read {} from {} with commit {} ", fp, uri, commit);
 						}
 					});
 			service
