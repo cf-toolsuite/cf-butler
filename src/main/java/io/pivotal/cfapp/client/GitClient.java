@@ -37,6 +37,7 @@ public class GitClient {
 		Repository result = null;
 		String uri = settings.getUri();
 		Assert.hasText(uri, "URI of remote Git repository must be specified");
+		Assert.isTrue(uri.startsWith("https://"), "URI scheme must be https");
 		Assert.isTrue(uri.endsWith(".git"), "URI must end with .git");
 		String path = String.join(File.separator, "tmp", uri.substring(uri.lastIndexOf("/") + 1).replace(".git",""));
 		try {
