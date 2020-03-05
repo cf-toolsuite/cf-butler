@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.eclipse.jgit.lib.Repository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
@@ -28,8 +28,8 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
-@ConditionalOnExpression(
-    "${cf.policies.git.isVersionManaged():false}"
+@ConditionalOnProperty(
+    prefix = "cf.policies.git", name = "uri"
 )
 public class PoliciesLoader implements ApplicationListener<StacksRetrievedEvent> {
 
