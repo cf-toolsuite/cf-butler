@@ -163,6 +163,8 @@ cf:
       password: ${vcap.services.cf-butler-secrets.credentials.CF_POLICIES_GIT_PASSWORD:""}
       commit: ${vcap.services.cf-butler-secrets.credentials.CF_POLICIES_GIT_COMMIT:}
       filePaths: ${vcap.services.cf-butler-secrets.credentials.CF_POLICIES_GIT_FILE-PATHS:}
+  token:
+    provider: ${vcap.services.cf-butler-secrets.credentials.CF_TOKEN_PROVIDER}
   buildpacks: ${vcap.services.cf-butler-secrets.credentials.CF_BUILDPACKS:}
 
 om:
@@ -175,9 +177,6 @@ om:
 pivnet:
   apiToken: ${vcap.services.cf-butler-secrets.credentials.PIVNET_API-TOKEN}
   enabled: ${vcap.services.cf-butler-secrets.credentials.PIVNET_ENABLED:false}
-
-token:
-  provider: ${vcap.services.cf-butler-secrets.credentials.TOKEN_PROVIDER}
 
 cron:
   collection: ${vcap.services.cf-butler-secrets.credentials.CRON_COLLECTION:0 0 0 * * *}
