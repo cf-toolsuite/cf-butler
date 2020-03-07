@@ -39,7 +39,7 @@ public class ButlerConfig {
     }
 
     @Bean
-    @ConditionalOnProperty(prefix="token", name="provider", havingValue="userpass", matchIfMissing=true)
+    @ConditionalOnProperty(prefix = "token", name = "provider", havingValue = "userpass", matchIfMissing=true)
     public TokenProvider tokenProvider(PasSettings settings) {
         return PasswordGrantTokenProvider
                 .builder()
@@ -49,7 +49,7 @@ public class ButlerConfig {
     }
 
     @Bean
-    @ConditionalOnProperty(prefix="token", name="provider", havingValue="sso")
+    @ConditionalOnProperty(prefix = "token", name = "provider", havingValue = "sso")
     public TokenProvider refreshGrantTokenProvider(PasSettings settings) {
         return RefreshTokenGrantTokenProvider
                 .builder()
