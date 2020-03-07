@@ -131,7 +131,7 @@ We'll use this file later as input configuration for the creation of either a [c
 At a minimum you should supply values for the following keys
 
 * `cf.apiHost` - a Pivotal Application Service API endpoint
-* `token.provider` - Pivotal Application Service authorization token provider, options are: `userpass` or `sso`
+* `cf.token.provider` - Pivotal Application Service authorization token provider, options are: `userpass` or `sso`
 * `pivnet.apiToken` - a Pivotal Network legacy API Token, visit your [profile](https://network.pivotal.io/users/dashboard/edit-profile)
 
 Based on choice of the authorization token provider
@@ -183,12 +183,20 @@ Or you may wish to `cf bind-service` to a database service instance. In this cas
 
 ### Managing policies
 
-Creation and deletion of policies are managed via API endpoints by default. When an audit trail is important to you, you may opt to set `cf.policies.provider` to `git`.  When you do this, you shift the lifecycle management of policies to Git.  You will have to specify additional configuration, like
+Creation and deletion of policies are managed via API endpoints by default. When an audit trail is important to you, you may opt to set `cf.policies.git.uri` -- this property specifies the location of the repository that contains policy files in JSON format.
 
-* `cf.policies.uri` the location of the repository that contains policy files in JSON format
-* `cf.policies.commit` the commit id to pull from
+When you do this, you shift the lifecycle management of policies to Git.  You will have to specify additional configuration, like
+
+* `cf.policies.git.commit` the commit id to pull from
   * if this property is missing the latest commit will be used
-* `cf.policies.filePaths` an array of file paths of policy files
+* `cf.policies.git.filePaths` an array of file paths of policy files
+
+If you want to work with a private repository, then you will have to specify
+
+* `cf.policies.git.username`
+* `cf.policies.git.password`
+
+one or both are used to authenticate.  In the case where you may have configured a personal access token, set `cf.policies.git.username` equal to the value of the token.
 
 Policy files must adhere to a naming convention where:
 
@@ -422,7 +430,7 @@ docker rm {pid}
 
 ### with Username and password authorization
 
-The following instructions explain how to get started when `token.provider` is set to `userpass`
+The following instructions explain how to get started when `cf.token.provider` is set to `userpass`
 
 Authenticate to a foundation using the API endpoint.
 
@@ -434,7 +442,7 @@ cf login -a https://api.run.pivotal.io
 
 ### with SSO authorization
 
-The following instructions explain how to get started when `token.provider` is set to `sso`
+The following instructions explain how to get started when `cf.token.provider` is set to `sso`
 
 Authenticate to a foundation using the API endpoint
 
