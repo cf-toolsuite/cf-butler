@@ -454,7 +454,7 @@ Paste the value as the value for `CF_REFRESH-TOKEN` in your `config/secrets.json
 
 ```
 {
-  "TOKEN_PROVIDER": "sso",
+  "CF_TOKEN_PROVIDER": "sso",
   "CF_API-HOST": "xxxxx",
   "CF_REFRESH-TOKEN": "xxxxx",
 }
