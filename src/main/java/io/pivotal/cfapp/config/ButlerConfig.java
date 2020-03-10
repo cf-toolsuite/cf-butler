@@ -11,19 +11,23 @@ import org.cloudfoundry.reactor.doppler.ReactorDopplerClient;
 import org.cloudfoundry.reactor.tokenprovider.PasswordGrantTokenProvider;
 import org.cloudfoundry.reactor.tokenprovider.RefreshTokenGrantTokenProvider;
 import org.cloudfoundry.reactor.uaa.ReactorUaaClient;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.context.event.SimpleApplicationEventMulticaster;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
+
+import io.pivotal.cfenv.core.CfEnv;
 
 @Configuration
-@EnableScheduling
-@EnableTransactionManagement
 public class ButlerConfig {
+
+    @Bean
+    @Profile("cloud")
+    public CfEnv cfEnv() {
+        return new CfEnv();
+    }
 
     @Bean
     public DefaultConnectionContext connectionContext(PasSettings settings) {
@@ -39,22 +43,21 @@ public class ButlerConfig {
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = "cf.token", name = "provider", havingValue = "userpass", matchIfMissing=true)
     public TokenProvider tokenProvider(PasSettings settings) {
-        return PasswordGrantTokenProvider
-                .builder()
-                    .username(settings.getUsername())
-                    .password(settings.getPassword())
-                    .build();
-    }
-
-    @Bean
-    @ConditionalOnProperty(prefix = "cf.token", name = "provider", havingValue = "sso")
-    public TokenProvider refreshGrantTokenProvider(PasSettings settings) {
-        return RefreshTokenGrantTokenProvider
-                .builder()
-                    .token(settings.getRefreshToken())
-                    .build();
+        if (settings.getTokenProvider().equalsIgnoreCase("userpass")) {
+            return PasswordGrantTokenProvider
+                    .builder()
+                        .username(settings.getUsername())
+                        .password(settings.getPassword())
+                        .build();
+        } else if (settings.getTokenProvider().equalsIgnoreCase("sso")) {
+            return RefreshTokenGrantTokenProvider
+                    .builder()
+                        .token(settings.getRefreshToken())
+                        .build();
+        } else {
+            throw new IllegalStateException("Unknown TokenProvider");
+        }
     }
 
     @Bean
