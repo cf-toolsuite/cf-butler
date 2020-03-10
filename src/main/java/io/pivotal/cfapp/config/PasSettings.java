@@ -29,13 +29,13 @@ public class PasSettings {
 	private Integer connectionPoolSize;
 	private String connectionTimeout;
     private String username;
-    private String password;
+	private String password;
+	private String tokenProvider = "userpass";
     // this is the value of RefreshToken within ~/.cf/config.json after one authenticates w/ cf login -a {api_endpoint} -sso
 	private String refreshToken;
 	private String accountRegex;
 	private Set<String> organizationBlackList = DEFAULT_BLACKLIST;
-	private boolean applicationStatisticsEnabled;
-	private boolean applicationEventsEnabled;
+
 
     public Set<String> getOrganizationBlackList() {
     	while (organizationBlackList.remove(""));

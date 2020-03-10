@@ -131,7 +131,7 @@ We'll use this file later as input configuration for the creation of either a [c
 At a minimum you should supply values for the following keys
 
 * `cf.apiHost` - a Pivotal Application Service API endpoint
-* `cf.token.provider` - Pivotal Application Service authorization token provider, options are: `userpass` or `sso`
+* `cf.tokenProvider` - Pivotal Application Service authorization token provider, options are: `userpass` or `sso`
 * `pivnet.apiToken` - a Pivotal Network legacy API Token, visit your [profile](https://network.pivotal.io/users/dashboard/edit-profile)
 
 Based on choice of the authorization token provider
@@ -271,7 +271,7 @@ secrets-{env}.json
 
 > Replace `<engine>` above with one of either `java-mail`, or `sendgrid`
 
-Furthermore, you will need to define additional properties depending on which engine you chose.  Checkout the secrets profile in [application.yml](https://github.com/pacphi/cf-butler/blob/master/src/main/resources/application.yml) to get to know what they are.
+Furthermore, you will need to define additional properties depending on which engine you chose.  Checkout [application.yml](https://github.com/pacphi/cf-butler/blob/master/src/main/resources/application.yml) to get to know what they are.
 
 E.g, if you intended to use [sendgrid](https://www.sendgrid.com) as your email notification engine then your secrets-{env}.yml might contain
 
@@ -430,7 +430,7 @@ docker rm {pid}
 
 ### with Username and password authorization
 
-The following instructions explain how to get started when `cf.token.provider` is set to `userpass`
+The following instructions explain how to get started when `cf.tokenProvider` is set to `userpass`
 
 Authenticate to a foundation using the API endpoint.
 
@@ -442,7 +442,7 @@ cf login -a https://api.run.pivotal.io
 
 ### with SSO authorization
 
-The following instructions explain how to get started when `cf.token.provider` is set to `sso`
+The following instructions explain how to get started when `cf.tokenProvider` is set to `sso`
 
 Authenticate to a foundation using the API endpoint
 
@@ -462,7 +462,7 @@ Paste the value as the value for `CF_REFRESH-TOKEN` in your `config/secrets.json
 
 ```
 {
-  "CF_TOKEN_PROVIDER": "sso",
+  "CF_TOKEN-PROVIDER": "sso",
   "CF_API-HOST": "xxxxx",
   "CF_REFRESH-TOKEN": "xxxxx",
 }

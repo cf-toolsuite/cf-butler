@@ -3,9 +3,7 @@ cf:
   refreshToken: xxxxxx
   organizationBlackList:
     - system
-
-token:
-  provider: sso
+  tokenProvider: sso
 
 logging:
   level:

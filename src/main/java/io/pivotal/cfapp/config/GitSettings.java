@@ -18,12 +18,12 @@ import lombok.Getter;
 public class GitSettings {
 
     @Default
-    private final String uri = "";
-    private final String username;
+    private String uri = "";
+    private String username;
     @Default
-    private final String password = "";
-    private final String commit;
-    private final Set<String> filePaths;
+    private String password = "";
+    private String commit;
+    private Set<String> filePaths;
 
 
     public GitSettings(
