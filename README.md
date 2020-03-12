@@ -80,12 +80,13 @@ Cf-butler is configured and deployed as an application instance. Its capabilitie
 
 Required
 
-* [Pivotal Application Service](https://pivotal.io/platform/pivotal-application-service) admin account
+* Access to a foundation with Pivotal Application Service 2.6 or better installed
+  * and [Pivotal Application Service](https://pivotal.io/platform/pivotal-application-service) admin account credentials
 
 Optional
 
-* [Pivotal Network](https://network.pivotal.io) account
-* [Pivotal Operations Manager](https://pivotal.io/platform/pcf-components/pcf-ops-manager) admin account
+* [Pivotal Network](https://network.pivotal.io) account credentials
+* [Pivotal Operations Manager](https://pivotal.io/platform/pcf-components/pcf-ops-manager) admin account credentials
 
 
 ## Tools
@@ -156,6 +157,8 @@ E.g., if you had a configuration file named `application-pws.yml`
 ```
 
 > See the [samples](samples) directory for some examples of configuration when deploying to [Pivotal Web Services](https://login.run.pivotal.io/login) or [PCF One](https://login.run.pcfone.io/login).
+
+For an exhaustive listing of all overridable configuration properties consult [ButlerCfEnvProcessor.java](https://github.com/pacphi/cf-butler/blob/master/src/main/java/io/pivotal/cfapp/config/ButlerCfEnvProcessor.java).
 
 ### Using an external database
 
