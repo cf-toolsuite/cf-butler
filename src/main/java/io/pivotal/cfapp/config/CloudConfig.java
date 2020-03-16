@@ -35,16 +35,16 @@ class CloudConfig {
     ConnectionFactory connectionFactory() {
         R2dbcProperties properties = r2dbcProperties();
         ConnectionFactoryOptions.Builder builder = ConnectionFactoryOptions
-                .parse(properties.determineUrl()).mutate();
-        String username = properties.determineUsername();
+                .parse(properties.getUrl()).mutate();
+        String username = properties.getUsername();
         if (StringUtils.hasText(username)) {
             builder.option(ConnectionFactoryOptions.USER, username);
         }
-        String password = properties.determinePassword();
+        String password = properties.getPassword();
         if (StringUtils.hasText(password)) {
             builder.option(ConnectionFactoryOptions.PASSWORD, password);
         }
-        String databaseName = properties.determineDatabaseName();
+        String databaseName = properties.getName();
         if (StringUtils.hasText(databaseName)) {
             builder.option(ConnectionFactoryOptions.DATABASE, databaseName);
         }
