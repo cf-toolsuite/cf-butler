@@ -228,4 +228,3 @@ bootJar.enabled = true
 jar.enabled = false
 
 test.finalizedBy jacocoTestReport
-build.finalizedBy publishToMavenLocal, bootBuildImage
