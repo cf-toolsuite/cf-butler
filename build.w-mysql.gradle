@@ -157,7 +157,7 @@ dependencies {
 
 publishing {
     publications {
-        mavenJava(MavenPublication) {
+        create<MavenPublication>("mavenJava") {
             from components.java
             versionMapping {
                 usage('java-api') {
@@ -192,6 +192,7 @@ publishing {
         }
     }
     repositories {
+        mavenLocal()
         maven {
             // change URLs to point to your repos, e.g. http://my.org/repo
             def releasesRepoUrl = "$buildDir/repos/releases"
@@ -228,4 +229,3 @@ bootJar.enabled = true
 jar.enabled = false
 
 test.finalizedBy jacocoTestReport
-build.finalizedBy publishToMavenLocal, bootBuildImage
