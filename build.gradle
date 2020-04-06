@@ -9,7 +9,7 @@ plugins {
     id 'com.google.cloud.tools.jib' version '2.1.0'
     id 'maven-publish'
     id 'com.github.spotbugs' version '4.0.5'
-    id 'info.solidsoft.pitest' version '1.4.7'
+    id 'info.solidsoft.pitest' version '1.4.8'
 }
 
 gitProperties {
@@ -132,7 +132,7 @@ dependencies {
     runtime('io.r2dbc:r2dbc-postgresql')
     implementation('org.eclipse.jgit:org.eclipse.jgit:5.7.0.202003110725-r')
     implementation('org.springframework.boot:spring-boot-starter-mail')
-    implementation('com.sendgrid:sendgrid-java:4.4.6') {
+    implementation('com.sendgrid:sendgrid-java:4.4.7') {
         exclude group: 'org.apache.httpcomponents', module: 'httpclient'
     }
     implementation('org.apache.httpcomponents:httpclient:4.5.12')
