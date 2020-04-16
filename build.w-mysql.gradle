@@ -132,7 +132,7 @@ dependencies {
     runtime('com.github.mirromutth:r2dbc-mysql:v0.8.1.RELEASE')
     implementation('org.eclipse.jgit:org.eclipse.jgit:5.7.0.202003110725-r')
     implementation('org.springframework.boot:spring-boot-starter-mail')
-    implementation('com.sendgrid:sendgrid-java:4.4.7') {
+    implementation('com.sendgrid:sendgrid-java:4.4.8') {
         exclude group: 'org.apache.httpcomponents', module: 'httpclient'
     }
     implementation('org.apache.httpcomponents:httpclient:4.5.12')
