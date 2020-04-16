@@ -1,16 +1,14 @@
 package io.pivotal.cfapp.task;
 
-import static org.cloudfoundry.util.tuple.TupleUtils.function;
-
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.cloudfoundry.client.v2.ClientV2Exception;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.operations.services.GetServiceInstanceRequest;
-import org.cloudfoundry.operations.services.ServiceInstance;
-import org.cloudfoundry.operations.services.ServiceInstanceSummary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
@@ -24,8 +22,6 @@ import io.pivotal.cfapp.service.ServiceInstanceDetailService;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.function.Tuple2;
-import reactor.util.function.Tuples;
 
 @Slf4j
 @Component
@@ -56,8 +52,7 @@ public class ServiceInstanceDetailTask implements ApplicationListener<SpacesRetr
     	service
             .deleteAll()
             .thenMany(Flux.fromIterable(spaces))
-            .concatMap(space -> buildClient(space))
-            .flatMap(client -> getServiceInstanceSummary(client))
+            .concatMap(space -> listServiceInstances(space))
             .flatMap(tuple -> getServiceInstanceDetail(tuple))
             .flatMap(service::save)
             .thenMany(service.findAll())
@@ -73,66 +68,63 @@ public class ServiceInstanceDetailTask implements ApplicationListener<SpacesRetr
                 );
     }
 
-    private Mono<DefaultCloudFoundryOperations> buildClient(Space target) {
-        return Mono
-                .just(DefaultCloudFoundryOperations
+    private DefaultCloudFoundryOperations buildClient(Space target) {
+        return DefaultCloudFoundryOperations
                         .builder()
                         .from(opsClient)
                         .organization(target.getOrganizationName())
 		                .space(target.getSpaceName())
-		                .build());
-	}
+		                .build();
+    }
+    private static Space buildSpace(String organization, String space) {
+        return Space
+                .builder()
+                    .organizationName(organization)
+                    .spaceName(space)
+                .build();
+    }
 
-    protected Flux<Tuple2<DefaultCloudFoundryOperations, ServiceInstanceSummary>> getServiceInstanceSummary(DefaultCloudFoundryOperations opsClient) {
+    protected Flux<ServiceInstanceDetail> listServiceInstances(Space target) {
         return
-            opsClient
+            buildClient(target)
                 .services()
                     .listInstances()
-                    .map(s -> Tuples.of(opsClient, s));
+                    .delayElements(Duration.ofMillis(250))
+                    .flatMap(sis -> Mono.just(
+                                        ServiceInstanceDetail
+                                            .builder()
+                                                .serviceInstanceId(sis.getId())
+                                                .organization(target.getOrganizationName())
+                                                .space(target.getSpaceName())
+                                                .name(sis.getName() != null ? sis.getName(): "user_provided_service")
+                                                .service(sis.getService())
+                                                .plan(sis.getPlan())
+                                                .applications(sis.getApplications())
+                                                .build()
+                                    )
+                    );
     }
 
-    protected Mono<ServiceInstance> getServiceInstanceDetail(DefaultCloudFoundryOperations opsClient, String serviceName) {
-        return opsClient
+    protected Mono<ServiceInstanceDetail> getServiceInstanceDetail(ServiceInstanceDetail fragment) {
+        log.trace("Fetching service instance detail for org={}, space={}, id={}, name={}", fragment.getOrganization(), fragment.getSpace(), fragment.getServiceInstanceId(), fragment.getName());
+        return buildClient(buildSpace(fragment.getOrganization(), fragment.getSpace()))
                 .services()
-                    .getInstance(GetServiceInstanceRequest.builder().name(serviceName).build());
-    }
-
-    protected Mono<ServiceInstanceDetail> getServiceInstanceDetail(
-        Tuple2<DefaultCloudFoundryOperations, ServiceInstanceSummary> tuple
-    ) {
-        DefaultCloudFoundryOperations opsClient = tuple.getT1();
-        ServiceInstanceSummary summary = tuple.getT2();
-        log.trace("Fetching service instance details for org={}, space={}, id={}, name={}", opsClient.getOrganization(), opsClient.getSpace(), summary.getId(), summary.getName());
-        return
-            Mono.zip(
-                Mono.just(opsClient),
-                Mono.just(summary),
-                getServiceInstanceDetail(opsClient, summary.getName())
-            )
-            .map(function(this::toServiceInstanceDetail));
-    }
-
-    private ServiceInstanceDetail toServiceInstanceDetail(
-        DefaultCloudFoundryOperations opsClient, ServiceInstanceSummary summary, ServiceInstance instance
-    ) {
-        return ServiceInstanceDetail
-                .builder()
-                    .organization(opsClient.getOrganization())
-                    .space(opsClient.getSpace())
-                    .serviceInstanceId(summary.getId())
-                    .name(summary.getName() != null ? summary.getName(): "user_provided_service")
-                    .service(summary.getService())
-                    .plan(summary.getPlan())
-                    .description(instance.getDescription())
-                    .type(instance.getType() != null ? instance.getType().getValue(): null)
-                    .applications(summary.getApplications())
-                    .lastOperation(instance.getLastOperation())
-                    .lastUpdated(StringUtils.isNotBlank(instance.getUpdatedAt()) ? Instant.parse(instance.getUpdatedAt())
-                                .atZone(ZoneId.systemDefault())
-                                .toLocalDateTime() : null)
-                    .dashboardUrl(instance.getDashboardUrl())
-                    .requestedState(StringUtils.isNotBlank(instance.getStatus()) ? instance.getStatus().toLowerCase(): null)
-                    .build();
+                    .getInstance(GetServiceInstanceRequest.builder().name(fragment.getName()).build())
+                    .flatMap(sid -> Mono.just(
+                                        ServiceInstanceDetail
+                                            .from(fragment)
+                                                .description(sid.getDescription())
+                                                .type(sid.getType() != null ? sid.getType().getValue(): null)
+                                                .lastOperation(sid.getLastOperation())
+                                                .lastUpdated(StringUtils.isNotBlank(sid.getUpdatedAt()) ? Instant.parse(sid.getUpdatedAt())
+                                                            .atZone(ZoneId.systemDefault())
+                                                            .toLocalDateTime() : null)
+                                                .dashboardUrl(sid.getDashboardUrl())
+                                                .requestedState(StringUtils.isNotBlank(sid.getStatus()) ? sid.getStatus().toLowerCase(): null)
+                                                .build()
+                                    )
+                    )
+                    .onErrorResume(ClientV2Exception.class, e -> Mono.just(fragment));
     }
 
 }
