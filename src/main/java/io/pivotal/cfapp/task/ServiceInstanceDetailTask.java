@@ -6,7 +6,6 @@ import java.time.ZoneId;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.cloudfoundry.client.v2.ClientV2Exception;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.operations.services.GetServiceInstanceRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -110,21 +109,20 @@ public class ServiceInstanceDetailTask implements ApplicationListener<SpacesRetr
         return buildClient(buildSpace(fragment.getOrganization(), fragment.getSpace()))
                 .services()
                     .getInstance(GetServiceInstanceRequest.builder().name(fragment.getName()).build())
-                    .flatMap(sid -> Mono.just(
-                                        ServiceInstanceDetail
-                                            .from(fragment)
-                                                .description(sid.getDescription())
-                                                .type(sid.getType() != null ? sid.getType().getValue(): null)
-                                                .lastOperation(sid.getLastOperation())
-                                                .lastUpdated(StringUtils.isNotBlank(sid.getUpdatedAt()) ? Instant.parse(sid.getUpdatedAt())
-                                                            .atZone(ZoneId.systemDefault())
-                                                            .toLocalDateTime() : null)
-                                                .dashboardUrl(sid.getDashboardUrl())
-                                                .requestedState(StringUtils.isNotBlank(sid.getStatus()) ? sid.getStatus().toLowerCase(): null)
-                                                .build()
-                                    )
+                    .map(sid ->
+                                ServiceInstanceDetail
+                                    .from(fragment)
+                                        .description(sid.getDescription())
+                                        .type(sid.getType() != null ? sid.getType().getValue(): null)
+                                        .lastOperation(sid.getLastOperation())
+                                        .lastUpdated(StringUtils.isNotBlank(sid.getUpdatedAt()) ? Instant.parse(sid.getUpdatedAt())
+                                                    .atZone(ZoneId.systemDefault())
+                                                    .toLocalDateTime() : null)
+                                        .dashboardUrl(sid.getDashboardUrl())
+                                        .requestedState(StringUtils.isNotBlank(sid.getStatus()) ? sid.getStatus().toLowerCase(): null)
+                                        .build()
                     )
-                    .onErrorResume(ClientV2Exception.class, e -> Mono.just(fragment));
+                    .onErrorResume(e -> Mono.just(fragment));
     }
 
 }
