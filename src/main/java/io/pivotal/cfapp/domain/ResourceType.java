@@ -13,7 +13,6 @@ import org.springframework.util.Assert;
 public enum ResourceType {
 
     APPS("apps"),
-    AUDIT_EVENTS("audit_events"),
     BUILDS("builds"),
     BUILDPACKS("buildpacks"),
     DEPLOYMENTS("deployments"),
@@ -21,17 +20,12 @@ public enum ResourceType {
     DROPLETS("droplets"),
     FEATURE_FLAGS("feature_flags"),
     ISOLATION_SEGMENTS("isolation_segments"),
-    JOBS("jobs"),
     ORGS("organizations"),
-    ORG_QUOTAS("organization_quotas"),
     PACKAGES("packages"),
     PROCESSES("processes"),
-    ROLES("roles"),
     SPACES("spaces"),
-    SPACE_QUOTAS("space_quotas"),
     STACKS("stacks"),
-    TASKS("tasks"),
-    REVISIONS("revisions");
+    TASKS("tasks");
 
     private String id;
 
