@@ -18,7 +18,6 @@ public enum ResourceType {
     DEPLOYMENTS("deployments"),
     DOMAINS("domains"),
     DROPLETS("droplets"),
-    FEATURE_FLAGS("feature_flags"),
     ISOLATION_SEGMENTS("isolation_segments"),
     ORGS("organizations"),
     PACKAGES("packages"),
