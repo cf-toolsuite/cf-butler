@@ -107,4 +107,11 @@ public class EmbeddedMetadata {
         return value.matches(pattern);
     }
 
+    public String labelsToString() {
+        return labels.keySet().stream().map(k -> k + "=" + labels.get(k)).collect(Collectors.joining("; "));
+    }
+
+    public String annotationsToString() {
+        return annotations.keySet().stream().map(k -> k + "=" + annotations.get(k)).collect(Collectors.joining("; "));
+    }
 }
