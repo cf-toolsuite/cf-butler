@@ -8,18 +8,27 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 import org.springframework.util.Assert;
 
+// @see https://v3-apidocs.cloudfoundry.org/version/3.82.0/index.html#resources
+// A subset of the available resources accessed via cf v3 api
 public enum ResourceType {
 
     APPS("apps"),
+    AUDIT_EVENTS("audit_events"),
     BUILDS("builds"),
     BUILDPACKS("buildpacks"),
     DEPLOYMENTS("deployments"),
+    DOMAINS("domains"),
     DROPLETS("droplets"),
+    FEATURE_FLAGS("feature_flags"),
     ISOLATION_SEGMENTS("isolation_segments"),
+    JOBS("jobs"),
     ORGS("organizations"),
+    ORG_QUOTAS("organization_quotas"),
     PACKAGES("packages"),
     PROCESSES("processes"),
+    ROLES("roles"),
     SPACES("spaces"),
+    SPACE_QUOTAS("space_quotas"),
     STACKS("stacks"),
     TASKS("tasks"),
     REVISIONS("revisions");
