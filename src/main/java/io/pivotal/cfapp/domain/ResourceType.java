@@ -24,7 +24,16 @@ public enum ResourceType {
     PROCESSES("processes"),
     SPACES("spaces"),
     STACKS("stacks"),
-    TASKS("tasks");
+    TASKS("tasks"),
+
+    // experimental resources
+    REVISIONS("revisions"),
+    SECURITY_GROUPS("security_groups"),
+    SERVICE_BINDINGS("service_bindings"),
+    SERVICE_BROKERS("service_brokers"),
+    SERVICE_OFFERINGS("service_offerings"),
+    SERVICE_PLANS("service_plans");
+
 
     private String id;
 
