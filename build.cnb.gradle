@@ -61,6 +61,10 @@ bootRun {
     systemProperties = System.properties
 }
 
+bootBuildImage {
+	builder = "gcr.io/paketo-buildpacks/builder:base-platform-api-0.3"
+}
+
 configurations {
 	// exclude Logback
     implementation.exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
