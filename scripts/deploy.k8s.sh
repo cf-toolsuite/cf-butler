@@ -9,7 +9,9 @@ if [ -z "$1" ] && [ -z "$2" ]; then
 	exit 1
 fi
 
-
+# Cloud Native Buildpacks do not like the Gradle Git plugin... so remove it
+mv build.gradle build.default.gradle
+cp build.cnb.gradle build.gradle
 
 case "$1" in
 
@@ -28,3 +30,7 @@ case "$1" in
 	;;
 
 esac
+
+# Restore build
+rm build.gradle
+mv build.default.gradle build.gradle
