@@ -88,7 +88,6 @@ public final class Lifecycle extends org.cloudfoundry.client.v3._Lifecycle {
    * Utility type used to correctly read immutable object from JSON representation.
    * @deprecated Do not use this type directly, it exists only for the <em>Jackson</em>-binding infrastructure
    */
-  @Generated(from = "_Lifecycle", generator = "Immutables")
   @Deprecated
   @JsonDeserialize
   @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE)
@@ -150,7 +149,6 @@ public final class Lifecycle extends org.cloudfoundry.client.v3._Lifecycle {
    * <p><em>{@code Builder} is not thread-safe and generally should not be stored in a field or collection,
    * but instead used immediately to create instances.</em>
    */
-  @Generated(from = "_Lifecycle", generator = "Immutables")
   public static final class Builder {
     private static final long INIT_BIT_DATA = 0x1L;
     private static final long INIT_BIT_TYPE = 0x2L;
