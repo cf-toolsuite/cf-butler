@@ -2,6 +2,7 @@ package io.pivotal.cfapp.task;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
@@ -19,6 +20,7 @@ import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import io.pivotal.cfapp.config.PasSettings;
@@ -26,6 +28,8 @@ import io.pivotal.cfapp.domain.AppDetail;
 import io.pivotal.cfapp.domain.Buildpack;
 import io.pivotal.cfapp.domain.Space;
 import io.pivotal.cfapp.domain.Stack;
+import io.pivotal.cfapp.domain.product.PivnetCache;
+import io.pivotal.cfapp.domain.product.Release;
 import io.pivotal.cfapp.event.AppDetailRetrievedEvent;
 import io.pivotal.cfapp.event.SpacesRetrievedEvent;
 import io.pivotal.cfapp.service.AppDetailService;
@@ -38,6 +42,7 @@ import reactor.core.publisher.Mono;
 
 @Slf4j
 @Component
+@Order(2)
 public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> {
 
     private final PasSettings settings;
@@ -47,16 +52,19 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
     private final BuildpacksCache buildpacksCache;
     private final StacksCache stacksCache;
     private final ApplicationEventPublisher publisher;
+    private final PivnetCache pivnetCache;
 
     @Autowired
     public AppDetailTask(
+            PivnetCache pivnetCache,
             PasSettings settings,
     		DefaultCloudFoundryOperations opsClient,
             AppDetailService appDetailsService,
             EventsService eventsService,
             BuildpacksCache buildpacksCache,
             StacksCache stacksCache,
-    		ApplicationEventPublisher publisher) {
+            ApplicationEventPublisher publisher) {
+        this.pivnetCache = pivnetCache;
         this.settings = settings;
         this.opsClient = opsClient;
         this.appDetailsService = appDetailsService;
@@ -75,6 +83,7 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
         log.info("AppDetailTask started");
         appDetailsService
             .deleteAll()
+            .delay(Duration.ofSeconds(120))
             .thenMany(Flux.fromIterable(spaces))
             .concatMap(space -> listApplications(space))
             .flatMap(fragment -> getSummaryInfo(fragment))
@@ -149,6 +158,10 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
                                             .image(sar.getDockerImage())
                                             .stack(nullSafeStack(sar.getStackId()))
                                             .lastPushed(nullSafeLocalDateTime(sar.getPackageUpdatedAt()))
+                                            .buildpackReleaseType(getBuildpackReleaseType(sar.getDetectedBuildpackId()))
+                                            .buildpackReleaseDate(getBuildpackReleaseDate(sar.getDetectedBuildpackId()))                                           
+                                            .buildpackLatestVersion(getBuildpackLatestVersion(sar.getDetectedBuildpackId()))
+                                            .buildpackLatestUrl(getBuildpackReleaseNotesUrl(sar.getDetectedBuildpackId()))
                                         .build()
                                 )
                         )
@@ -194,6 +207,38 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
         Buildpack buildpack = buildpacksCache.getBuildpackById(buildpackId);
         if (buildpack != null) {
             return settings.getBuildpack(buildpack.getName());
+        }
+        return null;
+    }
+
+    private String getBuildpackReleaseType(String buildpackId) {
+        Buildpack buildpack = buildpacksCache.getBuildpackById(buildpackId);
+        if (buildpack != null) {
+            return pivnetCache.findLatestProductReleaseBySlug(getBuildpack(buildpackId) + "-buildpack").getReleaseType();
+        }
+        return null;
+    }
+
+    private LocalDateTime getBuildpackReleaseDate(String buildpackId) {
+        Buildpack buildpack = buildpacksCache.getBuildpackById(buildpackId);
+        if (buildpack != null) {
+            return pivnetCache.findLatestProductReleaseBySlug(getBuildpack(buildpackId) + "-buildpack").getReleaseDate().atStartOfDay();
+        }
+        return null;
+    }
+
+    private String getBuildpackLatestVersion(String buildpackId) {
+        Buildpack buildpack = buildpacksCache.getBuildpackById(buildpackId);
+        if (buildpack != null) {
+            return pivnetCache.findLatestProductReleaseBySlug(getBuildpack(buildpackId) + "-buildpack").getVersion();
+        }
+        return null;
+    }
+
+    private String getBuildpackReleaseNotesUrl(String buildpackId) {
+        Buildpack buildpack = buildpacksCache.getBuildpackById(buildpackId);
+        if (buildpack != null) {
+            return pivnetCache.findLatestProductReleaseBySlug(getBuildpack(buildpackId) + "-buildpack").getReleaseNotesUrl();
         }
         return null;
     }
