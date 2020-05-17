@@ -1,15 +1,15 @@
 plugins {
     id 'com.gorylenko.gradle-git-properties' version '2.2.2'
-    id 'org.springframework.boot' version '2.3.0.RC1'
+    id 'org.springframework.boot' version '2.3.0.RELEASE'
     id 'io.spring.dependency-management' version '1.0.9.RELEASE'
     id 'com.github.ben-manes.versions' version '0.28.0'
-    id 'io.franzbecker.gradle-lombok' version '3.3.0'
+    id 'io.franzbecker.gradle-lombok' version '4.0.0'
 	id 'java'
     id 'jacoco'
     id 'com.google.cloud.tools.jib' version '2.2.0'
     id 'maven-publish'
-    id 'com.github.spotbugs' version '4.0.7'
-    id 'info.solidsoft.pitest' version '1.4.9'
+    id 'com.github.spotbugs' version '4.2.0'
+    id 'info.solidsoft.pitest' version '1.5.1'
 }
 
 gitProperties {
@@ -18,7 +18,7 @@ gitProperties {
 }
 
 spotbugs {
-    toolVersion = '4.0.0-beta1'
+    toolVersion = '4.0.3'
     ignoreFailures = true
     effort = 'max'
     reportLevel = 'low'
@@ -50,10 +50,10 @@ repositories {
 }
 
 ext {
-    set('springCloudServicesVersion', '3.1.1.RELEASE')
+    set('springCloudServicesVersion', '3.1.2.RELEASE')
 	set('springCloudVersion', "2020.0.0-M1")
     // @see https://github.com/spring-projects/spring-boot/blob/master/spring-boot-project/spring-boot-dependencies/pom.xml
-    set('spring-data-releasetrain.version', 'Neumann-RC1')
+    set('spring-data-releasetrain.version', 'Neumann-RELEASE')
 }
 
 dependencyManagement {
@@ -124,7 +124,7 @@ dependencies {
     implementation('org.springframework.boot:spring-boot-starter-log4j2')
     implementation('com.lmax:disruptor:3.4.2')
     implementation('org.springframework.boot:spring-boot-starter-data-r2dbc')
-    implementation('org.springframework.data:spring-data-relational:2.0.0.RC1')
+    implementation('org.springframework.data:spring-data-relational:2.0.0.RELEASE')
     implementation('org.locationtech.jts:jts-core:1.16.1')
     implementation('io.r2dbc:r2dbc-spi')
     runtime('io.r2dbc:r2dbc-pool')
@@ -142,7 +142,7 @@ dependencies {
     implementation('io.projectreactor.netty:reactor-netty:0.9.7.RELEASE')
     implementation('io.micrometer:micrometer-registry-prometheus')
     testImplementation('io.projectreactor:reactor-test')
-    testImplementation('org.assertj:assertj-core:3.15.0')
+    testImplementation('org.assertj:assertj-core:3.16.1')
     testImplementation('org.junit.jupiter:junit-jupiter-api')
     testImplementation('org.junit.jupiter:junit-jupiter-params')
     testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine')
