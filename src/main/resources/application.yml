@@ -112,3 +112,10 @@ spring:
 # SendGrid API key (alternative to username/password).
   sendgrid:
     api-key: replace_me
+
+---
+spring:
+  profiles: cloud
+
+  main:
+    cloud-platform: CLOUD_FOUNDRY
