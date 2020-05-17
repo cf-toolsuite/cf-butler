@@ -1,0 +1,9 @@
+---
+applications:
+- name: cf-butler
+  memory: 1G
+  instances: 1
+  env:
+    JAVA_OPTS: -Djava.security.egd=file:///dev/urandom
+    SPRING_PROFILES_ACTIVE: on-demand,cloud
+    BP_AUTO_RECONFIGURATION_ENABLED: false
