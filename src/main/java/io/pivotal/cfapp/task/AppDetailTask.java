@@ -2,6 +2,7 @@ package io.pivotal.cfapp.task;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
@@ -22,10 +23,15 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 import io.pivotal.cfapp.config.PasSettings;
+import io.pivotal.cfapp.config.PivnetSettings;
 import io.pivotal.cfapp.domain.AppDetail;
 import io.pivotal.cfapp.domain.Buildpack;
 import io.pivotal.cfapp.domain.Space;
 import io.pivotal.cfapp.domain.Stack;
+import io.pivotal.cfapp.domain.product.PivnetCache;
+import io.pivotal.cfapp.domain.product.Release;
+import org.springframework.context.ApplicationEvent;
+import io.pivotal.cfapp.event.ProductsAndReleasesRetrievedEvent;
 import io.pivotal.cfapp.event.AppDetailRetrievedEvent;
 import io.pivotal.cfapp.event.SpacesRetrievedEvent;
 import io.pivotal.cfapp.service.AppDetailService;
@@ -38,26 +44,35 @@ import reactor.core.publisher.Mono;
 
 @Slf4j
 @Component
-public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> {
+public class AppDetailTask implements ApplicationListener<ApplicationEvent> {
 
     private final PasSettings settings;
+    private final PivnetSettings pivnetSettings;
     private final DefaultCloudFoundryOperations opsClient;
     private final AppDetailService appDetailsService;
     private final EventsService eventsService;
     private final BuildpacksCache buildpacksCache;
     private final StacksCache stacksCache;
     private final ApplicationEventPublisher publisher;
+    private final PivnetCache pivnetCache;
+    private boolean spaceEventPublished;
+    private boolean productsAndReleasesEventPublished;
+    private List<Space> spaces;
 
     @Autowired
     public AppDetailTask(
+            PivnetCache pivnetCache,
             PasSettings settings,
+            PivnetSettings pivnetSettings,
     		DefaultCloudFoundryOperations opsClient,
             AppDetailService appDetailsService,
             EventsService eventsService,
             BuildpacksCache buildpacksCache,
             StacksCache stacksCache,
-    		ApplicationEventPublisher publisher) {
+            ApplicationEventPublisher publisher) {
+        this.pivnetCache = pivnetCache;
         this.settings = settings;
+        this.pivnetSettings = pivnetSettings;
         this.opsClient = opsClient;
         this.appDetailsService = appDetailsService;
         this.eventsService = eventsService;
@@ -67,14 +82,30 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
     }
 
     @Override
-    public void onApplicationEvent(SpacesRetrievedEvent event) {
-        collect(List.copyOf(event.getSpaces()));
+    public void onApplicationEvent(ApplicationEvent event) {
+        if(pivnetSettings.isEnabled()){
+            if(event instanceof SpacesRetrievedEvent) {
+                spaceEventPublished = true;
+                spaces=List.copyOf(((SpacesRetrievedEvent)event).getSpaces());  
+                if(productsAndReleasesEventPublished) {
+                    collect(spaces);
+                }
+            }
+            if(event instanceof ProductsAndReleasesRetrievedEvent) {
+                productsAndReleasesEventPublished = true;
+                if (spaceEventPublished){
+                    collect(spaces);
+                }
+            }
+        } else if(event instanceof SpacesRetrievedEvent) {
+            collect(List.copyOf(((SpacesRetrievedEvent)event).getSpaces()));
+        }
     }
 
     public void collect(List<Space> spaces) {
         log.info("AppDetailTask started");
-        appDetailsService
-            .deleteAll()
+        appDetailsService    
+        .deleteAll()
             .thenMany(Flux.fromIterable(spaces))
             .concatMap(space -> listApplications(space))
             .flatMap(fragment -> getSummaryInfo(fragment))
@@ -149,6 +180,10 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
                                             .image(sar.getDockerImage())
                                             .stack(nullSafeStack(sar.getStackId()))
                                             .lastPushed(nullSafeLocalDateTime(sar.getPackageUpdatedAt()))
+                                            .buildpackReleaseType(getBuildpackReleaseType(sar.getDetectedBuildpackId()))
+                                            .buildpackReleaseDate(getBuildpackReleaseDate(sar.getDetectedBuildpackId()))                                           
+                                            .buildpackLatestVersion(getBuildpackLatestVersion(sar.getDetectedBuildpackId()))
+                                            .buildpackLatestUrl(getBuildpackReleaseNotesUrl(sar.getDetectedBuildpackId()))
                                         .build()
                                 )
                         )
@@ -196,6 +231,26 @@ public class AppDetailTask implements ApplicationListener<SpacesRetrievedEvent> 
             return settings.getBuildpack(buildpack.getName());
         }
         return null;
+    }
+
+    private String getBuildpackReleaseType(String buildpackId) {
+        return pivnetCache.findLatestProductReleaseBySlug(getBuildpack(buildpackId) + "-buildpack").getReleaseType();
+    }
+
+    private LocalDateTime getBuildpackReleaseDate(String buildpackId) {
+        LocalDate releaseDate = pivnetCache.findLatestProductReleaseBySlug(getBuildpack(buildpackId) + "-buildpack").getReleaseDate();
+        if (releaseDate != null){
+            return releaseDate.atStartOfDay();
+        }
+        return null;
+    }
+
+    private String getBuildpackLatestVersion(String buildpackId) {
+        return pivnetCache.findLatestProductReleaseBySlug(getBuildpack(buildpackId) + "-buildpack").getVersion();    
+    }
+
+    private String getBuildpackReleaseNotesUrl(String buildpackId) {
+        return pivnetCache.findLatestProductReleaseBySlug(getBuildpack(buildpackId) + "-buildpack").getReleaseNotesUrl();
     }
 
     private String getBuildpackVersion(String buildpackId) {

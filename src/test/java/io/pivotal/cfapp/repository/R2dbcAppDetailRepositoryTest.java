@@ -81,6 +81,10 @@ public class R2dbcAppDetailRepositoryTest {
                 assertNull(ad.getLastEventActor());
                 assertNull(ad.getLastEventTime());
                 assertEquals("stopped", ad.getRequestedState());
+                assertNull(ad.getBuildpackReleaseType());
+                assertNull(ad.getBuildpackReleaseDate());
+                assertNull(ad.getBuildpackLatestVersion());
+                assertNull(ad.getBuildpackLatestUrl());
             }).verifyComplete();
     }
 }
