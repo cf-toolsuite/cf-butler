@@ -169,6 +169,10 @@ public class R2dbcAppDetailRepository {
 					.lastEvent(Defaults.getColumnValue(row, "last_event", String.class))
 					.lastEventActor(Defaults.getColumnValue(row, "last_event_actor", String.class))
 					.requestedState(Defaults.getColumnValue(row, "requested_state", String.class))
+					.buildpackReleaseType(Defaults.getColumnValue(row, "buildpack_release_type", String.class))
+					.buildpackReleaseDate(Defaults.getColumnValue(row, "buildpack_release_date", LocalDateTime.class))
+					.buildpackLatestVersion(Defaults.getColumnValue(row, "buildpack_latest_version", String.class))
+					.buildpackLatestUrl(Defaults.getColumnValue(row, "buildpack_latest_url", String.class))
 					.build();
 	}
 

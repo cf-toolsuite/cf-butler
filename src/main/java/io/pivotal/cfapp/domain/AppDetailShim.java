@@ -30,6 +30,10 @@ public class AppDetailShim {
 	private String lastEventActor;
 	private LocalDateTime lastEventTime;
 	private String requestedState;
+	private String buildpackReleaseType;
+	private LocalDateTime buildpackReleaseDate;
+	private String buildpackLatestVersion;
+	private String buildpackLatestUrl;
 
 	public static AppDetailShim from(AppDetail detail) {
         return AppDetailShim
@@ -53,6 +57,10 @@ public class AppDetailShim {
 						.lastEventActor(detail.getLastEventActor())
 						.lastEventTime(detail.getLastEventTime())
 						.requestedState(detail.getRequestedState())
+						.buildpackReleaseType(detail.getBuildpackReleaseType())
+						.buildpackReleaseDate(detail.getBuildpackReleaseDate())
+						.buildpackLatestVersion(detail.getBuildpackLatestVersion())
+						.buildpackLatestUrl(detail.getBuildpackLatestUrl())
 						.build();
 	}
 
