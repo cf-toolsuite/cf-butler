@@ -7,7 +7,6 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +19,6 @@ import reactor.core.publisher.Mono;
 @Slf4j
 @Component
 @ConditionalOnProperty(name = "pivnet.enabled", havingValue = "true")
-@Order(1)
 public class ProductsAndReleasesTask implements ApplicationRunner {
 
     private final PivnetClient client;
@@ -60,8 +58,9 @@ public class ProductsAndReleasesTask implements ApplicationRunner {
                 client
                     .getLatestProductReleases()
                     .collectList()
-                    .flatMap(releases -> { cache.setLatestProductReleases(releases); return Mono.empty(); }))
-            // .delaySubscription(Duration.ofSeconds(10))
+                    .flatMap(releases -> { 
+                        cache.setLatestProductReleases(releases); 
+                        return Mono.justOrEmpty(releases); }))
             .subscribe(
                 result -> {
                     publisher.publishEvent(
@@ -69,7 +68,7 @@ public class ProductsAndReleasesTask implements ApplicationRunner {
                                 .products(cache.getProducts())
                                 .allReleases(cache.getAllProductReleases())
                                 .latestReleases(cache.getLatestProductReleases()));
-                    log.info("ProductsAndReleasesTask completed");
+                     log.info("ProductsAndReleasesTask completed");
                 },
                 error -> {
                     log.error("ProductsAndReleasesTask terminated with error", error);
