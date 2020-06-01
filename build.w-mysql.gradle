@@ -6,9 +6,9 @@ plugins {
     id 'io.franzbecker.gradle-lombok' version '4.0.0'
 	id 'java'
     id 'jacoco'
-    id 'com.google.cloud.tools.jib' version '2.2.0'
+    id 'com.google.cloud.tools.jib' version '2.3.0'
     id 'maven-publish'
-    id 'com.github.spotbugs' version '4.2.0'
+    id 'com.github.spotbugs' version '4.2.4'
     id 'info.solidsoft.pitest' version '1.5.1'
 }
 
@@ -132,12 +132,12 @@ dependencies {
     runtime('com.github.mirromutth:r2dbc-mysql:v0.8.1.RELEASE')
     implementation('org.eclipse.jgit:org.eclipse.jgit:5.7.0.202003110725-r')
     implementation('org.springframework.boot:spring-boot-starter-mail')
-    implementation('com.sendgrid:sendgrid-java:4.4.8') {
+    implementation('com.sendgrid:sendgrid-java:4.5.0') {
         exclude group: 'org.apache.httpcomponents', module: 'httpclient'
     }
     implementation('org.apache.httpcomponents:httpclient:4.5.12')
-    implementation('org.cloudfoundry:cloudfoundry-client-reactor:4.6.0.RELEASE')
-    implementation('org.cloudfoundry:cloudfoundry-operations:4.6.0.RELEASE')
+    implementation('org.cloudfoundry:cloudfoundry-client-reactor:4.7.0.RELEASE')
+    implementation('org.cloudfoundry:cloudfoundry-operations:4.7.0.RELEASE')
     implementation('io.projectreactor:reactor-core:3.3.5.RELEASE')
     implementation('io.projectreactor.netty:reactor-netty:0.9.7.RELEASE')
     implementation('io.micrometer:micrometer-registry-prometheus')
