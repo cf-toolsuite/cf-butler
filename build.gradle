@@ -138,7 +138,7 @@ dependencies {
     implementation('org.apache.httpcomponents:httpclient:4.5.12')
     implementation('org.cloudfoundry:cloudfoundry-client-reactor:4.7.0.RELEASE')
     implementation('org.cloudfoundry:cloudfoundry-operations:4.7.0.RELEASE')
-    implementation('io.projectreactor:reactor-core:3.3.5.RELEASE')
+    implementation('io.projectreactor:reactor-core:3.3.6.RELEASE')
     implementation('io.projectreactor.netty:reactor-netty:0.9.7.RELEASE')
     implementation('io.micrometer:micrometer-registry-prometheus')
     testImplementation('io.projectreactor:reactor-test')
