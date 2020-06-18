@@ -11,6 +11,7 @@ import org.springframework.util.CollectionUtils;
 
 import io.pivotal.cfapp.config.PasSettings;
 import io.pivotal.cfapp.domain.AppDetail;
+import io.pivotal.cfapp.domain.AppRelationship;
 import io.pivotal.cfapp.domain.LegacyPolicy;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -30,12 +31,18 @@ public class LegacyWorkloadsService {
         this.settings = settings;
     }
 
-    public Mono<List<AppDetail>> getLegacyApplications(String list) {
+    public Mono<List<AppDetail>> getLegacyStackApplications(String list) {
         Set<String> stacks = Set.copyOf(Arrays.asList(list.split("\\s*,\\s*")));
-        return getLegacyApplications(LegacyPolicy.builder().stacks(stacks).build());
+        return getLegacyStackApplications(LegacyPolicy.builder().stacks(stacks).build());
     }
 
-    public Mono<List<AppDetail>> getLegacyApplications(LegacyPolicy policy) {
+    public Mono<List<AppRelationship>> getLegacyServiceApplications(String list) {
+        Set<String> services = Set.copyOf(Arrays.asList(list.split("\\s*,\\s*")));
+        return getLegacyServiceApplications(LegacyPolicy.builder().services(services).build());
+    }
+
+
+    public Mono<List<AppDetail>> getLegacyStackApplications(LegacyPolicy policy) {
 		    return snapshotService
                 .assembleSnapshotDetail()
                 .flatMapMany(sd -> Flux.fromIterable(sd.getApplications()))
@@ -44,6 +51,16 @@ public class LegacyWorkloadsService {
                 .filter(app -> policy.getStacks().contains(app.getStack()))
                 .collectList();
     }
+
+    public Mono<List<AppRelationship>> getLegacyServiceApplications(LegacyPolicy policy) {        
+        return snapshotService
+            .assembleSnapshotDetail()
+            .flatMapMany(sd -> Flux.fromIterable(sd.getApplicationRelationships()))
+            .filter(app -> isWhitelisted(policy, app.getOrganization()))
+            .filter(app -> isBlacklisted(app.getOrganization()))
+            .filter(app -> app.getService()!=null ? policy.getServices().contains(app.getService()):false)
+            .collectList();
+}
 
     private boolean isBlacklisted(String organization) {
         return !settings.getOrganizationBlackList().contains(organization);

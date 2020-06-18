@@ -28,16 +28,32 @@ public class LegacyWorkloadsController {
         this.util = new TkServiceUtil(tkService);
     }
 
-    @GetMapping(value = { "/snapshot/detail/legacy" } )
-	public Mono<ResponseEntity<Workloads>> getLegacyWorkloads(@RequestParam("stacks") String stacks) {
-        final WorkloadsBuilder builder = Workloads.builder();
-        return service
-                .getLegacyApplications(stacks)
-                .map(list -> builder.applications(list))
-                .flatMap(dwb -> util
-                                .getHeaders()
-                                    .map(h -> new ResponseEntity<Workloads>(dwb.build(), h, HttpStatus.OK)))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
-	}
 
+    @GetMapping(value = { "/snapshot/detail/legacy" } )
+    public Mono<ResponseEntity<Workloads>> getLegacyWorkloads(@RequestParam(value = "stacks", required = false) String stacks,
+    @RequestParam(value = "services", required = false) String cfServices
+    ) {
+        final WorkloadsBuilder builder = Workloads.builder();
+        Mono<ResponseEntity<Workloads>> result = null;
+        if (stacks !=null && cfServices == null) {
+            result = service
+                    .getLegacyStackApplications(stacks)
+                    .map(list -> builder.applications(list))
+                    .flatMap(dwb -> util
+                                    .getHeaders()
+                                        .map(h -> new ResponseEntity<Workloads>(dwb.build(), h, HttpStatus.OK)))
+                    .defaultIfEmpty(ResponseEntity.notFound().build());
+        } else if (cfServices !=null && stacks == null) {
+            result = service
+                    .getLegacyServiceApplications(cfServices)
+                    .map(list -> builder.appRelationship(list))
+                    .flatMap(dwb -> util
+                                    .getHeaders()
+                                        .map(h -> new ResponseEntity<Workloads>(dwb.build(), h, HttpStatus.OK)))
+                    .defaultIfEmpty(ResponseEntity.notFound().build());
+        } else {
+            result = Mono.just(ResponseEntity.badRequest().build());
+        }
+		return result;
+    }
 }
