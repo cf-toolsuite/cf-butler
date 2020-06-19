@@ -44,7 +44,7 @@ repositories {
 
 ext {
     set('springCloudServicesVersion', '3.1.2.RELEASE')
-	set('springCloudVersion', "2020.0.0-M1")
+	set('springCloudVersion', "2020.0.0-M2")
     // @see https://github.com/spring-projects/spring-boot/blob/master/spring-boot-project/spring-boot-dependencies/pom.xml
     set('spring-data-releasetrain.version', 'Neumann-RELEASE')
 }
