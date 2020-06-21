@@ -19,7 +19,7 @@ public class AppRelationshipRequest {
     private String space;
     private String serviceInstanceId;
     private String serviceName;
-    private String service;
+    private String serviceOffering;
     private String applicationId;
     private String applicationName;
     private String serviceType;
@@ -35,7 +35,7 @@ public class AppRelationshipRequest {
                         .applicationName(a)
                         .serviceInstanceId(detail.getServiceInstanceId())
                         .serviceName(detail.getName())
-                        .service(detail.getService())
+                        .serviceOffering(detail.getService())
                         .serviceType(detail.getType())
                         .servicePlan(detail.getPlan())
                         .build());

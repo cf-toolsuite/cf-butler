@@ -86,7 +86,7 @@ public class AppDetailTask implements ApplicationListener<ApplicationEvent> {
         if(pivnetSettings.isEnabled()){
             if(event instanceof SpacesRetrievedEvent) {
                 spaceEventPublished = true;
-                spaces=List.copyOf(((SpacesRetrievedEvent)event).getSpaces());  
+                spaces = List.copyOf(((SpacesRetrievedEvent)event).getSpaces());  
                 if(productsAndReleasesEventPublished) {
                     collect(spaces);
                 }

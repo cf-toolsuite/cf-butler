@@ -26,6 +26,8 @@ public class PoliciesValidator {
     private static final String ENDPOINT_REJECTED_MESSAGE = "{} was rejected because endpoint must not be empty and must start with a /";
     private static final String QUERY_REJECTED_MESSAGE = "-- {} was rejected because either name or sql was blank or sql did not start with SELECT.";
     private static final String EMAIL_NOTIFICATION_TEMPLATE_REJECTED_MESSAGE = "-- {} was rejected because either the email template did not contain valid email addresses for from/to or the subject/body was blank.";
+    private static final String LEGACY_FILTER_REJECTED_MESSAGE = "-- {} was rejected because it must have only one filter. Choose either stacks or service-offerings filter.";
+
 
     private final StacksCache stacksCache;
 
@@ -216,22 +218,27 @@ public class PoliciesValidator {
     public boolean validate(LegacyPolicy policy) {
         boolean hasId = Optional.ofNullable(policy.getId()).isPresent();
         boolean hasStacks = Optional.ofNullable(policy.getStacks()).isPresent();
+        boolean hasServiceOfferings = Optional.ofNullable(policy.getServiceOfferings()).isPresent();
         boolean hasOperatorTemplate = Optional.ofNullable(policy.getOperatorTemplate()).isPresent();
         boolean hasNotifyeeTemplate = Optional.ofNullable(policy.getNotifyeeTemplate()).isPresent();
-        boolean valid = !hasId && hasStacks && hasOperatorTemplate;
-        if (hasStacks) {
-            if (policy.getStacks().isEmpty()) {
-                valid = false;
-            } else {
-                for (String stack: policy.getStacks()) {
-                    if (!stacksCache.contains(stack) ) {
-                        valid = false;
-                        break;
-                    }
+        log.info("hasId "+ hasId);
+        log.info("hasStacks "+ hasStacks);
+        log.info("hasServiceOfferings "+ hasServiceOfferings);
+        log.info("hasOperatorTemplate "+ hasOperatorTemplate);
+        log.info("hasNotifyeeTemplate "+ hasNotifyeeTemplate);
+        log.info("policy.getStacks().isEmpty()" + policy.getStacks().isEmpty());
+        log.info("policy.getServiceOfferings().isEmpty()" + policy.getServiceOfferings().isEmpty());
+        boolean valid = !hasId && hasOperatorTemplate;
+        if (policy.getStacks().isEmpty() == policy.getServiceOfferings().isEmpty()) {
+            valid = false;
+            log.warn(LEGACY_FILTER_REJECTED_MESSAGE,policy.toString());
+        } else if (!policy.getStacks().isEmpty()) {
+            for (String stack: policy.getStacks()) {
+                if (!stacksCache.contains(stack) ) {
+                    valid = false;
+                    log.warn(LEGACY_REJECTED_MESSAGE, policy.toString());
+                    break;
                 }
-            }
-            if (valid == false) {
-                log.warn(LEGACY_REJECTED_MESSAGE, policy.toString());
             }
         }
         if (hasOperatorTemplate) {
@@ -251,5 +258,4 @@ public class PoliciesValidator {
         }
         return valid;
     }
-
 }

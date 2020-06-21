@@ -20,7 +20,7 @@ import lombok.Getter;
 
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({ "id", "stacks", "services", "operator-email-template", "notifyee-email-template", "organization-whitelist" })
+@JsonPropertyOrder({ "id", "stacks", "service-offerings", "operator-email-template", "notifyee-email-template", "organization-whitelist" })
 @Getter
 public class LegacyPolicy {
 
@@ -37,8 +37,8 @@ public class LegacyPolicy {
 	private Set<String> stacks = new HashSet<>();
 
 	@Default
-	@JsonProperty("services")
-	private Set<String> services = new HashSet<>();
+	@JsonProperty("service-offerings")
+	private Set<String> serviceOfferings = new HashSet<>();
 
     @JsonProperty("operator-email-template")
     private EmailNotificationTemplate operatorTemplate;
@@ -55,7 +55,7 @@ public class LegacyPolicy {
         @JsonProperty("pk") Long pk,
 		@JsonProperty("id") String id,
 		@JsonProperty("stacks") Set<String> stacks,
-		@JsonProperty("services") Set<String> services,
+		@JsonProperty("service-offerings") Set<String> serviceOfferings,
         @JsonProperty("operator-email-template") EmailNotificationTemplate operatorTemplate,
 		@JsonProperty("notifyee-email-template") EmailNotificationTemplate notifyeeTemplate,
 		@JsonProperty("organization-whitelist") Set<String> organizationWhiteList
@@ -63,7 +63,7 @@ public class LegacyPolicy {
         this.pk = pk;
 		this.id = id;
 		this.stacks = stacks;
-		this.services = services;
+		this.serviceOfferings = serviceOfferings;
         this.operatorTemplate = operatorTemplate;
 		this.notifyeeTemplate = notifyeeTemplate;
 		this.organizationWhiteList = organizationWhiteList;
@@ -78,8 +78,8 @@ public class LegacyPolicy {
 		return CollectionUtils.isEmpty(stacks) ? new HashSet<>() : Collections.unmodifiableSet(stacks);
 	}
 
-	public Set<String> getServices() {
-		return CollectionUtils.isEmpty(services) ? new HashSet<>() : Collections.unmodifiableSet(services);
+	public Set<String> getServiceOfferings() {
+		return CollectionUtils.isEmpty(serviceOfferings) ? new HashSet<>() : Collections.unmodifiableSet(serviceOfferings);
 	}
 
 	public Set<String> getOrganizationWhiteList() {
@@ -93,7 +93,7 @@ public class LegacyPolicy {
 	public static String[] columnNames() {
 		return
 			new String[] {
-				"pk", "id", "stacks", "services", "operator_email_template", "notifyee_email_template", "organization_whitelist"
+				"pk", "id", "stacks", "service_offerings", "operator_email_template", "notifyee_email_template", "organization_whitelist"
 			};
 	}
 
@@ -101,7 +101,7 @@ public class LegacyPolicy {
 		return LegacyPolicy
 				.builder()
 					.stacks(policy.getStacks())
-					.services(policy.getServices())
+					.serviceOfferings(policy.getServiceOfferings())
 					.operatorTemplate(policy.getOperatorTemplate())
 					.notifyeeTemplate(policy.getNotifyeeTemplate())
 					.organizationWhiteList(policy.getOrganizationWhiteList())
@@ -113,7 +113,7 @@ public class LegacyPolicy {
 				.builder()
 					.id(id)
 					.stacks(policy.getStacks())
-					.services(policy.getServices())
+					.serviceOfferings(policy.getServiceOfferings())
 					.operatorTemplate(policy.getOperatorTemplate())
 					.notifyeeTemplate(policy.getNotifyeeTemplate())
 					.organizationWhiteList(policy.getOrganizationWhiteList())

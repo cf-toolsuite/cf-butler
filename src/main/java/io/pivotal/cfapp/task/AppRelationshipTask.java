@@ -91,7 +91,7 @@ public class AppRelationshipTask implements ApplicationListener<ServiceInstanceD
                                     .appName(request.getApplicationName())
                                     .serviceInstanceId(request.getServiceInstanceId())
                                     .serviceName(request.getServiceName())
-                                    .service(request.getService())
+                                    .serviceOffering(request.getServiceOffering())
                                     .servicePlan(request.getServicePlan())
                                     .serviceType(request.getServiceType())
                                     .build());

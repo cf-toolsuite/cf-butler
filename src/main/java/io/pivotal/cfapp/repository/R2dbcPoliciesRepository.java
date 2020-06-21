@@ -247,6 +247,7 @@ public class R2dbcPoliciesRepository {
 									.pk(row.get("pk", Long.class))
 									.id(row.get("id", String.class))
 									.stacks(row.get("stacks", String.class) != null ? new HashSet<String>(Arrays.asList(row.get("stacks", String.class).split("\\s*,\\s*"))): new HashSet<>())
+									.serviceOfferings(row.get("service_offerings", String.class) != null ? new HashSet<String>(Arrays.asList(row.get("service_offerings", String.class).split("\\s*,\\s*"))): new HashSet<>())
 									.operatorTemplate(readEmailNotificationTemplate(row.get("operator_email_template", String.class) == null ? "{}": row.get("operator_email_template", String.class)))
 									.notifyeeTemplate(readEmailNotificationTemplate(row.get("notifyee_email_template", String.class) == null ? "{}": row.get("notifyee_email_template", String.class)))
 									.organizationWhiteList(row.get("organization_whitelist", String.class) != null ? new HashSet<String>(Arrays.asList(row.get("organization_whitelist", String.class).split("\\s*,\\s*"))): new HashSet<>())
@@ -263,7 +264,7 @@ public class R2dbcPoliciesRepository {
 		String selectAllEndpointPolicies = "select pk, id, description, endpoints, email_notification_template from endpoint_policy";
 		String selectAllQueryPolicies = "select pk, id, description, queries, email_notification_template from query_policy";
 		String selectAllHygienePolicies = "select pk, id, days_since_last_update, operator_email_template, notifyee_email_template, organization_whitelist from hygiene_policy";
-		String selectAllLegacyPolicies = "select pk, id, stacks, operator_email_template, notifyee_email_template, organization_whitelist from legacy_policy";
+		String selectAllLegacyPolicies = "select pk, id, stacks, service_offerings, operator_email_template, notifyee_email_template, organization_whitelist from legacy_policy";
 		List<ApplicationPolicy> applicationPolicies = new ArrayList<>();
 		List<ServiceInstancePolicy> serviceInstancePolicies = new ArrayList<>();
 		List<EndpointPolicy> endpointPolicies = new ArrayList<>();
@@ -353,6 +354,7 @@ public class R2dbcPoliciesRepository {
 												.pk(row.get("pk", Long.class))
 												.id(row.get("id", String.class))
 												.stacks(row.get("stacks", String.class) != null ? new HashSet<String>(Arrays.asList(row.get("stacks", String.class).split("\\s*,\\s*"))): new HashSet<>())
+												.serviceOfferings(row.get("service_offerings", String.class) != null ? new HashSet<String>(Arrays.asList(row.get("service_offerings", String.class).split("\\s*,\\s*"))): new HashSet<>())
 												.operatorTemplate(readEmailNotificationTemplate(row.get("operator_email_template", String.class) == null ? "{}": row.get("operator_email_template", String.class)))
 												.notifyeeTemplate(readEmailNotificationTemplate(row.get("notifyee_email_template", String.class) == null ? "{}": row.get("notifyee_email_template", String.class)))
 												.organizationWhiteList(row.get("organization_whitelist", String.class) != null ? new HashSet<String>(Arrays.asList(row.get("organization_whitelist", String.class).split("\\s*,\\s*"))): new HashSet<>())
@@ -451,6 +453,7 @@ public class R2dbcPoliciesRepository {
 								.pk(row.get("pk", Long.class))
 								.id(row.get("id", String.class))
 								.stacks(row.get("stacks", String.class) != null ? new HashSet<String>(Arrays.asList(row.get("stacks", String.class).split("\\s*,\\s*"))): new HashSet<>())
+								.serviceOfferings(row.get("service_offerings", String.class) != null ? new HashSet<String>(Arrays.asList(row.get("service_offerings", String.class).split("\\s*,\\s*"))): new HashSet<>())
 								.operatorTemplate(readEmailNotificationTemplate(row.get("operator_email_template", String.class) == null ? "{}": row.get("operator_email_template", String.class)))
 								.notifyeeTemplate(readEmailNotificationTemplate(row.get("notifyee_email_template", String.class) == null ? "{}": row.get("notifyee_email_template", String.class)))
 								.organizationWhiteList(row.get("organization_whitelist", String.class) != null ? new HashSet<String>(Arrays.asList(row.get("organization_whitelist", String.class).split("\\s*,\\s*"))): new HashSet<>())
@@ -724,6 +727,7 @@ public class R2dbcPoliciesRepository {
 					.pk(lp.getPk())
 					.id(lp.getId())
 					.stacks(CollectionUtils.isEmpty(lp.getStacks()) ? null: String.join(",", lp.getStacks()))
+					.serviceOfferings(CollectionUtils.isEmpty(lp.getServiceOfferings()) ? null: String.join(",", lp.getServiceOfferings()))
 					.operatorEmailTemplate(
 						lp.getOperatorTemplate() != null ? writeEmailNotificationTemplate(lp.getOperatorTemplate()) : null
 					)
