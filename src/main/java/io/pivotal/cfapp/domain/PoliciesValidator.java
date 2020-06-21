@@ -221,13 +221,6 @@ public class PoliciesValidator {
         boolean hasServiceOfferings = Optional.ofNullable(policy.getServiceOfferings()).isPresent();
         boolean hasOperatorTemplate = Optional.ofNullable(policy.getOperatorTemplate()).isPresent();
         boolean hasNotifyeeTemplate = Optional.ofNullable(policy.getNotifyeeTemplate()).isPresent();
-        log.info("hasId "+ hasId);
-        log.info("hasStacks "+ hasStacks);
-        log.info("hasServiceOfferings "+ hasServiceOfferings);
-        log.info("hasOperatorTemplate "+ hasOperatorTemplate);
-        log.info("hasNotifyeeTemplate "+ hasNotifyeeTemplate);
-        log.info("policy.getStacks().isEmpty()" + policy.getStacks().isEmpty());
-        log.info("policy.getServiceOfferings().isEmpty()" + policy.getServiceOfferings().isEmpty());
         boolean valid = !hasId && hasOperatorTemplate;
         if (policy.getStacks().isEmpty() == policy.getServiceOfferings().isEmpty()) {
             valid = false;
