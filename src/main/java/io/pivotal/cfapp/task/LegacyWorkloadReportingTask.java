@@ -143,7 +143,9 @@ public class LegacyWorkloadReportingTask implements PolicyExecutorTask {
         final WorkloadsBuilder builder = Workloads.builder();
         return legacyWorkloadsService
             .getLegacyApplications(policy)
-            .map(list -> builder.applications(list).build());
+            .map(list -> builder.applications(list))
+            .then(legacyWorkloadsService.getLegacyApplicationRelationships(policy))
+            .map(list -> builder.appRelationships(list).build());
     }
 
     private static Mono<Tuple2<UserSpaces, Workloads>> filterWorkloads(UserSpaces userSpaces, Workloads input){

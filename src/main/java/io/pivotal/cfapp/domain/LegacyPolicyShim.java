@@ -9,7 +9,8 @@ public class LegacyPolicyShim {
 
 	private Long pk;
     private String id;
-	private String stacks;
+    private String stacks;
+    private String serviceOfferings;
     private String operatorEmailTemplate;
     private String notifyeeEmailTemplate;
 	private String organizationWhitelist;

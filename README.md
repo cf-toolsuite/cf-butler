@@ -227,7 +227,7 @@ See additional property requirements in Query policies and the aforementioned sa
 
 #### Legacy Policies
 
-Legacy policies are useful when you want to search for and report on applications deployed to a legacy stack (e.g., windows2012R2, cflinuxfs2), notifying both the operator and for each application the author and/or his/her space compadres.
+Legacy policies are useful when you want to search for and report on applications deployed to a legacy stack (e.g., windows2012R2, cflinuxfs2) or service offering (e.g., using a product slug name like p-config-server, p-service-registry, p-mysql), notifying both the operator and for each application the author and/or his/her space compadres.
 
 As mentioned previously the policy file must adhere to a naming convention
 
@@ -941,6 +941,11 @@ GET /snapshot/detail/legacy?stacks={stacks}
 > Returns a list of all applications that have been deployed on legacy stacks. Replace `{stacks}` request parameter-value above with a comma-separated list of legacy stacks like `windows2012R2,cflinuxfs2`.
 
 ```
+GET /snapshot/detail/legacy?service-offerings={service-offerings}
+```
+> Returns a list of all service instances matching a product slug name as defined in the comma-separated list. Replace `{service-offerings}` request parameter-value above with a comma-separated list of legacy service offerings like `p-config-server, p-service-registry, p-mysql`.
+
+```
 GET /snapshot/detail/users
 ```
 > Provides a list of all space users (ignoring role) in comma-separated value format by organization and space, where multiple users in each space are comma-separated. Service accounts are filtered.
@@ -1150,6 +1155,25 @@ POST /policies
       "stacks": [
         "cflinuxfs2",
         "windows2012R2"
+      ]
+    },
+    {
+      "notifyee-email-template": {
+        "body": "<h3>These service instances are legacy service offerings</h3><p>To avoid repeated notification:</p><ul><li>for each application please bind to a modern alternative or cf delete</li></ul><p>depending on whether or not you want to keep the workload running.</p>",
+        "from": "admin@pcf.demo.ironleg.me",
+        "subject": "Legacy Policy Sample Report"
+      },
+      "operator-email-template": {
+        "body": "<h3>These service instances are legacy service offerings</h3><p>Results are herewith attached for your consideration.</p>",
+        "from": "admin@pcf.demo.ironleg.me",
+        "subject": "Legacy Policy Sample Report",
+        "to": [
+          "cphillipson@pivotal.io"
+        ]
+      },
+      "organization-whitelist": [],
+      "service-offerings": [
+        "p-config-server"
       ]
     }
   ]
