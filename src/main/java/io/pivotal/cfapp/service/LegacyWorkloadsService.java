@@ -11,7 +11,9 @@ import org.springframework.util.CollectionUtils;
 
 import io.pivotal.cfapp.config.PasSettings;
 import io.pivotal.cfapp.domain.AppDetail;
+import io.pivotal.cfapp.domain.AppRelationship;
 import io.pivotal.cfapp.domain.LegacyPolicy;
+import io.pivotal.cfapp.domain.WorkloadsFilter;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -30,9 +32,12 @@ public class LegacyWorkloadsService {
         this.settings = settings;
     }
 
-    public Mono<List<AppDetail>> getLegacyApplications(String list) {
-        Set<String> stacks = Set.copyOf(Arrays.asList(list.split("\\s*,\\s*")));
-        return getLegacyApplications(LegacyPolicy.builder().stacks(stacks).build());
+    public Mono<List<AppDetail>> getLegacyApplications(WorkloadsFilter workloadsFilter) {
+        return getLegacyApplications(LegacyPolicy.builder().stacks(workloadsFilter.getStacks()).build());
+    }
+
+    public Mono<List<AppRelationship>> getLegacyApplicationRelationships(WorkloadsFilter workloadsFilter) {
+        return getLegacyApplicationRelationships(LegacyPolicy.builder().serviceOfferings(workloadsFilter.getServiceOfferings()).build());
     }
 
     public Mono<List<AppDetail>> getLegacyApplications(LegacyPolicy policy) {
@@ -44,6 +49,16 @@ public class LegacyWorkloadsService {
                 .filter(app -> policy.getStacks().contains(app.getStack()))
                 .collectList();
     }
+
+    public Mono<List<AppRelationship>> getLegacyApplicationRelationships(LegacyPolicy policy) {        
+        return snapshotService
+            .assembleSnapshotDetail()
+            .flatMapMany(sd -> Flux.fromIterable(sd.getApplicationRelationships()))
+            .filter(app -> isWhitelisted(policy, app.getOrganization()))
+            .filter(app -> isBlacklisted(app.getOrganization()))
+            .filter(app -> app.getServiceOffering()!=null ? policy.getServiceOfferings().contains(app.getServiceOffering()):false)
+            .collectList();
+}
 
     private boolean isBlacklisted(String organization) {
         return !settings.getOrganizationBlackList().contains(organization);

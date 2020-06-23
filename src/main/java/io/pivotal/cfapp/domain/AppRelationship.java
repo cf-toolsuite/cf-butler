@@ -30,12 +30,13 @@ public class AppRelationship {
 	private String appName;
 	private String serviceInstanceId;
 	private String serviceName;
+	private String serviceOffering;
 	private String servicePlan;
 	private String serviceType;
 
 	public String toCsv() {
 		return String.join(",", wrap(getOrganization()), wrap(getSpace()), wrap(getAppId()), wrap(getAppName()),
-				wrap(getServiceInstanceId()), wrap(getServiceName()), wrap(getServicePlan()), wrap(getServiceType()));
+				wrap(getServiceInstanceId()), wrap(getServiceName()), wrap(getServiceOffering()), wrap(getServicePlan()), wrap(getServiceType()));
 	}
 
 	private static String wrap(String value) {
@@ -49,13 +50,13 @@ public class AppRelationship {
 	public static String[] columnNames() {
 		return
 			new String[] {
-				"pk", "organization", "space", "app_id", "app_name", "service_instance_id", "service_name",
+				"pk", "organization", "space", "app_id", "app_name", "service_instance_id", "service_name", "service_offering",
 				"service_plan, service_type" };
 	}
 
 	public static String headers() {
         return String.join(",", "organization", "space", "application id",
-                "application name", "service instance id", "service name", "service plan", "service type");
+                "application name", "service instance id", "service name", "service offering", "service plan", "service type");
     }
 
 }

@@ -17,7 +17,7 @@ import lombok.Getter;
 @Builder
 @Getter
 @EqualsAndHashCode
-@JsonPropertyOrder({ "applications", "service-instances" })
+@JsonPropertyOrder({ "applications", "service-instances", "application-relationships" })
 public class Workloads {
 
     @Default
@@ -28,18 +28,25 @@ public class Workloads {
     @JsonProperty("service-instances")
     private List<ServiceInstanceDetail> serviceInstances = new ArrayList<>();
 
+    @Default
+    @JsonProperty("application-relationships")
+    private List<AppRelationship> appRelationships = new ArrayList<>();
+
     @JsonCreator
     public Workloads(
         @JsonProperty("applications") List<AppDetail> applications,
-        @JsonProperty("service-instances") List<ServiceInstanceDetail> serviceInstances
+        @JsonProperty("service-instances") List<ServiceInstanceDetail> serviceInstances,
+        @JsonProperty("application-relationships") List<AppRelationship> appRelationships
     ) {
         this.applications = applications;
         this.serviceInstances = serviceInstances;
+        this.appRelationships = appRelationships;
     }
 
     public Workloads matchBySpace(List<Space> spaces) {
         List<AppDetail> matchingApps = new ArrayList<>();
         List<ServiceInstanceDetail> matchingServiceInstances = new ArrayList<>();
+        List<AppRelationship> matchingAppRelationships = new ArrayList<>();
         for (Space s: spaces) {
             matchingApps.addAll(applications
                     .stream()
@@ -53,16 +60,23 @@ public class Workloads {
                             serviceInstance.getOrganization().equalsIgnoreCase(s.getOrganizationName())
                                 && serviceInstance.getSpace().equalsIgnoreCase(s.getSpaceName()))
                         .collect(Collectors.toList()));
+            matchingAppRelationships.addAll(appRelationships
+                    .stream()
+                        .filter(appRelationship -> 
+                        appRelationship.getOrganization().equalsIgnoreCase(s.getOrganizationName())
+                                && appRelationship.getSpace().equalsIgnoreCase(s.getSpaceName()))
+                        .collect(Collectors.toList()));
         }
-        return Workloads.builder().applications(matchingApps).serviceInstances(matchingServiceInstances).build();
+        return Workloads.builder().applications(matchingApps).serviceInstances(matchingServiceInstances).appRelationships(matchingAppRelationships).build();
     }
 
     public String toString() {
         return String
                 .format(
-                    "Workloads comprised of... \n\tApplications: [%s],\n\tService Instances [%s]",
+                    "Workloads comprised of... \n\tApplications: [%s],\n\tService Instances [%s],\n\tApplication Relationships [%s]",
                     String.join(",", getApplications().stream().map(a -> a.getAppName()).collect(Collectors.toList())),
-                    String.join(",", getServiceInstances().stream().map(s -> s.getName()).collect(Collectors.toList()))
+                    String.join(",", getServiceInstances().stream().map(s -> s.getName()).collect(Collectors.toList())),
+                    String.join(",", getAppRelationships().stream().map(r -> r.getAppName()).collect(Collectors.toList()))
                 );
     }
 }
