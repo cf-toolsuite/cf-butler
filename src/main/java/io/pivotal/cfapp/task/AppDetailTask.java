@@ -57,7 +57,7 @@ public class AppDetailTask {
     private final StacksCache stacksCache;
     private final ApplicationEventPublisher publisher;
     private final PivnetCache pivnetCache;
-    private final AppDetailReadyDecider appDetailReadyDecider;
+    private final AppDetailReadyToBeCollectedDecider appDetailReadyToBeCollectedDecider;
 
     @Autowired
     public AppDetailTask(
@@ -70,7 +70,7 @@ public class AppDetailTask {
             BuildpacksCache buildpacksCache,
             StacksCache stacksCache,
             ApplicationEventPublisher publisher,
-            AppDetailReadyDecider appDetailReadyDecider) {
+            AppDetailReadyToBeCollectedDecider appDetailReadyToBeCollectedDecider) {
         this.pivnetCache = pivnetCache;
         this.settings = settings;
         this.pivnetSettings = pivnetSettings;
@@ -80,27 +80,27 @@ public class AppDetailTask {
         this.buildpacksCache = buildpacksCache;
         this.stacksCache = stacksCache;
         this.publisher = publisher;
-        this.appDetailReadyDecider = appDetailReadyDecider;
+        this.appDetailReadyToBeCollectedDecider = appDetailReadyToBeCollectedDecider;
     }
 
     @EventListener
     void handleSpacesRetrieved(SpacesRetrievedEvent event) {
-        appDetailReadyDecider.informDecision();
-        appDetailReadyDecider.setSpaces(event.getSpaces());
+        appDetailReadyToBeCollectedDecider.informDecision();
+        appDetailReadyToBeCollectedDecider.setSpaces(event.getSpaces());
       publisher.publishEvent(new AppDetailReadyToBeRetrievedEvent(this));
     }
   
     @EventListener
     void handleProductsAndReleasesRetrieved(ProductsAndReleasesRetrievedEvent event) {
-        appDetailReadyDecider.informDecision();
+        appDetailReadyToBeCollectedDecider.informDecision();
       publisher.publishEvent(new AppDetailReadyToBeRetrievedEvent(this));
     }
   
     @EventListener
     void handleAppDetailReadyToBeRetrieved(AppDetailReadyToBeRetrievedEvent event) {
-      if (appDetailReadyDecider.isDecided()) {
-        collect(appDetailReadyDecider.getSpaces());
-        appDetailReadyDecider.reset();
+      if (appDetailReadyToBeCollectedDecider.isDecided()) {
+        collect(appDetailReadyToBeCollectedDecider.getSpaces());
+        appDetailReadyToBeCollectedDecider.reset();
       }
     }
 

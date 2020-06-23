@@ -943,7 +943,7 @@ GET /snapshot/detail/legacy?stacks={stacks}
 ```
 GET /snapshot/detail/legacy?service-offerings={service-offerings}
 ```
-> Returns a list of all service instances matching a product slug name as defined in the comma-separated list. Replace `{service-offerings}` request parameter-value above with a comma-separated list of legacy service-offerings like `p.config-server,p-mysql`.
+> Returns a list of all service instances matching a product slug name as defined in the comma-separated list. Replace `{service-offerings}` request parameter-value above with a comma-separated list of legacy service offerings like `p-config-server, p-service-registry, p-mysql`.
 
 ```
 GET /snapshot/detail/users

@@ -11,14 +11,14 @@ import io.pivotal.cfapp.config.PivnetSettings;
 import io.pivotal.cfapp.domain.Space;
 
 @Component
-public class AppDetailReadyDecider {
+public class AppDetailReadyToBeCollectedDecider {
     
     private PivnetSettings settings; 
     private AtomicInteger decision = new AtomicInteger();
     private List<Space> spaces = new ArrayList<>();
 
     @Autowired
-    public AppDetailReadyDecider(PivnetSettings settings) {
+    public AppDetailReadyToBeCollectedDecider(PivnetSettings settings) {
        this.settings = settings;
     }
 

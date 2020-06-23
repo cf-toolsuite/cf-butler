@@ -39,17 +39,17 @@ public class LegacyWorkloadsController {
 
     @GetMapping(value = { "/snapshot/detail/legacy" } )
     public Mono<ResponseEntity<Workloads>> getLegacyWorkloads(@RequestParam(value = "stacks", defaultValue = "", required = false) String stacks,
-    @RequestParam(value = "serviceOfferings", defaultValue = "", required = false) String serviceOfferings
+    @RequestParam(value = "service-offerings", defaultValue = "", required = false) String serviceOfferings
     ) {
         final WorkloadsBuilder builder = Workloads.builder();
-        final WorkloadsFilter workloadFilters = WorkloadsFilter.builder()
+        final WorkloadsFilter workloadsFilters = WorkloadsFilter.builder()
         .stacks(Set.copyOf(Arrays.asList(stacks.split("\\s*,\\s*"))))
         .serviceOfferings(Set.copyOf(Arrays.asList(serviceOfferings.split("\\s*,\\s*"))))
         .build();
         return service
-                .getLegacyApplications(workloadFilters)
+                .getLegacyApplications(workloadsFilters)
                 .map(list -> builder.applications(list))
-                .then(service.getLegacyApplicationRelationships(workloadFilters))
+                .then(service.getLegacyApplicationRelationships(workloadsFilters))
                 .map(list -> builder.appRelationships(list))
                 .flatMap(dwb -> util
                                 .getHeaders()
