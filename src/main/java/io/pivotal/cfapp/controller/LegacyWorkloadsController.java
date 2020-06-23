@@ -42,14 +42,14 @@ public class LegacyWorkloadsController {
     @RequestParam(value = "serviceOfferings", defaultValue = "", required = false) String serviceOfferings
     ) {
         final WorkloadsBuilder builder = Workloads.builder();
-        final WorkloadsFilter workloadFilter = WorkloadsFilter.builder()
+        final WorkloadsFilter workloadFilters = WorkloadsFilter.builder()
         .stacks(Set.copyOf(Arrays.asList(stacks.split("\\s*,\\s*"))))
         .serviceOfferings(Set.copyOf(Arrays.asList(serviceOfferings.split("\\s*,\\s*"))))
         .build();
         return service
-                .getLegacyApplications(workloadFilter)
+                .getLegacyApplications(workloadFilters)
                 .map(list -> builder.applications(list))
-                .then(service.getLegacyApplicationRelationships(workloadFilter))
+                .then(service.getLegacyApplicationRelationships(workloadFilters))
                 .map(list -> builder.appRelationships(list))
                 .flatMap(dwb -> util
                                 .getHeaders()

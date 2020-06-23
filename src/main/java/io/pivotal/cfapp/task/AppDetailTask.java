@@ -20,6 +20,7 @@ import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import io.pivotal.cfapp.config.PasSettings;
@@ -32,6 +33,7 @@ import io.pivotal.cfapp.domain.product.PivnetCache;
 import io.pivotal.cfapp.domain.product.Release;
 import org.springframework.context.ApplicationEvent;
 import io.pivotal.cfapp.event.ProductsAndReleasesRetrievedEvent;
+import io.pivotal.cfapp.event.AppDetailReadyToBeRetrievedEvent;
 import io.pivotal.cfapp.event.AppDetailRetrievedEvent;
 import io.pivotal.cfapp.event.SpacesRetrievedEvent;
 import io.pivotal.cfapp.service.AppDetailService;
@@ -44,7 +46,7 @@ import reactor.core.publisher.Mono;
 
 @Slf4j
 @Component
-public class AppDetailTask implements ApplicationListener<ApplicationEvent> {
+public class AppDetailTask {
 
     private final PasSettings settings;
     private final PivnetSettings pivnetSettings;
@@ -55,9 +57,7 @@ public class AppDetailTask implements ApplicationListener<ApplicationEvent> {
     private final StacksCache stacksCache;
     private final ApplicationEventPublisher publisher;
     private final PivnetCache pivnetCache;
-    private boolean spaceEventPublished;
-    private boolean productsAndReleasesEventPublished;
-    private List<Space> spaces;
+    private final AppDetailReadyDecider appDetailReadyDecider;
 
     @Autowired
     public AppDetailTask(
@@ -69,7 +69,8 @@ public class AppDetailTask implements ApplicationListener<ApplicationEvent> {
             EventsService eventsService,
             BuildpacksCache buildpacksCache,
             StacksCache stacksCache,
-            ApplicationEventPublisher publisher) {
+            ApplicationEventPublisher publisher,
+            AppDetailReadyDecider appDetailReadyDecider) {
         this.pivnetCache = pivnetCache;
         this.settings = settings;
         this.pivnetSettings = pivnetSettings;
@@ -79,28 +80,30 @@ public class AppDetailTask implements ApplicationListener<ApplicationEvent> {
         this.buildpacksCache = buildpacksCache;
         this.stacksCache = stacksCache;
         this.publisher = publisher;
+        this.appDetailReadyDecider = appDetailReadyDecider;
     }
 
-    @Override
-    public void onApplicationEvent(ApplicationEvent event) {
-        if(pivnetSettings.isEnabled()){
-            if(event instanceof SpacesRetrievedEvent) {
-                spaceEventPublished = true;
-                spaces = List.copyOf(((SpacesRetrievedEvent)event).getSpaces());  
-                if(productsAndReleasesEventPublished) {
-                    collect(spaces);
-                }
-            }
-            if(event instanceof ProductsAndReleasesRetrievedEvent) {
-                productsAndReleasesEventPublished = true;
-                if (spaceEventPublished){
-                    collect(spaces);
-                }
-            }
-        } else if(event instanceof SpacesRetrievedEvent) {
-            collect(List.copyOf(((SpacesRetrievedEvent)event).getSpaces()));
-        }
+    @EventListener
+    void handleSpacesRetrieved(SpacesRetrievedEvent event) {
+        appDetailReadyDecider.informDecision();
+        appDetailReadyDecider.setSpaces(event.getSpaces());
+      publisher.publishEvent(new AppDetailReadyToBeRetrievedEvent(this));
     }
+  
+    @EventListener
+    void handleProductsAndReleasesRetrieved(ProductsAndReleasesRetrievedEvent event) {
+        appDetailReadyDecider.informDecision();
+      publisher.publishEvent(new AppDetailReadyToBeRetrievedEvent(this));
+    }
+  
+    @EventListener
+    void handleAppDetailReadyToBeRetrieved(AppDetailReadyToBeRetrievedEvent event) {
+      if (appDetailReadyDecider.isDecided()) {
+        collect(appDetailReadyDecider.getSpaces());
+        appDetailReadyDecider.reset();
+      }
+    }
+
 
     public void collect(List<Space> spaces) {
         log.info("AppDetailTask started");
