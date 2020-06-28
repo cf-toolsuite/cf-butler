@@ -19,22 +19,18 @@ import org.cloudfoundry.client.v2.applications.Usage;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import io.pivotal.cfapp.config.PasSettings;
-import io.pivotal.cfapp.config.PivnetSettings;
 import io.pivotal.cfapp.domain.AppDetail;
 import io.pivotal.cfapp.domain.Buildpack;
 import io.pivotal.cfapp.domain.Space;
 import io.pivotal.cfapp.domain.Stack;
 import io.pivotal.cfapp.domain.product.PivnetCache;
-import io.pivotal.cfapp.domain.product.Release;
-import org.springframework.context.ApplicationEvent;
-import io.pivotal.cfapp.event.ProductsAndReleasesRetrievedEvent;
 import io.pivotal.cfapp.event.AppDetailReadyToBeRetrievedEvent;
 import io.pivotal.cfapp.event.AppDetailRetrievedEvent;
+import io.pivotal.cfapp.event.ProductsAndReleasesRetrievedEvent;
 import io.pivotal.cfapp.event.SpacesRetrievedEvent;
 import io.pivotal.cfapp.service.AppDetailService;
 import io.pivotal.cfapp.service.BuildpacksCache;
@@ -49,7 +45,6 @@ import reactor.core.publisher.Mono;
 public class AppDetailTask {
 
     private final PasSettings settings;
-    private final PivnetSettings pivnetSettings;
     private final DefaultCloudFoundryOperations opsClient;
     private final AppDetailService appDetailsService;
     private final EventsService eventsService;
@@ -63,7 +58,6 @@ public class AppDetailTask {
     public AppDetailTask(
             PivnetCache pivnetCache,
             PasSettings settings,
-            PivnetSettings pivnetSettings,
     		DefaultCloudFoundryOperations opsClient,
             AppDetailService appDetailsService,
             EventsService eventsService,
@@ -73,7 +67,6 @@ public class AppDetailTask {
             AppDetailReadyToBeCollectedDecider appDetailReadyToBeCollectedDecider) {
         this.pivnetCache = pivnetCache;
         this.settings = settings;
-        this.pivnetSettings = pivnetSettings;
         this.opsClient = opsClient;
         this.appDetailsService = appDetailsService;
         this.eventsService = eventsService;

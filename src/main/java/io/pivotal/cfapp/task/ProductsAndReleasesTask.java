@@ -1,7 +1,5 @@
 package io.pivotal.cfapp.task;
 
-import java.time.Duration;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
