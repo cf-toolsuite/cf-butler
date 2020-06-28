@@ -222,7 +222,9 @@ public class PoliciesValidator {
         boolean hasOperatorTemplate = Optional.ofNullable(policy.getOperatorTemplate()).isPresent();
         boolean hasNotifyeeTemplate = Optional.ofNullable(policy.getNotifyeeTemplate()).isPresent();
         boolean valid = !hasId && hasOperatorTemplate;
-        if (policy.getStacks().isEmpty() == policy.getServiceOfferings().isEmpty()) {
+        if ((hasStacks && hasServiceOfferings) 
+            || (!hasStacks && hasServiceOfferings && policy.getServiceOfferings().isEmpty())
+            || (!hasServiceOfferings && hasStacks && policy.getStacks().isEmpty())) {
             valid = false;
             log.warn(LEGACY_FILTER_REJECTED_MESSAGE,policy.toString());
         } else if (!policy.getStacks().isEmpty()) {
