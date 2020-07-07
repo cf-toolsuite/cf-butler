@@ -6,7 +6,7 @@ plugins {
 	id 'java'
     id 'jacoco'
     id 'maven-publish'
-    id 'com.github.spotbugs' version '4.4.3'
+    id 'com.github.spotbugs' version '4.4.4'
     id 'info.solidsoft.pitest' version '1.5.1'
 }
 
@@ -108,9 +108,9 @@ dependencies {
     implementation('org.springframework.boot:spring-boot-configuration-processor')
     implementation('org.apache.commons:commons-lang3')
     implementation('com.fasterxml.jackson.datatype:jackson-datatype-jsr310')
-    implementation('com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.11.0')
+    implementation('com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.11.1')
     implementation('com.fasterxml.uuid:java-uuid-generator:4.0.1')
-    implementation('io.pivotal.cfenv:java-cfenv-boot:2.1.2.RELEASE')
+    implementation('io.pivotal.cfenv:java-cfenv-boot:2.2.0.RELEASE')
     implementation('org.springframework.credhub:spring-credhub-cloud-connector:2.0.1.RELEASE')
     implementation('org.springframework.boot:spring-boot-starter-actuator')
     implementation('org.springframework.boot:spring-boot-starter-webflux')
@@ -118,7 +118,7 @@ dependencies {
     implementation('com.lmax:disruptor:3.4.2')
     implementation('org.springframework.boot:spring-boot-starter-data-r2dbc')
     implementation('org.springframework.data:spring-data-relational:2.0.1.RELEASE')
-    implementation('org.locationtech.jts:jts-core:1.16.1')
+    implementation('org.locationtech.jts:jts-core:1.17.0')
     implementation('io.r2dbc:r2dbc-spi')
     runtime('io.r2dbc:r2dbc-pool')
     implementation('io.r2dbc:r2dbc-h2')
@@ -132,7 +132,7 @@ dependencies {
     implementation('org.cloudfoundry:cloudfoundry-client-reactor:4.8.0.RELEASE')
     implementation('org.cloudfoundry:cloudfoundry-operations:4.8.0.RELEASE')
     implementation('io.projectreactor:reactor-core:3.3.7.RELEASE')
-    implementation('io.projectreactor.netty:reactor-netty:0.9.8.RELEASE')
+    implementation('io.projectreactor.netty:reactor-netty:0.9.9.RELEASE')
     implementation('io.micrometer:micrometer-registry-prometheus')
     testImplementation('io.projectreactor:reactor-test')
     testImplementation('org.assertj:assertj-core:3.16.1')
