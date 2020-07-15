@@ -117,7 +117,7 @@ dependencies {
     implementation('com.fasterxml.jackson.datatype:jackson-datatype-jsr310')
     implementation('com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.11.1')
     implementation('com.fasterxml.uuid:java-uuid-generator:4.0.1')
-    implementation('io.pivotal.cfenv:java-cfenv-boot:2.2.0.RELEASE')
+    implementation('io.pivotal.cfenv:java-cfenv-boot:2.2.2.RELEASE')
     implementation('org.springframework.credhub:spring-credhub-cloud-connector:2.0.1.RELEASE')
     implementation('org.springframework.boot:spring-boot-starter-actuator')
     implementation('org.springframework.boot:spring-boot-starter-webflux')
@@ -132,7 +132,7 @@ dependencies {
     runtime('com.github.mirromutth:r2dbc-mysql:v0.8.1.RELEASE')
     implementation('org.eclipse.jgit:org.eclipse.jgit:5.8.0.202006091008-r')
     implementation('org.springframework.boot:spring-boot-starter-mail')
-    implementation('com.sendgrid:sendgrid-java:4.6.0') {
+    implementation('com.sendgrid:sendgrid-java:4.6.1') {
         exclude group: 'org.apache.httpcomponents', module: 'httpclient'
     }
     implementation('org.apache.httpcomponents:httpclient:4.5.12')
