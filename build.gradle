@@ -139,7 +139,7 @@ dependencies {
     implementation('org.cloudfoundry:cloudfoundry-client-reactor:4.8.0.RELEASE')
     implementation('org.cloudfoundry:cloudfoundry-operations:4.8.0.RELEASE')
     implementation('io.projectreactor:reactor-core:3.3.7.RELEASE')
-    implementation('io.projectreactor.netty:reactor-netty:0.9.9.RELEASE')
+    implementation('io.projectreactor.netty:reactor-netty:0.9.10.RELEASE')
     implementation('io.micrometer:micrometer-registry-prometheus')
     testImplementation('io.projectreactor:reactor-test')
     testImplementation('org.assertj:assertj-core:3.16.1')
