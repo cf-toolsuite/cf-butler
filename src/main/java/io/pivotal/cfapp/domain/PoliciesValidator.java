@@ -217,14 +217,10 @@ public class PoliciesValidator {
 
     public boolean validate(LegacyPolicy policy) {
         boolean hasId = Optional.ofNullable(policy.getId()).isPresent();
-        boolean hasStacks = Optional.ofNullable(policy.getStacks()).isPresent();
-        boolean hasServiceOfferings = Optional.ofNullable(policy.getServiceOfferings()).isPresent();
         boolean hasOperatorTemplate = Optional.ofNullable(policy.getOperatorTemplate()).isPresent();
         boolean hasNotifyeeTemplate = Optional.ofNullable(policy.getNotifyeeTemplate()).isPresent();
         boolean valid = !hasId && hasOperatorTemplate;
-        if ((hasStacks && hasServiceOfferings) 
-            || (!hasStacks && hasServiceOfferings && policy.getServiceOfferings().isEmpty())
-            || (!hasServiceOfferings && hasStacks && policy.getStacks().isEmpty())) {
+        if (policy.getStacks().isEmpty() == policy.getServiceOfferings().isEmpty()) {
             valid = false;
             log.warn(LEGACY_FILTER_REJECTED_MESSAGE,policy.toString());
         } else if (!policy.getStacks().isEmpty()) {
