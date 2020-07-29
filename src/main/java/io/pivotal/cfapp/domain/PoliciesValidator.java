@@ -217,8 +217,11 @@ public class PoliciesValidator {
 
     public boolean validate(LegacyPolicy policy) {
         boolean hasId = Optional.ofNullable(policy.getId()).isPresent();
+<<<<<<< HEAD
         boolean hasStacks = Optional.ofNullable(policy.getStacks()).isPresent();
         boolean hasServiceOfferings = Optional.ofNullable(policy.getServiceOfferings()).isPresent();
+=======
+>>>>>>> bec3718de90cd339c03c5d22eef298272a170638
         boolean hasOperatorTemplate = Optional.ofNullable(policy.getOperatorTemplate()).isPresent();
         boolean hasNotifyeeTemplate = Optional.ofNullable(policy.getNotifyeeTemplate()).isPresent();
         boolean valid = !hasId && hasOperatorTemplate;

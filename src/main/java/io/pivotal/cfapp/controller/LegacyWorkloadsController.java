@@ -1,5 +1,8 @@
 package io.pivotal.cfapp.controller;
 
+import java.util.Arrays;
+import java.util.Set;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import io.pivotal.cfapp.domain.Workloads;
 import io.pivotal.cfapp.domain.WorkloadsFilter;
 import io.pivotal.cfapp.domain.Workloads.WorkloadsBuilder;
+import io.pivotal.cfapp.domain.WorkloadsFilter;
 import io.pivotal.cfapp.service.LegacyWorkloadsService;
 import io.pivotal.cfapp.service.TkService;
 import io.pivotal.cfapp.service.TkServiceUtil;
