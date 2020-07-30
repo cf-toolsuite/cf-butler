@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import io.pivotal.cfapp.config.PasSettings;
 import io.pivotal.cfapp.domain.AppDetail;
+import io.pivotal.cfapp.domain.AppRelationship;
 import io.pivotal.cfapp.domain.EmailAttachment;
 import io.pivotal.cfapp.domain.EmailValidator;
 import io.pivotal.cfapp.domain.LegacyPolicy;
@@ -158,20 +159,37 @@ public class LegacyWorkloadReportingTask implements PolicyExecutorTask {
     private static List<EmailAttachment> buildAttachments(Tuple2<LegacyPolicy, Workloads> tuple) {
 	    String cr = System.getProperty("line.separator");
         List<EmailAttachment> result = new ArrayList<>();
-        StringBuilder applications = new StringBuilder();
-        tuple.getT2()
-            .getApplications()
-                .forEach(app -> applications.append(app.toCsv()).append(cr));
-        result.add(
-            EmailAttachment
-                .builder()
-                    .filename(getFileNamePrefix(tuple.getT1()) + "applications")
-                    .extension(".csv")
-                    .mimeType("text/plain;charset=UTF-8")
-                    .content(applications.toString())
-                    .headers(AppDetail.headers())
-                    .build()
-        );
+        StringBuilder content = new StringBuilder();
+        if (!tuple.getT2().getApplications().isEmpty()){
+            tuple.getT2()
+                .getApplications()
+                    .forEach(app -> content.append(app.toCsv()).append(cr));
+            result.add(
+                EmailAttachment
+                    .builder()
+                        .filename(getFileNamePrefix(tuple.getT1()) + "applications")
+                        .extension(".csv")
+                        .mimeType("text/plain;charset=UTF-8")
+                        .content(content.toString())
+                        .headers(AppDetail.headers())
+                        .build()
+            );
+        }
+        if (!tuple.getT2().getAppRelationships().isEmpty()){
+            tuple.getT2()
+                .getAppRelationships()
+                    .forEach(app -> content.append(app.toCsv()).append(cr));               
+            result.add(
+                EmailAttachment
+                    .builder()
+                        .filename(getFileNamePrefix(tuple.getT1()) + "applications")
+                        .extension(".csv")
+                        .mimeType("text/plain;charset=UTF-8")
+                        .content(content.toString())
+                        .headers(AppRelationship.headers())
+                        .build()
+            );
+        }
         return result;
     }
 
@@ -190,9 +208,20 @@ public class LegacyWorkloadReportingTask implements PolicyExecutorTask {
                                             .spaceName(app.getSpace())
                                         .build())
                         .collect(Collectors.toSet());
+        Set<Space> appRelationshipsSpaces =
+            workloads
+                .getAppRelationships()
+                    .stream()
+                        .map(app -> Space
+                                        .builder()
+                                            .organizationName(app.getOrganization())
+                                            .spaceName(app.getSpace())
+                                        .build())
+                        .collect(Collectors.toSet());       
         Set<Space> result = new HashSet<>();
         result.addAll(applicationSpaces);
+        result.addAll(appRelationshipsSpaces);
         return result;
     }
-
+    
 }
