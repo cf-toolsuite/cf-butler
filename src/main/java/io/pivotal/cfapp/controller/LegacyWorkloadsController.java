@@ -13,18 +13,11 @@ import org.springframework.web.bind.annotation.RestController;
 import io.pivotal.cfapp.domain.Workloads;
 import io.pivotal.cfapp.domain.WorkloadsFilter;
 import io.pivotal.cfapp.domain.Workloads.WorkloadsBuilder;
-import io.pivotal.cfapp.domain.WorkloadsFilter;
 import io.pivotal.cfapp.service.LegacyWorkloadsService;
 import io.pivotal.cfapp.service.TkService;
 import io.pivotal.cfapp.service.TkServiceUtil;
 import reactor.core.publisher.Mono;
-import lombok.Builder;
-import lombok.Getter;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 @RestController
 public class LegacyWorkloadsController {
