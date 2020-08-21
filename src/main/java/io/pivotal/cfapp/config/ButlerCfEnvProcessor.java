@@ -21,7 +21,7 @@ public class ButlerCfEnvProcessor implements CfEnvProcessor {
     public void process(CfCredentials cfCredentials, Map<String, Object> properties) {
         addPropertyValue("credhub.url", "https://credhub.service.cf.internal:8844", properties);
         addOrUpdatePropertyValue("spring.mail.host", "MAIL_HOST", cfCredentials, properties);
-        addOrUpdatePropertyValue("spring.mail.host", "MAIL_PORT", cfCredentials, properties);
+        addOrUpdatePropertyValue("spring.mail.port", "MAIL_PORT", cfCredentials, properties);
         addOrUpdatePropertyValue("spring.mail.username", "MAIL_USERNAME", cfCredentials, properties);
         addOrUpdatePropertyValue("spring.mail.password", "MAIL_PASSWORD", cfCredentials, properties);
         addOrUpdatePropertyValue("spring.mail.properties.mail.smtp.auth", "MAIL_SMTP_AUTH_ENABLED", cfCredentials, properties);
