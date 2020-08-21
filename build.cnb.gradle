@@ -7,7 +7,7 @@ plugins {
     id 'jacoco'
     id 'maven-publish'
     id 'com.github.spotbugs' version '4.5.0'
-    id 'info.solidsoft.pitest' version '1.5.1'
+    id 'info.solidsoft.pitest' version '1.5.2'
 }
 
 spotbugs {
