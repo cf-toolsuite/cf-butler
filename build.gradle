@@ -125,7 +125,7 @@ dependencies {
     implementation('com.lmax:disruptor:3.4.2')
     implementation('org.springframework.boot:spring-boot-starter-data-r2dbc')
     implementation('org.springframework.data:spring-data-relational:2.0.3.RELEASE')
-    implementation('org.locationtech.jts:jts-core:1.17.0')
+    implementation('org.locationtech.jts:jts-core:1.17.1')
     implementation('io.r2dbc:r2dbc-spi')
     runtime('io.r2dbc:r2dbc-pool')
     implementation('io.r2dbc:r2dbc-h2')
