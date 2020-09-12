@@ -1,5 +1,4 @@
 plugins {
-    id 'com.gorylenko.gradle-git-properties' version '2.2.3'
     id 'org.springframework.boot' version '2.3.3.RELEASE'
     id 'io.spring.dependency-management' version '1.0.10.RELEASE'
     id 'com.github.ben-manes.versions' version '0.31.0'
@@ -10,11 +9,6 @@ plugins {
     id 'maven-publish'
     id 'com.github.spotbugs' version '4.5.0'
     id 'info.solidsoft.pitest' version '1.5.2'
-}
-
-gitProperties {
-    dateFormat = "yyyy-MM-dd'T'HH:mmZ"
-    dateFormatTimeZone = "UTC"
 }
 
 spotbugs {
@@ -129,7 +123,11 @@ dependencies {
     implementation('io.r2dbc:r2dbc-spi')
     runtime('io.r2dbc:r2dbc-pool')
     implementation('io.r2dbc:r2dbc-h2')
-    runtime('io.r2dbc:r2dbc-postgresql')
+    if (project.hasProperty("mysql")) {
+        runtime('com.github.mirromutth:r2dbc-mysql:v0.8.1.RELEASE')
+    } else {
+        runtime('io.r2dbc:r2dbc-postgresql')
+    }
     implementation('org.eclipse.jgit:org.eclipse.jgit:5.9.0.202009080501-r')
     implementation('org.springframework.boot:spring-boot-starter-mail')
     implementation('com.sendgrid:sendgrid-java:4.6.4') {
