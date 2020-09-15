@@ -6,6 +6,7 @@ import java.time.LocalTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.r2dbc.core.DatabaseClient;
+import org.springframework.data.r2dbc.core.R2dbcEntityOperations;
 import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.stereotype.Repository;
 
@@ -23,8 +24,8 @@ public class R2dbcServiceInstanceMetricsRepository {
 
 	@Autowired
 	public R2dbcServiceInstanceMetricsRepository(
-		DatabaseClient client) {
-		this.client = client;
+		R2dbcEntityOperations ops) {
+		this.client = DatabaseClient.create(ops.getDatabaseClient().getConnectionFactory());
 	}
 
 	protected Flux<Tuple2<String, Long>> by(String columnName) {

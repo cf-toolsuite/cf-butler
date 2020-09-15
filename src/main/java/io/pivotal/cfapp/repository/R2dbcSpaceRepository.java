@@ -3,6 +3,7 @@ package io.pivotal.cfapp.repository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.r2dbc.core.DatabaseClient;
+import org.springframework.data.r2dbc.core.R2dbcEntityOperations;
 import org.springframework.stereotype.Repository;
 
 import io.pivotal.cfapp.domain.Space;
@@ -17,8 +18,8 @@ public class R2dbcSpaceRepository {
 	private final DatabaseClient client;
 
 	@Autowired
-	public R2dbcSpaceRepository(DatabaseClient client) {
-		this.client = client;
+	public R2dbcSpaceRepository(R2dbcEntityOperations ops) {
+		this.client = DatabaseClient.create(ops.getDatabaseClient().getConnectionFactory());
 	}
 
 	public Mono<Void> deleteAll() {

@@ -7,6 +7,7 @@ import java.time.LocalTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.r2dbc.core.DatabaseClient;
+import org.springframework.data.r2dbc.core.R2dbcEntityOperations;
 import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.stereotype.Repository;
 
@@ -26,9 +27,9 @@ public class R2dbcAppMetricsRepository {
 
 	@Autowired
 	public R2dbcAppMetricsRepository(
-		DatabaseClient client,
+		R2dbcEntityOperations ops,
 		DbmsSettings settings) {
-		this.client = client;
+		this.client = DatabaseClient.create(ops.getDatabaseClient().getConnectionFactory());
 		this.settings = settings;
 	}
 

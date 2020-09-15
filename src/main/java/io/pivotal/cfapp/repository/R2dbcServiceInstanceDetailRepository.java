@@ -8,6 +8,7 @@ import java.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.r2dbc.core.DatabaseClient;
+import org.springframework.data.r2dbc.core.R2dbcEntityOperations;
 import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.stereotype.Repository;
 
@@ -27,8 +28,8 @@ public class R2dbcServiceInstanceDetailRepository {
 	private final DatabaseClient client;
 
 	@Autowired
-	public R2dbcServiceInstanceDetailRepository(DatabaseClient client) {
-		this.client = client;
+	public R2dbcServiceInstanceDetailRepository(R2dbcEntityOperations ops) {
+		this.client = DatabaseClient.create(ops.getDatabaseClient().getConnectionFactory());
 	}
 
 	public Mono<ServiceInstanceDetail> save(ServiceInstanceDetail entity) {

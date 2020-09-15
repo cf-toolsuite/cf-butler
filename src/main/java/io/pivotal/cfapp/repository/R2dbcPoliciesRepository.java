@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.r2dbc.core.DatabaseClient;
+import org.springframework.data.r2dbc.core.R2dbcEntityOperations;
 import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
@@ -48,10 +49,10 @@ public class R2dbcPoliciesRepository {
 
 	@Autowired
 	public R2dbcPoliciesRepository(
-		DatabaseClient dbClient,
+		R2dbcEntityOperations ops,
 		PolicyIdProvider idProvider,
 		ObjectMapper mapper) {
-		this.dbClient = dbClient;
+		this.dbClient = DatabaseClient.create(ops.getDatabaseClient().getConnectionFactory());
 		this.idProvider = idProvider;
 		this.mapper = mapper;
 	}

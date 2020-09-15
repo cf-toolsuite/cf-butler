@@ -12,6 +12,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.r2dbc.core.DatabaseClient;
+import org.springframework.data.r2dbc.core.R2dbcEntityOperations;
 import org.springframework.stereotype.Component;
 
 import io.pivotal.cfapp.config.DbmsSettings;
@@ -29,11 +30,11 @@ public class DatabaseCreator implements ApplicationRunner {
 
 	@Autowired
 	public DatabaseCreator(
-		DatabaseClient client,
+		R2dbcEntityOperations ops,
 		ResourceLoader resourceLoader,
 		DbmsSettings settings,
 		ApplicationEventPublisher publisher) {
-		this.client = client;
+		this.client = DatabaseClient.create(ops.getDatabaseClient().getConnectionFactory());
 		this.resourceLoader = resourceLoader;
 		this.settings = settings;
 		this.publisher = publisher;

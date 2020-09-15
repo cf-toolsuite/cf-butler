@@ -17,18 +17,29 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.context.event.SimpleApplicationEventMulticaster;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.data.r2dbc.config.AbstractR2dbcConfiguration;
 
 import io.pivotal.cfenv.core.CfEnv;
+import io.r2dbc.spi.ConnectionFactory;
 
 @Configuration
 public class ButlerConfig {
+
+    @Configuration
+    static class ApplicationConfiguration extends AbstractR2dbcConfiguration {
+
+		@Override
+		public ConnectionFactory connectionFactory() {
+			// TODO Auto-generated method stub
+			return null;
+		}}
 
     @Bean
     @Profile("cloud")
     public CfEnv cfEnv() {
         return new CfEnv();
     }
-
+    
     @Bean
     public DefaultConnectionContext connectionContext(PasSettings settings) {
         return DefaultConnectionContext
