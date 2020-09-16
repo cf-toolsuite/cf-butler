@@ -20,7 +20,7 @@ import org.springframework.core.task.SimpleAsyncTaskExecutor;
 
 import io.pivotal.cfenv.core.CfEnv;
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 public class ButlerConfig {
 
     @Bean

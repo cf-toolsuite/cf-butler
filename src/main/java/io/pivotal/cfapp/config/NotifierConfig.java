@@ -14,10 +14,10 @@ import io.pivotal.cfapp.notifier.EmailNotifier;
 import io.pivotal.cfapp.notifier.JavaMailNotifier;
 import io.pivotal.cfapp.notifier.SendGridNotifier;
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 public class NotifierConfig {
 
-    @Configuration
+    @Configuration(proxyBeanMethods = false)
     @ConditionalOnProperty(prefix="notification", name="engine", havingValue="java-mail")
     @EnableAutoConfiguration(exclude = { SendGridAutoConfiguration.class })
     static class MailConfig {
@@ -28,7 +28,7 @@ public class NotifierConfig {
         }
     }
 
-    @Configuration
+    @Configuration(proxyBeanMethods = false)
     @ConditionalOnProperty(prefix="notification", name="engine", havingValue="sendgrid")
     @EnableAutoConfiguration(exclude = { MailSenderAutoConfiguration.class })
     static class SendGridConfig {
@@ -39,7 +39,7 @@ public class NotifierConfig {
         }
     }
 
-    @Configuration
+    @Configuration(proxyBeanMethods = false)
     @ConditionalOnProperty(prefix="notification", name="engine", havingValue="none", matchIfMissing=true)
     @EnableAutoConfiguration(exclude = { MailSenderAutoConfiguration.class, SendGridAutoConfiguration.class })
     static class NoMailConfig {}
