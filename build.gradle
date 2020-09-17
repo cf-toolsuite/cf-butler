@@ -134,7 +134,7 @@ dependencies {
         exclude group: 'org.apache.httpcomponents', module: 'httpclient'
     }
     implementation('org.apache.httpcomponents:httpclient:4.5.12')
-    implementation('org.cloudfoundry:cloudfoundry-client-reactor:4.9.0.RELEASE')
+    implementation('org.cloudfoundry:cloudfoundry-client-reactor:4.10.0.RELEASE')
     implementation('org.cloudfoundry:cloudfoundry-operations:4.9.0.RELEASE')
     implementation('io.projectreactor:reactor-core:3.3.9.RELEASE')
     implementation('io.projectreactor.netty:reactor-netty:0.9.11.RELEASE')
