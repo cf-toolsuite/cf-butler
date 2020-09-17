@@ -81,6 +81,16 @@
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-logging</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-log4j2</artifactId>
     </dependency>
     <dependency>
@@ -334,7 +344,7 @@
             <version>20.2.0</version>
             <configuration>
               <mainClass>io.pivotal.cfapp.AppInit</mainClass>
-              <buildArgs>-H:+TraceClassInitialization -H:+ReportExceptionStackTraces -Dspring.native.remove-xml-support=true -Dspring.native.remove-yaml-support=true -Dspring.spel.ignore=true -Dspring.native.remove-jmx-support=true</buildArgs>
+              <buildArgs>-H:+TraceClassInitialization -H:+ReportExceptionStackTraces -Dspring.native.remove-xml-support=true -Dspring.native.remove-yaml-support=true -Dspring.spel.ignore=true -Dspring.native.remove-jmx-support=true --initialize-at-build-time=org.eclipse.jgit</buildArgs>
             </configuration>
             <executions>
               <execution>
