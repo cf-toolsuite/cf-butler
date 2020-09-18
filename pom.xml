@@ -176,7 +176,7 @@
     <dependency>
       <groupId>com.sendgrid</groupId>
       <artifactId>sendgrid-java</artifactId>
-      <version>4.6.4</version>
+      <version>4.6.5</version>
       <exclusions>
         <exclusion>
           <artifactId>spring-boot-starter-logging</artifactId>
