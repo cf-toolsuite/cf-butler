@@ -196,12 +196,12 @@
     <dependency>
       <groupId>org.cloudfoundry</groupId>
       <artifactId>cloudfoundry-client-reactor</artifactId>
-      <version>4.9.0.RELEASE</version>
+      <version>4.10.0.RELEASE</version>
     </dependency>
     <dependency>
       <groupId>org.cloudfoundry</groupId>
       <artifactId>cloudfoundry-operations</artifactId>
-      <version>4.9.0.RELEASE</version>
+      <version>4.10.0.RELEASE</version>
     </dependency>
     <dependency>
       <groupId>io.micrometer</groupId>
