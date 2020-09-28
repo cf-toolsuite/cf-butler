@@ -7,13 +7,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
+import org.springframework.util.CollectionUtils;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
-import org.springframework.data.annotation.Id;
-import org.springframework.util.CollectionUtils;
 
 import lombok.Builder;
 import lombok.Builder.Default;
@@ -26,6 +27,7 @@ import lombok.ToString;
 @EqualsAndHashCode
 @ToString
 @JsonPropertyOrder({"organization", "space", "auditors", "developers", "managers", "users", "user-count"})
+@Table("space_users")
 public class SpaceUsers {
 
 	@Id
@@ -105,10 +107,6 @@ public class SpaceUsers {
 	@JsonProperty("user-count")
 	public Integer getUserCount() {
 		return getUsers().size();
-	}
-
-	public static String tableName() {
-		return "space_users";
 	}
 
 }

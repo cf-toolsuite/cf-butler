@@ -12,6 +12,8 @@ import org.springframework.data.r2dbc.dialect.R2dbcDialect;
 
 import io.pivotal.cfapp.domain.AppDetailReadConverter;
 import io.pivotal.cfapp.domain.AppDetailWriteConverter;
+import io.pivotal.cfapp.domain.SpaceUsersReadConverter;
+import io.pivotal.cfapp.domain.SpaceUsersWriteConverter;
 import io.r2dbc.spi.ConnectionFactory;
 
 @Configuration
@@ -27,6 +29,8 @@ public class R2dbcConfig {
 		List<Object> converterList = new ArrayList<>();
 	    converterList.add(new AppDetailReadConverter());
 	    converterList.add(new AppDetailWriteConverter());
+	    converterList.add(new SpaceUsersReadConverter());
+	    converterList.add(new SpaceUsersWriteConverter());
 	    return converterList;
 	}
 
