@@ -5,10 +5,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -25,6 +26,7 @@ import lombok.ToString;
 @Getter
 @EqualsAndHashCode
 @ToString
+@Table("application_detail")
 public class AppDetail {
 
 	@Id
@@ -38,14 +40,10 @@ public class AppDetail {
 	private String buildpackVersion;
 	private String image;
 	private String stack;
-	@Default
-	private Integer runningInstances = 0;
-	@Default
-	private Integer totalInstances = 0;
-	@Default
-	private Long memoryUsed = 0L;
-	@Default
-	private Long diskUsed = 0L;
+	private Integer runningInstances;
+	private Integer totalInstances;
+	private Long memoryUsed;
+	private Long diskUsed;
 	@Default
 	private List<String> urls = new ArrayList<>();
 	private LocalDateTime lastPushed;
@@ -79,20 +77,6 @@ public class AppDetail {
 
 	private Double toGigabytes(Long input) {
 		return Double.valueOf(input / 1000000000.0);
-	}
-
-	public static String tableName() {
-		return "application_detail";
-	}
-
-	public static String[] columnNames() {
-		return
-			new String[] {
-				"pk", "organization", "space", "app_id", "app_name", "buildpack", "buildpack_version", "image",
-				"stack", "running_instances", "total_instances", "memory_used", "disk_used",
-				"urls", "last_pushed", "last_event", "last_event_actor", "last_event_time",
-				"requested_state", 
-				"buildpack_release_type", "buildpack_release_date", "buildpack_latest_version", "buildpack_latest_url" };
 	}
 
 	public static String headers() {
