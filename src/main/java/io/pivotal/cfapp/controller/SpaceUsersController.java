@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.pivotal.cfapp.domain.SpaceUsers;
 import io.pivotal.cfapp.service.SpaceUsersService;
-import io.pivotal.cfapp.service.TkService;
+import io.pivotal.cfapp.service.TimeKeeperService;
 import io.pivotal.cfapp.service.TkServiceUtil;
 import reactor.core.publisher.Mono;
 
@@ -24,7 +24,7 @@ public class SpaceUsersController {
 	@Autowired
 	public SpaceUsersController(
 		SpaceUsersService service,
-		TkService tkService) {
+		TimeKeeperService tkService) {
 		this.service = service;
 		this.util = new TkServiceUtil(tkService);
 	}

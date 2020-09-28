@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.pivotal.cfapp.domain.UserSpaces;
-import io.pivotal.cfapp.service.TkService;
+import io.pivotal.cfapp.service.TimeKeeperService;
 import io.pivotal.cfapp.service.TkServiceUtil;
 import io.pivotal.cfapp.service.UserSpacesService;
 import reactor.core.publisher.Mono;
@@ -22,7 +22,7 @@ public class UserSpacesController {
     @Autowired
     public UserSpacesController(
 		UserSpacesService service,
-		TkService tkService) {
+		TimeKeeperService tkService) {
 		this.service = service;
 		this.util = new TkServiceUtil(tkService);
     }

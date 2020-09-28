@@ -6,17 +6,15 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
-import org.springframework.data.r2dbc.core.DatabaseClient;
 import org.springframework.data.r2dbc.core.R2dbcEntityOperations;
 import org.springframework.data.relational.core.query.Criteria;
+import org.springframework.data.relational.core.query.Query;
 import org.springframework.stereotype.Repository;
 
-import io.pivotal.cfapp.domain.Defaults;
 import io.pivotal.cfapp.domain.ServiceInstanceDetail;
-import io.pivotal.cfapp.domain.ServiceInstanceDetailShim;
 import io.pivotal.cfapp.domain.ServiceInstancePolicy;
-import io.r2dbc.spi.Row;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
@@ -25,43 +23,33 @@ import reactor.util.function.Tuples;
 @Repository
 public class R2dbcServiceInstanceDetailRepository {
 
-	private final DatabaseClient client;
+	private final R2dbcEntityOperations client;
 
 	@Autowired
-	public R2dbcServiceInstanceDetailRepository(R2dbcEntityOperations ops) {
-		this.client = DatabaseClient.create(ops.getDatabaseClient().getConnectionFactory());
+	public R2dbcServiceInstanceDetailRepository(R2dbcEntityOperations client) {
+		this.client = client;
 	}
 
 	public Mono<ServiceInstanceDetail> save(ServiceInstanceDetail entity) {
-		ServiceInstanceDetailShim shim = ServiceInstanceDetailShim.from(entity);
 		return
 			client
-				.insert()
-				.into(ServiceInstanceDetailShim.class)
-				.table(ServiceInstanceDetail.tableName())
-				.using(shim)
-				.fetch()
-				.rowsUpdated()
-				.then(Mono.just(entity));
+				.insert(entity);
 	}
 
 	public Flux<ServiceInstanceDetail> findAll() {
-		return client
-				.select()
-				.from(ServiceInstanceDetail.tableName())
-				.project(ServiceInstanceDetail.columnNames())
-				.orderBy(Order.asc("organization"), Order.asc("space"), Order.asc("service"), Order.asc("service_name"))
-				.map((row, metadata) -> fromRow(row))
-				.all();
+		return 
+			client
+				.select(ServiceInstanceDetail.class)
+					.matching(Query.empty().sort(Sort.by(Order.asc("organization"), Order.asc("space"), Order.asc("service"), Order.asc("service_name"))))
+					.all();
 	}
 
 	public Mono<Void> deleteAll() {
-		return client
-				.delete()
-				.from(ServiceInstanceDetail.tableName())
-				.fetch()
-				.rowsUpdated()
-				.then();
+		return 
+			client
+				.delete(ServiceInstanceDetail.class)
+					.all()
+					.then();
 	}
 
 	public Flux<Tuple2<ServiceInstanceDetail, ServiceInstancePolicy>> findByServiceInstancePolicy(ServiceInstancePolicy policy) {
@@ -73,7 +61,7 @@ public class R2dbcServiceInstanceDetailRepository {
 			temporal = fromDateTime;
 		}
 		if (fromDuration != null) {
-			temporal = LocalDateTime.now().minus(Duration.parse(fromDuration));;
+			temporal = LocalDateTime.now().minus(Duration.parse(fromDuration));
 		}
 		if (temporal != null) {
 			criteria = Criteria.where("bound_applications").isNull().and("last_updated").lessThanOrEquals(temporal);
@@ -82,46 +70,20 @@ public class R2dbcServiceInstanceDetailRepository {
 		}
 		return
 			client
-				.select()
-					.from(ServiceInstanceDetail.tableName())
-					.project(ServiceInstanceDetail.columnNames())
-					.matching(criteria)
-					.orderBy(Order.asc("organization"), Order.asc("space"), Order.asc("service_name"))
-				.map((row, metadata) -> fromRow(row))
-						.all()
-						.map(r -> toTuple(r, policy));
+				.select(ServiceInstanceDetail.class)
+					.matching(Query.query(criteria).sort(Sort.by(Order.asc("organization"), Order.asc("space"), Order.asc("service_name"))))
+					.all()
+					.map(r -> toTuple(r, policy));
 	}
 
 	public Flux<ServiceInstanceDetail> findByDateRange(LocalDate start, LocalDate end) {
-		return client
-				.select()
-					.from(ServiceInstanceDetail.tableName())
-					.project(ServiceInstanceDetail.columnNames())
-					.matching(Criteria.where("last_updated").lessThanOrEquals(LocalDateTime.of(end, LocalTime.MAX)).and("last_updated").greaterThan(LocalDateTime.of(start, LocalTime.MIDNIGHT)))
-					.orderBy(Order.desc("last_updated"))
-				.map((row, metadata) -> fromRow(row))
-				.all();
-	}
-
-	private ServiceInstanceDetail fromRow(Row row) {
-		return ServiceInstanceDetail
-				.builder()
-					.pk(row.get("pk", Long.class))
-					.organization(Defaults.getColumnValue(row, "organization", String.class))
-					.space(Defaults.getColumnValue(row, "space", String.class))
-					.serviceInstanceId(Defaults.getColumnValue(row, "service_instance_id", String.class))
-					.name(Defaults.getColumnValue(row, "service_name", String.class))
-					.service(Defaults.getColumnValue(row, "service", String.class))
-					.description(Defaults.getColumnValue(row, "description", String.class))
-					.type(Defaults.getColumnValue(row, "type", String.class))
-					.plan(Defaults.getColumnValue(row, "plan", String.class))
-					.applications(
-						Defaults.getColumnListOfStringValue(row, "bound_applications"))
-					.lastOperation(Defaults.getColumnValue(row, "last_operation", String.class))
-					.dashboardUrl(Defaults.getColumnValue(row, "dashboard_url", String.class))
-					.lastUpdated(Defaults.getColumnValue(row, "last_updated", LocalDateTime.class))
-					.requestedState(Defaults.getColumnValue(row, "requested_state", String.class))
-					.build();
+		Criteria criteria =
+			Criteria.where("last_updated").lessThanOrEquals(LocalDateTime.of(end, LocalTime.MAX)).and("last_updated").greaterThan(LocalDateTime.of(start, LocalTime.MIDNIGHT));
+		return 
+			client
+				.select(ServiceInstanceDetail.class)
+					.matching(Query.query(criteria).sort(Sort.by(Order.desc("last_updated"))))
+					.all();
 	}
 
 	private Tuple2<ServiceInstanceDetail, ServiceInstancePolicy> toTuple(ServiceInstanceDetail detail, ServiceInstancePolicy policy) {

@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import io.pivotal.cfapp.domain.SnapshotDetail;
 import io.pivotal.cfapp.domain.SnapshotSummary;
 import io.pivotal.cfapp.service.SnapshotService;
-import io.pivotal.cfapp.service.TkService;
+import io.pivotal.cfapp.service.TimeKeeperService;
 import io.pivotal.cfapp.service.TkServiceUtil;
 import reactor.core.publisher.Mono;
 
@@ -23,7 +23,7 @@ public class SnapshotController {
 	@Autowired
 	public SnapshotController(
 		SnapshotService snapshotService,
-		TkService tkService
+		TimeKeeperService tkService
 	) {
 		this.snapshotService = snapshotService;
 		this.util = new TkServiceUtil(tkService);

@@ -14,7 +14,7 @@ import io.pivotal.cfapp.domain.Workloads;
 import io.pivotal.cfapp.domain.Workloads.WorkloadsBuilder;
 import io.pivotal.cfapp.domain.WorkloadsFilter;
 import io.pivotal.cfapp.service.LegacyWorkloadsService;
-import io.pivotal.cfapp.service.TkService;
+import io.pivotal.cfapp.service.TimeKeeperService;
 import io.pivotal.cfapp.service.TkServiceUtil;
 import reactor.core.publisher.Mono;
 
@@ -27,7 +27,7 @@ public class LegacyWorkloadsController {
     @Autowired
     public LegacyWorkloadsController(
         LegacyWorkloadsService service,
-        TkService tkService) {
+        TimeKeeperService tkService) {
         this.service = service;
         this.util = new TkServiceUtil(tkService);
     }

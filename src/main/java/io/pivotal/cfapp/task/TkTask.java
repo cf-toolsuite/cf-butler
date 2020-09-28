@@ -8,19 +8,19 @@ import org.springframework.stereotype.Component;
 
 import io.pivotal.cfapp.event.DatabaseCreatedEvent;
 import io.pivotal.cfapp.event.TkRetrievedEvent;
-import io.pivotal.cfapp.service.TkService;
+import io.pivotal.cfapp.service.TimeKeeperService;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
 public class TkTask implements ApplicationListener<DatabaseCreatedEvent> {
 
-    private final TkService tkService;
+    private final TimeKeeperService tkService;
     private final ApplicationEventPublisher publisher;
 
     @Autowired
     public TkTask(
-            TkService tkService,
+            TimeKeeperService tkService,
     		ApplicationEventPublisher publisher) {
         this.tkService = tkService;
         this.publisher = publisher;

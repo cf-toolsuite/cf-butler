@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import io.pivotal.cfapp.domain.Workloads;
 import io.pivotal.cfapp.domain.Workloads.WorkloadsBuilder;
 import io.pivotal.cfapp.service.DormantWorkloadsService;
-import io.pivotal.cfapp.service.TkService;
+import io.pivotal.cfapp.service.TimeKeeperService;
 import io.pivotal.cfapp.service.TkServiceUtil;
 import reactor.core.publisher.Mono;
 
@@ -23,7 +23,7 @@ public class DormantWorkloadsController {
     @Autowired
     public DormantWorkloadsController(
         DormantWorkloadsService service,
-        TkService tkService) {
+        TimeKeeperService tkService) {
         this.service = service;
         this.util = new TkServiceUtil(tkService);
     }

@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import io.pivotal.cfapp.domain.product.PivnetCache;
 import io.pivotal.cfapp.domain.product.Products;
 import io.pivotal.cfapp.domain.product.Release;
-import io.pivotal.cfapp.service.TkService;
+import io.pivotal.cfapp.service.TimeKeeperService;
 import io.pivotal.cfapp.service.TkServiceUtil;
 import reactor.core.publisher.Mono;
 
@@ -29,7 +29,7 @@ public class PivnetController {
     @Autowired
     public PivnetController(
         PivnetCache cache,
-        TkService tkService) {
+        TimeKeeperService tkService) {
         this.cache = cache;
         this.util = new TkServiceUtil(tkService);
     }

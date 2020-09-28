@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 import io.pivotal.cfapp.config.PasSettings;
 import io.pivotal.cfapp.report.ServiceInstanceDetailCsvReport;
-import io.pivotal.cfapp.service.TkService;
+import io.pivotal.cfapp.service.TimeKeeperService;
 import io.pivotal.cfapp.service.TkServiceUtil;
 import io.pivotal.cfapp.event.ServiceInstanceDetailRetrievedEvent;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +21,7 @@ public class ServiceInstanceDetailConsoleNotifier implements ApplicationListener
     @Autowired
     public ServiceInstanceDetailConsoleNotifier(
 		PasSettings appSettings,
-		TkService tkService) {
+		TimeKeeperService tkService) {
 		this.report = new ServiceInstanceDetailCsvReport(appSettings);
 		this.util = new TkServiceUtil(tkService);
     }

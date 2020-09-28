@@ -1,6 +1,8 @@
 package io.pivotal.cfapp.repository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.r2dbc.core.R2dbcEntityOperations;
 import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.data.relational.core.query.Query;
@@ -46,6 +48,7 @@ public class R2dbcSpaceUsersRepository {
 		return
 			client
 				.select(SpaceUsers.class)
+					.matching(Query.empty().sort(Sort.by(Order.asc("organization"), Order.asc("space"))))
 					.all();
 	}
 

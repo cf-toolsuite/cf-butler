@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.pivotal.cfapp.domain.Demographics;
 import io.pivotal.cfapp.service.DemographicsService;
-import io.pivotal.cfapp.service.TkService;
+import io.pivotal.cfapp.service.TimeKeeperService;
 import io.pivotal.cfapp.service.TkServiceUtil;
 import reactor.core.publisher.Mono;
 
@@ -21,7 +21,7 @@ public class DemographicsController {
     @Autowired
     public DemographicsController(
         DemographicsService demoService,
-        TkService tkService
+        TimeKeeperService tkService
     ) {
         this.demoService = demoService;
         this.util = new TkServiceUtil(tkService);

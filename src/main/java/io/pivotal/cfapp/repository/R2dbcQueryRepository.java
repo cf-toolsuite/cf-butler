@@ -1,7 +1,6 @@
 package io.pivotal.cfapp.repository;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.r2dbc.core.DatabaseClient;
 import org.springframework.data.r2dbc.core.R2dbcEntityOperations;
 import org.springframework.stereotype.Repository;
 
@@ -15,17 +14,19 @@ import reactor.util.function.Tuples;
 @Repository
 public class R2dbcQueryRepository {
 
-    private final DatabaseClient client;
+    private final R2dbcEntityOperations client;
 
     @Autowired
-    public R2dbcQueryRepository(R2dbcEntityOperations ops) {
-        this.client = DatabaseClient.create(ops.getDatabaseClient().getConnectionFactory());
+    public R2dbcQueryRepository(R2dbcEntityOperations client) {
+        this.client = client;
     }
 
     public Flux<Tuple2<Row, RowMetadata>> executeQuery(Query query) {
-        return client
-                .execute(query.getSql())
-                .map((row, metadata) -> Tuples.of(row, metadata))
-                .all();
+        return 
+    		client
+    			.getDatabaseClient()
+	                .sql(query.getSql())
+	                .map((row, metadata) -> Tuples.of(row, metadata))
+	                .all();
     }
 }

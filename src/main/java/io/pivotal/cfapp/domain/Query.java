@@ -36,6 +36,7 @@ public class Query {
         this.description = description;
         this.sql = sql;
     }
+    
     @JsonIgnore
     public boolean isValid() {
         return StringUtils.isNotBlank(name)

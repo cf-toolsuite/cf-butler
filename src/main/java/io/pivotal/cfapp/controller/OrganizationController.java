@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.pivotal.cfapp.domain.Organization;
 import io.pivotal.cfapp.service.OrganizationService;
-import io.pivotal.cfapp.service.TkService;
+import io.pivotal.cfapp.service.TimeKeeperService;
 import io.pivotal.cfapp.service.TkServiceUtil;
 import reactor.core.publisher.Mono;
 
@@ -24,7 +24,7 @@ public class OrganizationController {
     @Autowired
     public OrganizationController(
         OrganizationService organizationService,
-            TkService tkService) {
+            TimeKeeperService tkService) {
         this.organizationService = organizationService;
         this.util = new TkServiceUtil(tkService);
     }

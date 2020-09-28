@@ -10,14 +10,15 @@ public class TkServiceUtil {
 
     private static final String LAST_TIME_COLLECTED = "Last-Time-Collected";
 
-    private final TkService tkService;
+    private final TimeKeeperService tkService;
 
-    public TkServiceUtil(TkService tkService) {
+    public TkServiceUtil(TimeKeeperService tkService) {
         this.tkService = tkService;
     }
 
     public Mono<HttpHeaders> getHeaders() {
-        return tkService
+        return 
+    		tkService
                 .findOne()
                 .map(lc -> {
                     HttpHeaders headers = new HttpHeaders();
@@ -27,7 +28,8 @@ public class TkServiceUtil {
     }
 
     public Mono<LocalDateTime> getTimeCollected() {
-        return tkService
+        return 
+    		tkService
                 .findOne();
     }
 
