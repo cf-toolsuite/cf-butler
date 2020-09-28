@@ -1,9 +1,10 @@
 package io.pivotal.cfapp.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -19,6 +20,7 @@ import lombok.ToString;
 @Getter
 @EqualsAndHashCode
 @ToString
+@Table("application_relationship")
 public class AppRelationship {
 
 	@Id
@@ -41,17 +43,6 @@ public class AppRelationship {
 
 	private static String wrap(String value) {
 		return value != null ? StringUtils.wrap(value, '"') : StringUtils.wrap("", '"');
-	}
-
-	public static String tableName() {
-		return "application_relationship";
-	}
-
-	public static String[] columnNames() {
-		return
-			new String[] {
-				"pk", "organization", "space", "app_id", "app_name", "service_instance_id", "service_name", "service_offering",
-				"service_plan, service_type" };
 	}
 
 	public static String headers() {

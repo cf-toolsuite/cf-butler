@@ -2,10 +2,11 @@ package io.pivotal.cfapp.domain;
 
 import java.time.LocalDateTime;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -19,6 +20,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access=AccessLevel.PACKAGE)
 @Getter
 @EqualsAndHashCode
+@Table("historical_record")
 public class HistoricalRecord {
 
 	@Id
@@ -42,17 +44,6 @@ public class HistoricalRecord {
 
 	private static String wrap(String value) {
 		return value != null ? StringUtils.wrap(value, '"') : StringUtils.wrap("", '"');
-	}
-
-	public static String tableName() {
-		return "historical_record";
-	}
-
-	public static String[] columnNames() {
-		return
-			new String[] {
-				"pk", "transaction_date_time", "action_taken", "organization", "space", "app_id",
-				"service_instance_id", "type", "name" };
 	}
 
 	public static String headers() {
