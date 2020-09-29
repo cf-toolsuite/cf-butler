@@ -4,15 +4,16 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
+import org.springframework.util.CollectionUtils;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.uuid.Generators;
-
-import org.springframework.data.annotation.Id;
-import org.springframework.util.CollectionUtils;
 
 import lombok.Builder;
 import lombok.Builder.Default;
@@ -24,6 +25,7 @@ import lombok.ToString;
 @JsonPropertyOrder({ "id", "description", "endpoints", "email-notification-template" })
 @Getter
 @ToString
+@Table("endpoint_policy")
 public class EndpointPolicy {
 
 	@Id
@@ -65,17 +67,6 @@ public class EndpointPolicy {
 
 	public Set<String> getEndpoints() {
 		return CollectionUtils.isEmpty(endpoints) ? new HashSet<>(): Collections.unmodifiableSet(endpoints);
-	}
-
-	public static String tableName() {
-		return "endpoint_policy";
-	}
-
-	public static String[] columnNames() {
-		return
-			new String[] {
-				"pk", "id", "description", "endpoints", "email_notification_template"
-			};
 	}
 
 	public static EndpointPolicy seed(EndpointPolicy policy) {

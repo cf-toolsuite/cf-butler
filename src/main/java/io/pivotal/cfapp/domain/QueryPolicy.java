@@ -4,15 +4,16 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
+import org.springframework.util.CollectionUtils;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.uuid.Generators;
-
-import org.springframework.data.annotation.Id;
-import org.springframework.util.CollectionUtils;
 
 import lombok.Builder;
 import lombok.Builder.Default;
@@ -24,6 +25,7 @@ import lombok.ToString;
 @JsonPropertyOrder({ "id", "description", "queries", "email-notification-template" })
 @Getter
 @ToString
+@Table("query_policy")
 public class QueryPolicy {
 
 	@Id
@@ -65,17 +67,6 @@ public class QueryPolicy {
 
 	public Set<Query> getQueries() {
 		return CollectionUtils.isEmpty(queries) ? new HashSet<>(): Collections.unmodifiableSet(queries);
-	}
-
-	public static String tableName() {
-		return "query_policy";
-	}
-
-	public static String[] columnNames() {
-		return
-			new String[] {
-				"pk", "id", "description", "queries", "email_notification_template"
-			};
 	}
 
 	public static QueryPolicy seed(QueryPolicy policy) {

@@ -4,15 +4,17 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
+import org.springframework.util.CollectionUtils;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.uuid.Generators;
-
-import org.springframework.data.annotation.Id;
-import org.springframework.util.CollectionUtils;
 
 import lombok.Builder;
 import lombok.Builder.Default;
@@ -22,6 +24,7 @@ import lombok.Getter;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({ "id", "days-since-last-update", "operator-email-template", "notifyee-email-template", "organization-whitelist" })
 @Getter
+@Table("hygiene_policy")
 public class HygienePolicy {
 
     @Id
@@ -37,13 +40,16 @@ public class HygienePolicy {
     private Integer daysSinceLastUpdate = 180;
 
     @JsonProperty("operator-email-template")
+    @Column("operator_email_template")
     private EmailNotificationTemplate operatorTemplate;
 
     @JsonProperty("notifyee-email-template")
+    @Column("notifyee_email_template")
     private EmailNotificationTemplate notifyeeTemplate;
 
 	@Default
 	@JsonProperty("organization-whitelist")
+	@Column("organization_whitelist")
 	private Set<String> organizationWhiteList = new HashSet<>();
 
     @JsonCreator
@@ -70,17 +76,6 @@ public class HygienePolicy {
 
 	public Set<String> getOrganizationWhiteList() {
 		return CollectionUtils.isEmpty(organizationWhiteList) ? new HashSet<>() : Collections.unmodifiableSet(organizationWhiteList);
-	}
-
-    public static String tableName() {
-		return "hygiene_policy";
-	}
-
-	public static String[] columnNames() {
-		return
-			new String[] {
-				"pk", "id", "days_since_last_update", "operator_email_template", "notifyee_email_template", "organization_whitelist"
-			};
 	}
 
 	public static HygienePolicy seed(HygienePolicy policy) {

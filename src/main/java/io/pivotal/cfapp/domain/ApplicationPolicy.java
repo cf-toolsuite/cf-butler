@@ -6,17 +6,19 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
+import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.uuid.Generators;
-
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.annotation.Id;
-import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
 
 import lombok.Builder;
 import lombok.Builder.Default;
@@ -28,6 +30,7 @@ import lombok.ToString;
 @JsonPropertyOrder({ "id", "operation", "description", "state", "options", "organization-whitelist" })
 @Getter
 @ToString
+@Table("application_policy")
 public class ApplicationPolicy {
 
 	@Id
@@ -53,6 +56,7 @@ public class ApplicationPolicy {
 
 	@Default
 	@JsonProperty("organization-whitelist")
+	@Column("organization_whitelist")
 	private Set<String> organizationWhiteList = new HashSet<>();
 
 	@JsonCreator
