@@ -33,7 +33,7 @@ public class R2dbcConfig {
             try {
                 Class<?> cl = Class.forName(beanDef.getBeanClassName());
                 converterList.add(cl.getDeclaredConstructor().newInstance());
-                log.info("Added an instance of " + beanDef.getBeanClassName() + "to list of customer converters.");
+                log.info("Added an instance of " + beanDef.getBeanClassName() + "to list of custom converters.");
             } catch (Exception e) {
                 log.error("Could not add an instance of "+ beanDef.getBeanClassName() + " to list of custom converters.", e);
             }
