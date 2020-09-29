@@ -11,7 +11,6 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.data.r2dbc.core.DatabaseClient;
 import org.springframework.data.r2dbc.core.R2dbcEntityOperations;
 import org.springframework.stereotype.Component;
 
@@ -23,18 +22,18 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class DatabaseCreator implements ApplicationRunner {
 
-	private final DatabaseClient client;
+	private final R2dbcEntityOperations client;
 	private final ResourceLoader resourceLoader;
 	private final DbmsSettings settings;
 	private final ApplicationEventPublisher publisher;
 
 	@Autowired
 	public DatabaseCreator(
-		R2dbcEntityOperations ops,
+		R2dbcEntityOperations client,
 		ResourceLoader resourceLoader,
 		DbmsSettings settings,
 		ApplicationEventPublisher publisher) {
-		this.client = DatabaseClient.create(ops.getDatabaseClient().getConnectionFactory());
+		this.client = client;
 		this.resourceLoader = resourceLoader;
 		this.settings = settings;
 		this.publisher = publisher;
@@ -52,12 +51,14 @@ public class DatabaseCreator implements ApplicationRunner {
 			while ((line = br.readLine()) != null) {
 				if (!line.isBlank()) {
 					ddl = line.strip().replace(";","");
-					client.execute(ddl)
-						.then()
-						.doOnError(e -> {
-							log.error(e.getMessage());
-							System.exit(1);
-						}).subscribe();
+					client
+						.getDatabaseClient()
+							.sql(ddl)
+							.then()
+							.doOnError(e -> {
+								log.error(e.getMessage());
+								System.exit(1);
+							}).subscribe();
 				}
 			}
 			br.close();
