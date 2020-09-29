@@ -22,7 +22,7 @@ public class QueryPolicyWriteConverter implements Converter<QueryPolicy, Outboun
         row.put("id", Parameter.fromOrEmpty(source.getId(), String.class));
         row.put("description", Parameter.fromOrEmpty(source.getDescription(), String.class));
         row.put("queries", Parameter.fromOrEmpty(CollectionUtils.isEmpty(source.getQueries()) ? null : writeQueries(source.getQueries()), String.class));
-        row.put("email_notificationl_template", Parameter.fromOrEmpty(source.getEmailNotificationTemplate() != null ? writeEmailNotificationTemplate(source.getEmailNotificationTemplate()) : null, String.class));
+        row.put("email_notification_template", Parameter.fromOrEmpty(source.getEmailNotificationTemplate() != null ? writeEmailNotificationTemplate(source.getEmailNotificationTemplate()) : null, String.class));
         return row;
     }
 
