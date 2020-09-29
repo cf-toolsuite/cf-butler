@@ -14,8 +14,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @WritingConverter
 public class EndpointPolicyWriteConverter implements Converter<EndpointPolicy, OutboundRow> {
 
-	private ObjectMapper mapper = new ObjectMapper();
-	
+    private ObjectMapper mapper = new ObjectMapper();
+
     @Override
     public OutboundRow convert(EndpointPolicy source) {
         OutboundRow row = new OutboundRow();
@@ -25,20 +25,20 @@ public class EndpointPolicyWriteConverter implements Converter<EndpointPolicy, O
         row.put("email_notification_template", Parameter.fromOrEmpty(source.getEmailNotificationTemplate() != null ? writeEmailNotificationTemplate(source.getEmailNotificationTemplate()) : null, String.class));
         return row;
     }
-    
-    private String writeEndpoints(Set<String> value) {
-        try {
-            return mapper.writeValueAsString(value);
-        } catch (JsonProcessingException jpe) {
-            throw new RuntimeException("Problem writing endpoints", jpe);
-        }
-	}
-    
+
     private String writeEmailNotificationTemplate(EmailNotificationTemplate value) {
         try {
             return mapper.writeValueAsString(value);
         } catch (JsonProcessingException jpe) {
             throw new RuntimeException("Problem writing email notification template", jpe);
         }
-	}
+    }
+
+    private String writeEndpoints(Set<String> value) {
+        try {
+            return mapper.writeValueAsString(value);
+        } catch (JsonProcessingException jpe) {
+            throw new RuntimeException("Problem writing endpoints", jpe);
+        }
+    }
 }

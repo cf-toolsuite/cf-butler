@@ -20,8 +20,8 @@ public class ReportRequestSpec {
 
     @JsonCreator
     public ReportRequestSpec(
-        @JsonProperty("input") ReportRequest[] input,
-        @JsonProperty("output") String output) {
+            @JsonProperty("input") ReportRequest[] input,
+            @JsonProperty("output") String output) {
         this.input = input;
         this.output = output;
     }

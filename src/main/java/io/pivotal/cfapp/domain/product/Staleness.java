@@ -8,13 +8,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import lombok.Builder;
-import lombok.Getter;
 import lombok.Builder.Default;
+import lombok.Getter;
 
 @Builder
 @Getter
 @JsonPropertyOrder({
-"parent_products_deployed_more_recently"
+    "parent_products_deployed_more_recently"
 })
 public class Staleness {
 
@@ -24,8 +24,8 @@ public class Staleness {
 
     @JsonCreator
     public Staleness(
-        @JsonProperty("parent_products_deployed_more_recently") List<String> parentProductsDeployedMoreRecently
-    ) {
+            @JsonProperty("parent_products_deployed_more_recently") List<String> parentProductsDeployedMoreRecently
+            ) {
         this.parentProductsDeployedMoreRecently = parentProductsDeployedMoreRecently;
     }
 }

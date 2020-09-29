@@ -28,63 +28,36 @@ public class ButlerConfig {
     public CfEnv cfEnv() {
         return new CfEnv();
     }
-    
-    @Bean
-    public DefaultConnectionContext connectionContext(PasSettings settings) {
-        return DefaultConnectionContext
-                .builder()
-                    .apiHost(settings.getApiHost())
-                    .skipSslValidation(settings.isSslValidationSkipped())
-                    .keepAlive(true)
-                    .connectionPoolSize(settings.getConnectionPoolSize())
-                    .connectTimeout(Duration.parse(settings.getConnectionTimeout()))
-                    .sslHandshakeTimeout(Duration.ofSeconds(30))
-                    .build();
-    }
-
-    @Bean
-    public TokenProvider tokenProvider(PasSettings settings) {
-        if (settings.getTokenProvider().equalsIgnoreCase("userpass")) {
-            return PasswordGrantTokenProvider
-                    .builder()
-                        .username(settings.getUsername())
-                        .password(settings.getPassword())
-                        .build();
-        } else if (settings.getTokenProvider().equalsIgnoreCase("sso")) {
-            return RefreshTokenGrantTokenProvider
-                    .builder()
-                        .token(settings.getRefreshToken())
-                        .build();
-        } else {
-            throw new IllegalStateException("Unknown TokenProvider");
-        }
-    }
 
     @Bean
     public ReactorCloudFoundryClient cloudFoundryClient(ConnectionContext connectionContext, TokenProvider tokenProvider) {
         return ReactorCloudFoundryClient
                 .builder()
-                    .connectionContext(connectionContext)
-                    .tokenProvider(tokenProvider)
-                    .build();
-}
+                .connectionContext(connectionContext)
+                .tokenProvider(tokenProvider)
+                .build();
+    }
+
+    @Bean
+    public DefaultConnectionContext connectionContext(PasSettings settings) {
+        return DefaultConnectionContext
+                .builder()
+                .apiHost(settings.getApiHost())
+                .skipSslValidation(settings.isSslValidationSkipped())
+                .keepAlive(true)
+                .connectionPoolSize(settings.getConnectionPoolSize())
+                .connectTimeout(Duration.parse(settings.getConnectionTimeout()))
+                .sslHandshakeTimeout(Duration.ofSeconds(30))
+                .build();
+    }
 
     @Bean
     public ReactorDopplerClient dopplerClient(ConnectionContext connectionContext, TokenProvider tokenProvider) {
         return ReactorDopplerClient
                 .builder()
-                    .connectionContext(connectionContext)
-                    .tokenProvider(tokenProvider)
-                    .build();
-    }
-
-    @Bean
-    public ReactorUaaClient uaaClient(ConnectionContext connectionContext, TokenProvider tokenProvider) {
-        return ReactorUaaClient
-                .builder()
-                    .connectionContext(connectionContext)
-                    .tokenProvider(tokenProvider)
-                    .build();
+                .connectionContext(connectionContext)
+                .tokenProvider(tokenProvider)
+                .build();
     }
 
     @Bean
@@ -92,18 +65,45 @@ public class ButlerConfig {
             ReactorDopplerClient dopplerClient, ReactorUaaClient uaaClient) {
         return DefaultCloudFoundryOperations
                 .builder()
-                    .cloudFoundryClient(cloudFoundryClient)
-                    .dopplerClient(dopplerClient)
-                    .uaaClient(uaaClient)
-                    .build();
+                .cloudFoundryClient(cloudFoundryClient)
+                .dopplerClient(dopplerClient)
+                .uaaClient(uaaClient)
+                .build();
     }
 
     @Bean(name = "applicationEventMulticaster")
     public ApplicationEventMulticaster simpleApplicationEventMulticaster() {
         SimpleApplicationEventMulticaster eventMulticaster =
-            new SimpleApplicationEventMulticaster();
+                new SimpleApplicationEventMulticaster();
         eventMulticaster.setTaskExecutor(new SimpleAsyncTaskExecutor());
         return eventMulticaster;
+    }
+
+    @Bean
+    public TokenProvider tokenProvider(PasSettings settings) {
+        if (settings.getTokenProvider().equalsIgnoreCase("userpass")) {
+            return PasswordGrantTokenProvider
+                    .builder()
+                    .username(settings.getUsername())
+                    .password(settings.getPassword())
+                    .build();
+        } else if (settings.getTokenProvider().equalsIgnoreCase("sso")) {
+            return RefreshTokenGrantTokenProvider
+                    .builder()
+                    .token(settings.getRefreshToken())
+                    .build();
+        } else {
+            throw new IllegalStateException("Unknown TokenProvider");
+        }
+    }
+
+    @Bean
+    public ReactorUaaClient uaaClient(ConnectionContext connectionContext, TokenProvider tokenProvider) {
+        return ReactorUaaClient
+                .builder()
+                .connectionContext(connectionContext)
+                .tokenProvider(tokenProvider)
+                .build();
     }
 
 }

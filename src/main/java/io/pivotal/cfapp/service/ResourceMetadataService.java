@@ -25,67 +25,67 @@ public class ResourceMetadataService {
 
     @Autowired
     public ResourceMetadataService(
-        WebClient webClient,
-        DefaultConnectionContext connectionContext,
-        TokenProvider tokenProvider,
-        PasSettings settings) {
+            WebClient webClient,
+            DefaultConnectionContext connectionContext,
+            TokenProvider tokenProvider,
+            PasSettings settings) {
         this.webClient = webClient;
         this.connectionContext = connectionContext;
         this.tokenProvider = tokenProvider;
         this.settings = settings;
     }
 
+    private Mono<String> getOauthToken() {
+        tokenProvider.invalidate(connectionContext);
+        return tokenProvider.getToken(connectionContext);
+    }
+
     public Mono<Resource> getResource(String type, String id) {
         Assert.hasText(id, "Global unique identifier for application must not be blank or null!");
-        ResourceType rt = ResourceType.from(type);
-        final String uri =
-            UriComponentsBuilder
-                .newInstance()
-                    .scheme("https")
-                    .host(settings.getApiHost())
-                    .path("/v3/{type}/{guid}")
-                    .buildAndExpand(rt.getId(), id)
-                    .encode()
-                    .toUriString();
-        return
-            getOauthToken()
-                .flatMap(t -> webClient
+                ResourceType rt = ResourceType.from(type);
+                final String uri =
+                        UriComponentsBuilder
+                        .newInstance()
+                        .scheme("https")
+                        .host(settings.getApiHost())
+                        .path("/v3/{type}/{guid}")
+                        .buildAndExpand(rt.getId(), id)
+                        .encode()
+                        .toUriString();
+                return
+                        getOauthToken()
+                        .flatMap(t -> webClient
                                 .get()
-                                    .uri(uri)
-                                    .header(HttpHeaders.AUTHORIZATION, t)
-                                        .retrieve()
-                                            .bodyToMono(Resource.class));
+                                .uri(uri)
+                                .header(HttpHeaders.AUTHORIZATION, t)
+                                .retrieve()
+                                .bodyToMono(Resource.class));
     }
 
     public Mono<Metadata> updateResource(String type, String id, Metadata metadata) {
         ResourceType rt = ResourceType.from(type);
         if (metadata.isValid()) {
             final String uri =
-                UriComponentsBuilder
+                    UriComponentsBuilder
                     .newInstance()
-                        .scheme("https")
-                        .host(settings.getApiHost())
-                        .path("/v3/{type}/{id}")
-                        .buildAndExpand(rt.getId(), id)
-                        .encode()
-                        .toUriString();
+                    .scheme("https")
+                    .host(settings.getApiHost())
+                    .path("/v3/{type}/{id}")
+                    .buildAndExpand(rt.getId(), id)
+                    .encode()
+                    .toUriString();
             return
-                getOauthToken()
+                    getOauthToken()
                     .flatMap(t -> webClient
-                                    .patch()
-                                        .uri(uri)
-                                        .bodyValue(metadata)
-                                        .header(HttpHeaders.AUTHORIZATION, t)
-                                            .retrieve()
-                                                .bodyToMono(Metadata.class));
+                            .patch()
+                            .uri(uri)
+                            .bodyValue(metadata)
+                            .header(HttpHeaders.AUTHORIZATION, t)
+                            .retrieve()
+                            .bodyToMono(Metadata.class));
         } else {
             return Mono.error(new IllegalArgumentException(String.format("Invalid metadata %s", metadata.toString())));
         }
-    }
-
-    private Mono<String> getOauthToken() {
-        tokenProvider.invalidate(connectionContext);
-        return tokenProvider.getToken(connectionContext);
     }
 
 }

@@ -29,9 +29,9 @@ public class TaskUsageReport {
 
     @JsonCreator
     public TaskUsageReport(
-        @JsonProperty("report_time") String reportTime,
-        @JsonProperty("monthly_reports") List<TaskUsageMonthly> monthlyReports,
-        @JsonProperty("yearly_reports") List<TaskUsageYearly> yearlyReports) {
+            @JsonProperty("report_time") String reportTime,
+            @JsonProperty("monthly_reports") List<TaskUsageMonthly> monthlyReports,
+            @JsonProperty("yearly_reports") List<TaskUsageYearly> yearlyReports) {
         this.reportTime = reportTime;
         this.monthlyReports = monthlyReports;
         this.yearlyReports = yearlyReports;

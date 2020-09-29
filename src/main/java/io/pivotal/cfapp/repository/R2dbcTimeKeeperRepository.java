@@ -17,26 +17,26 @@ public class R2dbcTimeKeeperRepository {
         this.client = client;
     }
 
-    public Mono<TimeKeeper> save(LocalDateTime collectionTime) {
-        return 
-    		client
-                .insert(new TimeKeeper(collectionTime));
-    }
-
     public Mono<Void> deleteOne() {
-        return 
-        		client
-                	.delete(TimeKeeper.class)
-	                	.all()
-	                	.then();
+        return
+                client
+                .delete(TimeKeeper.class)
+                .all()
+                .then();
     }
 
     public Mono<LocalDateTime> findOne() {
-        return 
-    		client
+        return
+                client
                 .select(TimeKeeper.class)
                 .one()
-                .map(tk -> tk.getCollectionTime());
+                .map(TimeKeeper::getCollectionTime);
+    }
+
+    public Mono<TimeKeeper> save(LocalDateTime collectionTime) {
+        return
+                client
+                .insert(new TimeKeeper(collectionTime));
     }
 
 }

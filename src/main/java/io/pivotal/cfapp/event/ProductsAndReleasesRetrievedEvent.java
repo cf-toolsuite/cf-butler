@@ -19,23 +19,9 @@ public class ProductsAndReleasesRetrievedEvent extends ApplicationEvent {
         super(source);
     }
 
-    public ProductsAndReleasesRetrievedEvent products(Products products) {
-        this.products = products;
-        return this;
-    }
-
     public ProductsAndReleasesRetrievedEvent allReleases(List<Release> allReleases) {
         this.allReleases = allReleases;
         return this;
-    }
-
-    public ProductsAndReleasesRetrievedEvent latestReleases(List<Release> latestReleases) {
-        this.latestReleases = latestReleases;
-        return this;
-    }
-
-    public Products getProducts() {
-        return products;
     }
 
     public List<Release> getAllReleases() {
@@ -44,6 +30,20 @@ public class ProductsAndReleasesRetrievedEvent extends ApplicationEvent {
 
     public List<Release> getLatestReleases() {
         return latestReleases;
+    }
+
+    public Products getProducts() {
+        return products;
+    }
+
+    public ProductsAndReleasesRetrievedEvent latestReleases(List<Release> latestReleases) {
+        this.latestReleases = latestReleases;
+        return this;
+    }
+
+    public ProductsAndReleasesRetrievedEvent products(Products products) {
+        this.products = products;
+        return this;
     }
 
 }

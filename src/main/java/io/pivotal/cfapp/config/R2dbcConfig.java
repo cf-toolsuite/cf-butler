@@ -22,41 +22,41 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class R2dbcConfig {
 
-	private static final String DOMAIN_PACKAGE = "io.pivotal.cfapp.domain";
-	
-	@Bean
-	public R2dbcCustomConversions r2dbcCustomConversions(ConnectionFactory factory	) {
-		return new R2dbcCustomConversions(getStoreConversions(factory), getCustomConverters());
-	}
+    private static final String DOMAIN_PACKAGE = "io.pivotal.cfapp.domain";
 
-	protected List<Object> getCustomConverters() {
-		List<Object> converterList = new ArrayList<>();
-		ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(false);
-		provider.addIncludeFilter(new AnnotationTypeFilter(ReadingConverter.class));
-		provider.addIncludeFilter(new AnnotationTypeFilter(WritingConverter.class));
-		for (BeanDefinition beanDef : provider.findCandidateComponents(DOMAIN_PACKAGE)) {
-			try {
-	            Class<?> cl = Class.forName(beanDef.getBeanClassName());
-	            converterList.add(cl.getDeclaredConstructor().newInstance());
-	            log.info("Added an instance of " + beanDef.getBeanClassName() + "to list of customer converters.");
-	        } catch (Exception e) {
-	            log.error("Could not add an instance of "+ beanDef.getBeanClassName() + " to list of custom converters.", e);
-	        }
+    protected List<Object> getCustomConverters() {
+        List<Object> converterList = new ArrayList<>();
+        ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(false);
+        provider.addIncludeFilter(new AnnotationTypeFilter(ReadingConverter.class));
+        provider.addIncludeFilter(new AnnotationTypeFilter(WritingConverter.class));
+        for (BeanDefinition beanDef : provider.findCandidateComponents(DOMAIN_PACKAGE)) {
+            try {
+                Class<?> cl = Class.forName(beanDef.getBeanClassName());
+                converterList.add(cl.getDeclaredConstructor().newInstance());
+                log.info("Added an instance of " + beanDef.getBeanClassName() + "to list of customer converters.");
+            } catch (Exception e) {
+                log.error("Could not add an instance of "+ beanDef.getBeanClassName() + " to list of custom converters.", e);
+            }
         }
-	    return converterList;
-	}
+        return converterList;
+    }
 
-	protected StoreConversions getStoreConversions(ConnectionFactory factory) {
+    protected R2dbcDialect getDialect(ConnectionFactory connectionFactory) {
+        return DialectResolver.getDialect(connectionFactory);
+    }
 
-		R2dbcDialect dialect = getDialect(factory);
+    protected StoreConversions getStoreConversions(ConnectionFactory factory) {
 
-		List<Object> converters = new ArrayList<>(dialect.getConverters());
-		converters.addAll(R2dbcCustomConversions.STORE_CONVERTERS);
+        R2dbcDialect dialect = getDialect(factory);
 
-		return StoreConversions.of(dialect.getSimpleTypeHolder(), converters);
-	}
-	
-	protected R2dbcDialect getDialect(ConnectionFactory connectionFactory) {
-		return DialectResolver.getDialect(connectionFactory);
-	}
+        List<Object> converters = new ArrayList<>(dialect.getConverters());
+        converters.addAll(R2dbcCustomConversions.STORE_CONVERTERS);
+
+        return StoreConversions.of(dialect.getSimpleTypeHolder(), converters);
+    }
+
+    @Bean
+    public R2dbcCustomConversions r2dbcCustomConversions(ConnectionFactory factory	) {
+        return new R2dbcCustomConversions(getStoreConversions(factory), getCustomConverters());
+    }
 }

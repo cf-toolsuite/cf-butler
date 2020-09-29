@@ -50,8 +50,8 @@ class CloudConfig {
         }
         if (properties.getProperties() != null) {
             properties.getProperties()
-                    .forEach((key, value) -> builder
-                            .option(Option.valueOf(key), value));
+            .forEach((key, value) -> builder
+                    .option(Option.valueOf(key), value));
         }
         return ConnectionFactories.get(builder.build());
     }

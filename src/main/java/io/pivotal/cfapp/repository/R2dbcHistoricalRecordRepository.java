@@ -19,35 +19,35 @@ import reactor.core.publisher.Mono;
 @Repository
 public class R2dbcHistoricalRecordRepository {
 
-	private final R2dbcEntityOperations client;
+    private final R2dbcEntityOperations client;
 
-	@Autowired
-	public R2dbcHistoricalRecordRepository(R2dbcEntityOperations client) {
-		this.client = client;
-	}
+    @Autowired
+    public R2dbcHistoricalRecordRepository(R2dbcEntityOperations client) {
+        this.client = client;
+    }
 
-	public Mono<HistoricalRecord> save(HistoricalRecord entity) {
-		return
-			client
-				.insert(entity);
-	}
+    public Flux<HistoricalRecord> findAll() {
+        return
+                client
+                .select(HistoricalRecord.class)
+                .matching(Query.empty().sort(Sort.by(Order.desc("transaction_date_time"))))
+                .all();
+    }
 
-	public Flux<HistoricalRecord> findAll() {
-		return 
-			client
-				.select(HistoricalRecord.class)
-					.matching(Query.empty().sort(Sort.by(Order.desc("transaction_date_time"))))
-					.all();
-	}
+    public Flux<HistoricalRecord> findByDateRange(LocalDate start, LocalDate end) {
+        Criteria criteria =
+                Criteria.where("transaction_date_time").lessThanOrEquals(LocalDateTime.of(end, LocalTime.MAX)).and("transaction_date_time").greaterThan(LocalDateTime.of(start, LocalTime.MIDNIGHT));
+        return
+                client
+                .select(HistoricalRecord.class)
+                .matching(Query.query(criteria).sort(Sort.by(Order.desc("transaction_date_time"))))
+                .all();
+    }
 
-	public Flux<HistoricalRecord> findByDateRange(LocalDate start, LocalDate end) {
-		Criteria criteria =
-			Criteria.where("transaction_date_time").lessThanOrEquals(LocalDateTime.of(end, LocalTime.MAX)).and("transaction_date_time").greaterThan(LocalDateTime.of(start, LocalTime.MIDNIGHT));
-		return 
-			client
-				.select(HistoricalRecord.class)
-					.matching(Query.query(criteria).sort(Sort.by(Order.desc("transaction_date_time"))))
-					.all();
-	}
+    public Mono<HistoricalRecord> save(HistoricalRecord entity) {
+        return
+                client
+                .insert(entity);
+    }
 
 }

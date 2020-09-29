@@ -27,23 +27,23 @@ public class OnDemandEventsController {
 
     @GetMapping("/events/{id}")
     public Mono<ResponseEntity<List<Event>>> getEvents(
-        @PathVariable("id") String id,
-        @RequestParam(value = "numberOfEvents", required = false) Integer numberOfEvents,
-        // if you specify types[] they must be comma-separated
-        @RequestParam(value = "types[]", required = false) String[] types
-    ) {
+            @PathVariable("id") String id,
+            @RequestParam(value = "numberOfEvents", required = false) Integer numberOfEvents,
+            // if you specify types[] they must be comma-separated
+            @RequestParam(value = "types[]", required = false) String[] types
+            ) {
         if (types == null) {
             return service
-                        .getEvents(id, numberOfEvents)
-                        .flatMapMany(json -> service.toFlux(json))
-                        .collectList()
-                        .map(r -> ResponseEntity.ok(r))
-                        .defaultIfEmpty(ResponseEntity.notFound().build());
+                    .getEvents(id, numberOfEvents)
+                    .flatMapMany(json -> service.toFlux(json))
+                    .collectList()
+                    .map(ResponseEntity::ok)
+                    .defaultIfEmpty(ResponseEntity.notFound().build());
         } else {
             return service
                     .getEvents(id, types)
                     .collectList()
-                    .map(r -> ResponseEntity.ok(r))
+                    .map(ResponseEntity::ok)
                     .defaultIfEmpty(ResponseEntity.notFound().build());
         }
     }

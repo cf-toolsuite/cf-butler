@@ -33,68 +33,68 @@ public class AppRelationshipTask implements ApplicationListener<ServiceInstanceD
 
     @Autowired
     public AppRelationshipTask(
-    		DefaultCloudFoundryOperations opsClient,
-    		AppRelationshipService service,
-    		ApplicationEventPublisher publisher
-    		) {
+            DefaultCloudFoundryOperations opsClient,
+            AppRelationshipService service,
+            ApplicationEventPublisher publisher
+            ) {
         this.opsClient = opsClient;
         this.service = service;
         this.publisher = publisher;
     }
 
-    @Override
-    public void onApplicationEvent(ServiceInstanceDetailRetrievedEvent event) {
-        collect(List.copyOf(event.getDetail()));
-    }
-
     public void collect(List<ServiceInstanceDetail> serviceInstances) {
         log.info("AppRelationshipTask started");
-    	service
-            .deleteAll()
-            .thenMany(Flux.fromIterable(serviceInstances))
-            .filter(sid -> !CollectionUtils.isEmpty(sid.getApplications()))
-            .flatMap(si -> Flux.fromIterable(AppRelationshipRequest.listOf(si)))
-            .flatMap(si -> getAppRelationship(si))
-            .flatMap(service::save)
-            .thenMany(service.findAll())
-                .collectList()
-                .subscribe(
-                    result -> {
-                        publisher.publishEvent(new AppRelationshipRetrievedEvent(this).relations(result));
-                        log.info("AppRelationshipTask completed");
-                    },
-                    error -> {
-                        log.error("AppRelationshipTask terminated with error", error);
-                    }
+        service
+        .deleteAll()
+        .thenMany(Flux.fromIterable(serviceInstances))
+        .filter(sid -> !CollectionUtils.isEmpty(sid.getApplications()))
+        .flatMap(si -> Flux.fromIterable(AppRelationshipRequest.listOf(si)))
+        .flatMap(this::getAppRelationship)
+        .flatMap(service::save)
+        .thenMany(service.findAll())
+        .collectList()
+        .subscribe(
+                result -> {
+                    publisher.publishEvent(new AppRelationshipRetrievedEvent(this).relations(result));
+                    log.info("AppRelationshipTask completed");
+                },
+                error -> {
+                    log.error("AppRelationshipTask terminated with error", error);
+                }
                 );
     }
 
     protected Mono<AppRelationship> getAppRelationship(AppRelationshipRequest request) {
         Flux<ApplicationResource> resources =
-            PaginationUtils.requestClientV3Resources(
-                page -> DefaultCloudFoundryOperations
+                PaginationUtils.requestClientV3Resources(
+                        page -> DefaultCloudFoundryOperations
                         .builder()
-                            .from(opsClient)
-                            .organization(request.getOrganization())
-                            .space(request.getSpace())
-                            .build()
+                        .from(opsClient)
+                        .organization(request.getOrganization())
+                        .space(request.getSpace())
+                        .build()
                         .getCloudFoundryClient()
-                            .applicationsV3()
-                                .list(ListApplicationsRequest.builder().page(page).addAllNames(Arrays.asList(new String[] { request.getApplicationName() })).build()));
+                        .applicationsV3()
+                        .list(ListApplicationsRequest.builder().page(page).addAllNames(Arrays.asList(new String[] { request.getApplicationName() })).build()));
         return resources
                 .next()
                 .map(ar -> AppRelationship
-                                .builder()
-                                    .organization(request.getOrganization())
-                                    .space(request.getSpace())
-                                    .appId(ar.getId())
-                                    .appName(request.getApplicationName())
-                                    .serviceInstanceId(request.getServiceInstanceId())
-                                    .serviceName(request.getServiceName())
-                                    .serviceOffering(request.getServiceOffering())
-                                    .servicePlan(request.getServicePlan())
-                                    .serviceType(request.getServiceType())
-                                    .build());
+                        .builder()
+                        .organization(request.getOrganization())
+                        .space(request.getSpace())
+                        .appId(ar.getId())
+                        .appName(request.getApplicationName())
+                        .serviceInstanceId(request.getServiceInstanceId())
+                        .serviceName(request.getServiceName())
+                        .serviceOffering(request.getServiceOffering())
+                        .servicePlan(request.getServicePlan())
+                        .serviceType(request.getServiceType())
+                        .build());
+    }
+
+    @Override
+    public void onApplicationEvent(ServiceInstanceDetailRetrievedEvent event) {
+        collect(List.copyOf(event.getDetail()));
     }
 
 }

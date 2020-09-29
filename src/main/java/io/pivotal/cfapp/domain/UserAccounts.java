@@ -4,11 +4,11 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
-import org.apache.commons.lang3.StringUtils;
 
 import lombok.Builder;
 import lombok.Builder.Default;
@@ -23,36 +23,36 @@ import lombok.ToString;
 @JsonPropertyOrder({"organization", "space", "accounts"})
 public class UserAccounts {
 
-	@JsonProperty("organization")
-	private String organization;
+    public static String headers() {
+        return String.join(",", "organization", "space", "user accounts");
+    }
 
-	@JsonProperty("space")
-	private String space;
+    private static String wrap(String value) {
+        return value != null ? StringUtils.wrap(value, '"') : StringUtils.wrap("", '"');
+    }
 
-	@Default
-	@JsonProperty("accounts")
-	private Set<String> accounts = new HashSet<>();
+    @JsonProperty("organization")
+    private String organization;
 
-	@JsonCreator
-	public UserAccounts(
-		@JsonProperty("organization") String organization,
-		@JsonProperty("space") String space,
-		@JsonProperty("accounts") Set<String> accounts
-	) {
-		this.organization = organization;
-		this.space = space;
-		this.accounts = accounts;
-	}
+    @JsonProperty("space")
+    private String space;
 
-	public String toCsv() {
-		return String.join(",", wrap(getOrganization()), wrap(getSpace()), wrap(String.join(",", getAccounts() != null ? getAccounts(): Collections.emptyList())));
-	}
+    @Default
+    @JsonProperty("accounts")
+    private Set<String> accounts = new HashSet<>();
 
-	private static String wrap(String value) {
-		return value != null ? StringUtils.wrap(value, '"') : StringUtils.wrap("", '"');
-	}
+    @JsonCreator
+    public UserAccounts(
+            @JsonProperty("organization") String organization,
+            @JsonProperty("space") String space,
+            @JsonProperty("accounts") Set<String> accounts
+            ) {
+        this.organization = organization;
+        this.space = space;
+        this.accounts = accounts;
+    }
 
-	public static String headers() {
-		return String.join(",", "organization", "space", "user accounts");
-	}
+    public String toCsv() {
+        return String.join(",", wrap(getOrganization()), wrap(getSpace()), wrap(String.join(",", getAccounts() != null ? getAccounts(): Collections.emptyList())));
+    }
 }

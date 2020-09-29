@@ -9,10 +9,10 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import lombok.Builder.Default;
 
 @Builder
 @AllArgsConstructor(access=AccessLevel.PACKAGE)
@@ -20,8 +20,8 @@ import lombok.Builder.Default;
 @Getter
 @ToString
 @JsonPropertyOrder({ "by-organization", "by-buildpack", "by-stack", "by-dockerimage", "by-status",
-"total-applications", "total-running-application-instances", "total-stopped-application-instances", "total-crashed-application-instances",
-"total-application-instances", "total-memory-used-in-mb", "total-disk-used-in-mb", "velocity"})
+    "total-applications", "total-running-application-instances", "total-stopped-application-instances", "total-crashed-application-instances",
+    "total-application-instances", "total-memory-used-in-mb", "total-disk-used-in-mb", "velocity"})
 public class ApplicationCounts {
 
     @Default

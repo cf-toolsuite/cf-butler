@@ -32,10 +32,10 @@ public class Organization {
     @JsonCreator
     @PersistenceConstructor
     public Organization(
-        @JsonProperty("id") String id,
-        @JsonProperty("name") String name) {
-            this.id = id;
-            this.name = name;
+            @JsonProperty("id") String id,
+            @JsonProperty("name") String name) {
+        this.id = id;
+        this.name = name;
     }
 
 }

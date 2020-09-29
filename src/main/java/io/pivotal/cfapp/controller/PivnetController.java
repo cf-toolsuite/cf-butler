@@ -28,10 +28,35 @@ public class PivnetController {
 
     @Autowired
     public PivnetController(
-        PivnetCache cache,
-        TimeKeeperService tkService) {
+            PivnetCache cache,
+            TimeKeeperService tkService) {
         this.cache = cache;
         this.util = new TkServiceUtil(tkService);
+    }
+
+    @GetMapping("/store/product/releases")
+    public Mono<ResponseEntity<List<Release>>> getLatestAvailableProductReleases(
+            @RequestParam(name = "q", defaultValue = "latest") String option) {
+        if (option.equalsIgnoreCase("latest")) {
+            return util.getHeaders()
+                    .map(h -> new ResponseEntity<>(cache.getLatestProductReleases(), h, HttpStatus.OK))
+                    .defaultIfEmpty(ResponseEntity.notFound().build());
+        } else if (option.equalsIgnoreCase("all")) {
+            return util.getHeaders()
+                    .map(h -> new ResponseEntity<>(cache.getAllProductReleases(), h, HttpStatus.OK))
+                    .defaultIfEmpty(ResponseEntity.notFound().build());
+        } else if (option.equalsIgnoreCase("recent")) {
+            List<Release> recentReleases = cache
+                    .getAllProductReleases()
+                    .stream()
+                    .filter(r -> r.getReleaseDate().isAfter(LocalDate.now().minusDays(7)))
+                    .collect(Collectors.toList());
+            return util.getHeaders()
+                    .map(h -> new ResponseEntity<>(recentReleases, h, HttpStatus.OK))
+                    .defaultIfEmpty(ResponseEntity.notFound().build());
+        } else {
+            return Mono.just(ResponseEntity.badRequest().build());
+        }
     }
 
     @GetMapping("/store/product/catalog")
@@ -39,31 +64,6 @@ public class PivnetController {
         return util.getHeaders()
                 .map(h -> new ResponseEntity<>(cache.getProducts(), h, HttpStatus.OK))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
-    }
-
-    @GetMapping("/store/product/releases")
-    public Mono<ResponseEntity<List<Release>>> getLatestAvailableProductReleases(
-        @RequestParam(name = "q", defaultValue = "latest") String option) {
-            if (option.equalsIgnoreCase("latest")) {
-                return util.getHeaders()
-                        .map(h -> new ResponseEntity<>(cache.getLatestProductReleases(), h, HttpStatus.OK))
-                        .defaultIfEmpty(ResponseEntity.notFound().build());
-            } else if (option.equalsIgnoreCase("all")) {
-                return util.getHeaders()
-                        .map(h -> new ResponseEntity<>(cache.getAllProductReleases(), h, HttpStatus.OK))
-                        .defaultIfEmpty(ResponseEntity.notFound().build());
-            } else if (option.equalsIgnoreCase("recent")) {
-                List<Release> recentReleases = cache
-                                                .getAllProductReleases()
-                                                    .stream()
-                                                    .filter(r -> r.getReleaseDate().isAfter(LocalDate.now().minusDays(7)))
-                                                    .collect(Collectors.toList());
-                return util.getHeaders()
-                        .map(h -> new ResponseEntity<>(recentReleases, h, HttpStatus.OK))
-                        .defaultIfEmpty(ResponseEntity.notFound().build());
-            } else {
-                return Mono.just(ResponseEntity.badRequest().build());
-            }
     }
 
 }

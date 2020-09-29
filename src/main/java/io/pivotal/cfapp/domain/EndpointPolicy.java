@@ -28,64 +28,64 @@ import lombok.ToString;
 @Table("endpoint_policy")
 public class EndpointPolicy {
 
-	@Id
-	@JsonIgnore
-	private Long pk;
+    public static EndpointPolicy seed(EndpointPolicy policy) {
+        return EndpointPolicy
+                .builder()
+                .description(policy.getDescription())
+                .endpoints(policy.getEndpoints())
+                .emailNotificationTemplate(policy.getEmailNotificationTemplate())
+                .build();
+    }
 
-	@Default
-	@JsonProperty("id")
-	private String id = Generators.timeBasedGenerator().generate().toString();
+    public static EndpointPolicy seedWith(EndpointPolicy policy, String id) {
+        return EndpointPolicy
+                .builder()
+                .id(id)
+                .description(policy.getDescription())
+                .endpoints(policy.getEndpoints())
+                .emailNotificationTemplate(policy.getEmailNotificationTemplate())
+                .build();
+    }
 
-	@JsonProperty("description")
-	private String description;
+    @Id
+    @JsonIgnore
+    private Long pk;
 
-	@Default
-	@JsonProperty("endpoints")
-	private Set<String> endpoints = new HashSet<>();
+    @Default
+    @JsonProperty("id")
+    private String id = Generators.timeBasedGenerator().generate().toString();
 
-	@JsonProperty("email-notification-template")
-	private EmailNotificationTemplate emailNotificationTemplate;
+    @JsonProperty("description")
+    private String description;
 
-	@JsonCreator
-	EndpointPolicy(
-			@JsonProperty("pk") Long pk,
-			@JsonProperty("id") String id,
-			@JsonProperty("description") String description,
-			@JsonProperty("endpoints") Set<String> endpoints,
-			@JsonProperty("email-notification-template") EmailNotificationTemplate emailNotificationTemplate) {
-		this.pk = pk;
-		this.id = id;
-		this.description = description;
-		this.endpoints = endpoints;
-		this.emailNotificationTemplate = emailNotificationTemplate;
-	}
+    @Default
+    @JsonProperty("endpoints")
+    private Set<String> endpoints = new HashSet<>();
 
-	@JsonIgnore
-	public Long getPk() {
-		return pk;
-	}
+    @JsonProperty("email-notification-template")
+    private EmailNotificationTemplate emailNotificationTemplate;
 
-	public Set<String> getEndpoints() {
-		return CollectionUtils.isEmpty(endpoints) ? new HashSet<>(): Collections.unmodifiableSet(endpoints);
-	}
+    @JsonCreator
+    EndpointPolicy(
+            @JsonProperty("pk") Long pk,
+            @JsonProperty("id") String id,
+            @JsonProperty("description") String description,
+            @JsonProperty("endpoints") Set<String> endpoints,
+            @JsonProperty("email-notification-template") EmailNotificationTemplate emailNotificationTemplate) {
+        this.pk = pk;
+        this.id = id;
+        this.description = description;
+        this.endpoints = endpoints;
+        this.emailNotificationTemplate = emailNotificationTemplate;
+    }
 
-	public static EndpointPolicy seed(EndpointPolicy policy) {
-		return EndpointPolicy
-				.builder()
-					.description(policy.getDescription())
-					.endpoints(policy.getEndpoints())
-					.emailNotificationTemplate(policy.getEmailNotificationTemplate())
-					.build();
-	}
+    public Set<String> getEndpoints() {
+        return CollectionUtils.isEmpty(endpoints) ? new HashSet<>(): Collections.unmodifiableSet(endpoints);
+    }
 
-	public static EndpointPolicy seedWith(EndpointPolicy policy, String id) {
-		return EndpointPolicy
-				.builder()
-					.id(id)
-					.description(policy.getDescription())
-					.endpoints(policy.getEndpoints())
-					.emailNotificationTemplate(policy.getEmailNotificationTemplate())
-					.build();
-	}
+    @JsonIgnore
+    public Long getPk() {
+        return pk;
+    }
 
 }

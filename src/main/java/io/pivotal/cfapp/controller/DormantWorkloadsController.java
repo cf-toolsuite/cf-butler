@@ -22,14 +22,14 @@ public class DormantWorkloadsController {
 
     @Autowired
     public DormantWorkloadsController(
-        DormantWorkloadsService service,
-        TimeKeeperService tkService) {
+            DormantWorkloadsService service,
+            TimeKeeperService tkService) {
         this.service = service;
         this.util = new TkServiceUtil(tkService);
     }
 
     @GetMapping(value = { "/snapshot/detail/dormant/{daysSinceLastUpdate}" } )
-	public Mono<ResponseEntity<Workloads>> getDormantWorkloads(@PathVariable("daysSinceLastUpdate") Integer daysSinceLastUpdate) {
+    public Mono<ResponseEntity<Workloads>> getDormantWorkloads(@PathVariable("daysSinceLastUpdate") Integer daysSinceLastUpdate) {
         final WorkloadsBuilder builder = Workloads.builder();
         return service
                 .getDormantApplications(daysSinceLastUpdate)
@@ -37,9 +37,9 @@ public class DormantWorkloadsController {
                 .then(service.getDormantServiceInstances(daysSinceLastUpdate))
                 .map(list -> builder.serviceInstances(list))
                 .flatMap(dwb -> util
-                                .getHeaders()
-                                    .map(h -> new ResponseEntity<Workloads>(dwb.build(), h, HttpStatus.OK)))
+                        .getHeaders()
+                        .map(h -> new ResponseEntity<Workloads>(dwb.build(), h, HttpStatus.OK)))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
-	}
+    }
 
 }

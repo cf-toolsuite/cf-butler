@@ -12,5 +12,5 @@ import lombok.Getter;
 @Table("time_keeper")
 public class TimeKeeper {
 
-	private LocalDateTime collectionTime;
+    private LocalDateTime collectionTime;
 }

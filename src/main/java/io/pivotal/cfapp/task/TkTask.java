@@ -21,32 +21,32 @@ public class TkTask implements ApplicationListener<DatabaseCreatedEvent> {
     @Autowired
     public TkTask(
             TimeKeeperService tkService,
-    		ApplicationEventPublisher publisher) {
+            ApplicationEventPublisher publisher) {
         this.tkService = tkService;
         this.publisher = publisher;
-    }
-
-    @Override
-	public void onApplicationEvent(DatabaseCreatedEvent event) {
-		collect();
     }
 
     public void collect() {
         log.info("TkTask started");
         tkService
-            .deleteOne()
-            .then(tkService.save())
-            .then(tkService.findOne())
-                .subscribe(
-                    result -> {
-                        publisher.publishEvent(new TkRetrievedEvent(this).lastCollected(result));
-                        log.info("TkTask completed");
-                        log.trace("Last collected time was set to {}", result);
-                    },
-                    error -> {
-                        log.error("TkTask terminated with error", error);
-                    }
+        .deleteOne()
+        .then(tkService.save())
+        .then(tkService.findOne())
+        .subscribe(
+                result -> {
+                    publisher.publishEvent(new TkRetrievedEvent(this).lastCollected(result));
+                    log.info("TkTask completed");
+                    log.trace("Last collected time was set to {}", result);
+                },
+                error -> {
+                    log.error("TkTask terminated with error", error);
+                }
                 );
+    }
+
+    @Override
+    public void onApplicationEvent(DatabaseCreatedEvent event) {
+        collect();
     }
 
     @Scheduled(cron = "${cron.collection}")

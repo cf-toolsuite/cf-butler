@@ -11,15 +11,15 @@ import org.springframework.r2dbc.core.Parameter;
 @WritingConverter
 public class SpaceUsersWriteConverter implements Converter<SpaceUsers, OutboundRow> {
 
-	@Override
-	public OutboundRow convert(SpaceUsers source) {
-		OutboundRow row = new OutboundRow();
+    @Override
+    public OutboundRow convert(SpaceUsers source) {
+        OutboundRow row = new OutboundRow();
         row.put("organization", Parameter.fromOrEmpty(source.getOrganization(), String.class));
         row.put("space", Parameter.fromOrEmpty(source.getSpace(), String.class));
         row.put("auditors", Parameter.fromOrEmpty(source.getAuditors().stream().filter(StringUtils::isNotBlank).collect(Collectors.joining(",")), String.class));
         row.put("developers", Parameter.fromOrEmpty(source.getDevelopers().stream().filter(StringUtils::isNotBlank).collect(Collectors.joining(",")), String.class));
         row.put("managers", Parameter.fromOrEmpty(source.getManagers().stream().filter(StringUtils::isNotBlank).collect(Collectors.joining(",")), String.class));
         return row;
-	}
+    }
 
 }

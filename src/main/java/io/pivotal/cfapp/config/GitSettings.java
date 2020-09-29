@@ -27,11 +27,11 @@ public class GitSettings {
 
 
     public GitSettings(
-        @DefaultValue("")  String uri,
-        String username,
-        @DefaultValue("") String password,
-        String commit,
-        Set<String> filePaths) {
+            @DefaultValue("")  String uri,
+            String username,
+            @DefaultValue("") String password,
+            String commit,
+            Set<String> filePaths) {
         this.uri = uri;
         this.username = username;
         this.password = password;
@@ -43,12 +43,12 @@ public class GitSettings {
         return StringUtils.isNotBlank(getUsername());
     }
 
-    public boolean isVersionManaged() {
-        return StringUtils.isNotBlank(uri);
-    }
-
     public boolean isPinnedCommit() {
         return StringUtils.isNotBlank(getCommit());
+    }
+
+    public boolean isVersionManaged() {
+        return StringUtils.isNotBlank(uri);
     }
 
 }

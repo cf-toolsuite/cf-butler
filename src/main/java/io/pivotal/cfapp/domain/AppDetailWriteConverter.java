@@ -39,5 +39,5 @@ public class AppDetailWriteConverter implements Converter<AppDetail, OutboundRow
         row.put("buildpack_latest_url", Parameter.fromOrEmpty(source.getBuildpackLatestUrl(), String.class));
         return row;
     }
-    
+
 }

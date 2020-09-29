@@ -22,8 +22,8 @@ public class R2dbcOrganizationRepositoryTest {
 
     @Autowired
     public R2dbcOrganizationRepositoryTest(
-    		R2dbcOrganizationRepository repo
-    ) {
+            R2dbcOrganizationRepository repo
+            ) {
         this.repo = repo;
     }
 
@@ -38,10 +38,10 @@ public class R2dbcOrganizationRepositoryTest {
         String name = "zoo-labs";
         Organization entity = new Organization(id, name);
         StepVerifier.create(repo.save(entity)
-            .thenMany(repo.findAll()))
-            .assertNext(o -> {
-                assertEquals(id, o.getId());
-                assertEquals(name, o.getName());
-            }).verifyComplete();
+                .thenMany(repo.findAll()))
+        .assertNext(o -> {
+            assertEquals(id, o.getId());
+            assertEquals(name, o.getName());
+        }).verifyComplete();
     }
 }

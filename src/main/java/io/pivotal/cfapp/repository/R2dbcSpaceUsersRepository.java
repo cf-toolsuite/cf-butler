@@ -15,41 +15,41 @@ import reactor.core.publisher.Mono;
 @Repository
 public class R2dbcSpaceUsersRepository {
 
-	private final R2dbcEntityOperations client;
+    private final R2dbcEntityOperations client;
 
-	@Autowired
-	public R2dbcSpaceUsersRepository(R2dbcEntityOperations client) {
-		this.client = client;
-	}
+    @Autowired
+    public R2dbcSpaceUsersRepository(R2dbcEntityOperations client) {
+        this.client = client;
+    }
 
-	public Mono<Void> deleteAll() {
-		return 
-			client
-				.delete(SpaceUsers.class)
-					.all()
-					.then();
-	}
+    public Mono<Void> deleteAll() {
+        return
+                client
+                .delete(SpaceUsers.class)
+                .all()
+                .then();
+    }
 
-	public Mono<SpaceUsers> save(SpaceUsers entity) {
-		return
-			client
-				.insert(entity);
-	}
+    public Flux<SpaceUsers> findAll() {
+        return
+                client
+                .select(SpaceUsers.class)
+                .matching(Query.empty().sort(Sort.by(Order.asc("organization"), Order.asc("space"))))
+                .all();
+    }
 
-	public Mono<SpaceUsers> findByOrganizationAndSpace(String organization, String space) {
-		return 
-			client
-				.select(SpaceUsers.class)
-					.matching(Query.query(Criteria.where("organization").is(organization).and("space").is(space)))
-					.one();
-	}
+    public Mono<SpaceUsers> findByOrganizationAndSpace(String organization, String space) {
+        return
+                client
+                .select(SpaceUsers.class)
+                .matching(Query.query(Criteria.where("organization").is(organization).and("space").is(space)))
+                .one();
+    }
 
-	public Flux<SpaceUsers> findAll() {
-		return
-			client
-				.select(SpaceUsers.class)
-					.matching(Query.empty().sort(Sort.by(Order.asc("organization"), Order.asc("space"))))
-					.all();
-	}
+    public Mono<SpaceUsers> save(SpaceUsers entity) {
+        return
+                client
+                .insert(entity);
+    }
 
 }

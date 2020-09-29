@@ -14,33 +14,33 @@ import reactor.core.publisher.Mono;
 @Repository
 public class R2dbcOrganizationRepository {
 
-	private final R2dbcEntityOperations client;
+    private final R2dbcEntityOperations client;
 
-	@Autowired
-	public R2dbcOrganizationRepository(R2dbcEntityOperations client) {
-		this.client = client;
-	}
+    @Autowired
+    public R2dbcOrganizationRepository(R2dbcEntityOperations client) {
+        this.client = client;
+    }
 
-	public Mono<Void> deleteAll() {
-		return 
-			client
-				.delete(Organization.class)
-					.all()
-					.then();
-	}
+    public Mono<Void> deleteAll() {
+        return
+                client
+                .delete(Organization.class)
+                .all()
+                .then();
+    }
 
-	public Mono<Organization> save(Organization entity) {
-		return 
-			client
-				.insert(entity);
-	}
+    public Flux<Organization> findAll() {
+        return
+                client
+                .select(Organization.class)
+                .matching(Query.empty().sort(Sort.by(Order.asc("org_name"))))
+                .all();
+    }
 
-	public Flux<Organization> findAll() {
-		return 
-			client
-				.select(Organization.class)
-					.matching(Query.empty().sort(Sort.by(Order.asc("org_name"))))
-					.all();
-	}
+    public Mono<Organization> save(Organization entity) {
+        return
+                client
+                .insert(entity);
+    }
 
 }

@@ -15,10 +15,10 @@ public class DemographicsService {
 
     @Autowired
     public DemographicsService(
-        SpaceService spaceService,
-        SpaceUsersService spaceUsersService,
-        OrganizationService orgService
-    ) {
+            SpaceService spaceService,
+            SpaceUsersService spaceUsersService,
+            OrganizationService orgService
+            ) {
         this.spaceService = spaceService;
         this.spaceUsersService = spaceUsersService;
         this.orgService = orgService;
@@ -26,17 +26,21 @@ public class DemographicsService {
 
     public Mono<Demographics> getDemographics() {
         return totalUserAccounts()
-                    .map(ua -> Demographics.builder().userAccounts(ua))
-                    .flatMap(b -> totalServiceAccounts()
-                                .map(sa -> b.serviceAccounts(sa)))
-                    .flatMap(b -> totalSpaces()
-                                .map(s -> b.spaces(s)))
-                    .flatMap(b -> totalOrganizations()
-                                .map(o -> b.organizations(o).build()));
+                .map(ua -> Demographics.builder().userAccounts(ua))
+                .flatMap(b -> totalServiceAccounts()
+                        .map(sa -> b.serviceAccounts(sa)))
+                .flatMap(b -> totalSpaces()
+                        .map(s -> b.spaces(s)))
+                .flatMap(b -> totalOrganizations()
+                        .map(o -> b.organizations(o).build()));
     }
 
     private Mono<Long> totalOrganizations() {
         return orgService.findAll().count();
+    }
+
+    private Mono<Long> totalServiceAccounts() {
+        return spaceUsersService.totalServiceAccounts();
     }
 
     private Mono<Long> totalSpaces() {
@@ -45,9 +49,5 @@ public class DemographicsService {
 
     private Mono<Long> totalUserAccounts() {
         return spaceUsersService.totalUserAccounts();
-    }
-
-    private Mono<Long> totalServiceAccounts() {
-        return spaceUsersService.totalServiceAccounts();
     }
 }

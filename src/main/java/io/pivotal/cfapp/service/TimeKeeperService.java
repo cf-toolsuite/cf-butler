@@ -23,21 +23,21 @@ public class TimeKeeperService {
     }
 
     @Transactional
-    public Mono<TimeKeeper> save() {
-        LocalDateTime collectionTime = LocalDateTime.now();
-        return 
-    		repo
-                .save(collectionTime)
-                .onErrorContinue(
-					(ex, data) -> log.error(String.format("Problem saving collectime time %s.", collectionTime), ex));
-    }
-
-    @Transactional
     public Mono<Void> deleteOne() {
-		    return repo.deleteOne();
+        return repo.deleteOne();
     }
 
     public Mono<LocalDateTime> findOne() {
-		    return repo.findOne();
+        return repo.findOne();
+    }
+
+    @Transactional
+    public Mono<TimeKeeper> save() {
+        LocalDateTime collectionTime = LocalDateTime.now();
+        return
+                repo
+                .save(collectionTime)
+                .onErrorContinue(
+                        (ex, data) -> log.error(String.format("Problem saving collectime time %s.", collectionTime), ex));
     }
 }

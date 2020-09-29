@@ -21,8 +21,8 @@ public class R2dbcTimeKeeperRepositoryTest {
 
     @Autowired
     public R2dbcTimeKeeperRepositoryTest(
-    		R2dbcTimeKeeperRepository repo
-    ) {
+            R2dbcTimeKeeperRepository repo
+            ) {
         this.repo = repo;
     }
 
@@ -35,9 +35,9 @@ public class R2dbcTimeKeeperRepositoryTest {
     public void testSaveWasSuccessful() {
         LocalDateTime now  = LocalDateTime.now();
         StepVerifier.create(repo.save(now)
-            .thenMany(repo.findOne()))
-            .assertNext(one -> {
-                assertEquals(now, one);
-            }).verifyComplete();
+                .thenMany(repo.findOne()))
+        .assertNext(one -> {
+            assertEquals(now, one);
+        }).verifyComplete();
     }
 }

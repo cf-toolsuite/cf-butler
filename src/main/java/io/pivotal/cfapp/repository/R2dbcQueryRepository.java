@@ -22,11 +22,11 @@ public class R2dbcQueryRepository {
     }
 
     public Flux<Tuple2<Row, RowMetadata>> executeQuery(Query query) {
-        return 
-    		client
-    			.getDatabaseClient()
-	                .sql(query.getSql())
-	                .map((row, metadata) -> Tuples.of(row, metadata))
-	                .all();
+        return
+                client
+                .getDatabaseClient()
+                .sql(query.getSql())
+                .map(Tuples::of)
+                .all();
     }
 }

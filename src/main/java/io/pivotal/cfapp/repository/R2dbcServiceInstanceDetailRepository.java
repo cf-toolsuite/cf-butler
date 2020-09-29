@@ -23,71 +23,71 @@ import reactor.util.function.Tuples;
 @Repository
 public class R2dbcServiceInstanceDetailRepository {
 
-	private final R2dbcEntityOperations client;
+    private final R2dbcEntityOperations client;
 
-	@Autowired
-	public R2dbcServiceInstanceDetailRepository(R2dbcEntityOperations client) {
-		this.client = client;
-	}
+    @Autowired
+    public R2dbcServiceInstanceDetailRepository(R2dbcEntityOperations client) {
+        this.client = client;
+    }
 
-	public Mono<ServiceInstanceDetail> save(ServiceInstanceDetail entity) {
-		return
-			client
-				.insert(entity);
-	}
+    public Mono<Void> deleteAll() {
+        return
+                client
+                .delete(ServiceInstanceDetail.class)
+                .all()
+                .then();
+    }
 
-	public Flux<ServiceInstanceDetail> findAll() {
-		return 
-			client
-				.select(ServiceInstanceDetail.class)
-					.matching(Query.empty().sort(Sort.by(Order.asc("organization"), Order.asc("space"), Order.asc("service"), Order.asc("service_name"))))
-					.all();
-	}
+    public Flux<ServiceInstanceDetail> findAll() {
+        return
+                client
+                .select(ServiceInstanceDetail.class)
+                .matching(Query.empty().sort(Sort.by(Order.asc("organization"), Order.asc("space"), Order.asc("service"), Order.asc("service_name"))))
+                .all();
+    }
 
-	public Mono<Void> deleteAll() {
-		return 
-			client
-				.delete(ServiceInstanceDetail.class)
-					.all()
-					.then();
-	}
+    public Flux<ServiceInstanceDetail> findByDateRange(LocalDate start, LocalDate end) {
+        Criteria criteria =
+                Criteria.where("last_updated").lessThanOrEquals(LocalDateTime.of(end, LocalTime.MAX)).and("last_updated").greaterThan(LocalDateTime.of(start, LocalTime.MIDNIGHT));
+        return
+                client
+                .select(ServiceInstanceDetail.class)
+                .matching(Query.query(criteria).sort(Sort.by(Order.desc("last_updated"))))
+                .all();
+    }
 
-	public Flux<Tuple2<ServiceInstanceDetail, ServiceInstancePolicy>> findByServiceInstancePolicy(ServiceInstancePolicy policy) {
-		LocalDateTime fromDateTime = policy.getOption("from-datetime", LocalDateTime.class);
-		String fromDuration = policy.getOption("from-duration", String.class);
-		LocalDateTime temporal = null;
-		Criteria criteria = null;
-		if (fromDateTime != null) {
-			temporal = fromDateTime;
-		}
-		if (fromDuration != null) {
-			temporal = LocalDateTime.now().minus(Duration.parse(fromDuration));
-		}
-		if (temporal != null) {
-			criteria = Criteria.where("bound_applications").isNull().and("last_updated").lessThanOrEquals(temporal);
-		} else {
-			criteria = Criteria.where("bound_applications").isNull();
-		}
-		return
-			client
-				.select(ServiceInstanceDetail.class)
-					.matching(Query.query(criteria).sort(Sort.by(Order.asc("organization"), Order.asc("space"), Order.asc("service_name"))))
-					.all()
-					.map(r -> toTuple(r, policy));
-	}
+    public Flux<Tuple2<ServiceInstanceDetail, ServiceInstancePolicy>> findByServiceInstancePolicy(ServiceInstancePolicy policy) {
+        LocalDateTime fromDateTime = policy.getOption("from-datetime", LocalDateTime.class);
+        String fromDuration = policy.getOption("from-duration", String.class);
+        LocalDateTime temporal = null;
+        Criteria criteria = null;
+        if (fromDateTime != null) {
+            temporal = fromDateTime;
+        }
+        if (fromDuration != null) {
+            temporal = LocalDateTime.now().minus(Duration.parse(fromDuration));
+        }
+        if (temporal != null) {
+            criteria = Criteria.where("bound_applications").isNull().and("last_updated").lessThanOrEquals(temporal);
+        } else {
+            criteria = Criteria.where("bound_applications").isNull();
+        }
+        return
+                client
+                .select(ServiceInstanceDetail.class)
+                .matching(Query.query(criteria).sort(Sort.by(Order.asc("organization"), Order.asc("space"), Order.asc("service_name"))))
+                .all()
+                .map(r -> toTuple(r, policy));
+    }
 
-	public Flux<ServiceInstanceDetail> findByDateRange(LocalDate start, LocalDate end) {
-		Criteria criteria =
-			Criteria.where("last_updated").lessThanOrEquals(LocalDateTime.of(end, LocalTime.MAX)).and("last_updated").greaterThan(LocalDateTime.of(start, LocalTime.MIDNIGHT));
-		return 
-			client
-				.select(ServiceInstanceDetail.class)
-					.matching(Query.query(criteria).sort(Sort.by(Order.desc("last_updated"))))
-					.all();
-	}
+    public Mono<ServiceInstanceDetail> save(ServiceInstanceDetail entity) {
+        return
+                client
+                .insert(entity);
+    }
 
-	private Tuple2<ServiceInstanceDetail, ServiceInstancePolicy> toTuple(ServiceInstanceDetail detail, ServiceInstancePolicy policy) {
-		return Tuples.of(detail, policy);
-	}
+    private Tuple2<ServiceInstanceDetail, ServiceInstancePolicy> toTuple(ServiceInstanceDetail detail, ServiceInstancePolicy policy) {
+        return Tuples.of(detail, policy);
+    }
 
 }

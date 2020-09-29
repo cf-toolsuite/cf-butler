@@ -15,8 +15,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @WritingConverter
 public class ApplicationPolicyWriteConverter implements Converter<ApplicationPolicy, OutboundRow> {
 
-	private ObjectMapper mapper = new ObjectMapper();
-	
+    private ObjectMapper mapper = new ObjectMapper();
+
     @Override
     public OutboundRow convert(ApplicationPolicy source) {
         OutboundRow row = new OutboundRow();
@@ -28,12 +28,12 @@ public class ApplicationPolicyWriteConverter implements Converter<ApplicationPol
         row.put("options", Parameter.fromOrEmpty(CollectionUtils.isEmpty(source.getOptions()) ? null : writeOptions(source.getOptions()), String.class));
         return row;
     }
-    
+
     private String writeOptions(Object value) {
         try {
             return mapper.writeValueAsString(value);
         } catch (JsonProcessingException jpe) {
             throw new RuntimeException("Problem writing options", jpe);
         }
-	}
+    }
 }

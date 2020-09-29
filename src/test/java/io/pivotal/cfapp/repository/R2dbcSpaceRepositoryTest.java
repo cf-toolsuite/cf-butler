@@ -22,8 +22,8 @@ public class R2dbcSpaceRepositoryTest {
 
     @Autowired
     public R2dbcSpaceRepositoryTest(
-    		R2dbcSpaceRepository repo
-    ) {
+            R2dbcSpaceRepository repo
+            ) {
         this.repo = repo;
     }
 
@@ -37,19 +37,19 @@ public class R2dbcSpaceRepositoryTest {
         String organizationId = UUID.randomUUID().toString();
         String spaceId = UUID.randomUUID().toString();
         Space entity = Space
-                            .builder()
-                                .spaceId(spaceId)
-                                .spaceName("dev")
-                                .organizationId(organizationId)
-                                .organizationName("zoo-labs")
-                                .build();
+                .builder()
+                .spaceId(spaceId)
+                .spaceName("dev")
+                .organizationId(organizationId)
+                .organizationName("zoo-labs")
+                .build();
         StepVerifier.create(repo.save(entity)
-            .thenMany(repo.findAll()))
-            .assertNext(s -> {
-                assertEquals(spaceId, s.getSpaceId());
-                assertEquals("dev", s.getSpaceName());
-                assertEquals(organizationId, s.getOrganizationId());
-                assertEquals("zoo-labs", s.getOrganizationName());
-            }).verifyComplete();
+                .thenMany(repo.findAll()))
+        .assertNext(s -> {
+            assertEquals(spaceId, s.getSpaceId());
+            assertEquals("dev", s.getSpaceName());
+            assertEquals(organizationId, s.getOrganizationId());
+            assertEquals("zoo-labs", s.getOrganizationName());
+        }).verifyComplete();
     }
 }

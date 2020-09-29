@@ -6,10 +6,10 @@ import reactor.core.publisher.Mono;
 
 public interface OrganizationService {
 
-	Mono<Void> deleteAll();
+    Mono<Void> deleteAll();
 
-	Mono<Organization> save(Organization entity);
+    Flux<Organization> findAll();
 
-	Flux<Organization> findAll();
+    Mono<Organization> save(Organization entity);
 
 }

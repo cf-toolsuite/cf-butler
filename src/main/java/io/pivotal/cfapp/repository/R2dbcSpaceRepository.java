@@ -14,32 +14,32 @@ import reactor.core.publisher.Mono;
 @Repository
 public class R2dbcSpaceRepository {
 
-	private final R2dbcEntityOperations client;
+    private final R2dbcEntityOperations client;
 
-	@Autowired
-	public R2dbcSpaceRepository(R2dbcEntityOperations client) {
-		this.client = client;
-	}
+    @Autowired
+    public R2dbcSpaceRepository(R2dbcEntityOperations client) {
+        this.client = client;
+    }
 
-	public Mono<Void> deleteAll() {
-		return 
-			client
-				.delete(Space.class)
-				.all()
-				.then();
-	}
+    public Mono<Void> deleteAll() {
+        return
+                client
+                .delete(Space.class)
+                .all()
+                .then();
+    }
 
-	public Mono<Space> save(Space entity) {
-		return 
-			client
-				.insert(entity);
-	}
+    public Flux<Space> findAll() {
+        return
+                client
+                .select(Space.class)
+                .matching(Query.empty().sort(Sort.by(Order.asc("org_name"), Order.asc("space_name"))))
+                .all();
+    }
 
-	public Flux<Space> findAll() {
-		return 
-			client
-				.select(Space.class)
-				.matching(Query.empty().sort(Sort.by(Order.asc("org_name"), Order.asc("space_name"))))
-				.all();
-	}
+    public Mono<Space> save(Space entity) {
+        return
+                client
+                .insert(entity);
+    }
 }

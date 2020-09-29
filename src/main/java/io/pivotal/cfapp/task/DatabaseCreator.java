@@ -22,51 +22,51 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class DatabaseCreator implements ApplicationRunner {
 
-	private final R2dbcEntityOperations client;
-	private final ResourceLoader resourceLoader;
-	private final DbmsSettings settings;
-	private final ApplicationEventPublisher publisher;
+    private final R2dbcEntityOperations client;
+    private final ResourceLoader resourceLoader;
+    private final DbmsSettings settings;
+    private final ApplicationEventPublisher publisher;
 
-	@Autowired
-	public DatabaseCreator(
-		R2dbcEntityOperations client,
-		ResourceLoader resourceLoader,
-		DbmsSettings settings,
-		ApplicationEventPublisher publisher) {
-		this.client = client;
-		this.resourceLoader = resourceLoader;
-		this.settings = settings;
-		this.publisher = publisher;
-	}
+    @Autowired
+    public DatabaseCreator(
+            R2dbcEntityOperations client,
+            ResourceLoader resourceLoader,
+            DbmsSettings settings,
+            ApplicationEventPublisher publisher) {
+        this.client = client;
+        this.resourceLoader = resourceLoader;
+        this.settings = settings;
+        this.publisher = publisher;
+    }
 
-	@Override
-	public void run(ApplicationArguments args) {
-		String line; String provider = ""; String ddl = ""; String location = "";
-		try {
-			provider = settings.getProvider().toLowerCase().replaceAll("\\s","");
-			location = String.join("/", "classpath:db", provider, "schema.ddl");
-			Resource schema = resourceLoader.getResource(location);
-			InputStream is = schema.getInputStream();
-			BufferedReader br = new BufferedReader(new InputStreamReader(is));
-			while ((line = br.readLine()) != null) {
-				if (!line.isBlank()) {
-					ddl = line.strip().replace(";","");
-					client
-						.getDatabaseClient()
-							.sql(ddl)
-							.then()
-							.doOnError(e -> {
-								log.error(e.getMessage());
-								System.exit(1);
-							}).subscribe();
-				}
-			}
-			br.close();
-			publisher.publishEvent(new DatabaseCreatedEvent(this));
-		} catch (IOException ioe) {
-			log.error(String.format("Failed trying to read %s\n", location), ioe);
-			System.exit(1);
-		}
-	}
+    @Override
+    public void run(ApplicationArguments args) {
+        String line; String provider = ""; String ddl = ""; String location = "";
+        try {
+            provider = settings.getProvider().toLowerCase().replaceAll("\\s","");
+            location = String.join("/", "classpath:db", provider, "schema.ddl");
+            Resource schema = resourceLoader.getResource(location);
+            InputStream is = schema.getInputStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            while ((line = br.readLine()) != null) {
+                if (!line.isBlank()) {
+                    ddl = line.strip().replace(";","");
+                    client
+                    .getDatabaseClient()
+                    .sql(ddl)
+                    .then()
+                    .doOnError(e -> {
+                        log.error(e.getMessage());
+                        System.exit(1);
+                    }).subscribe();
+                }
+            }
+            br.close();
+            publisher.publishEvent(new DatabaseCreatedEvent(this));
+        } catch (IOException ioe) {
+            log.error(String.format("Failed trying to read %s\n", location), ioe);
+            System.exit(1);
+        }
+    }
 
 }

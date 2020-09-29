@@ -23,8 +23,8 @@ public class OpsmanController {
 
     @Autowired
     public OpsmanController(
-        OpsmanClient client
-    ) {
+            OpsmanClient client
+            ) {
         this.client = client;
     }
 
@@ -32,23 +32,7 @@ public class OpsmanController {
     public Mono<ResponseEntity<List<DeployedProduct>>> getDeployedProducts() {
         return client
                 .getDeployedProducts()
-                .map(products -> ResponseEntity.ok(products))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
-    }
-
-    @GetMapping("/products/stemcell/assignments")
-    public Mono<ResponseEntity<StemcellAssignments>> getStemcellAssignments() {
-        return client
-                .getStemcellAssignments()
-                .map(assignments -> ResponseEntity.ok(assignments))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
-    }
-
-    @GetMapping("/products/stemcell/associations")
-    public Mono<ResponseEntity<StemcellAssociations>> getStemcellAssociations() {
-        return client
-                .getStemcellAssociations()
-                .map(associations -> ResponseEntity.ok(associations))
+                .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
@@ -56,7 +40,23 @@ public class OpsmanController {
     public Mono<ResponseEntity<OmInfo>> getOmInfo() {
         return client
                 .getOmInfo()
-                .map(info -> ResponseEntity.ok(info))
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/products/stemcell/assignments")
+    public Mono<ResponseEntity<StemcellAssignments>> getStemcellAssignments() {
+        return client
+                .getStemcellAssignments()
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/products/stemcell/associations")
+    public Mono<ResponseEntity<StemcellAssociations>> getStemcellAssociations() {
+        return client
+                .getStemcellAssociations()
+                .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 

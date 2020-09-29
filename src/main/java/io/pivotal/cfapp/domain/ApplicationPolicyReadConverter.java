@@ -15,29 +15,30 @@ import io.r2dbc.spi.Row;
 
 @ReadingConverter
 public class ApplicationPolicyReadConverter implements Converter<Row, ApplicationPolicy> {
-    
-	private ObjectMapper mapper = new ObjectMapper();
-	
+
+    private ObjectMapper mapper = new ObjectMapper();
+
+    @Override
     public ApplicationPolicy convert(Row source) {
         return
-    		ApplicationPolicy
-				.builder()
-					.pk(source.get("pk", Long.class))
-					.id(source.get("id", String.class))
-					.operation(source.get("operation", String.class))
-					.description(source.get("description", String.class))
-					.options(readOptions(source.get("options", String.class) == null ? "{}" : source.get("options", String.class)))
-					.organizationWhiteList(source.get("organization_whitelist", String.class) != null ? new HashSet<String>(Arrays.asList(source.get("organization_whitelist", String.class).split("\\s*,\\s*"))): new HashSet<>())
-					.state(source.get("state", String.class))
-				.build();
+                ApplicationPolicy
+                .builder()
+                .pk(source.get("pk", Long.class))
+                .id(source.get("id", String.class))
+                .operation(source.get("operation", String.class))
+                .description(source.get("description", String.class))
+                .options(readOptions(source.get("options", String.class) == null ? "{}" : source.get("options", String.class)))
+                .organizationWhiteList(source.get("organization_whitelist", String.class) != null ? new HashSet<String>(Arrays.asList(source.get("organization_whitelist", String.class).split("\\s*,\\s*"))): new HashSet<>())
+                .state(source.get("state", String.class))
+                .build();
     }
-    
+
     private Map<String, Object> readOptions(String value) {
         try {
             return mapper.readValue(value, new TypeReference<Map<String, Object>>() {});
         } catch (IOException ioe) {
             throw new RuntimeException("Problem reading options", ioe);
         }
-	}
+    }
 }
 

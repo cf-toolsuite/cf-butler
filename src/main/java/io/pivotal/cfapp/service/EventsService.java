@@ -20,6 +20,7 @@ import io.pivotal.cfapp.domain.Event;
 import io.pivotal.cfapp.domain.ServiceInstanceDetail;
 import io.pivotal.cfapp.domain.event.EventType;
 import io.pivotal.cfapp.domain.event.Events;
+import io.pivotal.cfapp.domain.event.Resource;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -28,54 +29,47 @@ import reactor.core.publisher.Mono;
 public class EventsService {
 
     private static final int EVENTS_PER_PAGE = 10;
+    private static Integer getPageSize(Integer numberOfEvents) {
+        int maxNumberOfEvents = 250;
+        Integer result = EVENTS_PER_PAGE;
+        if (numberOfEvents != null) {
+            result = numberOfEvents;
+        }
+        Assert.isTrue(result > 0, "Number of events requested must be greater than zero!");
+        Assert.isTrue(result <= maxNumberOfEvents, String.format("The maximum number of events that may be requested is %d!", maxNumberOfEvents));
+        return result;
+    }
+    private static Mono<Boolean> isDormant(LocalDateTime dateTime, int daysSinceLastUpdate) {
+        Mono<Boolean> result = Mono.just(Boolean.TRUE);
+        if (dateTime != null) {
+            result = Mono.just(ChronoUnit.DAYS.between(dateTime, LocalDateTime.now()) >= daysSinceLastUpdate);
+        }
+        return result;
+    }
     private final WebClient webClient;
     private final DefaultConnectionContext connectionContext;
+
     private final TokenProvider tokenProvider;
+
     private final PasSettings settings;
 
     @Autowired
     public EventsService(
-        WebClient webClient,
-        DefaultConnectionContext connectionContext,
-        TokenProvider tokenProvider,
-        PasSettings settings) {
+            WebClient webClient,
+            DefaultConnectionContext connectionContext,
+            TokenProvider tokenProvider,
+            PasSettings settings) {
         this.webClient = webClient;
         this.connectionContext = connectionContext;
         this.tokenProvider = tokenProvider;
         this.settings = settings;
     }
 
-    public Mono<Events> getEvents(String id, Integer numberOfEvents) {
-        Assert.hasText(id, "Global unique identifier for application or service instance must not be blank or null!");
-        final int pageSize = getPageSize(numberOfEvents);
-        final String uri = UriComponentsBuilder
-            .newInstance()
-                .scheme("https")
-                .host(settings.getApiHost())
-                .path("/v2/events")
-                .queryParam("q", "actee:{id}")
-                .queryParam("page", 1)
-                .queryParam("results-per-page", "{pageSize}")
-                .queryParam("order-direction", "desc")
-                .queryParam("order-by", "timestamp")
-                .buildAndExpand(id, pageSize)
-                .encode()
-                .toUriString();
-        return
-            getOauthToken()
-                .flatMap(t -> webClient
-                                .get()
-                                    .uri(uri)
-                                    .header(HttpHeaders.AUTHORIZATION, t)
-                                        .retrieve()
-                                            .bodyToMono(Events.class));
-    }
-
     public Mono<Events> getEvent(String id, String type) {
         Assert.hasText(id, "Global unique identifier for application or service instance must not be blank or null!");
         EventType eventType = EventType.from(type);
         final String uri = UriComponentsBuilder
-            .newInstance()
+                .newInstance()
                 .scheme("https")
                 .host(settings.getApiHost())
                 .path("/v2/events")
@@ -89,20 +83,51 @@ public class EventsService {
                 .encode()
                 .toUriString();
         return
-            getOauthToken()
+                getOauthToken()
                 .flatMap(t -> webClient
-                                .get()
-                                    .uri(uri)
-                                    .header(HttpHeaders.AUTHORIZATION, t)
-                                        .retrieve()
-                                            .bodyToMono(Events.class));
+                        .get()
+                        .uri(uri)
+                        .header(HttpHeaders.AUTHORIZATION, t)
+                        .retrieve()
+                        .bodyToMono(Events.class));
+    }
+
+    public Mono<Events> getEvents(String id, Integer numberOfEvents) {
+        Assert.hasText(id, "Global unique identifier for application or service instance must not be blank or null!");
+        final int pageSize = getPageSize(numberOfEvents);
+        final String uri = UriComponentsBuilder
+                .newInstance()
+                .scheme("https")
+                .host(settings.getApiHost())
+                .path("/v2/events")
+                .queryParam("q", "actee:{id}")
+                .queryParam("page", 1)
+                .queryParam("results-per-page", "{pageSize}")
+                .queryParam("order-direction", "desc")
+                .queryParam("order-by", "timestamp")
+                .buildAndExpand(id, pageSize)
+                .encode()
+                .toUriString();
+        return
+                getOauthToken()
+                .flatMap(t -> webClient
+                        .get()
+                        .uri(uri)
+                        .header(HttpHeaders.AUTHORIZATION, t)
+                        .retrieve()
+                        .bodyToMono(Events.class));
     }
 
     public Flux<Event> getEvents(String id, String[] types) {
         return Flux
                 .fromArray(types)
                 .concatMap(type -> getEvent(id, type))
-                .flatMap(json -> toFlux(json));
+                .flatMap(this::toFlux);
+    }
+
+    private Mono<String> getOauthToken() {
+        tokenProvider.invalidate(connectionContext);
+        return tokenProvider.getToken(connectionContext);
     }
 
     public Mono<Boolean> isDormantApplication(AppDetail detail, int daysSinceLastUpdate) {
@@ -110,14 +135,14 @@ public class EventsService {
             return Mono.just(Boolean.TRUE);
         } else {
             return getEvents(detail.getAppId(), 1)
-                        .flatMap(
+                    .flatMap(
                             envelope -> envelope.hasNoEvents()
-                                            ? isDormant(detail.getLastPushed(), daysSinceLastUpdate)
-                                            : toFlux(envelope)
-                                                .filter(event -> ChronoUnit.DAYS.between(event.getTime(), LocalDateTime.now()) >= daysSinceLastUpdate)
-                                                .collect(Collectors.toList())
-                                                .map(list -> list.size() > 0)
-                        );
+                            ? isDormant(detail.getLastPushed(), daysSinceLastUpdate)
+                                    : toFlux(envelope)
+                                    .filter(event -> ChronoUnit.DAYS.between(event.getTime(), LocalDateTime.now()) >= daysSinceLastUpdate)
+                                    .collect(Collectors.toList())
+                                    .map(list -> list.size() > 0)
+                            );
         }
     }
 
@@ -126,57 +151,33 @@ public class EventsService {
             return Mono.just(Boolean.TRUE);
         } else {
             return getEvents(detail.getServiceInstanceId(), 1)
-                        .flatMap(
+                    .flatMap(
                             envelope -> envelope.hasNoEvents()
-                                            ? isDormant(detail.getLastUpdated(), daysSinceLastUpdate)
-                                            : toFlux(envelope)
-                                                .filter(event -> ChronoUnit.DAYS.between(event.getTime(), LocalDateTime.now()) >= daysSinceLastUpdate)
-                                                .collect(Collectors.toList())
-                                                .map(list -> list.size() > 0)
-                        );
+                            ? isDormant(detail.getLastUpdated(), daysSinceLastUpdate)
+                                    : toFlux(envelope)
+                                    .filter(event -> ChronoUnit.DAYS.between(event.getTime(), LocalDateTime.now()) >= daysSinceLastUpdate)
+                                    .collect(Collectors.toList())
+                                    .map(list -> list.size() > 0)
+                            );
         }
-    }
-
-    private static Mono<Boolean> isDormant(LocalDateTime dateTime, int daysSinceLastUpdate) {
-        Mono<Boolean> result = Mono.just(Boolean.TRUE);
-        if (dateTime != null) {
-            result = Mono.just(ChronoUnit.DAYS.between(dateTime, LocalDateTime.now()) >= daysSinceLastUpdate);
-        }
-        return result;
     }
 
     public Flux<Event> toFlux(Events envelope) {
         return
-            Flux
+                Flux
                 .fromIterable(envelope.getResources())
-                .map(resource -> resource.getEntity())
+                .map(Resource::getEntity)
                 .map(entity -> Event
-                                .builder()
-                                    .type(entity.getType())
-                                    .actee(entity.getActee())
-                                    .actor(entity.getActor())
-                                    .time(
-                                        entity.getTimestamp() != null
-                                            ? LocalDateTime.ofInstant(entity.getTimestamp(), ZoneOffset.UTC)
-                                            : null)
-                                .build()
-                );
-    }
-
-    private Mono<String> getOauthToken() {
-        tokenProvider.invalidate(connectionContext);
-        return tokenProvider.getToken(connectionContext);
-    }
-
-    private static Integer getPageSize(Integer numberOfEvents) {
-        int maxNumberOfEvents = 250;
-        Integer result = EVENTS_PER_PAGE;
-        if (numberOfEvents != null) {
-            result = numberOfEvents;
-        }
-        Assert.isTrue(result > 0, "Number of events requested must be greater than zero!");
-        Assert.isTrue(result <= maxNumberOfEvents, String.format("The maximum number of events that may be requested is %d!", maxNumberOfEvents));
-        return result;
+                        .builder()
+                        .type(entity.getType())
+                        .actee(entity.getActee())
+                        .actor(entity.getActor())
+                        .time(
+                                entity.getTimestamp() != null
+                                ? LocalDateTime.ofInstant(entity.getTimestamp(), ZoneOffset.UTC)
+                                        : null)
+                        .build()
+                        );
     }
 
 }

@@ -20,9 +20,9 @@ public class DemographicsController {
 
     @Autowired
     public DemographicsController(
-        DemographicsService demoService,
-        TimeKeeperService tkService
-    ) {
+            DemographicsService demoService,
+            TimeKeeperService tkService
+            ) {
         this.demoService = demoService;
         this.util = new TkServiceUtil(tkService);
     }
@@ -31,8 +31,8 @@ public class DemographicsController {
     public Mono<ResponseEntity<Demographics>> getDemographics() {
         return util.getHeaders()
                 .flatMap(h -> demoService
-                                .getDemographics()
-                                .map(d -> new ResponseEntity<>(d, h, HttpStatus.OK)))
-                                .defaultIfEmpty(ResponseEntity.notFound().build());
+                        .getDemographics()
+                        .map(d -> new ResponseEntity<>(d, h, HttpStatus.OK)))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 }

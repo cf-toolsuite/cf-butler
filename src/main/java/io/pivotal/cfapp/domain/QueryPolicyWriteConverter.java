@@ -14,8 +14,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @WritingConverter
 public class QueryPolicyWriteConverter implements Converter<QueryPolicy, OutboundRow> {
 
-	private ObjectMapper mapper = new ObjectMapper();
-	
+    private ObjectMapper mapper = new ObjectMapper();
+
     @Override
     public OutboundRow convert(QueryPolicy source) {
         OutboundRow row = new OutboundRow();
@@ -25,20 +25,20 @@ public class QueryPolicyWriteConverter implements Converter<QueryPolicy, Outboun
         row.put("email_notificationl_template", Parameter.fromOrEmpty(source.getEmailNotificationTemplate() != null ? writeEmailNotificationTemplate(source.getEmailNotificationTemplate()) : null, String.class));
         return row;
     }
-    
-    private String writeQueries(Set<Query> value) {
-        try {
-            return mapper.writeValueAsString(value);
-        } catch (JsonProcessingException jpe) {
-            throw new RuntimeException("Problem writing queries", jpe);
-        }
-	}
-    
+
     private String writeEmailNotificationTemplate(EmailNotificationTemplate value) {
         try {
             return mapper.writeValueAsString(value);
         } catch (JsonProcessingException jpe) {
             throw new RuntimeException("Problem writing email notification template", jpe);
         }
-	}
+    }
+
+    private String writeQueries(Set<Query> value) {
+        try {
+            return mapper.writeValueAsString(value);
+        } catch (JsonProcessingException jpe) {
+            throw new RuntimeException("Problem writing queries", jpe);
+        }
+    }
 }

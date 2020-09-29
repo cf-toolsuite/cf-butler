@@ -16,23 +16,23 @@ import reactor.core.publisher.Mono;
 @RestController
 public class UserSpacesController {
 
-	private final UserSpacesService service;
-	private final TkServiceUtil util;
+    private final UserSpacesService service;
+    private final TkServiceUtil util;
 
     @Autowired
     public UserSpacesController(
-		UserSpacesService service,
-		TimeKeeperService tkService) {
-		this.service = service;
-		this.util = new TkServiceUtil(tkService);
+            UserSpacesService service,
+            TimeKeeperService tkService) {
+        this.service = service;
+        this.util = new TkServiceUtil(tkService);
     }
 
     @GetMapping(value = { "/snapshot/spaces/users/{name}" })
-	public Mono<ResponseEntity<UserSpaces>> getSpacesForAccountName(@PathVariable("name") String name) {
-		return util.getHeaders()
-				.flatMap(h -> service
-								.getUserSpaces(name)
-								.map(userSpaces -> new ResponseEntity<>(userSpaces, h, HttpStatus.OK)))
-								.defaultIfEmpty(ResponseEntity.notFound().build());
-	}
+    public Mono<ResponseEntity<UserSpaces>> getSpacesForAccountName(@PathVariable("name") String name) {
+        return util.getHeaders()
+                .flatMap(h -> service
+                        .getUserSpaces(name)
+                        .map(userSpaces -> new ResponseEntity<>(userSpaces, h, HttpStatus.OK)))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
 }

@@ -22,7 +22,7 @@ import lombok.ToString;
 @Table("spaces")
 public class Space {
 
-	@Column("org_id")
+    @Column("org_id")
     @JsonProperty("organization-id")
     private final String organizationId;
 
@@ -41,14 +41,14 @@ public class Space {
     @JsonCreator
     @PersistenceConstructor
     Space(
-        @JsonProperty("organization-id") String organizationId,
-        @JsonProperty("organization-name") String organizationName,
-        @JsonProperty("space-id") String spaceId,
-        @JsonProperty("space-name") String spaceName) {
-            this.organizationId = organizationId;
-            this.organizationName = organizationName;
-            this.spaceId = spaceId;
-            this.spaceName = spaceName;
+            @JsonProperty("organization-id") String organizationId,
+            @JsonProperty("organization-name") String organizationName,
+            @JsonProperty("space-id") String spaceId,
+            @JsonProperty("space-name") String spaceName) {
+        this.organizationId = organizationId;
+        this.organizationName = organizationName;
+        this.spaceId = spaceId;
+        this.spaceName = spaceName;
     }
 
 }

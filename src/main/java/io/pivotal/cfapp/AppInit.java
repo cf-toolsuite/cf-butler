@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @SpringBootApplication(proxyBeanMethods = false)
 public class AppInit {
 
-	public static void main(String[] args) {
-		SpringApplication.run(AppInit.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(AppInit.class, args);
+    }
 }

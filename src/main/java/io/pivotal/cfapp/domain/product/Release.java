@@ -3,37 +3,51 @@ package io.pivotal.cfapp.domain.product;
 import java.time.Instant;
 import java.time.LocalDate;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import org.apache.commons.lang3.StringUtils;
-
 import lombok.Builder;
-import lombok.Getter;
 import lombok.Builder.Default;
+import lombok.Getter;
 
 @Builder
 @Getter
 @JsonPropertyOrder({
-"id",
-"slug",
-"version",
-"release_type",
-"release_date",
-"release_notes_url",
-"availability",
-"description",
-"eula",
-"eccn",
-"license_exception",
-"updated_at",
-"software_files_updated_at",
-"_links"
+    "id",
+    "slug",
+    "version",
+    "release_type",
+    "release_date",
+    "release_notes_url",
+    "availability",
+    "description",
+    "eula",
+    "eccn",
+    "license_exception",
+    "updated_at",
+    "software_files_updated_at",
+    "_links"
 })
 public class Release {
 
     private static final String BASE_URL = "https://network.pivotal.io/api/v2/products/";
+
+    public static Release empty() {
+        return Release.builder().build();
+    }
+
+    public static String headers() {
+        return String.join(",", "id", "slug", "version", "release_type", "release_date",
+                "release_notes_url", "availability", "description", "eccn", "license_exception", "updated_at",
+                "software_files_updated_at");
+    }
+
+    private static String wrap(String value) {
+        return value != null ? StringUtils.wrap(value, '"') : StringUtils.wrap("", '"');
+    }
 
     @Default
     @JsonProperty("id")
@@ -80,21 +94,21 @@ public class Release {
 
     @JsonCreator
     public Release(
-        @JsonProperty("id") Long id,
-        @JsonProperty("version") String version,
-        @JsonProperty("release_type") String releaseType,
-        @JsonProperty("release_date") LocalDate releaseDate,
-        @JsonProperty("release_notes_url") String releaseNotesUrl,
-        @JsonProperty("availability") String availability,
-        @JsonProperty("description") String description,
-        @JsonProperty("eula") Eula eula,
-        @JsonProperty("end_of_support_date") LocalDate endOfSupportDate,
-        @JsonProperty("eccn") String eccn,
-        @JsonProperty("license_exception") String licenseException,
-        @JsonProperty("updated_at") Instant updatedAt,
-        @JsonProperty("software_files_updated_at") Instant softwareFilesUpdatedAt,
-        @JsonProperty("_links") ReleaseLinks links
-    ) {
+            @JsonProperty("id") Long id,
+            @JsonProperty("version") String version,
+            @JsonProperty("release_type") String releaseType,
+            @JsonProperty("release_date") LocalDate releaseDate,
+            @JsonProperty("release_notes_url") String releaseNotesUrl,
+            @JsonProperty("availability") String availability,
+            @JsonProperty("description") String description,
+            @JsonProperty("eula") Eula eula,
+            @JsonProperty("end_of_support_date") LocalDate endOfSupportDate,
+            @JsonProperty("eccn") String eccn,
+            @JsonProperty("license_exception") String licenseException,
+            @JsonProperty("updated_at") Instant updatedAt,
+            @JsonProperty("software_files_updated_at") Instant softwareFilesUpdatedAt,
+            @JsonProperty("_links") ReleaseLinks links
+            ) {
         this.id = id;
         this.version = version;
         this.releaseType = releaseType;
@@ -119,26 +133,12 @@ public class Release {
         return slug;
     }
 
-    public static Release empty() {
-        return Release.builder().build();
-    }
-
-    public static String headers() {
-        return String.join(",", "id", "slug", "version", "release_type", "release_date",
-            "release_notes_url", "availability", "description", "eccn", "license_exception", "updated_at",
-            "software_files_updated_at");
-    }
-
-    private static String wrap(String value) {
-		return value != null ? StringUtils.wrap(value, '"') : StringUtils.wrap("", '"');
-    }
-
     public String toCsv() {
         return String.join(",", wrap(String.valueOf(getId())), wrap(getSlug()), wrap(getVersion()),
-            wrap(getReleaseType()), wrap(getReleaseDate() != null ? getReleaseDate().toString(): ""),
-            wrap(getReleaseNotesUrl()), wrap(getAvailability()), wrap(getDescription()),
-            wrap(getEccn()), wrap(getLicenseException()), wrap(getUpdatedAt() != null ? getUpdatedAt().toString(): ""),
-            wrap(getSoftwareFilesUpdatedAt() != null ? getSoftwareFilesUpdatedAt().toString(): ""));
+                wrap(getReleaseType()), wrap(getReleaseDate() != null ? getReleaseDate().toString(): ""),
+                wrap(getReleaseNotesUrl()), wrap(getAvailability()), wrap(getDescription()),
+                wrap(getEccn()), wrap(getLicenseException()), wrap(getUpdatedAt() != null ? getUpdatedAt().toString(): ""),
+                wrap(getSoftwareFilesUpdatedAt() != null ? getSoftwareFilesUpdatedAt().toString(): ""));
     }
 
 }

@@ -14,18 +14,18 @@ import lombok.Getter;
 @Getter
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-"actee",
-"actee_name",
-"actee_type",
-"actor",
-"actor_name",
-"actor_type",
-"actor_username",
-"metadata",
-"organization_guid",
-"space_guid",
-"timestamp",
-"type"
+    "actee",
+    "actee_name",
+    "actee_type",
+    "actor",
+    "actor_name",
+    "actor_type",
+    "actor_username",
+    "metadata",
+    "organization_guid",
+    "space_guid",
+    "timestamp",
+    "type"
 })
 public class Entity {
 
@@ -67,19 +67,19 @@ public class Entity {
 
     @JsonCreator
     public Entity(
-        @JsonProperty("actee") String actee,
-        @JsonProperty("actee_name") String acteeName,
-        @JsonProperty("actee_type") String acteeType,
-        @JsonProperty("actor") String actor,
-        @JsonProperty("actor_name") String actorName,
-        @JsonProperty("actor_type") String actorType,
-        @JsonProperty("actor_username") String actorUsername,
-        @JsonProperty("metadata") EntityMetadata metadata,
-        @JsonProperty("organization_guid") String organizationGuid,
-        @JsonProperty("space_guid") String spaceGuid,
-        @JsonProperty("timestamp") Instant timestamp,
-        @JsonProperty("type") String type
-    ) {
+            @JsonProperty("actee") String actee,
+            @JsonProperty("actee_name") String acteeName,
+            @JsonProperty("actee_type") String acteeType,
+            @JsonProperty("actor") String actor,
+            @JsonProperty("actor_name") String actorName,
+            @JsonProperty("actor_type") String actorType,
+            @JsonProperty("actor_username") String actorUsername,
+            @JsonProperty("metadata") EntityMetadata metadata,
+            @JsonProperty("organization_guid") String organizationGuid,
+            @JsonProperty("space_guid") String spaceGuid,
+            @JsonProperty("timestamp") Instant timestamp,
+            @JsonProperty("type") String type
+            ) {
         this.actee = actee;
         this.acteeName = acteeName;
         this.acteeType = acteeType;

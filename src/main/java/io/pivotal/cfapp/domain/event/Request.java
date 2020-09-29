@@ -12,23 +12,23 @@ import lombok.Getter;
 @Getter
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-"instances",
-"state",
-"related_guid",
-"relation",
-"route",
-"verb",
-"buildpack",
-"command",
-"console",
-"docker_credentials",
-"environment_json",
-"health_check_type",
-"memory",
-"name",
-"production",
-"space_guid",
-"stack_guid"
+    "instances",
+    "state",
+    "related_guid",
+    "relation",
+    "route",
+    "verb",
+    "buildpack",
+    "command",
+    "console",
+    "docker_credentials",
+    "environment_json",
+    "health_check_type",
+    "memory",
+    "name",
+    "production",
+    "space_guid",
+    "stack_guid"
 })
 public class Request {
 
@@ -85,23 +85,23 @@ public class Request {
 
     @JsonCreator
     public Request(
-        @JsonProperty("instances") Integer instances,
-        @JsonProperty("state") String state,
-        @JsonProperty("related_guid") String relatedGuid,
-        @JsonProperty("relation") String relation,
-        @JsonProperty("route") String route,
-        @JsonProperty("verb") String verb,
-        @JsonProperty("buildpack") String buildpack,
-        @JsonProperty("command") String command,
-        @JsonProperty("console") Boolean console,
-        @JsonProperty("docker_credentials") String dockerCredentials,
-        @JsonProperty("environment_json") String environmentJson,
-        @JsonProperty("health_check_type") String healthCheckType,
-        @JsonProperty("memory") Integer memory,
-        @JsonProperty("name") String name,
-        @JsonProperty("production") Boolean production,
-        @JsonProperty("space_guid") String spaceGuid,
-        @JsonProperty("stack_guid") String stackGuid) {
+            @JsonProperty("instances") Integer instances,
+            @JsonProperty("state") String state,
+            @JsonProperty("related_guid") String relatedGuid,
+            @JsonProperty("relation") String relation,
+            @JsonProperty("route") String route,
+            @JsonProperty("verb") String verb,
+            @JsonProperty("buildpack") String buildpack,
+            @JsonProperty("command") String command,
+            @JsonProperty("console") Boolean console,
+            @JsonProperty("docker_credentials") String dockerCredentials,
+            @JsonProperty("environment_json") String environmentJson,
+            @JsonProperty("health_check_type") String healthCheckType,
+            @JsonProperty("memory") Integer memory,
+            @JsonProperty("name") String name,
+            @JsonProperty("production") Boolean production,
+            @JsonProperty("space_guid") String spaceGuid,
+            @JsonProperty("stack_guid") String stackGuid) {
         this.instances = instances;
         this.state = state;
         this.relatedGuid = relatedGuid;

@@ -14,8 +14,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @WritingConverter
 public class HygienePolicyWriteConverter implements Converter<HygienePolicy, OutboundRow> {
 
-	private ObjectMapper mapper = new ObjectMapper();
-	
+    private ObjectMapper mapper = new ObjectMapper();
+
     @Override
     public OutboundRow convert(HygienePolicy source) {
         OutboundRow row = new OutboundRow();
@@ -26,12 +26,12 @@ public class HygienePolicyWriteConverter implements Converter<HygienePolicy, Out
         row.put("organization_whitelist", Parameter.fromOrEmpty(source.getOrganizationWhiteList().stream().filter(StringUtils::isNotBlank).collect(Collectors.joining(",")), String.class));
         return row;
     }
-    
+
     private String writeEmailNotificationTemplate(EmailNotificationTemplate value) {
         try {
             return mapper.writeValueAsString(value);
         } catch (JsonProcessingException jpe) {
             throw new RuntimeException("Problem writing email notification template", jpe);
         }
-	}
+    }
 }

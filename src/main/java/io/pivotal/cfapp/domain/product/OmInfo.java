@@ -10,14 +10,6 @@ import lombok.Getter;
 @Getter
 public class OmInfo {
 
-    @JsonProperty("info")
-    private Info info;
-
-    @JsonCreator
-    public OmInfo(@JsonProperty("info") Info info) {
-        this.info = info;
-    }
-
     @Builder
     @Getter
     public static class Info {
@@ -29,5 +21,13 @@ public class OmInfo {
         public Info(@JsonProperty("version") String version) {
             this.version = version;
         }
+    }
+
+    @JsonProperty("info")
+    private Info info;
+
+    @JsonCreator
+    public OmInfo(@JsonProperty("info") Info info) {
+        this.info = info;
     }
 }

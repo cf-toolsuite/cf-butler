@@ -15,9 +15,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @WritingConverter
 public class ServiceInstancePolicyWriteConverter implements Converter<ServiceInstancePolicy, OutboundRow> {
 
-	private ObjectMapper mapper = new ObjectMapper();
-	
-	@Override
+    private ObjectMapper mapper = new ObjectMapper();
+
+    @Override
     public OutboundRow convert(ServiceInstancePolicy source) {
         OutboundRow row = new OutboundRow();
         row.put("id", Parameter.fromOrEmpty(source.getId(), String.class));
@@ -27,12 +27,12 @@ public class ServiceInstancePolicyWriteConverter implements Converter<ServiceIns
         row.put("organization_whitelist", Parameter.fromOrEmpty(source.getOrganizationWhiteList().stream().filter(StringUtils::isNotBlank).collect(Collectors.joining(",")), String.class));
         return row;
     }
-    
+
     private String writeOptions(Object value) {
         try {
             return mapper.writeValueAsString(value);
         } catch (JsonProcessingException jpe) {
             throw new RuntimeException("Problem writing options", jpe);
         }
-	}
+    }
 }

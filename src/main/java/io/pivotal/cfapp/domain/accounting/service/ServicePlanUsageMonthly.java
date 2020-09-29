@@ -28,9 +28,9 @@ public class ServicePlanUsageMonthly {
 
     @JsonCreator
     public ServicePlanUsageMonthly(
-        @JsonProperty("usages") List<ServiceUsageMonthly> usages,
-        @JsonProperty("service_plan_name") String servicePlanName,
-        @JsonProperty("service_plan_guid") String servicePlanGuid) {
+            @JsonProperty("usages") List<ServiceUsageMonthly> usages,
+            @JsonProperty("service_plan_name") String servicePlanName,
+            @JsonProperty("service_plan_guid") String servicePlanGuid) {
         this.usages = usages;
         this.servicePlanName = servicePlanName;
         this.servicePlanGuid = servicePlanGuid;

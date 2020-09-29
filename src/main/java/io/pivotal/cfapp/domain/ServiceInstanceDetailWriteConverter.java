@@ -30,5 +30,5 @@ public class ServiceInstanceDetailWriteConverter implements Converter<ServiceIns
         row.put("last_updated", Parameter.fromOrEmpty(source.getLastUpdated(), LocalDateTime.class));
         return row;
     }
-    
+
 }

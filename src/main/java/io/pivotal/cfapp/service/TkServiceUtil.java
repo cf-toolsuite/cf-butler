@@ -17,8 +17,8 @@ public class TkServiceUtil {
     }
 
     public Mono<HttpHeaders> getHeaders() {
-        return 
-    		tkService
+        return
+                tkService
                 .findOne()
                 .map(lc -> {
                     HttpHeaders headers = new HttpHeaders();
@@ -28,8 +28,8 @@ public class TkServiceUtil {
     }
 
     public Mono<LocalDateTime> getTimeCollected() {
-        return 
-    		tkService
+        return
+                tkService
                 .findOne();
     }
 
