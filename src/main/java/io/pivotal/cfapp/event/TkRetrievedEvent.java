@@ -14,13 +14,13 @@ public class TkRetrievedEvent extends ApplicationEvent {
         super(source);
     }
 
+    public LocalDateTime getLastCollected() {
+        return lastCollected;
+    }
+
     public TkRetrievedEvent lastCollected(LocalDateTime lastCollected) {
         this.lastCollected = lastCollected;
         return this;
-    }
-
-    public LocalDateTime getLastCollected() {
-        return lastCollected;
     }
 
 }

@@ -17,53 +17,53 @@ import reactor.core.publisher.Mono;
 @ConditionalOnProperty(prefix = "cf.policies.git", name = "uri")
 public class DbmsOnlyPoliciesController {
 
-	private final PoliciesService policiesService;
+    private final PoliciesService policiesService;
 
-	@Autowired
-	public DbmsOnlyPoliciesController(
-			PoliciesService policiesService) {
-		this.policiesService = policiesService;
-	}
+    @Autowired
+    public DbmsOnlyPoliciesController(
+            PoliciesService policiesService) {
+        this.policiesService = policiesService;
+    }
 
-	@PostMapping("/policies")
-	public Mono<ResponseEntity<Policies>> establishPolicies(@RequestBody Policies policies) {
-		return policiesService.save(policies)
-								.map(p -> ResponseEntity.ok(p));
-	}
+    @DeleteMapping("/policies")
+    public Mono<ResponseEntity<Void>> deleteAllPolicies() {
+        return policiesService.deleteAll()
+                .map(ResponseEntity::ok);
+    }
 
-	@DeleteMapping("/policies/application/{id}")
-	public Mono<ResponseEntity<Void>> deleteApplicationPolicy(@PathVariable String id) {
-		return policiesService.deleteApplicationPolicyById(id)
-								.map(p -> ResponseEntity.ok(p));
-	}
+    @DeleteMapping("/policies/application/{id}")
+    public Mono<ResponseEntity<Void>> deleteApplicationPolicy(@PathVariable String id) {
+        return policiesService.deleteApplicationPolicyById(id)
+                .map(ResponseEntity::ok);
+    }
 
-	@DeleteMapping("/policies/serviceInstance/{id}")
-	public Mono<ResponseEntity<Void>> deleteServiceInstancePolicy(@PathVariable String id) {
-		return policiesService.deleteServiceInstancePolicyById(id)
-								.map(p -> ResponseEntity.ok(p));
-	}
+    @DeleteMapping("/policies/hygiene/{id}")
+    public Mono<ResponseEntity<Void>> deleteHygienePolicy(@PathVariable String id) {
+        return policiesService.deleteHygienePolicyById(id)
+                .map(ResponseEntity::ok);
+    }
 
-	@DeleteMapping("/policies/query/{id}")
-	public Mono<ResponseEntity<Void>> deleteQueryPolicy(@PathVariable String id) {
-		return policiesService.deleteQueryPolicyById(id)
-								.map(p -> ResponseEntity.ok(p));
-	}
+    @DeleteMapping("/policies/legacy/{id}")
+    public Mono<ResponseEntity<Void>> deleteLegacyPolicy(@PathVariable String id) {
+        return policiesService.deleteLegacyPolicyById(id)
+                .map(ResponseEntity::ok);
+    }
 
-	@DeleteMapping("/policies/hygiene/{id}")
-	public Mono<ResponseEntity<Void>> deleteHygienePolicy(@PathVariable String id) {
-		return policiesService.deleteHygienePolicyById(id)
-								.map(p -> ResponseEntity.ok(p));
-	}
+    @DeleteMapping("/policies/query/{id}")
+    public Mono<ResponseEntity<Void>> deleteQueryPolicy(@PathVariable String id) {
+        return policiesService.deleteQueryPolicyById(id)
+                .map(ResponseEntity::ok);
+    }
 
-	@DeleteMapping("/policies/legacy/{id}")
-	public Mono<ResponseEntity<Void>> deleteLegacyPolicy(@PathVariable String id) {
-		return policiesService.deleteLegacyPolicyById(id)
-								.map(p -> ResponseEntity.ok(p));
-	}
+    @DeleteMapping("/policies/serviceInstance/{id}")
+    public Mono<ResponseEntity<Void>> deleteServiceInstancePolicy(@PathVariable String id) {
+        return policiesService.deleteServiceInstancePolicyById(id)
+                .map(ResponseEntity::ok);
+    }
 
-	@DeleteMapping("/policies")
-	public Mono<ResponseEntity<Void>> deleteAllPolicies() {
-		return policiesService.deleteAll()
-								.map(p -> ResponseEntity.ok(p));
-	}
+    @PostMapping("/policies")
+    public Mono<ResponseEntity<Policies>> establishPolicies(@RequestBody Policies policies) {
+        return policiesService.save(policies)
+                .map(ResponseEntity::ok);
+    }
 }

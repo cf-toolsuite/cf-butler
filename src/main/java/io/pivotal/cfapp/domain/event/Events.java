@@ -9,20 +9,19 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-
 import lombok.Builder;
-import lombok.Getter;
 import lombok.Builder.Default;
+import lombok.Getter;
 
 @Builder
 @Getter
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-"next_url",
-"prev_url",
-"resources",
-"total_pages",
-"total_results"
+    "next_url",
+    "prev_url",
+    "resources",
+    "total_pages",
+    "total_results"
 })
 public class Events {
 
@@ -46,12 +45,12 @@ public class Events {
 
     @JsonCreator
     public Events(
-        @JsonProperty("next_url") String nextUrl,
-        @JsonProperty("prev_url") String prevUrl,
-        @JsonProperty("resources") List<Resource> resources,
-        @JsonProperty("total_pages") Integer totalPages,
-        @JsonProperty("total_results") Integer totalResults
-    ) {
+            @JsonProperty("next_url") String nextUrl,
+            @JsonProperty("prev_url") String prevUrl,
+            @JsonProperty("resources") List<Resource> resources,
+            @JsonProperty("total_pages") Integer totalPages,
+            @JsonProperty("total_results") Integer totalResults
+            ) {
         this.nextUrl = nextUrl;
         this.prevUrl = prevUrl;
         this.resources = resources;

@@ -1,7 +1,7 @@
 plugins {
-    id 'org.springframework.boot' version '2.3.3.RELEASE'
+    id 'org.springframework.boot' version '2.4.0-M2'
     id 'io.spring.dependency-management' version '1.0.10.RELEASE'
-    id 'com.github.ben-manes.versions' version '0.31.0'
+    id 'com.github.ben-manes.versions' version '0.33.0'
     id 'io.franzbecker.gradle-lombok' version '4.0.0'
 	id 'java'
     id 'jacoco'
@@ -44,10 +44,9 @@ repositories {
 }
 
 ext {
-    set('springCloudServicesVersion', '3.1.2.RELEASE')
-	set('springCloudVersion', "2020.0.0-M2")
+    set('springCloudServicesVersion', '3.1.5.RELEASE')
+	set('springCloudVersion', "2020.0.0-M3")
     // @see https://github.com/spring-projects/spring-boot/blob/master/spring-boot-project/spring-boot-dependencies/pom.xml
-    set('spring-data-releasetrain.version', 'Neumann-RELEASE')
 }
 
 dependencyManagement {
@@ -118,26 +117,23 @@ dependencies {
     implementation('org.springframework.boot:spring-boot-starter-log4j2')
     implementation('com.lmax:disruptor:3.4.2')
     implementation('org.springframework.boot:spring-boot-starter-data-r2dbc')
-    implementation('org.springframework.data:spring-data-relational:2.0.3.RELEASE')
     implementation('org.locationtech.jts:jts-core:1.17.1')
     implementation('io.r2dbc:r2dbc-spi')
     runtime('io.r2dbc:r2dbc-pool')
     implementation('io.r2dbc:r2dbc-h2')
     if (project.hasProperty("mysql")) {
-        runtime('com.github.mirromutth:r2dbc-mysql:v0.8.1.RELEASE')
+        runtime('dev.miku:r2dbc-mysql:0.8.2.RELEASE')
     } else {
         runtime('io.r2dbc:r2dbc-postgresql')
     }
     implementation('org.eclipse.jgit:org.eclipse.jgit:5.9.0.202009080501-r')
     implementation('org.springframework.boot:spring-boot-starter-mail')
-    implementation('com.sendgrid:sendgrid-java:4.6.4') {
+    implementation('com.sendgrid:sendgrid-java:4.6.6') {
         exclude group: 'org.apache.httpcomponents', module: 'httpclient'
     }
     implementation('org.apache.httpcomponents:httpclient:4.5.12')
-    implementation('org.cloudfoundry:cloudfoundry-client-reactor:4.9.0.RELEASE')
-    implementation('org.cloudfoundry:cloudfoundry-operations:4.9.0.RELEASE')
-    implementation('io.projectreactor:reactor-core:3.3.9.RELEASE')
-    implementation('io.projectreactor.netty:reactor-netty:0.9.11.RELEASE')
+    implementation('org.cloudfoundry:cloudfoundry-client-reactor:4.10.0.RELEASE')
+    implementation('org.cloudfoundry:cloudfoundry-operations:4.10.0.RELEASE')
     implementation('io.micrometer:micrometer-registry-prometheus')
     testImplementation('io.projectreactor:reactor-test')
     testImplementation('org.assertj:assertj-core:3.17.2')
@@ -146,10 +142,7 @@ dependencies {
     testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine')
     testImplementation('org.mockito:mockito-core')
     testImplementation('org.mockito:mockito-junit-jupiter')
-    testImplementation('org.springframework.boot:spring-boot-starter-test') {
-        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
-	    exclude group: 'junit', module: 'junit'
-    }
+    testImplementation('org.springframework.boot:spring-boot-starter-test')
     testImplementation('org.pitest:pitest-junit5-plugin:0.12')
 }
 

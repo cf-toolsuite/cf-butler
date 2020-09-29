@@ -33,11 +33,11 @@ public class TaskUsageMonthly {
 
     @JsonCreator
     public TaskUsageMonthly(
-        @JsonProperty("month") Integer month,
-        @JsonProperty("year") Integer year,
-        @JsonProperty("total_task_runs") Integer totalTaskRuns,
-        @JsonProperty("maximum_concurrent_tasks") Integer maximumConcurrentTasks,
-        @JsonProperty("task_hours") Double taskHours) {
+            @JsonProperty("month") Integer month,
+            @JsonProperty("year") Integer year,
+            @JsonProperty("total_task_runs") Integer totalTaskRuns,
+            @JsonProperty("maximum_concurrent_tasks") Integer maximumConcurrentTasks,
+            @JsonProperty("task_hours") Double taskHours) {
         this.month = month;
         this.year = year;
         this.totalTaskRuns = totalTaskRuns;

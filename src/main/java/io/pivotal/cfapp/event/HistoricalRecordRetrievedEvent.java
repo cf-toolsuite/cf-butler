@@ -16,13 +16,13 @@ public class HistoricalRecordRetrievedEvent extends ApplicationEvent {
         super(source);
     }
 
+    public List<HistoricalRecord> getRecords() {
+        return records;
+    }
+
     public HistoricalRecordRetrievedEvent records(List<HistoricalRecord> records) {
         this.records = records;
         return this;
-    }
-
-    public List<HistoricalRecord> getRecords() {
-        return records;
     }
 
 }

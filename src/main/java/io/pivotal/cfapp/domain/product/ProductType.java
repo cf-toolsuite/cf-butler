@@ -7,6 +7,16 @@ public enum ProductType {
     STEMCELL("stemcell"),
     TILE("tile");
 
+    public static ProductType from(String value) {
+        ProductType result = ProductType.TILE;
+        if (value.contains("stemcell")) {
+            result = ProductType.STEMCELL;
+        } else if (value.contains("buildpack")) {
+            result = ProductType.BUILDPACK;
+        }
+        return result;
+    }
+
     private String id;
 
     ProductType(String id) {
@@ -16,15 +26,5 @@ public enum ProductType {
     @JsonValue
     public String getId() {
         return id;
-    }
-
-    public static ProductType from(String value) {
-        ProductType result = ProductType.TILE;
-        if (value.contains("stemcell")) {
-            result = ProductType.STEMCELL;
-        } else if (value.contains("buildpack")) {
-            result = ProductType.BUILDPACK;
-        }
-        return result;
     }
 }

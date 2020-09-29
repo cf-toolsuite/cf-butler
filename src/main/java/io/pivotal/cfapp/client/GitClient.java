@@ -29,59 +29,94 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Component
 @ConditionalOnProperty(
-    prefix = "cf.policies.git", name = "uri"
-)
+        prefix = "cf.policies.git", name = "uri"
+        )
 public class GitClient {
 
-	public Repository getRepository(GitSettings settings) {
-		Repository result = null;
-		String uri = settings.getUri();
-		Assert.hasText(uri, "URI of remote Git repository must be specified");
-		Assert.isTrue(uri.startsWith("https://"), "URI scheme must be https");
-		Assert.isTrue(uri.endsWith(".git"), "URI must end with .git");
-		String path = String.join(File.separator, "tmp", uri.substring(uri.lastIndexOf("/") + 1).replace(".git",""));
-		try {
-			File directory = new File(path);
-			Path p = Paths.get(directory.toURI());
-			if (Files.exists(p)) {
-				Files
-					.walk(p)
-					.sorted(Comparator.reverseOrder())
-					.map(Path::toFile)
-					.forEach(File::delete);
-			}
-			p.toFile().delete();
-			if (settings.isAuthenticated()) {
-				String username = settings.getUsername();
-				String password = settings.getPassword();
-				Git
-					.cloneRepository()
-						.setURI(uri)
-						.setCredentialsProvider(new UsernamePasswordCredentialsProvider(username, password))
-						.setDirectory(directory)
-						.setCloneAllBranches(true)
-						.call()
-						.close();
-			} else {
-				Git
-					.cloneRepository()
-						.setURI(uri)
-						.setDirectory(directory)
-						.setCloneAllBranches(true)
-						.call()
-						.close();
-			}
-			result = Git.open(directory).getRepository();
-		} catch (GitAPIException | IOException e) {
-			log.warn(String.format("Cannot clone Git repository at %s", uri), e);
-		}
-		return result;
-	}
+    // @see https://stackoverflow.com/questions/42820282/get-the-latest-commit-in-a-repository-with-jgit
+    public RevCommit getLatestCommit(Repository repo) throws IOException, GitAPIException {
+        RevCommit latestCommit = null;
+        int inc = 0;
+        try(
+                Git git = new Git(repo);
+                RevWalk walk = new RevWalk(repo);
+                ) {
+            List<Ref> branches = git.branchList().call();
+            for(Ref branch : branches) {
+                RevCommit commit = walk.parseCommit(branch.getObjectId());
+                if (inc == 0)
+                    latestCommit = commit;
+                if(commit.getAuthorIdent().getWhen().compareTo(latestCommit.getAuthorIdent().getWhen()) > 0)
+                    latestCommit = commit;
+                inc++;
+            }
+        }
+        return latestCommit;
+    }
+
+    public Repository getRepository(GitSettings settings) {
+        Repository result = null;
+        String uri = settings.getUri();
+        Assert.hasText(uri, "URI of remote Git repository must be specified");
+        Assert.isTrue(uri.startsWith("https://"), "URI scheme must be https");
+        Assert.isTrue(uri.endsWith(".git"), "URI must end with .git");
+        String path = String.join(File.separator, "tmp", uri.substring(uri.lastIndexOf("/") + 1).replace(".git",""));
+        try {
+            File directory = new File(path);
+            Path p = Paths.get(directory.toURI());
+            if (Files.exists(p)) {
+                Files
+                .walk(p)
+                .sorted(Comparator.reverseOrder())
+                .map(Path::toFile)
+                .forEach(File::delete);
+            }
+            p.toFile().delete();
+            if (settings.isAuthenticated()) {
+                String username = settings.getUsername();
+                String password = settings.getPassword();
+                Git
+                .cloneRepository()
+                .setURI(uri)
+                .setCredentialsProvider(new UsernamePasswordCredentialsProvider(username, password))
+                .setDirectory(directory)
+                .setCloneAllBranches(true)
+                .call()
+                .close();
+            } else {
+                Git
+                .cloneRepository()
+                .setURI(uri)
+                .setDirectory(directory)
+                .setCloneAllBranches(true)
+                .call()
+                .close();
+            }
+            result = Git.open(directory).getRepository();
+        } catch (GitAPIException | IOException e) {
+            log.warn(String.format("Cannot clone Git repository at %s", uri), e);
+        }
+        return result;
+    }
+
+    public String orLatestCommit(String commit, Repository repo) {
+        String result = null;
+        if (StringUtils.isNotBlank(commit)) {
+            result = commit;
+        } else {
+            try {
+                result = getLatestCommit(repo).getName();
+            } catch (GitAPIException | IOException e) {
+                log.error("Trouble fetching latest commit id.", e);
+            }
+        }
+        return result;
+    }
 
     public String readFile(Repository repo, String commitId, String filePath) throws IOException {
-		ObjectId oid = repo.resolve(commitId);
-		RevCommit commit = repo.parseCommit(oid);
-    	try (TreeWalk walk = TreeWalk.forPath(repo, filePath, commit.getTree())) {
+        ObjectId oid = repo.resolve(commitId);
+        RevCommit commit = repo.parseCommit(oid);
+        try (TreeWalk walk = TreeWalk.forPath(repo, filePath, commit.getTree())) {
             if (walk != null) {
                 byte[] bytes = repo.open(walk.getObjectId(0)).getBytes();
                 return new String(bytes, StandardCharsets.UTF_8);
@@ -89,41 +124,6 @@ public class GitClient {
                 throw new IllegalArgumentException(String.format("No file found for commitId=%s and filePath=%s", commitId, filePath));
             }
         }
-	}
-
-	// @see https://stackoverflow.com/questions/42820282/get-the-latest-commit-in-a-repository-with-jgit
-	public RevCommit getLatestCommit(Repository repo) throws IOException, GitAPIException {
-		RevCommit latestCommit = null;
-		int inc = 0;
-		try(
-			Git git = new Git(repo);
-			RevWalk walk = new RevWalk(repo);
-		) {
-			List<Ref> branches = git.branchList().call();
-			for(Ref branch : branches) {
-				RevCommit commit = walk.parseCommit(branch.getObjectId());
-				if (inc == 0)
-					latestCommit = commit;
-				if(commit.getAuthorIdent().getWhen().compareTo(latestCommit.getAuthorIdent().getWhen()) > 0)
-					latestCommit = commit;
-				inc++;
-			}
-		}
-		return latestCommit;
-	}
-
-	public String orLatestCommit(String commit, Repository repo) {
-		String result = null;
-		if (StringUtils.isNotBlank(commit)) {
-			result = commit;
-		} else {
-			try {
-				result = getLatestCommit(repo).getName();
-			} catch (GitAPIException | IOException e) {
-				log.error("Trouble fetching latest commit id.", e);
-			}
-		}
-		return result;
-	}
+    }
 
 }

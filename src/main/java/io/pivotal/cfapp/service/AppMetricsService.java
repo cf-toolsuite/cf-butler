@@ -6,30 +6,30 @@ import reactor.util.function.Tuple2;
 
 public interface AppMetricsService {
 
-	Flux<Tuple2<String, Long>> byOrganization();
+    Flux<Tuple2<String, Long>> byBuildpack();
 
-	Flux<Tuple2<String, Long>> byStack();
+    Flux<Tuple2<String, Long>> byDockerImage();
 
-	Flux<Tuple2<String, Long>> byBuildpack();
+    Flux<Tuple2<String, Long>> byOrganization();
 
-	Flux<Tuple2<String, Long>> byDockerImage();
+    Flux<Tuple2<String, Long>> byStack();
 
-	Flux<Tuple2<String, Long>> byStatus();
+    Flux<Tuple2<String, Long>> byStatus();
 
-	Mono<Long> totalApplications();
+    Mono<Long> totalApplicationInstances();
 
-	Mono<Long> totalApplicationInstances();
+    Mono<Long> totalApplications();
 
-	Mono<Long> totalRunningApplicationInstances();
+    Mono<Long> totalCrashedApplicationInstances();
 
-	Mono<Long> totalStoppedApplicationInstances();
+    Mono<Double> totalDiskUsed();
 
-	Mono<Long> totalCrashedApplicationInstances();
+    Mono<Double> totalMemoryUsed();
 
-	Mono<Double> totalMemoryUsed();
+    Mono<Long> totalRunningApplicationInstances();
 
-	Mono<Double> totalDiskUsed();
+    Mono<Long> totalStoppedApplicationInstances();
 
-	Flux<Tuple2<String, Long>> totalVelocity();
+    Flux<Tuple2<String, Long>> totalVelocity();
 
 }

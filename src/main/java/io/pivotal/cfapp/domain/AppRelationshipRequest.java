@@ -15,6 +15,23 @@ import lombok.NoArgsConstructor;
 @Getter
 public class AppRelationshipRequest {
 
+    public static List<AppRelationshipRequest> listOf(ServiceInstanceDetail detail) {
+        List<AppRelationshipRequest> result = new ArrayList<>();
+        detail.getApplications().forEach(a -> {
+            result.add(AppRelationshipRequest
+                    .builder()
+                    .organization(detail.getOrganization())
+                    .space(detail.getSpace())
+                    .applicationName(a)
+                    .serviceInstanceId(detail.getServiceInstanceId())
+                    .serviceName(detail.getName())
+                    .serviceOffering(detail.getService())
+                    .serviceType(detail.getType())
+                    .servicePlan(detail.getPlan())
+                    .build());
+        });
+        return result;
+    }
     private String organization;
     private String space;
     private String serviceInstanceId;
@@ -23,23 +40,6 @@ public class AppRelationshipRequest {
     private String applicationId;
     private String applicationName;
     private String serviceType;
-    private String servicePlan;
 
-    public static List<AppRelationshipRequest> listOf(ServiceInstanceDetail detail) {
-        List<AppRelationshipRequest> result = new ArrayList<>();
-        detail.getApplications().forEach(a -> {
-            result.add(AppRelationshipRequest
-                        .builder()
-                        .organization(detail.getOrganization())
-                        .space(detail.getSpace())
-                        .applicationName(a)
-                        .serviceInstanceId(detail.getServiceInstanceId())
-                        .serviceName(detail.getName())
-                        .serviceOffering(detail.getService())
-                        .serviceType(detail.getType())
-                        .servicePlan(detail.getPlan())
-                        .build());
-        });
-        return result;
-    }
+    private String servicePlan;
 }

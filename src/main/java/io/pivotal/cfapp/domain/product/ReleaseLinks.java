@@ -35,12 +35,12 @@ public class ReleaseLinks {
     private UserGroups userGroups;
 
     public ReleaseLinks(
-        @JsonProperty("self") Self self,
-        @JsonProperty("eula_acceptance") EulaAcceptance eulaAcceptance,
-        @JsonProperty("product_files") ProductFiles productFiles,
-        @JsonProperty("file_groups") FileGroups fileGroups,
-        @JsonProperty("user_groups") UserGroups userGroups
-    ) {
+            @JsonProperty("self") Self self,
+            @JsonProperty("eula_acceptance") EulaAcceptance eulaAcceptance,
+            @JsonProperty("product_files") ProductFiles productFiles,
+            @JsonProperty("file_groups") FileGroups fileGroups,
+            @JsonProperty("user_groups") UserGroups userGroups
+            ) {
         this.self = self;
         this.eulaAcceptance = eulaAcceptance;
         this.productFiles = productFiles;

@@ -27,22 +27,23 @@ public class UserSpaces {
 
     @JsonCreator
     public UserSpaces(
-        @JsonProperty("account-name") String accountName,
-        @JsonProperty("spaces") List<Space> spaces)
+            @JsonProperty("account-name") String accountName,
+            @JsonProperty("spaces") List<Space> spaces)
     {
         this.accountName = accountName;
         this.spaces = spaces;
     }
 
+    @Override
     public String toString() {
         return String.format(
-            "User: %s, Spaces: [%s]",
-            getAccountName(),
-            String.join(",", getSpaces()
-                                .stream()
-                                .map(s ->
-                                    String.join("/", s.getOrganizationName(), s.getSpaceName())
+                "User: %s, Spaces: [%s]",
+                getAccountName(),
+                String.join(",", getSpaces()
+                        .stream()
+                        .map(s ->
+                        String.join("/", s.getOrganizationName(), s.getSpaceName())
                                 )
-                                .collect(Collectors.toList())));
+                        .collect(Collectors.toList())));
     }
 }

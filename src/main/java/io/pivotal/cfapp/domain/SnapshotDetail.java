@@ -1,8 +1,8 @@
 package io.pivotal.cfapp.domain;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -11,10 +11,10 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import lombok.Builder.Default;
 
 @Builder
 @AllArgsConstructor(access=AccessLevel.PACKAGE)

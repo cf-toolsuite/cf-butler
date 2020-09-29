@@ -14,7 +14,7 @@ import io.pivotal.cfapp.domain.Workloads;
 import io.pivotal.cfapp.domain.Workloads.WorkloadsBuilder;
 import io.pivotal.cfapp.domain.WorkloadsFilter;
 import io.pivotal.cfapp.service.LegacyWorkloadsService;
-import io.pivotal.cfapp.service.TkService;
+import io.pivotal.cfapp.service.TimeKeeperService;
 import io.pivotal.cfapp.service.TkServiceUtil;
 import reactor.core.publisher.Mono;
 
@@ -26,8 +26,8 @@ public class LegacyWorkloadsController {
 
     @Autowired
     public LegacyWorkloadsController(
-        LegacyWorkloadsService service,
-        TkService tkService) {
+            LegacyWorkloadsService service,
+            TimeKeeperService tkService) {
         this.service = service;
         this.util = new TkServiceUtil(tkService);
     }
@@ -35,21 +35,21 @@ public class LegacyWorkloadsController {
 
     @GetMapping(value = { "/snapshot/detail/legacy" } )
     public Mono<ResponseEntity<Workloads>> getLegacyWorkloads(@RequestParam(value = "stacks", defaultValue = "", required = false) String stacks,
-    @RequestParam(value = "service-offerings", defaultValue = "", required = false) String serviceOfferings
-    ) {
+            @RequestParam(value = "service-offerings", defaultValue = "", required = false) String serviceOfferings
+            ) {
         final WorkloadsBuilder builder = Workloads.builder();
         final WorkloadsFilter workloadsFilters = WorkloadsFilter.builder()
-        .stacks(Set.copyOf(Arrays.asList(stacks.split("\\s*,\\s*"))))
-        .serviceOfferings(Set.copyOf(Arrays.asList(serviceOfferings.split("\\s*,\\s*"))))
-        .build();
+                .stacks(Set.copyOf(Arrays.asList(stacks.split("\\s*,\\s*"))))
+                .serviceOfferings(Set.copyOf(Arrays.asList(serviceOfferings.split("\\s*,\\s*"))))
+                .build();
         return service
                 .getLegacyApplications(workloadsFilters)
                 .map(list -> builder.applications(list))
                 .then(service.getLegacyApplicationRelationships(workloadsFilters))
                 .map(list -> builder.appRelationships(list))
                 .flatMap(dwb -> util
-                                .getHeaders()
-                                .map(h -> new ResponseEntity<Workloads>(dwb.build(), h, HttpStatus.OK)))
+                        .getHeaders()
+                        .map(h -> new ResponseEntity<Workloads>(dwb.build(), h, HttpStatus.OK)))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 }

@@ -14,19 +14,19 @@ import reactor.core.publisher.Mono;
 @RestController
 public class OnDemandCollectorTriggerController {
 
-	@Autowired
-	private TkTask tkCollector;
+    @Autowired
+    private TkTask tkCollector;
 
-	@Autowired(required = false)
-	private ProductsAndReleasesTask productsAndReleasesCollector;
+    @Autowired(required = false)
+    private ProductsAndReleasesTask productsAndReleasesCollector;
 
-	@PostMapping("/collect")
-	public Mono<ResponseEntity<Void>> triggerCollection() {
-		tkCollector.collect();
-		if (productsAndReleasesCollector != null) {
-			productsAndReleasesCollector.collect();
-		}
-		return Mono.just(ResponseEntity.accepted().build());
-	}
+    @PostMapping("/collect")
+    public Mono<ResponseEntity<Void>> triggerCollection() {
+        tkCollector.collect();
+        if (productsAndReleasesCollector != null) {
+            productsAndReleasesCollector.collect();
+        }
+        return Mono.just(ResponseEntity.accepted().build());
+    }
 
 }

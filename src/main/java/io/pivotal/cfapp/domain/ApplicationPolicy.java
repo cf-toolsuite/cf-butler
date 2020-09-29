@@ -6,17 +6,19 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
+import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.uuid.Generators;
-
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.annotation.Id;
-import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
 
 import lombok.Builder;
 import lombok.Builder.Default;
@@ -28,106 +30,108 @@ import lombok.ToString;
 @JsonPropertyOrder({ "id", "operation", "description", "state", "options", "organization-whitelist" })
 @Getter
 @ToString
+@Table("application_policy")
 public class ApplicationPolicy {
 
-	@Id
-	@JsonIgnore
-	private Long pk;
+    public static String[] columnNames() {
+        return
+                new String[] {
+                        "pk", "id", "operation", "description", "options", "organization_whitelist", "state"
+        };
+    }
 
-	@Default
-	@JsonProperty("id")
-	private String id = Generators.timeBasedGenerator().generate().toString();
+    public static ApplicationPolicy seed(ApplicationPolicy policy) {
+        return ApplicationPolicy
+                .builder()
+                .description(policy.getDescription())
+                .operation(policy.getOperation())
+                .options(policy.getOptions())
+                .organizationWhiteList(policy.getOrganizationWhiteList())
+                .state(policy.getState())
+                .build();
+    }
 
-	@JsonProperty("operation")
-	private String operation;
+    public static ApplicationPolicy seedWith(ApplicationPolicy policy, String id) {
+        return ApplicationPolicy
+                .builder()
+                .id(id)
+                .description(policy.getDescription())
+                .operation(policy.getOperation())
+                .options(policy.getOptions())
+                .organizationWhiteList(policy.getOrganizationWhiteList())
+                .state(policy.getState())
+                .build();
+    }
 
-	@JsonProperty("description")
-	private String description;
+    public static String tableName() {
+        return "application_policy";
+    }
 
-	@JsonProperty("state")
-	private String state;
+    @Id
+    @JsonIgnore
+    private Long pk;
 
-	@Default
-	@JsonProperty("options")
-	private Map<String, Object> options = new HashMap<>();
+    @Default
+    @JsonProperty("id")
+    private String id = Generators.timeBasedGenerator().generate().toString();
 
-	@Default
-	@JsonProperty("organization-whitelist")
-	private Set<String> organizationWhiteList = new HashSet<>();
+    @JsonProperty("operation")
+    private String operation;
 
-	@JsonCreator
-	ApplicationPolicy(
-			@JsonProperty("pk") Long pk,
-			@JsonProperty("id") String id,
-			@JsonProperty("operation") String operation,
-			@JsonProperty("description") String description,
-			@JsonProperty("state") String state,
-			@JsonProperty("options") Map<String, Object> options,
-			@JsonProperty("organization-whitelist") Set<String> organizationWhiteList) {
-		this.pk = pk;
-		this.id = id;
-		this.operation = operation;
-		this.description = description;
-		this.state = state;
-		this.options = options;
-		this.organizationWhiteList = organizationWhiteList;
-	}
+    @JsonProperty("description")
+    private String description;
 
-	@JsonIgnore
-	public Long getPk() {
-		return pk;
-	}
+    @JsonProperty("state")
+    private String state;
 
-	public Set<String> getOrganizationWhiteList() {
-		return CollectionUtils.isEmpty(organizationWhiteList) ? new HashSet<>() : Collections.unmodifiableSet(organizationWhiteList);
-	}
+    @Default
+    @JsonProperty("options")
+    private Map<String, Object> options = new HashMap<>();
 
-	public Map<String, Object> getOptions() {
-		return CollectionUtils.isEmpty(options) ? new HashMap<>(): Collections.unmodifiableMap(options);
-	}
+    @Default
+    @JsonProperty("organization-whitelist")
+    @Column("organization_whitelist")
+    private Set<String> organizationWhiteList = new HashSet<>();
 
-	@JsonIgnore
-	public <T> T getOption(String key, Class<T> type) {
-		Assert.isTrue(StringUtils.isNotBlank(key), "Option key must not be blank.");
-		Object value = options.get(key);
-		if (value == null) {
-			return null;
-		}
-		return type.cast(value);
-	}
+    @JsonCreator
+    ApplicationPolicy(
+            @JsonProperty("pk") Long pk,
+            @JsonProperty("id") String id,
+            @JsonProperty("operation") String operation,
+            @JsonProperty("description") String description,
+            @JsonProperty("state") String state,
+            @JsonProperty("options") Map<String, Object> options,
+            @JsonProperty("organization-whitelist") Set<String> organizationWhiteList) {
+        this.pk = pk;
+        this.id = id;
+        this.operation = operation;
+        this.description = description;
+        this.state = state;
+        this.options = options;
+        this.organizationWhiteList = organizationWhiteList;
+    }
 
-	public static String tableName() {
-		return "application_policy";
-	}
+    @JsonIgnore
+    public <T> T getOption(String key, Class<T> type) {
+        Assert.isTrue(StringUtils.isNotBlank(key), "Option key must not be blank.");
+        Object value = options.get(key);
+        if (value == null) {
+            return null;
+        }
+        return type.cast(value);
+    }
 
-	public static String[] columnNames() {
-		return
-			new String[] {
-				"pk", "id", "operation", "description", "options", "organization_whitelist", "state"
-			};
-	}
+    public Map<String, Object> getOptions() {
+        return CollectionUtils.isEmpty(options) ? new HashMap<>(): Collections.unmodifiableMap(options);
+    }
 
-	public static ApplicationPolicy seed(ApplicationPolicy policy) {
-		return ApplicationPolicy
-				.builder()
-					.description(policy.getDescription())
-					.operation(policy.getOperation())
-					.options(policy.getOptions())
-					.organizationWhiteList(policy.getOrganizationWhiteList())
-					.state(policy.getState())
-					.build();
-	}
+    public Set<String> getOrganizationWhiteList() {
+        return CollectionUtils.isEmpty(organizationWhiteList) ? new HashSet<>() : Collections.unmodifiableSet(organizationWhiteList);
+    }
 
-	public static ApplicationPolicy seedWith(ApplicationPolicy policy, String id) {
-		return ApplicationPolicy
-				.builder()
-					.id(id)
-					.description(policy.getDescription())
-					.operation(policy.getOperation())
-					.options(policy.getOptions())
-					.organizationWhiteList(policy.getOrganizationWhiteList())
-					.state(policy.getState())
-					.build();
-	}
+    @JsonIgnore
+    public Long getPk() {
+        return pk;
+    }
 
 }

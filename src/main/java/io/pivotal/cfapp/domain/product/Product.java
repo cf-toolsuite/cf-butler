@@ -9,8 +9,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import lombok.Builder;
-import lombok.Getter;
 import lombok.Builder.Default;
+import lombok.Getter;
 
 @Builder
 @Getter
@@ -50,14 +50,14 @@ public class Product {
 
     @JsonCreator
     public Product(
-        @JsonProperty("id") Long id,
-        @JsonProperty("slug") String slug,
-        @JsonProperty("name") String name,
-        @JsonProperty("logo_url") String logoUrl,
-        @JsonProperty("_links") ProductLinks links,
-        @JsonProperty("platform_compatibility") List<String> platformCompatibility,
-        @JsonProperty("installs_on_pks") Boolean installsOnPks
-    ) {
+            @JsonProperty("id") Long id,
+            @JsonProperty("slug") String slug,
+            @JsonProperty("name") String name,
+            @JsonProperty("logo_url") String logoUrl,
+            @JsonProperty("_links") ProductLinks links,
+            @JsonProperty("platform_compatibility") List<String> platformCompatibility,
+            @JsonProperty("installs_on_pks") Boolean installsOnPks
+            ) {
         this.id = id;
         this.slug = slug;
         this.name = name;

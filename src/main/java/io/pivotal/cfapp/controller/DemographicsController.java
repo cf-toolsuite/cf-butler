@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.pivotal.cfapp.domain.Demographics;
 import io.pivotal.cfapp.service.DemographicsService;
-import io.pivotal.cfapp.service.TkService;
+import io.pivotal.cfapp.service.TimeKeeperService;
 import io.pivotal.cfapp.service.TkServiceUtil;
 import reactor.core.publisher.Mono;
 
@@ -20,9 +20,9 @@ public class DemographicsController {
 
     @Autowired
     public DemographicsController(
-        DemographicsService demoService,
-        TkService tkService
-    ) {
+            DemographicsService demoService,
+            TimeKeeperService tkService
+            ) {
         this.demoService = demoService;
         this.util = new TkServiceUtil(tkService);
     }
@@ -31,8 +31,8 @@ public class DemographicsController {
     public Mono<ResponseEntity<Demographics>> getDemographics() {
         return util.getHeaders()
                 .flatMap(h -> demoService
-                                .getDemographics()
-                                .map(d -> new ResponseEntity<>(d, h, HttpStatus.OK)))
-                                .defaultIfEmpty(ResponseEntity.notFound().build());
+                        .getDemographics()
+                        .map(d -> new ResponseEntity<>(d, h, HttpStatus.OK)))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 }

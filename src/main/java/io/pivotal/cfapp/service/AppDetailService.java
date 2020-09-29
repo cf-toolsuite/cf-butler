@@ -10,15 +10,15 @@ import reactor.util.function.Tuple2;
 
 public interface AppDetailService {
 
-	Mono<Void> deleteAll();
+    Mono<Void> deleteAll();
 
-	Mono<AppDetail> save(AppDetail entity);
+    Flux<AppDetail> findAll();
 
-	Mono<AppDetail> findByAppId(String appId);
+    Mono<AppDetail> findByAppId(String appId);
 
-	Flux<AppDetail> findAll();
+    Flux<Tuple2<AppDetail, ApplicationPolicy>> findByApplicationPolicy(ApplicationPolicy policy, boolean mayHaveServiceBindings);
 
-	Flux<Tuple2<AppDetail, ApplicationPolicy>> findByApplicationPolicy(ApplicationPolicy policy, boolean mayHaveServiceBindings);
+    Flux<AppDetail> findByDateRange(LocalDate start, LocalDate end);
 
-	Flux<AppDetail> findByDateRange(LocalDate start, LocalDate end);
+    Mono<AppDetail> save(AppDetail entity);
 }
