@@ -29,9 +29,9 @@ public class ServiceUsageReport {
 
     @JsonCreator
     public ServiceUsageReport(
-        @JsonProperty("report_time") String reportTime,
-        @JsonProperty("monthly_service_reports") List<ServiceUsageMonthlyAggregate> monthlyServiceReports,
-        @JsonProperty("yearly_service_report") List<ServiceUsageYearlyAggregate> yearlyServiceReport) {
+            @JsonProperty("report_time") String reportTime,
+            @JsonProperty("monthly_service_reports") List<ServiceUsageMonthlyAggregate> monthlyServiceReports,
+            @JsonProperty("yearly_service_report") List<ServiceUsageYearlyAggregate> yearlyServiceReport) {
         this.reportTime = reportTime;
         this.monthlyServiceReports = monthlyServiceReports;
         this.yearlyServiceReport = yearlyServiceReport;

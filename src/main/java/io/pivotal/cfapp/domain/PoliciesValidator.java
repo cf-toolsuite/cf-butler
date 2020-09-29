@@ -93,38 +93,6 @@ public class PoliciesValidator {
         return valid;
     }
 
-    public boolean validate(ServiceInstancePolicy policy) {
-        boolean hasId = Optional.ofNullable(policy.getId()).isPresent();
-        boolean hasOperation = Optional.ofNullable(policy.getOperation()).isPresent();
-        boolean hasFromDateTime = Optional.ofNullable(policy.getOption("from-datetime", LocalDateTime.class)).isPresent();
-        boolean hasFromDuration = Optional.ofNullable(policy.getOption("from-duration", String.class)).isPresent();
-        boolean valid = !hasId && hasOperation;
-        if (hasOperation) {
-            try {
-                ServiceInstanceOperation.from(policy.getOperation());
-            } catch (IllegalArgumentException iae) {
-                valid = false;
-                log.warn(PARSING_REJECTED_MESSAGE, policy.toString(), iae.getMessage());
-            }
-        }
-        if (hasFromDateTime && hasFromDuration) {
-            valid = false;
-            log.warn(DUAL_TIME_CONSTRAINTS_REJECTED_MESSAGE, policy.toString());
-        }
-        if (hasFromDuration) {
-            try {
-                Duration.parse(policy.getOption("from-duration", String.class));
-            } catch (DateTimeParseException dtpe) {
-                valid = false;
-                log.warn(PARSING_REJECTED_MESSAGE, policy.toString(), dtpe.getMessage());
-            }
-        }
-        if (valid == false) {
-            log.warn(REQUIRED_PROPERTIES_REJECTED_MESSAGE, policy.toString());
-        }
-        return valid;
-    }
-
     public boolean validate(EndpointPolicy policy) {
         boolean hasId = Optional.ofNullable(policy.getId()).isPresent();
         boolean hasEndpoints = Optional.ofNullable(policy.getEndpoints()).isPresent();
@@ -138,36 +106,6 @@ public class PoliciesValidator {
                     if (StringUtils.isBlank(e) || !e.startsWith("/")) {
                         valid = false;
                         log.warn(ENDPOINT_REJECTED_MESSAGE, policy.toString());
-                        break;
-                    }
-                }
-            }
-        }
-        if (hasEmailNotificationTemplate) {
-            if (!policy.getEmailNotificationTemplate().isValid()) {
-                valid = false;
-                log.warn(EMAIL_NOTIFICATION_TEMPLATE_REJECTED_MESSAGE, policy.toString());
-            }
-        }
-        if (valid == false) {
-            log.warn(REQUIRED_PROPERTIES_REJECTED_MESSAGE, policy.toString());
-        }
-        return valid;
-    }
-
-    public boolean validate(QueryPolicy policy) {
-        boolean hasId = Optional.ofNullable(policy.getId()).isPresent();
-        boolean hasQueries = Optional.ofNullable(policy.getQueries()).isPresent();
-        boolean hasEmailNotificationTemplate = Optional.ofNullable(policy.getEmailNotificationTemplate()).isPresent();
-        boolean valid = !hasId && hasQueries && hasEmailNotificationTemplate;
-        if (hasQueries) {
-            if (Collections.isEmpty(policy.getQueries())) {
-                valid = false;
-            } else {
-                for (Query q: policy.getQueries()) {
-                    if (!q.isValid()) {
-                        valid = false;
-                        log.warn(QUERY_REJECTED_MESSAGE, policy.toString());
                         break;
                     }
                 }
@@ -242,6 +180,68 @@ public class PoliciesValidator {
             if (!policy.getNotifyeeTemplate().isValid()) {
                 valid = false;
                 log.warn(EMAIL_NOTIFICATION_TEMPLATE_REJECTED_MESSAGE, policy.toString());
+            }
+        }
+        if (valid == false) {
+            log.warn(REQUIRED_PROPERTIES_REJECTED_MESSAGE, policy.toString());
+        }
+        return valid;
+    }
+
+    public boolean validate(QueryPolicy policy) {
+        boolean hasId = Optional.ofNullable(policy.getId()).isPresent();
+        boolean hasQueries = Optional.ofNullable(policy.getQueries()).isPresent();
+        boolean hasEmailNotificationTemplate = Optional.ofNullable(policy.getEmailNotificationTemplate()).isPresent();
+        boolean valid = !hasId && hasQueries && hasEmailNotificationTemplate;
+        if (hasQueries) {
+            if (Collections.isEmpty(policy.getQueries())) {
+                valid = false;
+            } else {
+                for (Query q: policy.getQueries()) {
+                    if (!q.isValid()) {
+                        valid = false;
+                        log.warn(QUERY_REJECTED_MESSAGE, policy.toString());
+                        break;
+                    }
+                }
+            }
+        }
+        if (hasEmailNotificationTemplate) {
+            if (!policy.getEmailNotificationTemplate().isValid()) {
+                valid = false;
+                log.warn(EMAIL_NOTIFICATION_TEMPLATE_REJECTED_MESSAGE, policy.toString());
+            }
+        }
+        if (valid == false) {
+            log.warn(REQUIRED_PROPERTIES_REJECTED_MESSAGE, policy.toString());
+        }
+        return valid;
+    }
+
+    public boolean validate(ServiceInstancePolicy policy) {
+        boolean hasId = Optional.ofNullable(policy.getId()).isPresent();
+        boolean hasOperation = Optional.ofNullable(policy.getOperation()).isPresent();
+        boolean hasFromDateTime = Optional.ofNullable(policy.getOption("from-datetime", LocalDateTime.class)).isPresent();
+        boolean hasFromDuration = Optional.ofNullable(policy.getOption("from-duration", String.class)).isPresent();
+        boolean valid = !hasId && hasOperation;
+        if (hasOperation) {
+            try {
+                ServiceInstanceOperation.from(policy.getOperation());
+            } catch (IllegalArgumentException iae) {
+                valid = false;
+                log.warn(PARSING_REJECTED_MESSAGE, policy.toString(), iae.getMessage());
+            }
+        }
+        if (hasFromDateTime && hasFromDuration) {
+            valid = false;
+            log.warn(DUAL_TIME_CONSTRAINTS_REJECTED_MESSAGE, policy.toString());
+        }
+        if (hasFromDuration) {
+            try {
+                Duration.parse(policy.getOption("from-duration", String.class));
+            } catch (DateTimeParseException dtpe) {
+                valid = false;
+                log.warn(PARSING_REJECTED_MESSAGE, policy.toString(), dtpe.getMessage());
             }
         }
         if (valid == false) {

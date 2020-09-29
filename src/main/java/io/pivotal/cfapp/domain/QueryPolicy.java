@@ -4,15 +4,16 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
+import org.springframework.util.CollectionUtils;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.uuid.Generators;
-
-import org.springframework.data.annotation.Id;
-import org.springframework.util.CollectionUtils;
 
 import lombok.Builder;
 import lombok.Builder.Default;
@@ -24,77 +25,67 @@ import lombok.ToString;
 @JsonPropertyOrder({ "id", "description", "queries", "email-notification-template" })
 @Getter
 @ToString
+@Table("query_policy")
 public class QueryPolicy {
 
-	@Id
-	@JsonIgnore
-	private Long pk;
+    public static QueryPolicy seed(QueryPolicy policy) {
+        return QueryPolicy
+                .builder()
+                .description(policy.getDescription())
+                .queries(policy.getQueries())
+                .emailNotificationTemplate(policy.getEmailNotificationTemplate())
+                .build();
+    }
 
-	@Default
-	@JsonProperty("id")
-	private String id = Generators.timeBasedGenerator().generate().toString();
+    public static QueryPolicy seedWith(QueryPolicy policy, String id) {
+        return QueryPolicy
+                .builder()
+                .id(id)
+                .description(policy.getDescription())
+                .queries(policy.getQueries())
+                .emailNotificationTemplate(policy.getEmailNotificationTemplate())
+                .build();
+    }
 
-	@JsonProperty("description")
-	private String description;
+    @Id
+    @JsonIgnore
+    private Long pk;
 
-	@Default
-	@JsonProperty("queries")
-	private Set<Query> queries = new HashSet<>();
+    @Default
+    @JsonProperty("id")
+    private String id = Generators.timeBasedGenerator().generate().toString();
 
-	@JsonProperty("email-notification-template")
-	private EmailNotificationTemplate emailNotificationTemplate;
+    @JsonProperty("description")
+    private String description;
 
-	@JsonCreator
-	QueryPolicy(
-			@JsonProperty("pk") Long pk,
-			@JsonProperty("id") String id,
-			@JsonProperty("description") String description,
-			@JsonProperty("queries") Set<Query> queries,
-			@JsonProperty("email-notification-template") EmailNotificationTemplate emailNotificationTemplate) {
-		this.pk = pk;
-		this.id = id;
-		this.description = description;
-		this.queries = queries;
-		this.emailNotificationTemplate = emailNotificationTemplate;
-	}
+    @Default
+    @JsonProperty("queries")
+    private Set<Query> queries = new HashSet<>();
 
-	@JsonIgnore
-	public Long getPk() {
-		return pk;
-	}
+    @JsonProperty("email-notification-template")
+    private EmailNotificationTemplate emailNotificationTemplate;
 
-	public Set<Query> getQueries() {
-		return CollectionUtils.isEmpty(queries) ? new HashSet<>(): Collections.unmodifiableSet(queries);
-	}
+    @JsonCreator
+    QueryPolicy(
+            @JsonProperty("pk") Long pk,
+            @JsonProperty("id") String id,
+            @JsonProperty("description") String description,
+            @JsonProperty("queries") Set<Query> queries,
+            @JsonProperty("email-notification-template") EmailNotificationTemplate emailNotificationTemplate) {
+        this.pk = pk;
+        this.id = id;
+        this.description = description;
+        this.queries = queries;
+        this.emailNotificationTemplate = emailNotificationTemplate;
+    }
 
-	public static String tableName() {
-		return "query_policy";
-	}
+    @JsonIgnore
+    public Long getPk() {
+        return pk;
+    }
 
-	public static String[] columnNames() {
-		return
-			new String[] {
-				"pk", "id", "description", "queries", "email_notification_template"
-			};
-	}
-
-	public static QueryPolicy seed(QueryPolicy policy) {
-		return QueryPolicy
-				.builder()
-					.description(policy.getDescription())
-					.queries(policy.getQueries())
-					.emailNotificationTemplate(policy.getEmailNotificationTemplate())
-					.build();
-	}
-
-	public static QueryPolicy seedWith(QueryPolicy policy, String id) {
-		return QueryPolicy
-				.builder()
-					.id(id)
-					.description(policy.getDescription())
-					.queries(policy.getQueries())
-					.emailNotificationTemplate(policy.getEmailNotificationTemplate())
-					.build();
-	}
+    public Set<Query> getQueries() {
+        return CollectionUtils.isEmpty(queries) ? new HashSet<>(): Collections.unmodifiableSet(queries);
+    }
 
 }

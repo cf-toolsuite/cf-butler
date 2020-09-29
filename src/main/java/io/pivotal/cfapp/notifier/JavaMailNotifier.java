@@ -17,6 +17,15 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class JavaMailNotifier extends EmailNotifier {
 
+    private static void addAttachment(MimeMessageHelper helper, EmailAttachment ea) {
+        try {
+            DataSource ds = new ByteArrayDataSource(ea.getHeadedContent(), ea.getMimeType());
+            helper.addAttachment(ea.getFilename() + ea.getExtension(), ds);
+        } catch (MessagingException | IOException e) {
+            log.warn("Could not add attachment to email!", e);
+        }
+    }
+
     private final JavaMailSender javaMailSender;
 
     public JavaMailNotifier(JavaMailSender javaMailSender) {
@@ -24,6 +33,7 @@ public class JavaMailNotifier extends EmailNotifier {
         this.javaMailSender = javaMailSender;
     }
 
+    @Override
     public void sendMail(String from, String to, String subject, String body, List<EmailAttachment> attachments) {
         try {
             MimeMessage message = javaMailSender.createMimeMessage();
@@ -37,15 +47,6 @@ public class JavaMailNotifier extends EmailNotifier {
             log.info("Email sent to {} with subject: {}!", to, subject);
         } catch (MessagingException me) {
             log.warn("Could not send email!", me);
-        }
-    }
-
-    private static void addAttachment(MimeMessageHelper helper, EmailAttachment ea) {
-        try {
-            DataSource ds = new ByteArrayDataSource(ea.getHeadedContent(), ea.getMimeType());
-            helper.addAttachment(ea.getFilename() + ea.getExtension(), ds);
-        } catch (MessagingException | IOException e) {
-            log.warn("Could not add attachment to email!", e);
         }
     }
 }

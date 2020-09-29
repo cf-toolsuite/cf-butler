@@ -3,15 +3,15 @@ package io.pivotal.cfapp.service;
 import java.io.File;
 import java.io.IOException;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.pivotal.cfapp.ButlerTest;
 
@@ -25,9 +25,9 @@ public class ServiceInstanceReporterTest {
 
     @Autowired
     public ServiceInstanceReporterTest(
-        ServiceInstanceReporter reporter,
-        ObjectMapper mapper
-    ) {
+            ServiceInstanceReporter reporter,
+            ObjectMapper mapper
+            ) {
         this.reporter = reporter;
         this.mapper = mapper;
     }

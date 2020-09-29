@@ -24,15 +24,21 @@ public class LegacyWorkloadsService {
 
     @Autowired
     public LegacyWorkloadsService(
-        SnapshotService snapshotService,
-        PasSettings settings
-    ) {
+            SnapshotService snapshotService,
+            PasSettings settings
+            ) {
         this.snapshotService = snapshotService;
         this.settings = settings;
     }
 
-    public Mono<List<AppDetail>> getLegacyApplications(WorkloadsFilter workloadsFilter) {
-        return getLegacyApplications(LegacyPolicy.builder().stacks(workloadsFilter.getStacks()).build());
+    public Mono<List<AppRelationship>> getLegacyApplicationRelationships(LegacyPolicy policy) {
+        return snapshotService
+                .assembleSnapshotDetail()
+                .flatMapMany(sd -> Flux.fromIterable(sd.getApplicationRelationships()))
+                .filter(app -> isWhitelisted(policy, app.getOrganization()))
+                .filter(app -> isBlacklisted(app.getOrganization()))
+                .filter(app -> app.getServiceOffering()!=null ? policy.getServiceOfferings().contains(app.getServiceOffering()):false)
+                .collectList();
     }
 
     public Mono<List<AppRelationship>> getLegacyApplicationRelationships(WorkloadsFilter workloadsFilter) {
@@ -40,7 +46,7 @@ public class LegacyWorkloadsService {
     }
 
     public Mono<List<AppDetail>> getLegacyApplications(LegacyPolicy policy) {
-		    return snapshotService
+        return snapshotService
                 .assembleSnapshotDetail()
                 .flatMapMany(sd -> Flux.fromIterable(sd.getApplications()))
                 .filter(app -> isWhitelisted(policy, app.getOrganization()))
@@ -49,28 +55,22 @@ public class LegacyWorkloadsService {
                 .collectList();
     }
 
-    public Mono<List<AppRelationship>> getLegacyApplicationRelationships(LegacyPolicy policy) {        
-        return snapshotService
-            .assembleSnapshotDetail()
-            .flatMapMany(sd -> Flux.fromIterable(sd.getApplicationRelationships()))
-            .filter(app -> isWhitelisted(policy, app.getOrganization()))
-            .filter(app -> isBlacklisted(app.getOrganization()))
-            .filter(app -> app.getServiceOffering()!=null ? policy.getServiceOfferings().contains(app.getServiceOffering()):false)
-            .collectList();
-}
+    public Mono<List<AppDetail>> getLegacyApplications(WorkloadsFilter workloadsFilter) {
+        return getLegacyApplications(LegacyPolicy.builder().stacks(workloadsFilter.getStacks()).build());
+    }
 
     private boolean isBlacklisted(String organization) {
         return !settings.getOrganizationBlackList().contains(organization);
     }
 
     private boolean isWhitelisted(LegacyPolicy policy, String organization) {
-    	Set<String> prunedSet = new HashSet<>(policy.getOrganizationWhiteList());
-    	while (prunedSet.remove(""));
-    	Set<String> whitelist =
-    			CollectionUtils.isEmpty(prunedSet) ?
-    					prunedSet: policy.getOrganizationWhiteList();
-    	return
-			whitelist.isEmpty() ? true: policy.getOrganizationWhiteList().contains(organization);
+        Set<String> prunedSet = new HashSet<>(policy.getOrganizationWhiteList());
+        while (prunedSet.remove(""));
+        Set<String> whitelist =
+                CollectionUtils.isEmpty(prunedSet) ?
+                        prunedSet: policy.getOrganizationWhiteList();
+        return
+                whitelist.isEmpty() ? true: policy.getOrganizationWhiteList().contains(organization);
     }
 
 }

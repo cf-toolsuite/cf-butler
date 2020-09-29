@@ -26,103 +26,103 @@ import reactor.core.publisher.Mono;
 @Component
 public class ServiceInstanceDetailTask implements ApplicationListener<SpacesRetrievedEvent> {
 
+    private static Space buildSpace(String organization, String space) {
+        return Space
+                .builder()
+                .organizationName(organization)
+                .spaceName(space)
+                .build();
+    }
     private DefaultCloudFoundryOperations opsClient;
     private ServiceInstanceDetailService service;
+
     private ApplicationEventPublisher publisher;
 
     @Autowired
     public ServiceInstanceDetailTask(
-    		DefaultCloudFoundryOperations opsClient,
-    		ServiceInstanceDetailService service,
-    		ApplicationEventPublisher publisher
-    		) {
+            DefaultCloudFoundryOperations opsClient,
+            ServiceInstanceDetailService service,
+            ApplicationEventPublisher publisher
+            ) {
         this.opsClient = opsClient;
         this.service = service;
         this.publisher = publisher;
     }
 
-    @Override
-    public void onApplicationEvent(SpacesRetrievedEvent event) {
-        collect(List.copyOf(event.getSpaces()));
+    private DefaultCloudFoundryOperations buildClient(Space target) {
+        return DefaultCloudFoundryOperations
+                .builder()
+                .from(opsClient)
+                .organization(target.getOrganizationName())
+                .space(target.getSpaceName())
+                .build();
     }
 
     public void collect(List<Space> spaces) {
         log.info("ServiceInstanceDetailTask started");
-    	service
-            .deleteAll()
-            .thenMany(Flux.fromIterable(spaces))
-            .concatMap(space -> listServiceInstances(space))
-            .flatMap(tuple -> getServiceInstanceDetail(tuple))
-            .flatMap(service::save)
-            .thenMany(service.findAll())
-                .collectList()
-                .subscribe(
-                    result -> {
-                        publisher.publishEvent(new ServiceInstanceDetailRetrievedEvent(this).detail(result));
-                        log.info("ServiceInstanceDetailTask completed");
-                    },
-                    error -> {
-                        log.error("ServiceInstanceDetailTask terminated with error", error);
-                    }
+        service
+        .deleteAll()
+        .thenMany(Flux.fromIterable(spaces))
+        .concatMap(this::listServiceInstances)
+        .flatMap(this::getServiceInstanceDetail)
+        .flatMap(service::save)
+        .thenMany(service.findAll())
+        .collectList()
+        .subscribe(
+                result -> {
+                    publisher.publishEvent(new ServiceInstanceDetailRetrievedEvent(this).detail(result));
+                    log.info("ServiceInstanceDetailTask completed");
+                },
+                error -> {
+                    log.error("ServiceInstanceDetailTask terminated with error", error);
+                }
                 );
     }
-
-    private DefaultCloudFoundryOperations buildClient(Space target) {
-        return DefaultCloudFoundryOperations
-                        .builder()
-                        .from(opsClient)
-                        .organization(target.getOrganizationName())
-		                .space(target.getSpaceName())
-		                .build();
-    }
-    private static Space buildSpace(String organization, String space) {
-        return Space
-                .builder()
-                    .organizationName(organization)
-                    .spaceName(space)
-                .build();
-    }
-
-    protected Flux<ServiceInstanceDetail> listServiceInstances(Space target) {
-        return
-            buildClient(target)
-                .services()
-                    .listInstances()
-                    .delayElements(Duration.ofMillis(250))
-                    .flatMap(sis -> Mono.just(
-                                        ServiceInstanceDetail
-                                            .builder()
-                                                .serviceInstanceId(sis.getId())
-                                                .organization(target.getOrganizationName())
-                                                .space(target.getSpaceName())
-                                                .name(sis.getName() != null ? sis.getName(): "user_provided_service")
-                                                .service(sis.getService())
-                                                .plan(sis.getPlan())
-                                                .applications(sis.getApplications())
-                                                .build()
-                                    )
-                    );
-    }
-
     protected Mono<ServiceInstanceDetail> getServiceInstanceDetail(ServiceInstanceDetail fragment) {
         log.trace("Fetching service instance detail for org={}, space={}, id={}, name={}", fragment.getOrganization(), fragment.getSpace(), fragment.getServiceInstanceId(), fragment.getName());
         return buildClient(buildSpace(fragment.getOrganization(), fragment.getSpace()))
                 .services()
-                    .getInstance(GetServiceInstanceRequest.builder().name(fragment.getName()).build())
-                    .map(sid ->
-                                ServiceInstanceDetail
-                                    .from(fragment)
-                                        .description(sid.getDescription())
-                                        .type(sid.getType() != null ? sid.getType().getValue(): null)
-                                        .lastOperation(sid.getLastOperation())
-                                        .lastUpdated(StringUtils.isNotBlank(sid.getUpdatedAt()) ? Instant.parse(sid.getUpdatedAt())
-                                                    .atZone(ZoneId.systemDefault())
-                                                    .toLocalDateTime() : null)
-                                        .dashboardUrl(sid.getDashboardUrl())
-                                        .requestedState(StringUtils.isNotBlank(sid.getStatus()) ? sid.getStatus().toLowerCase(): null)
-                                        .build()
-                    )
-                    .onErrorResume(e -> Mono.just(fragment));
+                .getInstance(GetServiceInstanceRequest.builder().name(fragment.getName()).build())
+                .map(sid ->
+                ServiceInstanceDetail
+                .from(fragment)
+                .description(sid.getDescription())
+                .type(sid.getType() != null ? sid.getType().getValue(): null)
+                .lastOperation(sid.getLastOperation())
+                .lastUpdated(StringUtils.isNotBlank(sid.getUpdatedAt()) ? Instant.parse(sid.getUpdatedAt())
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDateTime() : null)
+                .dashboardUrl(sid.getDashboardUrl())
+                .requestedState(StringUtils.isNotBlank(sid.getStatus()) ? sid.getStatus().toLowerCase(): null)
+                .build()
+                        )
+                .onErrorResume(e -> Mono.just(fragment));
+    }
+
+    protected Flux<ServiceInstanceDetail> listServiceInstances(Space target) {
+        return
+                buildClient(target)
+                .services()
+                .listInstances()
+                .delayElements(Duration.ofMillis(250))
+                .flatMap(sis -> Mono.just(
+                        ServiceInstanceDetail
+                        .builder()
+                        .serviceInstanceId(sis.getId())
+                        .organization(target.getOrganizationName())
+                        .space(target.getSpaceName())
+                        .name(sis.getName() != null ? sis.getName(): "user_provided_service")
+                        .service(sis.getService())
+                        .plan(sis.getPlan())
+                        .applications(sis.getApplications())
+                        .build()
+                        )
+                        );
+    }
+
+    @Override
+    public void onApplicationEvent(SpacesRetrievedEvent event) {
+        collect(List.copyOf(event.getSpaces()));
     }
 
 }

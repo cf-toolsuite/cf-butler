@@ -29,9 +29,9 @@ public class AppUsageReport {
 
     @JsonCreator
     public AppUsageReport(
-        @JsonProperty("report_time") String reportTime,
-        @JsonProperty("monthly_reports") List<AppUsageMonthly> monthlyReports,
-        @JsonProperty("yearly_reports") List<AppUsageYearly> yearlyReports) {
+            @JsonProperty("report_time") String reportTime,
+            @JsonProperty("monthly_reports") List<AppUsageMonthly> monthlyReports,
+            @JsonProperty("yearly_reports") List<AppUsageYearly> yearlyReports) {
         this.reportTime = reportTime;
         this.monthlyReports = monthlyReports;
         this.yearlyReports = yearlyReports;

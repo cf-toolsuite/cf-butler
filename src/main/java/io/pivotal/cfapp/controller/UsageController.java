@@ -25,63 +25,63 @@ public class UsageController {
 
     @Autowired
     public UsageController(
-        UsageCache cache,
-        UsageService service) {
+            UsageCache cache,
+            UsageService service) {
         this.cache = cache;
         this.service = service;
     }
 
     @GetMapping(value = "/accounting/applications/{orgName}/{startDate}/{endDate}")
     public Mono<ResponseEntity<String>> getOrganizationApplicationUsageReport(
-        @PathVariable("orgName") String organizationName,
-        @DateTimeFormat(iso = ISO.DATE) @PathVariable("startDate") LocalDate startDate,
-        @DateTimeFormat(iso = ISO.DATE) @PathVariable("endDate") LocalDate endDate
-    ) {
+            @PathVariable("orgName") String organizationName,
+            @DateTimeFormat(iso = ISO.DATE) @PathVariable("startDate") LocalDate startDate,
+            @DateTimeFormat(iso = ISO.DATE) @PathVariable("endDate") LocalDate endDate
+            ) {
         return service.getApplicationUsage(organizationName, startDate, endDate)
-                .map(r -> ResponseEntity.ok(r))
+                .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @GetMapping(value = "/accounting/services/{orgName}/{startDate}/{endDate}")
     public Mono<ResponseEntity<String>> getOrganizationServiceUsageReport(
-        @PathVariable("orgName") String organizationName,
-        @DateTimeFormat(iso = ISO.DATE) @PathVariable("startDate") LocalDate startDate,
-        @DateTimeFormat(iso = ISO.DATE) @PathVariable("endDate") LocalDate endDate
-    ) {
+            @PathVariable("orgName") String organizationName,
+            @DateTimeFormat(iso = ISO.DATE) @PathVariable("startDate") LocalDate startDate,
+            @DateTimeFormat(iso = ISO.DATE) @PathVariable("endDate") LocalDate endDate
+            ) {
         return service.getServiceUsage(organizationName, startDate, endDate)
-                .map(r -> ResponseEntity.ok(r))
+                .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @GetMapping(value = "/accounting/tasks/{orgName}/{startDate}/{endDate}")
     public Mono<ResponseEntity<String>> getOrganizationTaskUsageReport(
-        @PathVariable("orgName") String organizationName,
-        @DateTimeFormat(iso = ISO.DATE) @PathVariable("startDate") LocalDate startDate,
-        @DateTimeFormat(iso = ISO.DATE) @PathVariable("endDate") LocalDate endDate
-    ) {
+            @PathVariable("orgName") String organizationName,
+            @DateTimeFormat(iso = ISO.DATE) @PathVariable("startDate") LocalDate startDate,
+            @DateTimeFormat(iso = ISO.DATE) @PathVariable("endDate") LocalDate endDate
+            ) {
         return service.getTaskUsage(organizationName, startDate, endDate)
-                .map(r -> ResponseEntity.ok(r))
+                .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @GetMapping(value = "/accounting/applications")
     public Mono<ResponseEntity<AppUsageReport>> getSystemWideApplicationUsageReport() {
         return Mono.justOrEmpty(cache.getApplicationReport())
-                .map(r -> ResponseEntity.ok(r))
+                .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @GetMapping(value = "/accounting/services")
     public Mono<ResponseEntity<ServiceUsageReport>> getSystemWideServiceUsageReport() {
         return Mono.justOrEmpty(cache.getServiceReport())
-                .map(r -> ResponseEntity.ok(r))
+                .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @GetMapping(value = "/accounting/tasks")
     public Mono<ResponseEntity<TaskUsageReport>> getSystemWideTaskUsageReport() {
         return Mono.justOrEmpty(cache.getTaskReport())
-                .map(r -> ResponseEntity.ok(r))
+                .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 

@@ -10,14 +10,14 @@ import reactor.util.function.Tuple2;
 
 public interface ServiceInstanceDetailService {
 
-	Mono<Void> deleteAll();
+    Mono<Void> deleteAll();
 
-	Mono<ServiceInstanceDetail> save(ServiceInstanceDetail entity);
+    Flux<ServiceInstanceDetail> findAll();
 
-	Flux<ServiceInstanceDetail> findAll();
+    Flux<ServiceInstanceDetail> findByDateRange(LocalDate start, LocalDate end);
 
-	Flux<Tuple2<ServiceInstanceDetail, ServiceInstancePolicy>> findByServiceInstancePolicy(ServiceInstancePolicy policy);
+    Flux<Tuple2<ServiceInstanceDetail, ServiceInstancePolicy>> findByServiceInstancePolicy(ServiceInstancePolicy policy);
 
-	Flux<ServiceInstanceDetail> findByDateRange(LocalDate start, LocalDate end);
+    Mono<ServiceInstanceDetail> save(ServiceInstanceDetail entity);
 
 }

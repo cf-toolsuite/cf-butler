@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.pivotal.cfapp.domain.Organization;
 import io.pivotal.cfapp.service.OrganizationService;
-import io.pivotal.cfapp.service.TkService;
+import io.pivotal.cfapp.service.TimeKeeperService;
 import io.pivotal.cfapp.service.TkServiceUtil;
 import reactor.core.publisher.Mono;
 
@@ -23,8 +23,8 @@ public class OrganizationController {
 
     @Autowired
     public OrganizationController(
-        OrganizationService organizationService,
-            TkService tkService) {
+            OrganizationService organizationService,
+            TimeKeeperService tkService) {
         this.organizationService = organizationService;
         this.util = new TkServiceUtil(tkService);
     }
@@ -33,20 +33,20 @@ public class OrganizationController {
     public Mono<ResponseEntity<List<Organization>>> listAllOrganizations() {
         return util.getHeaders()
                 .flatMap(h -> organizationService
-                                    .findAll()
-                                    .collectList()
-                                    .map(orgs -> new ResponseEntity<>(orgs, h, HttpStatus.OK)))
-                                    .defaultIfEmpty(ResponseEntity.notFound().build());
+                        .findAll()
+                        .collectList()
+                        .map(orgs -> new ResponseEntity<>(orgs, h, HttpStatus.OK)))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/snapshot/organizations/count")
     public Mono<ResponseEntity<Long>> organizationsCount() {
         return util.getHeaders()
                 .flatMap(h -> organizationService
-                                .findAll()
-                                .count()
-                                .map(count -> new ResponseEntity<>(count, h, HttpStatus.OK)))
-                                .defaultIfEmpty(ResponseEntity.ok(0L));
+                        .findAll()
+                        .count()
+                        .map(count -> new ResponseEntity<>(count, h, HttpStatus.OK)))
+                .defaultIfEmpty(ResponseEntity.ok(0L));
     }
 
 

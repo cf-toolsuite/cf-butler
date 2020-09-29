@@ -90,16 +90,6 @@ public enum EventType {
     AUDIT_SERVICE_INSTANCE_SHARE("audit.service_instance.share"),
     AUDIT_SERVICE_INSTANCE_UNSHARE("audit.service_instance.unshare");
 
-    private final String id;
-
-    EventType(String id) {
-        this.id = id;
-    }
-
-    public String getId() {
-        return id;
-    }
-
     public static EventType from(String id) {
         EventType result = null;
         List<EventType> candidates = Arrays.asList(EventType.values()).stream().filter(et -> et.getId().equalsIgnoreCase(id)).collect(Collectors.toList());
@@ -108,5 +98,15 @@ public enum EventType {
         }
         Assert.isTrue(result != null, "Not a valid event type identifier");
         return result;
+    }
+
+    private final String id;
+
+    EventType(String id) {
+        this.id = id;
+    }
+
+    public String getId() {
+        return id;
     }
 }

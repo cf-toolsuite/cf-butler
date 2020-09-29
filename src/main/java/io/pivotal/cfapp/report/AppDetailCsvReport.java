@@ -8,11 +8,24 @@ import io.pivotal.cfapp.event.AppDetailRetrievedEvent;
 
 public class AppDetailCsvReport  {
 
-	private PasSettings appSettings;
+    private PasSettings appSettings;
 
-	public AppDetailCsvReport(PasSettings appSettings) {
-		this.appSettings = appSettings;
-	}
+    public AppDetailCsvReport(PasSettings appSettings) {
+        this.appSettings = appSettings;
+    }
+
+    public String generateDetail(AppDetailRetrievedEvent event) {
+        StringBuffer details = new StringBuffer();
+        details.append("\n");
+        details.append(AppDetail.headers());
+        details.append("\n");
+        event.getDetail()
+        .forEach(a -> {
+            details.append(a.toCsv());
+            details.append("\n");
+        });
+        return details.toString();
+    }
 
     public String generatePreamble(LocalDateTime collectionTime) {
         StringBuffer preamble = new StringBuffer();
@@ -27,19 +40,6 @@ public class AppDetailCsvReport  {
         preamble.append(LocalDateTime.now());
         preamble.append(".");
         return preamble.toString();
-    }
-
-    public String generateDetail(AppDetailRetrievedEvent event) {
-        StringBuffer details = new StringBuffer();
-        details.append("\n");
-        details.append(AppDetail.headers());
-        details.append("\n");
-        event.getDetail()
-                .forEach(a -> {
-                    details.append(a.toCsv());
-                    details.append("\n");
-                });
-        return details.toString();
     }
 
 }

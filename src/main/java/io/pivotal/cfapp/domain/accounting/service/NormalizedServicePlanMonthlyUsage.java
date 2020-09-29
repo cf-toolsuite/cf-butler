@@ -11,20 +11,6 @@ import lombok.Getter;
 @Getter
 public class NormalizedServicePlanMonthlyUsage {
 
-    private Integer year;
-    private Integer month;
-    private String serviceName;
-    private String serviceGuid;
-    private String servicePlanName;
-    private String servicePlanGuid;
-    private Double durationInHours;
-    private Double averageInstances;
-    private Integer maximumInstances;
-
-    public String getKey() {
-        return String.join("-", serviceName, servicePlanName, String.valueOf(year), String.format("%02d", month));
-    }
-
     public static List<NormalizedServicePlanMonthlyUsage> listOf(ServiceUsageReport report) {
         List<NormalizedServicePlanMonthlyUsage> result = new ArrayList<>();
         List<ServiceUsageMonthlyAggregate> monthlyAggregates = report.getMonthlyServiceReports();
@@ -38,7 +24,7 @@ public class NormalizedServicePlanMonthlyUsage {
                 List<ServiceUsageMonthly> monthlyServicePlanUsageMetrics = spum.getUsages();
                 for (ServiceUsageMonthly metrics: monthlyServicePlanUsageMetrics) {
                     result.add(
-                        NormalizedServicePlanMonthlyUsage.builder()
+                            NormalizedServicePlanMonthlyUsage.builder()
                             .year(metrics.getYear())
                             .month(metrics.getMonth())
                             .serviceGuid(serviceGuid)
@@ -49,12 +35,26 @@ public class NormalizedServicePlanMonthlyUsage {
                             .maximumInstances(metrics.getMaximumInstances())
                             .durationInHours(metrics.getDurationInHours())
                             .build()
-                    );
+                            );
                 }
             }
         }
         result.sort(Comparator.comparing(NormalizedServicePlanMonthlyUsage::getKey));
         return result;
+    }
+    private Integer year;
+    private Integer month;
+    private String serviceName;
+    private String serviceGuid;
+    private String servicePlanName;
+    private String servicePlanGuid;
+    private Double durationInHours;
+    private Double averageInstances;
+
+    private Integer maximumInstances;
+
+    public String getKey() {
+        return String.join("-", serviceName, servicePlanName, String.valueOf(year), String.format("%02d", month));
     }
 
 }

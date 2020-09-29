@@ -20,9 +20,9 @@ public class StemcellDetail {
 
     @JsonCreator
     public StemcellDetail(
-        @JsonProperty("os") String os,
-        @JsonProperty("version") String version
-    ) {
+            @JsonProperty("os") String os,
+            @JsonProperty("version") String version
+            ) {
         this.os = os;
         this.version = version;
     }

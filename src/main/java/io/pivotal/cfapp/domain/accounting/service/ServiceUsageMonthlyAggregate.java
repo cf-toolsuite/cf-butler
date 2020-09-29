@@ -9,8 +9,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import lombok.Builder;
-import lombok.Getter;
 import lombok.Builder.Default;
+import lombok.Getter;
 
 @Builder
 @Getter
@@ -33,10 +33,10 @@ public class ServiceUsageMonthlyAggregate {
 
     @JsonCreator
     public ServiceUsageMonthlyAggregate(
-        @JsonProperty("service_name") String serviceName,
-        @JsonProperty("service_guid") String serviceGuid,
-        @JsonProperty("usages") List<ServiceUsageMonthly> usages,
-        @JsonProperty("plans") List<ServicePlanUsageMonthly> plans) {
+            @JsonProperty("service_name") String serviceName,
+            @JsonProperty("service_guid") String serviceGuid,
+            @JsonProperty("usages") List<ServiceUsageMonthly> usages,
+            @JsonProperty("plans") List<ServicePlanUsageMonthly> plans) {
         this.serviceName = serviceName;
         this.serviceGuid = serviceGuid;
         this.usages = usages;

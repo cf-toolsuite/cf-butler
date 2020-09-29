@@ -22,27 +22,6 @@ public abstract class EmailNotifier implements ApplicationListener<EmailNotifica
 
     private final String template = getEmailTemplate();
 
-    public abstract void sendMail(String from, String to, String subject, String body, List<EmailAttachment> attachments);
-
-    @Override
-    public void onApplicationEvent(EmailNotificationEvent event) {
-        List<String> recipients = event.getRecipients();
-        String from = event.getFrom();
-        String footer =
-            String.format("This email was sent from %s on %s",
-                event.getDomain(), DateTimeFormatter.ISO_DATE_TIME.format(LocalDateTime.now()));
-        String subject = event.getSubject();
-        final String body = buildBody(template, event.getBody(), subject, footer);
-        log.trace("About to send email using ||> From: {}, To: {}, Subject: {}, Body: {}", from, recipients.toString(), subject, body);
-        List<EmailAttachment> prunedAttachments = event.getAttachments().stream().filter(ea -> ea.hasContent()).collect(Collectors.toList());
-        boolean shouldSend = !prunedAttachments.isEmpty();
-        recipients.forEach(recipient -> {
-            if (shouldSend) {
-                sendMail(from, recipient, subject, body, prunedAttachments);
-            }
-        });
-    }
-
     protected String buildBody(String template, String body, String subject, String footer) {
         String result = "";
         if (StringUtils.isNotBlank(template) && isEmailTemplate(template)) {
@@ -58,9 +37,9 @@ public abstract class EmailNotifier implements ApplicationListener<EmailNotifica
         try (
                 InputStream resource = new ClassPathResource("email-template.html").getInputStream();
                 BufferedReader reader = new BufferedReader(new InputStreamReader(resource));
-            ) {
+                ) {
             result =
-                reader
+                    reader
                     .lines()
                     .collect(Collectors.joining("\n"));
         } catch (IOException ioe) {
@@ -76,5 +55,26 @@ public abstract class EmailNotifier implements ApplicationListener<EmailNotifica
         }
         return result;
     }
+
+    @Override
+    public void onApplicationEvent(EmailNotificationEvent event) {
+        List<String> recipients = event.getRecipients();
+        String from = event.getFrom();
+        String footer =
+                String.format("This email was sent from %s on %s",
+                        event.getDomain(), DateTimeFormatter.ISO_DATE_TIME.format(LocalDateTime.now()));
+        String subject = event.getSubject();
+        final String body = buildBody(template, event.getBody(), subject, footer);
+        log.trace("About to send email using ||> From: {}, To: {}, Subject: {}, Body: {}", from, recipients.toString(), subject, body);
+        List<EmailAttachment> prunedAttachments = event.getAttachments().stream().filter(EmailAttachment::hasContent).collect(Collectors.toList());
+        boolean shouldSend = !prunedAttachments.isEmpty();
+        recipients.forEach(recipient -> {
+            if (shouldSend) {
+                sendMail(from, recipient, subject, body, prunedAttachments);
+            }
+        });
+    }
+
+    public abstract void sendMail(String from, String to, String subject, String body, List<EmailAttachment> attachments);
 
 }

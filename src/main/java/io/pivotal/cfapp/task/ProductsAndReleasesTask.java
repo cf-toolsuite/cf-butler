@@ -27,51 +27,51 @@ public class ProductsAndReleasesTask implements ApplicationRunner {
     public ProductsAndReleasesTask(
             PivnetClient client,
             PivnetCache cache,
-    		ApplicationEventPublisher publisher) {
+            ApplicationEventPublisher publisher) {
         this.client = client;
         this.cache = cache;
         this.publisher = publisher;
     }
 
-    @Override
-    public void run(ApplicationArguments args) throws Exception {
-        collect();
-    }
-
     public void collect() {
         log.info("ProductsAndReleasesTask started");
         client
-            .getProducts()
-            .flatMap(products -> {
-                cache.setProducts(products);
-                return Mono.empty(); })
-            .then(
+        .getProducts()
+        .flatMap(products -> {
+            cache.setProducts(products);
+            return Mono.empty(); })
+        .then(
                 client
-                    .getAllProductReleases()
-                    .collectList()
-                    .flatMap(releases -> {
-                        cache.setAllProductReleases(releases);
-                        return Mono.empty(); }))
-            .then(
+                .getAllProductReleases()
+                .collectList()
+                .flatMap(releases -> {
+                    cache.setAllProductReleases(releases);
+                    return Mono.empty(); }))
+        .then(
                 client
-                    .getLatestProductReleases()
-                    .collectList()
-                    .flatMap(releases -> { 
-                        cache.setLatestProductReleases(releases); 
-                        return Mono.justOrEmpty(releases); }))
-            .subscribe(
+                .getLatestProductReleases()
+                .collectList()
+                .flatMap(releases -> {
+                    cache.setLatestProductReleases(releases);
+                    return Mono.justOrEmpty(releases); }))
+        .subscribe(
                 result -> {
                     publisher.publishEvent(
-                        new ProductsAndReleasesRetrievedEvent(this)
-                                .products(cache.getProducts())
-                                .allReleases(cache.getAllProductReleases())
-                                .latestReleases(cache.getLatestProductReleases()));
-                     log.info("ProductsAndReleasesTask completed");
+                            new ProductsAndReleasesRetrievedEvent(this)
+                            .products(cache.getProducts())
+                            .allReleases(cache.getAllProductReleases())
+                            .latestReleases(cache.getLatestProductReleases()));
+                    log.info("ProductsAndReleasesTask completed");
                 },
                 error -> {
                     log.error("ProductsAndReleasesTask terminated with error", error);
                 }
-            );
+                );
+    }
+
+    @Override
+    public void run(ApplicationArguments args) throws Exception {
+        collect();
     }
 
     @Scheduled(cron = "${cron.collection}")

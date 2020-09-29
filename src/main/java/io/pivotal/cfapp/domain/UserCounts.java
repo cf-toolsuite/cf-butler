@@ -32,10 +32,10 @@ public class UserCounts {
 
     @JsonCreator
     public UserCounts(
-        @JsonProperty("by-organization") Map<String, Integer> byOrganization,
-        @JsonProperty("total-user-accounts") Long totalUserAccounts,
-        @JsonProperty("total-service-accounts") Long totalServiceAccounts
-    ) {
+            @JsonProperty("by-organization") Map<String, Integer> byOrganization,
+            @JsonProperty("total-user-accounts") Long totalUserAccounts,
+            @JsonProperty("total-service-accounts") Long totalServiceAccounts
+            ) {
         this.byOrganization = byOrganization;
         this.totalUserAccounts = totalUserAccounts;
         this.totalServiceAccounts = totalServiceAccounts;

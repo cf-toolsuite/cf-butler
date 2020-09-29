@@ -5,8 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import lombok.Builder;
-import lombok.Getter;
 import lombok.Builder.Default;
+import lombok.Getter;
 
 @Builder
 @Getter
@@ -31,11 +31,11 @@ public class Demographics {
 
     @JsonCreator
     public Demographics(
-        @JsonProperty("total-organizations") Long organizations,
-        @JsonProperty("total-spaces") Long spaces,
-        @JsonProperty("total-user-accounts") Long userAccounts,
-        @JsonProperty("total-service-accounts") Long serviceAccounts
-    ) {
+            @JsonProperty("total-organizations") Long organizations,
+            @JsonProperty("total-spaces") Long spaces,
+            @JsonProperty("total-user-accounts") Long userAccounts,
+            @JsonProperty("total-service-accounts") Long serviceAccounts
+            ) {
         this.organizations = organizations;
         this.spaces = spaces;
         this.userAccounts = userAccounts;

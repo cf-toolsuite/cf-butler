@@ -16,8 +16,8 @@ public class Metadata {
 
     @JsonCreator
     public Metadata(
-        @JsonProperty("metadata") EmbeddedMetadata metadata
-    ) {
+            @JsonProperty("metadata") EmbeddedMetadata metadata
+            ) {
         this.metadata = metadata;
     }
 

@@ -16,13 +16,13 @@ public class SpacesRetrievedEvent extends ApplicationEvent {
         super(source);
     }
 
+    public List<Space> getSpaces() {
+        return spaces;
+    }
+
     public SpacesRetrievedEvent spaces(List<Space> spaces) {
         this.spaces = spaces;
         return this;
-    }
-
-    public List<Space> getSpaces() {
-        return spaces;
     }
 
 }

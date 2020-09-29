@@ -23,62 +23,62 @@ import reactor.core.publisher.Mono;
 @RestController
 public class HistoricalReportController {
 
-	private final HistoricalRecordService historicalRecordService;
-	private final HistoricalRecordCsvReport report;
+    private final HistoricalRecordService historicalRecordService;
+    private final HistoricalRecordCsvReport report;
 
-	@Autowired
-	public HistoricalReportController(
-			PasSettings butlerSettings,
-			HistoricalRecordService historicalRecordService) {
-		this.historicalRecordService = historicalRecordService;
-		this.report = new HistoricalRecordCsvReport(butlerSettings);
-	}
+    @Autowired
+    public HistoricalReportController(
+            PasSettings butlerSettings,
+            HistoricalRecordService historicalRecordService) {
+        this.historicalRecordService = historicalRecordService;
+        this.report = new HistoricalRecordCsvReport(butlerSettings);
+    }
 
-	@GetMapping(value = { "/policies/report" }, produces = MediaType.TEXT_PLAIN_VALUE)
-	public Mono<ResponseEntity<String>> generateReport(
-		@DateTimeFormat(iso = ISO.DATE)
-		@RequestParam(required = false, value = "start")
-		LocalDate start,
-		@DateTimeFormat(iso = ISO.DATE)
-		@RequestParam(required = false, value = "end")
-		LocalDate end) {
-		Mono<ResponseEntity<String>> result = null;
-		boolean hasDateRange = start != null && end != null;
-		boolean hasValidDateRange = hasDateRange && start.isBefore(end);
-		if (!hasDateRange) {
-			result = historicalRecordService
-					.findAll()
-					.collectList()
-					.map(r ->
-						new HistoricalRecordRetrievedEvent(this)
-							.records(r)
-					)
-					.delayElement(Duration.ofMillis(500))
-					.map(e -> ResponseEntity.ok(
-								String.join(
-										"\n\n",
-										report.generatePreamble(),
-										report.generateDetail(e))))
-					.defaultIfEmpty(ResponseEntity.notFound().build());
-		} else if (hasValidDateRange) {
-			result = historicalRecordService
-					.findByDateRange(start, end)
-					.collectList()
-					.map(r ->
-						new HistoricalRecordRetrievedEvent(this)
-							.records(r)
-					)
-					.delayElement(Duration.ofMillis(500))
-					.map(e -> ResponseEntity.ok(
-								String.join(
-										"\n\n",
-										report.generatePreamble(),
-										report.generateDetail(e))))
-					.defaultIfEmpty(ResponseEntity.notFound().build());
-		} else {
-			log.error("The start date must be before end date when fetching historical records contrained by a date range.");
-			result = Mono.just(ResponseEntity.badRequest().build());
-		}
-		return result;
-	}
+    @GetMapping(value = { "/policies/report" }, produces = MediaType.TEXT_PLAIN_VALUE)
+    public Mono<ResponseEntity<String>> generateReport(
+            @DateTimeFormat(iso = ISO.DATE)
+            @RequestParam(required = false, value = "start")
+            LocalDate start,
+            @DateTimeFormat(iso = ISO.DATE)
+            @RequestParam(required = false, value = "end")
+            LocalDate end) {
+        Mono<ResponseEntity<String>> result = null;
+        boolean hasDateRange = start != null && end != null;
+        boolean hasValidDateRange = hasDateRange && start.isBefore(end);
+        if (!hasDateRange) {
+            result = historicalRecordService
+                    .findAll()
+                    .collectList()
+                    .map(r ->
+                    new HistoricalRecordRetrievedEvent(this)
+                    .records(r)
+                            )
+                    .delayElement(Duration.ofMillis(500))
+                    .map(e -> ResponseEntity.ok(
+                            String.join(
+                                    "\n\n",
+                                    report.generatePreamble(),
+                                    report.generateDetail(e))))
+                    .defaultIfEmpty(ResponseEntity.notFound().build());
+        } else if (hasValidDateRange) {
+            result = historicalRecordService
+                    .findByDateRange(start, end)
+                    .collectList()
+                    .map(r ->
+                    new HistoricalRecordRetrievedEvent(this)
+                    .records(r)
+                            )
+                    .delayElement(Duration.ofMillis(500))
+                    .map(e -> ResponseEntity.ok(
+                            String.join(
+                                    "\n\n",
+                                    report.generatePreamble(),
+                                    report.generateDetail(e))))
+                    .defaultIfEmpty(ResponseEntity.notFound().build());
+        } else {
+            log.error("The start date must be before end date when fetching historical records contrained by a date range.");
+            result = Mono.just(ResponseEntity.badRequest().build());
+        }
+        return result;
+    }
 }

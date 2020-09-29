@@ -31,11 +31,11 @@ public class ProductLinks {
     private FileGroups fileGroups;
 
     public ProductLinks(
-        @JsonProperty("self") Self self,
-        @JsonProperty("releases") Releases releases,
-        @JsonProperty("product_files") ProductFiles productFiles,
-        @JsonProperty("file_groups") FileGroups fileGroups
-    ) {
+            @JsonProperty("self") Self self,
+            @JsonProperty("releases") Releases releases,
+            @JsonProperty("product_files") ProductFiles productFiles,
+            @JsonProperty("file_groups") FileGroups fileGroups
+            ) {
         this.self = self;
         this.releases = releases;
         this.productFiles = productFiles;

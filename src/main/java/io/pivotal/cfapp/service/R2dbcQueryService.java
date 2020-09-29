@@ -29,6 +29,6 @@ public class R2dbcQueryService implements QueryService {
         return repo
                 .executeQuery(query)
                 .onErrorContinue(
-                    (ex, data) -> log.error(String.format("Problem executing query %s.", query.getSql()), ex));
+                        (ex, data) -> log.error(String.format("Problem executing query %s.", query.getSql()), ex));
     }
 }

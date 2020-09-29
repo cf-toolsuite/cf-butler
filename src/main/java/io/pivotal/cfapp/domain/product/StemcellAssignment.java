@@ -64,18 +64,18 @@ public class StemcellAssignment {
 
     @JsonCreator
     public StemcellAssignment(
-        @JsonProperty("available_stemcell_versions") List<String> availableStemcellVersions,
-        @JsonProperty("deployed_product_version") String deployedProductVersion,
-        @JsonProperty("deployed_stemcell_version") String deployedStemcellVersion,
-        @JsonProperty("guid") String guid,
-        @JsonProperty("identifier") String identifier,
-        @JsonProperty("is_staged_for_deletion") Boolean isStagedForDeletion,
-        @JsonProperty("label") String label,
-        @JsonProperty("required_stemcell_os") String requiredStemcellOs,
-        @JsonProperty("required_stemcell_version") String requiredStemcellVersion,
-        @JsonProperty("staged_product_version") String stagedProductVersion,
-        @JsonProperty("staged_stemcell_version") String stagedStemcellVersion
-    ) {
+            @JsonProperty("available_stemcell_versions") List<String> availableStemcellVersions,
+            @JsonProperty("deployed_product_version") String deployedProductVersion,
+            @JsonProperty("deployed_stemcell_version") String deployedStemcellVersion,
+            @JsonProperty("guid") String guid,
+            @JsonProperty("identifier") String identifier,
+            @JsonProperty("is_staged_for_deletion") Boolean isStagedForDeletion,
+            @JsonProperty("label") String label,
+            @JsonProperty("required_stemcell_os") String requiredStemcellOs,
+            @JsonProperty("required_stemcell_version") String requiredStemcellVersion,
+            @JsonProperty("staged_product_version") String stagedProductVersion,
+            @JsonProperty("staged_stemcell_version") String stagedStemcellVersion
+            ) {
         this.availableStemcellVersions = availableStemcellVersions;
         this.deployedProductVersion = deployedProductVersion;
         this.deployedStemcellVersion = deployedStemcellVersion;

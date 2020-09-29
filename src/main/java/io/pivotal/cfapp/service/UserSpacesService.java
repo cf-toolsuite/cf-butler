@@ -10,6 +10,14 @@ import reactor.core.publisher.Mono;
 @Service
 public class UserSpacesService {
 
+    private static Space buildSpace(String organization, String space) {
+        return Space
+                .builder()
+                .organizationName(organization)
+                .spaceName(space)
+                .build();
+    }
+
     private final SpaceUsersService service;
 
     @Autowired
@@ -23,13 +31,5 @@ public class UserSpacesService {
                 .map(su -> buildSpace(su.getOrganization(), su.getSpace()))
                 .collectList()
                 .map(spaces -> UserSpaces.builder().accountName(name).spaces(spaces).build());
-    }
-
-    private static Space buildSpace(String organization, String space) {
-        return Space
-                .builder()
-                    .organizationName(organization)
-                    .spaceName(space)
-                .build();
     }
 }

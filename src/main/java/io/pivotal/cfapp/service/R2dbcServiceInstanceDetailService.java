@@ -17,41 +17,41 @@ import reactor.util.function.Tuple2;
 @Service
 public class R2dbcServiceInstanceDetailService implements ServiceInstanceDetailService {
 
-	private R2dbcServiceInstanceDetailRepository repo;
+    private R2dbcServiceInstanceDetailRepository repo;
 
-	public R2dbcServiceInstanceDetailService(R2dbcServiceInstanceDetailRepository repo) {
-		this.repo = repo;
-	}
+    public R2dbcServiceInstanceDetailService(R2dbcServiceInstanceDetailRepository repo) {
+        this.repo = repo;
+    }
 
-	@Override
-	@Transactional
-	public Mono<ServiceInstanceDetail> save(ServiceInstanceDetail entity) {
-		return repo
-				.save(entity)
-				.onErrorContinue(
-					(ex, data) -> log.error(String.format("Problem saving service instance %s.", entity), ex));
-	}
+    @Override
+    @Transactional
+    public Mono<Void> deleteAll() {
+        return repo.deleteAll();
+    }
 
-	@Override
-	public Flux<ServiceInstanceDetail> findAll() {
-		return repo.findAll();
-	}
+    @Override
+    public Flux<ServiceInstanceDetail> findAll() {
+        return repo.findAll();
+    }
 
-	@Override
-	@Transactional
-	public Mono<Void> deleteAll() {
-		return repo.deleteAll();
-	}
+    @Override
+    public Flux<ServiceInstanceDetail> findByDateRange(LocalDate start, LocalDate end) {
+        return repo.findByDateRange(start, end);
+    }
 
-	@Override
-	public Flux<Tuple2<ServiceInstanceDetail, ServiceInstancePolicy>> findByServiceInstancePolicy(
-			ServiceInstancePolicy policy) {
-		return repo.findByServiceInstancePolicy(policy);
-	}
+    @Override
+    public Flux<Tuple2<ServiceInstanceDetail, ServiceInstancePolicy>> findByServiceInstancePolicy(
+            ServiceInstancePolicy policy) {
+        return repo.findByServiceInstancePolicy(policy);
+    }
 
-	@Override
-	public Flux<ServiceInstanceDetail> findByDateRange(LocalDate start, LocalDate end) {
-		return repo.findByDateRange(start, end);
-	}
+    @Override
+    @Transactional
+    public Mono<ServiceInstanceDetail> save(ServiceInstanceDetail entity) {
+        return repo
+                .save(entity)
+                .onErrorContinue(
+                        (ex, data) -> log.error(String.format("Problem saving service instance %s.", entity), ex));
+    }
 
 }

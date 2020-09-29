@@ -23,7 +23,7 @@ public class WebClientConfig {
     @ConditionalOnProperty(name = "cf.sslValidationSkipped", havingValue="true")
     public WebClient insecureWebClient(WebClient.Builder builder) throws SSLException {
         SslContext sslContext =
-            SslContextBuilder
+                SslContextBuilder
                 .forClient()
                 .trustManager(InsecureTrustManagerFactory.INSTANCE)
                 .build();
@@ -37,7 +37,7 @@ public class WebClientConfig {
     @Bean
     @ConditionalOnProperty(name = "cf.sslValidationSkipped", havingValue="false", matchIfMissing=true)
     public WebClient secureWebClient(WebClient.Builder builder) {
-          return builder
-                    .build();
+        return builder
+                .build();
     }
 }

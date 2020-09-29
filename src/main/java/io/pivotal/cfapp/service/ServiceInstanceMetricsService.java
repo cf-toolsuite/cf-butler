@@ -6,14 +6,14 @@ import reactor.util.function.Tuple2;
 
 public interface ServiceInstanceMetricsService {
 
-	Flux<Tuple2<String, Long>> byOrganization();
+    Flux<Tuple2<String, Long>> byOrganization();
 
-	Flux<Tuple2<String, Long>> byService();
+    Flux<Tuple2<String, Long>> byService();
 
-	Flux<Tuple2<String, Long>> byServiceAndPlan();
+    Flux<Tuple2<String, Long>> byServiceAndPlan();
 
-	Mono<Long> totalServiceInstances();
+    Mono<Long> totalServiceInstances();
 
-	Flux<Tuple2<String, Long>> totalVelocity();
+    Flux<Tuple2<String, Long>> totalVelocity();
 
 }

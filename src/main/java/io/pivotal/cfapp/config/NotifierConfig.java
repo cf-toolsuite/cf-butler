@@ -1,7 +1,5 @@
 package io.pivotal.cfapp.config;
 
-import com.sendgrid.SendGrid;
-
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.mail.MailSenderAutoConfiguration;
@@ -10,14 +8,16 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.javamail.JavaMailSender;
 
+import com.sendgrid.SendGrid;
+
 import io.pivotal.cfapp.notifier.EmailNotifier;
 import io.pivotal.cfapp.notifier.JavaMailNotifier;
 import io.pivotal.cfapp.notifier.SendGridNotifier;
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 public class NotifierConfig {
 
-    @Configuration
+    @Configuration(proxyBeanMethods = false)
     @ConditionalOnProperty(prefix="notification", name="engine", havingValue="java-mail")
     @EnableAutoConfiguration(exclude = { SendGridAutoConfiguration.class })
     static class MailConfig {
@@ -28,7 +28,12 @@ public class NotifierConfig {
         }
     }
 
-    @Configuration
+    @Configuration(proxyBeanMethods = false)
+    @ConditionalOnProperty(prefix="notification", name="engine", havingValue="none", matchIfMissing=true)
+    @EnableAutoConfiguration(exclude = { MailSenderAutoConfiguration.class, SendGridAutoConfiguration.class })
+    static class NoMailConfig {}
+
+    @Configuration(proxyBeanMethods = false)
     @ConditionalOnProperty(prefix="notification", name="engine", havingValue="sendgrid")
     @EnableAutoConfiguration(exclude = { MailSenderAutoConfiguration.class })
     static class SendGridConfig {
@@ -38,9 +43,4 @@ public class NotifierConfig {
             return new SendGridNotifier(sendGrid);
         }
     }
-
-    @Configuration
-    @ConditionalOnProperty(prefix="notification", name="engine", havingValue="none", matchIfMissing=true)
-    @EnableAutoConfiguration(exclude = { MailSenderAutoConfiguration.class, SendGridAutoConfiguration.class })
-    static class NoMailConfig {}
 }

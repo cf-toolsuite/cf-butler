@@ -27,9 +27,9 @@ public class R2dbcAppMetricsRepositoryTest {
 
     @Autowired
     public R2dbcAppMetricsRepositoryTest(
-        R2dbcAppMetricsRepository metricsRepo,
-        R2dbcAppDetailRepository detailRepo
-    ) {
+            R2dbcAppMetricsRepository metricsRepo,
+            R2dbcAppDetailRepository detailRepo
+            ) {
         this.metricsRepo = metricsRepo;
         this.detailRepo = detailRepo;
     }
@@ -37,79 +37,61 @@ public class R2dbcAppMetricsRepositoryTest {
     @BeforeEach
     public void setUp() {
         AppDetail entity = AppDetail
-                            .builder()
-                                .appId("foo-id")
-                                .appName("foo")
-                                .organization("zoo-labs")
-                                .space("dev")
-                                .lastPushed(LocalDateTime.now())
-                                .stack("cflinuxfs3")
-                                .buildpack("java_buildpack")
-                                .runningInstances(1)
-                                .totalInstances(1)
-                                .memoryUsed(1L)
-                                .diskUsed(1L)
-                                .requestedState("stopped")
-                                .build();
+                .builder()
+                .appId("foo-id")
+                .appName("foo")
+                .organization("zoo-labs")
+                .space("dev")
+                .lastPushed(LocalDateTime.now())
+                .stack("cflinuxfs3")
+                .buildpack("java_buildpack")
+                .runningInstances(1)
+                .totalInstances(1)
+                .memoryUsed(1L)
+                .diskUsed(1L)
+                .requestedState("stopped")
+                .build();
         StepVerifier.create(detailRepo.deleteAll().then(detailRepo.save(entity))).expectNext(entity).verifyComplete();
-    }
-
-    @Test
-    public void testByOrganization() {
-        Flux<Tuple2<String, Long>> input = metricsRepo.byOrganization();
-        StepVerifier.create(input)
-            .assertNext(m -> {
-                assertEquals(1L, m.getT2());
-                assertEquals("zoo-labs", m.getT1());
-            }).verifyComplete();
-    }
-
-    @Test
-    public void testByStack() {
-        Flux<Tuple2<String, Long>> input = metricsRepo.byStack();
-        StepVerifier.create(input)
-            .assertNext(m -> {
-                assertEquals(1L, m.getT2());
-                assertEquals("cflinuxfs3", m.getT1());
-            }).verifyComplete();
-    }
-
-    @Test
-    public void testByDockerImage() {
-        Flux<Tuple2<String, Long>> input = metricsRepo.byDockerImage();
-        StepVerifier.create(input)
-            .assertNext(m -> {
-                assertEquals(0L, m.getT2());
-                assertEquals("--", m.getT1());
-            }).verifyComplete();
     }
 
     @Test
     public void testByBuildpack() {
         Flux<Tuple2<String, Long>> input = metricsRepo.byBuildpack();
         StepVerifier.create(input)
-            .assertNext(m -> {
-                assertEquals(1L, m.getT2());
-                assertEquals("java_buildpack", m.getT1());
-            }).verifyComplete();
+        .assertNext(m -> {
+            assertEquals(1L, m.getT2());
+            assertEquals("java_buildpack", m.getT1());
+        }).verifyComplete();
     }
 
     @Test
-    public void testTotalApplications() {
-        Mono<Long> input = metricsRepo.totalApplications();
-        StepVerifier.create(input).assertNext(r -> assertEquals(1L, r)).verifyComplete();
+    public void testByDockerImage() {
+        Flux<Tuple2<String, Long>> input = metricsRepo.byDockerImage();
+        StepVerifier.create(input)
+        .assertNext(m -> {
+            assertEquals(0L, m.getT2());
+            assertEquals("--", m.getT1());
+        }).verifyComplete();
     }
 
     @Test
-    public void testTotalStoppedApplications() {
-        Mono<Long> input = metricsRepo.totalStoppedApplicationInstances();
-        StepVerifier.create(input).assertNext(r -> assertEquals(1L, r)).verifyComplete();
+    public void testByOrganization() {
+        Flux<Tuple2<String, Long>> input = metricsRepo.byOrganization();
+        StepVerifier.create(input)
+        .assertNext(m -> {
+            assertEquals(1L, m.getT2());
+            assertEquals("zoo-labs", m.getT1());
+        }).verifyComplete();
     }
 
     @Test
-    public void testTotalRunningApplications() {
-        Mono<Long> input = metricsRepo.totalRunningApplicationInstances();
-        StepVerifier.create(input).assertNext(r -> assertEquals(0L, r)).verifyComplete();
+    public void testByStack() {
+        Flux<Tuple2<String, Long>> input = metricsRepo.byStack();
+        StepVerifier.create(input)
+        .assertNext(m -> {
+            assertEquals(1L, m.getT2());
+            assertEquals("cflinuxfs3", m.getT1());
+        }).verifyComplete();
     }
 
     @Test
@@ -124,6 +106,24 @@ public class R2dbcAppMetricsRepositoryTest {
         final LocalDate now = LocalDate.now();
         Mono<Long> input = metricsRepo.countStagnant(now.minusYears(1));
         StepVerifier.create(input).assertNext(r -> assertEquals(0L, r)).verifyComplete();
+    }
+
+    @Test
+    public void testTotalApplications() {
+        Mono<Long> input = metricsRepo.totalApplications();
+        StepVerifier.create(input).assertNext(r -> assertEquals(1L, r)).verifyComplete();
+    }
+
+    @Test
+    public void testTotalRunningApplications() {
+        Mono<Long> input = metricsRepo.totalRunningApplicationInstances();
+        StepVerifier.create(input).assertNext(r -> assertEquals(0L, r)).verifyComplete();
+    }
+
+    @Test
+    public void testTotalStoppedApplications() {
+        Mono<Long> input = metricsRepo.totalStoppedApplicationInstances();
+        StepVerifier.create(input).assertNext(r -> assertEquals(1L, r)).verifyComplete();
     }
 
     @Test

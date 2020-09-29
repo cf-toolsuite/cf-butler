@@ -10,22 +10,21 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
+
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvParser;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
-
 import io.pivotal.cfapp.domain.accounting.application.AppUsageMonthly;
-import io.pivotal.cfapp.domain.accounting.application.AppUsageReport;
 import io.pivotal.cfapp.domain.accounting.application.AppUsageMonthly.AppUsageMonthlyBuilder;
+import io.pivotal.cfapp.domain.accounting.application.AppUsageReport;
 import io.pivotal.cfapp.domain.accounting.application.AppUsageReport.AppUsageReportBuilder;
 import lombok.extern.slf4j.Slf4j;
 
@@ -41,15 +40,6 @@ public class ApplicationReporter {
         this.mapper = mapper;
     }
 
-    public void createReport(String outputFilename, ReportRequest[] requests) {
-        Path path = Paths.get(outputFilename);
-        try {
-            Files.write(path, createReport(requests).getBytes());
-        } catch (IOException ioe) {
-            log.warn("Could not create report output file!", ioe);
-        }
-    }
-
     public String createReport(ReportRequest[] requests) {
         List<ReportRequest> list = Arrays.asList(requests);
         try { log.info(mapper.writeValueAsString(list)); } catch (JsonProcessingException jpe) {}
@@ -59,6 +49,15 @@ public class ApplicationReporter {
             result.append(createReport(r.getFoundation(), r.getEnvironment(), r.getPeriod(), r.getFilename()));
         }
         return result.toString();
+    }
+
+    public void createReport(String outputFilename, ReportRequest[] requests) {
+        Path path = Paths.get(outputFilename);
+        try {
+            Files.write(path, createReport(requests).getBytes());
+        } catch (IOException ioe) {
+            log.warn("Could not create report output file!", ioe);
+        }
     }
 
     public String createReport(String foundation, String environment, String period, String filename) {
@@ -73,20 +72,20 @@ public class ApplicationReporter {
             AppUsageReport report = readAppUsageReport(filename);
             List<AppUsageMonthly> usage = report.getMonthlyReports();
             List<AppUsageMonthly> filtered =
-                usage
+                    usage
                     .stream()
                     .filter(u -> u.getYear().equals(year) && u.getMonth() != null && u.getMonth().equals(month))
                     .collect(Collectors.toList());
             for (AppUsageMonthly u: filtered) {
                 result.append(foundation + "," + period + "," + u.getMaximumAppInstances() + "," + u.getAverageAppInstances() + "," + u.getAppInstanceHours() + "\n");
             }
-		} catch (JsonParseException jpe) {
-			log.warn(String.format("Could not parse file contents of %s into a AppUsageReport!", filename), jpe);
-		} catch (JsonMappingException jme) {
-			log.warn(String.format("Could not map file contents in %s into JSON!", filename), jme);
-		} catch (IOException ioe) {
-			log.warn(String.format("Trouble creating report from %s!", filename), ioe);
-		}
+        } catch (JsonParseException jpe) {
+            log.warn(String.format("Could not parse file contents of %s into a AppUsageReport!", filename), jpe);
+        } catch (JsonMappingException jme) {
+            log.warn(String.format("Could not map file contents in %s into JSON!", filename), jme);
+        } catch (IOException ioe) {
+            log.warn(String.format("Trouble creating report from %s!", filename), ioe);
+        }
         return result.toString();
     }
 

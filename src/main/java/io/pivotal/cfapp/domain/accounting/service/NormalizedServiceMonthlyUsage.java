@@ -11,18 +11,6 @@ import lombok.Getter;
 @Getter
 public class NormalizedServiceMonthlyUsage {
 
-    private Integer year;
-    private Integer month;
-    private String serviceName;
-    private String serviceGuid;
-    private Double durationInHours;
-    private Double averageInstances;
-    private Integer maximumInstances;
-
-    public String getKey() {
-        return String.join("-", serviceName, String.valueOf(year), String.format("%02d", month));
-    }
-
     public static List<NormalizedServiceMonthlyUsage> listOf(ServiceUsageReport report) {
         List<NormalizedServiceMonthlyUsage> result = new ArrayList<>();
         List<ServiceUsageMonthlyAggregate> monthlyAggregates = report.getMonthlyServiceReports();
@@ -32,7 +20,7 @@ public class NormalizedServiceMonthlyUsage {
             List<ServiceUsageMonthly> monthlyServiceUsageMetrics = suma.getUsages();
             for (ServiceUsageMonthly metrics: monthlyServiceUsageMetrics) {
                 result.add(
-                    NormalizedServiceMonthlyUsage.builder()
+                        NormalizedServiceMonthlyUsage.builder()
                         .year(metrics.getYear())
                         .month(metrics.getMonth())
                         .serviceGuid(serviceGuid)
@@ -41,10 +29,22 @@ public class NormalizedServiceMonthlyUsage {
                         .maximumInstances(metrics.getMaximumInstances())
                         .durationInHours(metrics.getDurationInHours())
                         .build()
-                );
+                        );
             }
         }
         result.sort(Comparator.comparing(NormalizedServiceMonthlyUsage::getKey));
         return result;
+    }
+    private Integer year;
+    private Integer month;
+    private String serviceName;
+    private String serviceGuid;
+    private Double durationInHours;
+    private Double averageInstances;
+
+    private Integer maximumInstances;
+
+    public String getKey() {
+        return String.join("-", serviceName, String.valueOf(year), String.format("%02d", month));
     }
 }

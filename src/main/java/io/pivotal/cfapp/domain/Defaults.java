@@ -11,12 +11,12 @@ import io.r2dbc.spi.Row;
 public class Defaults {
 
     public static List<String> getColumnListOfStringValue(Row row, String columnName) {
-		String csv = Defaults.getColumnValue(row, columnName, String.class);
-		if (StringUtils.isNotBlank(csv)) {
-			return Arrays.asList(csv.split("\\s*,\\s*"));
-		} else {
-			return new ArrayList<String>();
-		}
+        String csv = Defaults.getColumnValue(row, columnName, String.class);
+        if (StringUtils.isNotBlank(csv)) {
+            return Arrays.asList(csv.split("\\s*,\\s*"));
+        } else {
+            return new ArrayList<String>();
+        }
     }
 
     public static <T> T getColumnValue(Row row, String columnName, Class<T> columnType) {

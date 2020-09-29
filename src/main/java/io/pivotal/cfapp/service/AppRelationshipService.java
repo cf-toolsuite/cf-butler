@@ -6,13 +6,13 @@ import reactor.core.publisher.Mono;
 
 public interface AppRelationshipService {
 
-	Mono<Void> deleteAll();
+    Mono<Void> deleteAll();
 
-	Mono<AppRelationship> save(AppRelationship entity);
+    Flux<AppRelationship> findAll();
 
-	Flux<AppRelationship> findAll();
+    Flux<AppRelationship> findByApplicationId(String applicationId);
 
-	Flux<AppRelationship> findByApplicationId(String applicationId);
+    Flux<AppRelationship> findByServiceInstanceId(String serviceInstanceId);
 
-	Flux<AppRelationship> findByServiceInstanceId(String serviceInstanceId);
+    Mono<AppRelationship> save(AppRelationship entity);
 }

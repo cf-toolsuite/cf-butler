@@ -7,14 +7,14 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-"request",
-"droplet_guid",
-"package_guid",
-"build_guid",
-"app_port",
-"process_type",
-"route_guid",
-"route_mapping_guid"
+    "request",
+    "droplet_guid",
+    "package_guid",
+    "build_guid",
+    "app_port",
+    "process_type",
+    "route_guid",
+    "route_mapping_guid"
 })
 public class EntityMetadata {
 
@@ -44,14 +44,14 @@ public class EntityMetadata {
 
     @JsonCreator
     public EntityMetadata(
-        @JsonProperty("request") Request request,
-        @JsonProperty("droplet_guid") String dropletGuid,
-        @JsonProperty("package_guid") String packageGuid,
-        @JsonProperty("build_guid") String buildGuid,
-        @JsonProperty("app_port") Integer appPort,
-        @JsonProperty("process_type") String processType,
-        @JsonProperty("route_guid") String routeGuid,
-        @JsonProperty("route_mapping_guid") String routeMappingGuid) {
+            @JsonProperty("request") Request request,
+            @JsonProperty("droplet_guid") String dropletGuid,
+            @JsonProperty("package_guid") String packageGuid,
+            @JsonProperty("build_guid") String buildGuid,
+            @JsonProperty("app_port") Integer appPort,
+            @JsonProperty("process_type") String processType,
+            @JsonProperty("route_guid") String routeGuid,
+            @JsonProperty("route_mapping_guid") String routeMappingGuid) {
         this.request = request;
         this.dropletGuid = dropletGuid;
         this.packageGuid = packageGuid;

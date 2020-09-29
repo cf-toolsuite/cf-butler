@@ -23,29 +23,29 @@ public class OnDemandResourceMetadataController {
 
     @Autowired
     public OnDemandResourceMetadataController(
-        ResourceMetadataService service
-    ) {
+            ResourceMetadataService service
+            ) {
         this.service = service;
     }
 
     @GetMapping("/metadata/{type}/{id}")
     public Mono<ResponseEntity<Resource>> getResourceMetadata(
-    @PathVariable("type") String type,
-    @PathVariable("id") String id
-    ) {
+            @PathVariable("type") String type,
+            @PathVariable("id") String id
+            ) {
         return service.getResource(type, id)
-                        .map(r -> ResponseEntity.ok(r))
-                        .defaultIfEmpty(ResponseEntity.notFound().build());
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @PatchMapping("/metadata/{type}/{id}")
     public Mono<ResponseEntity<Metadata>> updateResourceMetadata(
-        @PathVariable("type") String type,
-        @PathVariable("id") String id,
-        @RequestBody Metadata metadata
-    ) {
+            @PathVariable("type") String type,
+            @PathVariable("id") String id,
+            @RequestBody Metadata metadata
+            ) {
         return service.updateResource(type, id, metadata)
-                        .map(r -> ResponseEntity.ok(r))
-                        .defaultIfEmpty(ResponseEntity.notFound().build());
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 }

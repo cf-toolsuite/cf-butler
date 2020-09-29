@@ -16,13 +16,13 @@ public class AppRelationshipRetrievedEvent extends ApplicationEvent {
         super(source);
     }
 
+    public List<AppRelationship> getRelations() {
+        return relations;
+    }
+
     public AppRelationshipRetrievedEvent relations(List<AppRelationship> relations) {
         this.relations = relations;
         return this;
-    }
-
-    public List<AppRelationship> getRelations() {
-        return relations;
     }
 
 }

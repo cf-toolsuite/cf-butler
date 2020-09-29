@@ -25,46 +25,46 @@ public class OrganizationsTask implements ApplicationListener<TkRetrievedEvent> 
 
     @Autowired
     public OrganizationsTask(
-    		DefaultCloudFoundryOperations opsClient,
+            DefaultCloudFoundryOperations opsClient,
             OrganizationService organizationService,
-    		ApplicationEventPublisher publisher) {
+            ApplicationEventPublisher publisher) {
         this.opsClient = opsClient;
         this.organizationService = organizationService;
         this.publisher = publisher;
     }
 
-    @Override
-    public void onApplicationEvent(TkRetrievedEvent event) {
-        collect();
-    }
-
     public void collect() {
         log.info("OrganizationTask started");
         organizationService
-            .deleteAll()
-            .thenMany(getOrganizations())
-            .flatMap(organizationService::save)
-            .thenMany(organizationService.findAll())
-                .collectList()
-                .subscribe(
-                    result -> {
-                        publisher.publishEvent(new OrganizationsRetrievedEvent(this).organizations(result));
-                        log.info("OrganizationTask completed");
-                        log.trace("Retrieved {} organizations", result.size());
-                    },
-                    error -> {
-                        log.error("OrganizationTask terminated with error", error);
-                    }
+        .deleteAll()
+        .thenMany(getOrganizations())
+        .flatMap(organizationService::save)
+        .thenMany(organizationService.findAll())
+        .collectList()
+        .subscribe(
+                result -> {
+                    publisher.publishEvent(new OrganizationsRetrievedEvent(this).organizations(result));
+                    log.info("OrganizationTask completed");
+                    log.trace("Retrieved {} organizations", result.size());
+                },
+                error -> {
+                    log.error("OrganizationTask terminated with error", error);
+                }
                 );
     }
 
     protected Flux<Organization> getOrganizations() {
         return PaginationUtils.requestClientV3Resources(
-            page -> opsClient
-                        .getCloudFoundryClient()
-                        .organizationsV3()
-                            .list(ListOrganizationsRequest.builder().page(page).build()))
-                            .map(os -> new Organization(os.getId(), os.getName()));
+                page -> opsClient
+                .getCloudFoundryClient()
+                .organizationsV3()
+                .list(ListOrganizationsRequest.builder().page(page).build()))
+                .map(os -> new Organization(os.getId(), os.getName()));
+    }
+
+    @Override
+    public void onApplicationEvent(TkRetrievedEvent event) {
+        collect();
     }
 
 }

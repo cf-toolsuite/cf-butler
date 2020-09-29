@@ -12,35 +12,35 @@ import io.pivotal.cfapp.domain.Space;
 
 @Component
 public class AppDetailReadyToBeCollectedDecider {
-    
-    private PivnetSettings settings; 
+
+    private PivnetSettings settings;
     private AtomicInteger decision = new AtomicInteger();
     private List<Space> spaces = new ArrayList<>();
 
     @Autowired
     public AppDetailReadyToBeCollectedDecider(PivnetSettings settings) {
-       this.settings = settings;
-    }
-
-    public int informDecision() {
-      return decision.incrementAndGet();
-    }
-
-    public boolean isDecided() {
-       return settings.isEnabled() ? decision.get() == 2: decision.get() == 1;
-    }
-
-    public void setSpaces(List<Space> spaces) {
-      this.spaces = spaces;
-    }
-
-    public void reset() {
-      spaces.clear();
-      decision.set(0);
+        this.settings = settings;
     }
 
     public List<Space> getSpaces() {
-      return List.copyOf(spaces);
+        return List.copyOf(spaces);
+    }
+
+    public int informDecision() {
+        return decision.incrementAndGet();
+    }
+
+    public boolean isDecided() {
+        return settings.isEnabled() ? decision.get() == 2: decision.get() == 1;
+    }
+
+    public void reset() {
+        spaces.clear();
+        decision.set(0);
+    }
+
+    public void setSpaces(List<Space> spaces) {
+        this.spaces = spaces;
     }
 
 }

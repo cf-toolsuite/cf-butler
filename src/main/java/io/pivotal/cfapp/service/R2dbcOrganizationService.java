@@ -28,16 +28,16 @@ public class R2dbcOrganizationService implements OrganizationService {
     }
 
     @Override
+    public Flux<Organization> findAll() {
+        return repo.findAll();
+    }
+
+    @Override
     @Transactional
     public Mono<Organization> save(Organization entity) {
         return repo
                 .save(entity)
                 .onErrorContinue(
-                    (ex, data) -> log.error(String.format("Problem saving organization %s.", entity), ex));
-    }
-
-    @Override
-    public Flux<Organization> findAll() {
-        return repo.findAll();
+                        (ex, data) -> log.error(String.format("Problem saving organization %s.", entity), ex));
     }
 }

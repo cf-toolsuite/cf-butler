@@ -14,10 +14,10 @@ import lombok.Getter;
 @Getter
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-"created_at",
-"guid",
-"updated_at",
-"url"
+    "created_at",
+    "guid",
+    "updated_at",
+    "url"
 })
 public class ResourceMetadata {
 
@@ -35,10 +35,10 @@ public class ResourceMetadata {
 
     @JsonCreator
     public ResourceMetadata(
-        @JsonProperty("created_at") Instant createdAt,
-        @JsonProperty("guid") String guid,
-        @JsonProperty("updated_at") Instant updatedAt,
-        @JsonProperty("url") String url) {
+            @JsonProperty("created_at") Instant createdAt,
+            @JsonProperty("guid") String guid,
+            @JsonProperty("updated_at") Instant updatedAt,
+            @JsonProperty("url") String url) {
         this.createdAt = createdAt;
         this.guid = guid;
         this.updatedAt = updatedAt;

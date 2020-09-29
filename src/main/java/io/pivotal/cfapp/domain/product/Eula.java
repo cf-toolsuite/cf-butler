@@ -5,8 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import lombok.Builder;
-import lombok.Getter;
 import lombok.Builder.Default;
+import lombok.Getter;
 
 @Builder
 @Getter
@@ -15,7 +15,7 @@ import lombok.Builder.Default;
     "slug",
     "name",
     "_links"
-    })
+})
 public class Eula {
 
     @Default
@@ -33,11 +33,11 @@ public class Eula {
 
     @JsonCreator
     public Eula(
-        @JsonProperty("id") Long id,
-        @JsonProperty("slug") String slug,
-        @JsonProperty("name") String name,
-        @JsonProperty("_links") EulaLinks links
-    ) {
+            @JsonProperty("id") Long id,
+            @JsonProperty("slug") String slug,
+            @JsonProperty("name") String name,
+            @JsonProperty("_links") EulaLinks links
+            ) {
         this.id = id;
         this.slug = slug;
         this.name = name;

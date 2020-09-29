@@ -23,10 +23,10 @@ class ReportRequest {
 
     @JsonCreator
     public ReportRequest(
-        @JsonProperty("foundation") String foundation,
-        @JsonProperty("environment") String environment,
-        @JsonProperty("period") String period,
-        @JsonProperty("filename") String filename) {
+            @JsonProperty("foundation") String foundation,
+            @JsonProperty("environment") String environment,
+            @JsonProperty("period") String period,
+            @JsonProperty("filename") String filename) {
         this.foundation = foundation;
         this.environment = environment;
         this.period = period;

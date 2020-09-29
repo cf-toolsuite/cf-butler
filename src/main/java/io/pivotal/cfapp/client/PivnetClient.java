@@ -29,32 +29,19 @@ public class PivnetClient {
         this.client = client;
     }
 
-    public Mono<Products> getProducts() {
-        String uri = String.format("%s%s", BASE_URL, "/v2/products");
-        return client
-                .get()
-                .uri(uri)
-                .header(HttpHeaders.AUTHORIZATION, settings.getApiToken())
-                    .retrieve()
-                    .bodyToMono(Products.class);
-    }
-
-    public Flux<Release> getProductReleases(String slug) {
-        String uri = String.format("%s%s%s%s", BASE_URL, "/v2/products/", slug, "/releases");
-        return client
-                .get()
-                .uri(uri)
-                .header(HttpHeaders.AUTHORIZATION, settings.getApiToken())
-                    .retrieve()
-                    .bodyToMono(Releases.class)
-                    .flatMapMany(r -> Flux.fromIterable(r.getReleases()));
+    public Flux<Release> getAllProductReleases() {
+        return getProducts()
+                .flatMapMany(list -> Flux.fromIterable(list.getProducts()))
+                .flatMap(l -> getProductReleases(l.getSlug()))
+                .onErrorContinue(
+                        (ex, data) -> log.warn("Problem obtaining releases for product [{}].", data, ex));
     }
 
     public Mono<Release> getLatestProductRelease(String slug) {
         return getProductReleases(slug)
                 .next()
                 .onErrorContinue(
-                    (ex, data) -> log.warn("Problem obtaining releases for product [{}].", slug, ex));
+                        (ex, data) -> log.warn("Problem obtaining releases for product [{}].", slug, ex));
     }
 
     public Flux<Release> getLatestProductReleases() {
@@ -63,11 +50,24 @@ public class PivnetClient {
                 .flatMap(p -> getLatestProductRelease(p.getSlug()));
     }
 
-    public Flux<Release> getAllProductReleases() {
-        return getProducts()
-                .flatMapMany(list -> Flux.fromIterable(list.getProducts()))
-                .flatMap(l -> getProductReleases(l.getSlug()))
-                .onErrorContinue(
-                    (ex, data) -> log.warn("Problem obtaining releases for product [{}].", data, ex));
+    public Flux<Release> getProductReleases(String slug) {
+        String uri = String.format("%s%s%s%s", BASE_URL, "/v2/products/", slug, "/releases");
+        return client
+                .get()
+                .uri(uri)
+                .header(HttpHeaders.AUTHORIZATION, settings.getApiToken())
+                .retrieve()
+                .bodyToMono(Releases.class)
+                .flatMapMany(r -> Flux.fromIterable(r.getReleases()));
+    }
+
+    public Mono<Products> getProducts() {
+        String uri = String.format("%s%s", BASE_URL, "/v2/products");
+        return client
+                .get()
+                .uri(uri)
+                .header(HttpHeaders.AUTHORIZATION, settings.getApiToken())
+                .retrieve()
+                .bodyToMono(Products.class);
     }
 }

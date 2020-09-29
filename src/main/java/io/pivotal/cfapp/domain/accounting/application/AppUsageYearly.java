@@ -5,8 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import lombok.Builder;
-import lombok.Getter;
 import lombok.Builder.Default;
+import lombok.Getter;
 
 @Builder
 @Getter
@@ -30,10 +30,10 @@ public class AppUsageYearly {
 
     @JsonCreator
     public AppUsageYearly(
-        @JsonProperty("year") Integer year,
-        @JsonProperty("average_app_instances") Double averageAppInstances,
-        @JsonProperty("maximum_app_instances") Integer maximumAppInstances,
-        @JsonProperty("app_instance_hours") Double appInstanceHours) {
+            @JsonProperty("year") Integer year,
+            @JsonProperty("average_app_instances") Double averageAppInstances,
+            @JsonProperty("maximum_app_instances") Integer maximumAppInstances,
+            @JsonProperty("app_instance_hours") Double appInstanceHours) {
         this.year = year;
         this.averageAppInstances = averageAppInstances;
         this.maximumAppInstances = maximumAppInstances;

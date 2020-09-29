@@ -63,17 +63,17 @@ public class StemcellAssociation {
 
     @JsonCreator
     public StemcellAssociation(
-        @JsonProperty("guid") String guid,
-        @JsonProperty("identifier") String identifier,
-        @JsonProperty("label") String label,
-        @JsonProperty("staged_product_version") String stagedProductVersion,
-        @JsonProperty("deployed_product_version") String deployedProductVersion,
-        @JsonProperty("is_staged_for_deletion") Boolean isStagedForDeletion,
-        @JsonProperty("staged_stemcells") List<StemcellDetail> stagedStemcells,
-        @JsonProperty("deployed_stemcells") List<StemcellDetail> deployedStemcells,
-        @JsonProperty("available_stemcells") List<StemcellDetail> availableStemcells,
-        @JsonProperty("required_stemcells") List<StemcellDetail> requiredStemcells
-    ) {
+            @JsonProperty("guid") String guid,
+            @JsonProperty("identifier") String identifier,
+            @JsonProperty("label") String label,
+            @JsonProperty("staged_product_version") String stagedProductVersion,
+            @JsonProperty("deployed_product_version") String deployedProductVersion,
+            @JsonProperty("is_staged_for_deletion") Boolean isStagedForDeletion,
+            @JsonProperty("staged_stemcells") List<StemcellDetail> stagedStemcells,
+            @JsonProperty("deployed_stemcells") List<StemcellDetail> deployedStemcells,
+            @JsonProperty("available_stemcells") List<StemcellDetail> availableStemcells,
+            @JsonProperty("required_stemcells") List<StemcellDetail> requiredStemcells
+            ) {
         this.guid = guid;
         this.identifier = identifier;
         this.label = label;

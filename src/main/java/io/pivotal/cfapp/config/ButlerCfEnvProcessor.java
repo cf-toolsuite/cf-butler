@@ -11,10 +11,30 @@ public class ButlerCfEnvProcessor implements CfEnvProcessor {
 
     private static final String SERVICE_NAME = "cf-butler-secrets";
 
+    private static void addOrUpdatePropertyValue(String propertyName, String credentialName, CfCredentials cfCredentials, Map<String, Object> properties) {
+        Object credential = cfCredentials.getMap().get(credentialName);
+        if (credential != null) {
+            properties.put(propertyName, credential);
+        }
+    }
+
+    private static void addPropertyValue(String propertyName, Object propertyValue, Map<String, Object> properties) {
+        properties.put(propertyName, propertyValue);
+    }
+
     @Override
     public boolean accept(CfService service) {
         return
-            service.getName().equalsIgnoreCase(SERVICE_NAME);
+                service.getName().equalsIgnoreCase(SERVICE_NAME);
+    }
+
+    @Override
+    public CfEnvProcessorProperties getProperties() {
+        return
+                CfEnvProcessorProperties
+                .builder()
+                .serviceName(SERVICE_NAME)
+                .build();
     }
 
     @Override
@@ -57,25 +77,5 @@ public class ButlerCfEnvProcessor implements CfEnvProcessor {
         addOrUpdatePropertyValue("cron.collection", "CRON_COLLECTION", cfCredentials, properties);
         addOrUpdatePropertyValue("cron.collection", "CRON_EXECUTION", cfCredentials, properties);
         addOrUpdatePropertyValue("management.endpoints.web.exposure.include", "EXPOSED_ACTUATOR_ENDPOINTS", cfCredentials, properties);
-    }
-
-    @Override
-    public CfEnvProcessorProperties getProperties() {
-        return
-            CfEnvProcessorProperties
-                .builder()
-			        .serviceName(SERVICE_NAME)
-			        .build();
-    }
-
-    private static void addPropertyValue(String propertyName, Object propertyValue, Map<String, Object> properties) {
-        properties.put(propertyName, propertyValue);
-    }
-
-    private static void addOrUpdatePropertyValue(String propertyName, String credentialName, CfCredentials cfCredentials, Map<String, Object> properties) {
-        Object credential = cfCredentials.getMap().get(credentialName);
-        if (credential != null) {
-            properties.put(propertyName, credential);
-        }
     }
 }

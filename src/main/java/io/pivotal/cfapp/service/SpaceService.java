@@ -6,10 +6,10 @@ import reactor.core.publisher.Mono;
 
 public interface SpaceService {
 
-	Mono<Void> deleteAll();
+    Mono<Void> deleteAll();
 
-	Mono<Space> save(Space entity);
+    Flux<Space> findAll();
 
-	Flux<Space> findAll();
+    Mono<Space> save(Space entity);
 
 }

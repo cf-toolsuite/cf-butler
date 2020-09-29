@@ -28,12 +28,12 @@ public class DormantWorkloadsService {
 
     @Autowired
     public DormantWorkloadsService(
-        EventsService eventsService,
-        SnapshotService snapshotService,
-        AppDetailService appDetailService,
-        AppRelationshipService relationshipService,
-        PasSettings settings
-    ) {
+            EventsService eventsService,
+            SnapshotService snapshotService,
+            AppDetailService appDetailService,
+            AppRelationshipService relationshipService,
+            PasSettings settings
+            ) {
         this.eventsService = eventsService;
         this.snapshotService = snapshotService;
         this.appDetailService = appDetailService;
@@ -41,28 +41,39 @@ public class DormantWorkloadsService {
         this.settings = settings;
     }
 
-    public Mono<List<AppDetail>> getDormantApplications(Integer daysSinceLastUpdate) {
-        return getDormantApplications(HygienePolicy.builder().daysSinceLastUpdate(daysSinceLastUpdate).build());
-    }
-
-    public Mono<List<ServiceInstanceDetail>> getDormantServiceInstances(Integer daysSinceLastUpdate) {
-        return getDormantServiceInstances(HygienePolicy.builder().daysSinceLastUpdate(daysSinceLastUpdate).build());
+    private Mono<Boolean> areAnyRelationsDormant(ServiceInstanceDetail sid, Integer daysSinceLastUpdate) {
+        // see if service instance has any bound applications
+        Flux<AppRelationship> relations = relationshipService.findByServiceInstanceId(sid.getServiceInstanceId());
+        return
+                relations
+                // get application details for each bound app id
+                .flatMap(relation -> appDetailService.findByAppId(relation.getAppId()))
+                // check whether or not the app is dormant
+                .flatMap(appDetail -> eventsService
+                        .isDormantApplication(appDetail, daysSinceLastUpdate))
+                .collectList()
+                // result is a union; service instance deemed not dormant if any one of the applications is not dormant
+                .map(list -> list.isEmpty() ? Boolean.FALSE : BooleanUtils.or(list.toArray(Boolean[]::new)));
     }
 
     public Mono<List<AppDetail>> getDormantApplications(HygienePolicy policy) {
-		    return snapshotService
+        return snapshotService
                 .assembleSnapshotDetail()
                 .flatMapMany(sd -> Flux.fromIterable(sd.getApplications()))
                 .filter(app -> isWhitelisted(policy, app.getOrganization()))
                 .filter(app -> isBlacklisted(app.getOrganization()))
-		        .filter(app -> app.getRequestedState().equalsIgnoreCase("started"))
+                .filter(app -> app.getRequestedState().equalsIgnoreCase("started"))
                 // @see https://github.com/reactor/reactor-core/issues/498
                 .filterWhen(app -> eventsService.isDormantApplication(app, policy.getDaysSinceLastUpdate()))
                 .collectList();
     }
 
+    public Mono<List<AppDetail>> getDormantApplications(Integer daysSinceLastUpdate) {
+        return getDormantApplications(HygienePolicy.builder().daysSinceLastUpdate(daysSinceLastUpdate).build());
+    }
+
     public Mono<List<ServiceInstanceDetail>> getDormantServiceInstances(HygienePolicy policy) {
-		    return snapshotService
+        return snapshotService
                 .assembleSnapshotDetail()
                 .flatMapMany(sd -> Flux.fromIterable(sd.getServiceInstances()))
                 .filter(sid -> isWhitelisted(policy, sid.getOrganization()))
@@ -75,32 +86,21 @@ public class DormantWorkloadsService {
                 .collectList();
     }
 
+    public Mono<List<ServiceInstanceDetail>> getDormantServiceInstances(Integer daysSinceLastUpdate) {
+        return getDormantServiceInstances(HygienePolicy.builder().daysSinceLastUpdate(daysSinceLastUpdate).build());
+    }
+
     private boolean isBlacklisted(String organization) {
         return !settings.getOrganizationBlackList().contains(organization);
     }
 
     private boolean isWhitelisted(HygienePolicy policy, String organization) {
-    	Set<String> prunedSet = new HashSet<>(policy.getOrganizationWhiteList());
-    	while (prunedSet.remove(""));
-    	Set<String> whitelist =
-    			CollectionUtils.isEmpty(prunedSet) ?
-    					prunedSet: policy.getOrganizationWhiteList();
-    	return
-			whitelist.isEmpty() ? true: policy.getOrganizationWhiteList().contains(organization);
-    }
-
-    private Mono<Boolean> areAnyRelationsDormant(ServiceInstanceDetail sid, Integer daysSinceLastUpdate) {
-        // see if service instance has any bound applications
-        Flux<AppRelationship> relations = relationshipService.findByServiceInstanceId(sid.getServiceInstanceId());
+        Set<String> prunedSet = new HashSet<>(policy.getOrganizationWhiteList());
+        while (prunedSet.remove(""));
+        Set<String> whitelist =
+                CollectionUtils.isEmpty(prunedSet) ?
+                        prunedSet: policy.getOrganizationWhiteList();
         return
-            relations
-                // get application details for each bound app id
-                .flatMap(relation -> appDetailService.findByAppId(relation.getAppId()))
-                // check whether or not the app is dormant
-                .flatMap(appDetail -> eventsService
-                                        .isDormantApplication(appDetail, daysSinceLastUpdate))
-                .collectList()
-                // result is a union; service instance deemed not dormant if any one of the applications is not dormant
-                .map(list -> list.isEmpty() ? Boolean.FALSE : BooleanUtils.or(list.toArray(Boolean[]::new)));
+                whitelist.isEmpty() ? true: policy.getOrganizationWhiteList().contains(organization);
     }
 }

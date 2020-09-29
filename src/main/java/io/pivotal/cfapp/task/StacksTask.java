@@ -23,26 +23,21 @@ public class StacksTask implements ApplicationListener<TkRetrievedEvent> {
 
     @Autowired
     public StacksTask(
-        DefaultCloudFoundryOperations opsClient,
-        StacksCache cache,
-        ApplicationEventPublisher publisher) {
+            DefaultCloudFoundryOperations opsClient,
+            StacksCache cache,
+            ApplicationEventPublisher publisher) {
         this.opsClient = opsClient;
         this.cache = cache;
         this.publisher = publisher;
     }
 
 
-    @Override
-    public void onApplicationEvent(TkRetrievedEvent event) {
-        collect();
-    }
-
     public void collect() {
         log.info("StacksTask started");
         getStacks()
-            .collectList()
-            .map(list -> cache.from(list))
-            .subscribe(
+        .collectList()
+        .map(list -> cache.from(list))
+        .subscribe(
                 result -> {
                     publisher.publishEvent(new StacksRetrievedEvent(this));
                     log.trace("Stacks cache contains {}", result);
@@ -57,7 +52,12 @@ public class StacksTask implements ApplicationListener<TkRetrievedEvent> {
     protected Flux<Stack> getStacks() {
         return opsClient
                 .stacks()
-                    .list();
+                .list();
+    }
+
+    @Override
+    public void onApplicationEvent(TkRetrievedEvent event) {
+        collect();
     }
 
 }

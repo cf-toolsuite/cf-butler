@@ -22,59 +22,59 @@ import reactor.core.publisher.Flux;
 @Component
 public class SpacesTask implements ApplicationListener<OrganizationsRetrievedEvent> {
 
-	private final DefaultCloudFoundryOperations opsClient;
+    private final DefaultCloudFoundryOperations opsClient;
     private final SpaceService service;
     private final ApplicationEventPublisher publisher;
 
     @Autowired
     public SpacesTask(
-    		DefaultCloudFoundryOperations opsClient,
-    		SpaceService service,
-    		ApplicationEventPublisher publisher) {
+            DefaultCloudFoundryOperations opsClient,
+            SpaceService service,
+            ApplicationEventPublisher publisher) {
         this.opsClient = opsClient;
         this.service = service;
         this.publisher = publisher;
     }
 
-	@Override
-	public void onApplicationEvent(OrganizationsRetrievedEvent event) {
-		collect(List.copyOf(event.getOrganizations()));
-	}
-
-	public void collect(List<Organization> organizations) {
+    public void collect(List<Organization> organizations) {
         log.info("SpacesTask started");
         service
-            .deleteAll()
-            .thenMany(Flux.fromIterable(organizations))
-            .flatMap(o -> getSpaces(o))
-            .flatMap(service::save)
-            .thenMany(service.findAll())
-                .collectList()
-                .subscribe(
-                    result -> {
-                        publisher.publishEvent(new SpacesRetrievedEvent(this).spaces(result));
-                        log.info("SpacesTask completed");
-                        log.trace("Retrieved {} spaces", result.size());
-                    },
-                    error -> {
-                        log.error("SpacesTask terminated with error", error);
-                    }
+        .deleteAll()
+        .thenMany(Flux.fromIterable(organizations))
+        .flatMap(this::getSpaces)
+        .flatMap(service::save)
+        .thenMany(service.findAll())
+        .collectList()
+        .subscribe(
+                result -> {
+                    publisher.publishEvent(new SpacesRetrievedEvent(this).spaces(result));
+                    log.info("SpacesTask completed");
+                    log.trace("Retrieved {} spaces", result.size());
+                },
+                error -> {
+                    log.error("SpacesTask terminated with error", error);
+                }
                 );
     }
 
     protected Flux<Space> getSpaces(Organization organization) {
         return PaginationUtils.requestClientV3Resources(
-            page -> opsClient
-                        .getCloudFoundryClient()
-                        .spacesV3()
-                            .list(ListSpacesRequest.builder().page(page).organizationIds(new String[] { organization.getId() }).build()))
-                            .map(response -> Space
-                                                .builder()
-                                                    .organizationId(organization.getId())
-                                                    .organizationName(organization.getName())
-                                                    .spaceId(response.getId())
-                                                    .spaceName(response.getName())
-                                                .build());
+                page -> opsClient
+                .getCloudFoundryClient()
+                .spacesV3()
+                .list(ListSpacesRequest.builder().page(page).organizationIds(new String[] { organization.getId() }).build()))
+                .map(response -> Space
+                        .builder()
+                        .organizationId(organization.getId())
+                        .organizationName(organization.getName())
+                        .spaceId(response.getId())
+                        .spaceName(response.getName())
+                        .build());
+    }
+
+    @Override
+    public void onApplicationEvent(OrganizationsRetrievedEvent event) {
+        collect(List.copyOf(event.getOrganizations()));
     }
 
 }

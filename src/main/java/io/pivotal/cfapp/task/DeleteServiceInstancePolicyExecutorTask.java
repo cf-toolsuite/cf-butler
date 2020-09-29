@@ -27,87 +27,87 @@ import reactor.core.publisher.Mono;
 @Component
 public class DeleteServiceInstancePolicyExecutorTask implements PolicyExecutorTask {
 
-	private PasSettings settings;
-	private DefaultCloudFoundryOperations opsClient;
+    private PasSettings settings;
+    private DefaultCloudFoundryOperations opsClient;
     private ServiceInstanceDetailService serviceInfoService;
     private PoliciesService policiesService;
     private HistoricalRecordService historicalRecordService;
 
     @Autowired
     public DeleteServiceInstancePolicyExecutorTask(
-    		PasSettings settings,
-    		DefaultCloudFoundryOperations opsClient,
-    		ServiceInstanceDetailService serviceInfoService,
-    		PoliciesService policiesService,
-    		HistoricalRecordService historicalRecordService
-    		) {
-    	this.settings = settings;
+            PasSettings settings,
+            DefaultCloudFoundryOperations opsClient,
+            ServiceInstanceDetailService serviceInfoService,
+            PoliciesService policiesService,
+            HistoricalRecordService historicalRecordService
+            ) {
+        this.settings = settings;
         this.opsClient = opsClient;
         this.serviceInfoService = serviceInfoService;
         this.policiesService = policiesService;
         this.historicalRecordService = historicalRecordService;
     }
 
-	@Override
+    protected Mono<HistoricalRecord> deleteServiceInstance(ServiceInstanceDetail sd) {
+        return DefaultCloudFoundryOperations.builder()
+                .from(opsClient)
+                .organization(sd.getOrganization())
+                .space(sd.getSpace())
+                .build()
+                .services()
+                .deleteInstance(DeleteServiceInstanceRequest.builder().name(sd.getName()).build())
+                .then(Mono.just(HistoricalRecord
+                        .builder()
+                        .transactionDateTime(LocalDateTime.now())
+                        .actionTaken("delete")
+                        .organization(sd.getOrganization())
+                        .space(sd.getSpace())
+                        .serviceInstanceId(sd.getServiceInstanceId())
+                        .type("service-instance")
+                        .name(String.join("__", sd.getName(), sd.getType(), sd.getPlan()))
+                        .build()));
+    }
+
+    @Override
     public void execute() {
-		log.info("DeleteServiceInstancePolicyExecutorTask started");
-    	policiesService
-	        .findByServiceInstanceOperation(ServiceInstanceOperation.DELETE)
-				.flux()
-				.flatMap(p -> Flux.fromIterable(p.getServiceInstancePolicies()))
-				.flatMap(sp -> serviceInfoService.findByServiceInstancePolicy(sp))
-				.filter(wl -> isWhitelisted(wl.getT2(), wl.getT1().getOrganization()))
-				.filter(bl -> isBlacklisted(bl.getT1().getOrganization()))
-				.flatMap(ds -> deleteServiceInstance(ds.getT1()))
-				.flatMap(historicalRecordService::save)
-				.collectList()
-				.subscribe(
-					result -> {
-						log.info("DeleteServiceInstancePolicyExecutorTask completed");
-						log.info("-- {} service instances deleted.", result.size());
-					},
-					error -> {
-						log.error("DeleteServiceInstancePolicyExecutorTask terminated with error", error);
-					}
-				);
+        log.info("DeleteServiceInstancePolicyExecutorTask started");
+        policiesService
+        .findByServiceInstanceOperation(ServiceInstanceOperation.DELETE)
+        .flux()
+        .flatMap(p -> Flux.fromIterable(p.getServiceInstancePolicies()))
+        .flatMap(sp -> serviceInfoService.findByServiceInstancePolicy(sp))
+        .filter(wl -> isWhitelisted(wl.getT2(), wl.getT1().getOrganization()))
+        .filter(bl -> isBlacklisted(bl.getT1().getOrganization()))
+        .flatMap(ds -> deleteServiceInstance(ds.getT1()))
+        .flatMap(historicalRecordService::save)
+        .collectList()
+        .subscribe(
+                result -> {
+                    log.info("DeleteServiceInstancePolicyExecutorTask completed");
+                    log.info("-- {} service instances deleted.", result.size());
+                },
+                error -> {
+                    log.error("DeleteServiceInstancePolicyExecutorTask terminated with error", error);
+                }
+                );
+    }
+
+    private boolean isBlacklisted(String  organization) {
+        return !settings.getOrganizationBlackList().contains(organization);
+    }
+
+    private boolean isWhitelisted(ServiceInstancePolicy policy, String organization) {
+        Set<String> prunedSet = new HashSet<>(policy.getOrganizationWhiteList());
+        while (prunedSet.remove(""));
+        Set<String> whitelist =
+                CollectionUtils.isEmpty(prunedSet) ?
+                        prunedSet: policy.getOrganizationWhiteList();
+        return
+                whitelist.isEmpty() ? true: policy.getOrganizationWhiteList().contains(organization);
     }
 
     @Scheduled(cron = "${cron.execution}")
     protected void runTask() {
         execute();
     }
-
-    protected Mono<HistoricalRecord> deleteServiceInstance(ServiceInstanceDetail sd) {
-    	return DefaultCloudFoundryOperations.builder()
-                .from(opsClient)
-                .organization(sd.getOrganization())
-                .space(sd.getSpace())
-                .build()
-					.services()
-						.deleteInstance(DeleteServiceInstanceRequest.builder().name(sd.getName()).build())
-						.then(Mono.just(HistoricalRecord
-									.builder()
-										.transactionDateTime(LocalDateTime.now())
-										.actionTaken("delete")
-										.organization(sd.getOrganization())
-										.space(sd.getSpace())
-										.serviceInstanceId(sd.getServiceInstanceId())
-										.type("service-instance")
-										.name(String.join("__", sd.getName(), sd.getType(), sd.getPlan()))
-										.build()));
-    }
-
-    private boolean isBlacklisted(String  organization) {
-		return !settings.getOrganizationBlackList().contains(organization);
-	}
-
-    private boolean isWhitelisted(ServiceInstancePolicy policy, String organization) {
-    	Set<String> prunedSet = new HashSet<>(policy.getOrganizationWhiteList());
-    	while (prunedSet.remove(""));
-    	Set<String> whitelist =
-    			CollectionUtils.isEmpty(prunedSet) ?
-    					prunedSet: policy.getOrganizationWhiteList();
-    	return
-			whitelist.isEmpty() ? true: policy.getOrganizationWhiteList().contains(organization);
-	}
 }

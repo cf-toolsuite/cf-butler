@@ -43,13 +43,13 @@ public class ServiceUsageYearlyAggregate {
 
     @JsonCreator
     public ServiceUsageYearlyAggregate(
-        @JsonProperty("service_name") String serviceName,
-        @JsonProperty("service_guid") String serviceGuid,
-        @JsonProperty("year") Integer year,
-        @JsonProperty("duration_in_hours") Double durationInHours,
-        @JsonProperty("maximum_instances") Integer maximumInstances,
-        @JsonProperty("average_instances") Double averageInstances,
-        @JsonProperty("plans") List<ServicePlanUsageYearly> plans) {
+            @JsonProperty("service_name") String serviceName,
+            @JsonProperty("service_guid") String serviceGuid,
+            @JsonProperty("year") Integer year,
+            @JsonProperty("duration_in_hours") Double durationInHours,
+            @JsonProperty("maximum_instances") Integer maximumInstances,
+            @JsonProperty("average_instances") Double averageInstances,
+            @JsonProperty("plans") List<ServicePlanUsageYearly> plans) {
         this.serviceName = serviceName;
         this.serviceGuid = serviceGuid;
         this.year = year;

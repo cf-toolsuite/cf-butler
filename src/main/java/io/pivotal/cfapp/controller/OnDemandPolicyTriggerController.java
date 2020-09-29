@@ -17,19 +17,19 @@ import reactor.core.publisher.Mono;
 @RestController
 public class OnDemandPolicyTriggerController {
 
-	private ListableBeanFactory factory;
+    private ListableBeanFactory factory;
 
-	@Autowired
-	public OnDemandPolicyTriggerController(ListableBeanFactory factory) {
-		this.factory = factory;
-	}
+    @Autowired
+    public OnDemandPolicyTriggerController(ListableBeanFactory factory) {
+        this.factory = factory;
+    }
 
-	@PostMapping("/policies/execute")
-	public Mono<ResponseEntity<Void>> triggerPolicyExection() {
-		Map<String, PolicyExecutorTask> taskMap = factory.getBeansOfType(PolicyExecutorTask.class);
-		Collection<PolicyExecutorTask> tasks = taskMap.values();
-		tasks.forEach(t -> t.execute());
-		return Mono.just(ResponseEntity.accepted().build());
-	}
+    @PostMapping("/policies/execute")
+    public Mono<ResponseEntity<Void>> triggerPolicyExection() {
+        Map<String, PolicyExecutorTask> taskMap = factory.getBeansOfType(PolicyExecutorTask.class);
+        Collection<PolicyExecutorTask> tasks = taskMap.values();
+        tasks.forEach(PolicyExecutorTask::execute);
+        return Mono.just(ResponseEntity.accepted().build());
+    }
 
 }

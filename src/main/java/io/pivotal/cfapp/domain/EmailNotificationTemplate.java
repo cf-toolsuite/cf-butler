@@ -3,24 +3,37 @@ package io.pivotal.cfapp.domain;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import org.apache.commons.lang3.StringUtils;
-
 import io.jsonwebtoken.lang.Collections;
 import lombok.Builder;
-import lombok.Getter;
 import lombok.Builder.Default;
+import lombok.Getter;
 
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({ "from", "to", "subject", "body" })
 @Getter
 public class EmailNotificationTemplate {
+
+    private static boolean areRecipientsValid(List<String> recipients) {
+        boolean result = true;
+        if (!Collections.isEmpty(recipients)) {
+            for (String recipient: recipients) {
+                if (!EmailValidator.isValid(recipient)) {
+                    result = false;
+                    break;
+                }
+            }
+        }
+        return result;
+    }
 
     @JsonProperty("from")
     private String from;
@@ -37,11 +50,11 @@ public class EmailNotificationTemplate {
 
     @JsonCreator
     public EmailNotificationTemplate(
-        @JsonProperty("from") String from,
-        @JsonProperty("to") List<String> to,
-        @JsonProperty("subject") String subject,
-        @JsonProperty("body") String body
-    ) {
+            @JsonProperty("from") String from,
+            @JsonProperty("to") List<String> to,
+            @JsonProperty("subject") String subject,
+            @JsonProperty("body") String body
+            ) {
         this.from = from;
         this.to = to;
         this.subject = subject;
@@ -54,18 +67,5 @@ public class EmailNotificationTemplate {
                 && areRecipientsValid(to)
                 && StringUtils.isNotBlank(subject)
                 && StringUtils.isNotBlank(body);
-    }
-
-    private static boolean areRecipientsValid(List<String> recipients) {
-        boolean result = true;
-        if (!Collections.isEmpty(recipients)) {
-            for (String recipient: recipients) {
-                if (!EmailValidator.isValid(recipient)) {
-                    result = false;
-                    break;
-                }
-            }
-        }
-        return result;
     }
 }
