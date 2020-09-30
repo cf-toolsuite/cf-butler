@@ -33,13 +33,6 @@ import lombok.ToString;
 @Table("application_policy")
 public class ApplicationPolicy {
 
-    public static String[] columnNames() {
-        return
-                new String[] {
-                        "pk", "id", "operation", "description", "options", "organization_whitelist", "state"
-        };
-    }
-
     public static ApplicationPolicy seed(ApplicationPolicy policy) {
         return ApplicationPolicy
                 .builder()
@@ -61,10 +54,6 @@ public class ApplicationPolicy {
                 .organizationWhiteList(policy.getOrganizationWhiteList())
                 .state(policy.getState())
                 .build();
-    }
-
-    public static String tableName() {
-        return "application_policy";
     }
 
     @Id
