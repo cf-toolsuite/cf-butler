@@ -128,7 +128,7 @@ dependencies {
     }
     implementation('org.eclipse.jgit:org.eclipse.jgit:5.9.0.202009080501-r')
     implementation('org.springframework.boot:spring-boot-starter-mail')
-    implementation('com.sendgrid:sendgrid-java:4.6.6') {
+    implementation('com.sendgrid:sendgrid-java:4.6.7') {
         exclude group: 'org.apache.httpcomponents', module: 'httpclient'
     }
     implementation('org.apache.httpcomponents:httpclient:4.5.12')
