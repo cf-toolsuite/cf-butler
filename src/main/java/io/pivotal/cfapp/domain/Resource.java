@@ -31,18 +31,13 @@ public class Resource {
 
     @JsonCreator
     public Resource(
-<<<<<<< Updated upstream
-            @JsonProperty("guid") String guid,
-            @JsonProperty("created_at") Instant createdAt,
-            @JsonProperty("updated_at") Instant updatedAt,
-            @JsonProperty("metadata") EmbeddedMetadata metadata) {
-=======
+
         @JsonProperty("guid") String guid,
         @JsonProperty("name") String name,
         @JsonProperty("created_at") Instant createdAt,
         @JsonProperty("updated_at") Instant updatedAt,
         @JsonProperty("metadata") EmbeddedMetadata metadata) {
->>>>>>> Stashed changes
+
         this.guid = guid;
         this.name = name;
         this.createdAt = createdAt;

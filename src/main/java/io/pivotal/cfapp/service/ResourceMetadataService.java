@@ -35,12 +35,10 @@ public class ResourceMetadataService {
         this.tokenProvider = tokenProvider;
         this.settings = settings;
     }
-
-<<<<<<< Updated upstream
     private Mono<String> getOauthToken() {
         tokenProvider.invalidate(connectionContext);
         return tokenProvider.getToken(connectionContext);
-=======
+    }
     public Mono<Resources> getResources(String type) {
         ResourceType rt = ResourceType.from(type);
         final String uri =
@@ -82,7 +80,6 @@ public class ResourceMetadataService {
                                     .header(HttpHeaders.AUTHORIZATION, t)
                                         .retrieve()
                                             .bodyToMono(Resources.class));
->>>>>>> Stashed changes
     }
 
     public Mono<Resource> getResource(String type, String id) {
