@@ -25,10 +25,10 @@ public class OpsmanClient {
 
     @Autowired
     public OpsmanClient(
-        WebClient client,
-        OpsmanSettings settings,
-        OpsmanAccessTokenProvider tokenProvider
-    ) {
+            WebClient client,
+            OpsmanSettings settings,
+            OpsmanAccessTokenProvider tokenProvider
+            ) {
         this.client = client;
         this.settings = settings;
         this.tokenProvider = tokenProvider;
@@ -37,78 +37,78 @@ public class OpsmanClient {
     public Mono<List<DeployedProduct>> getDeployedProducts() {
         String uri = String.format(URI_TEMPLATE, settings.getApiHost(), "/api/v0/deployed/products");
         return
-            tokenProvider.obtainAccessToken()
+                tokenProvider.obtainAccessToken()
                 .flatMap(
-                    token ->
+                        token ->
                         client
-                            .get()
-                            .uri(uri)
-                            .headers(h -> h.setBearerAuth(token))
-                            .retrieve()
-                                .bodyToFlux(DeployedProduct.class)
-                                .collectList()
-                );
-    }
-
-    public Mono<StemcellAssignments> getStemcellAssignments() {
-        String uri = String.format(URI_TEMPLATE, settings.getApiHost(), "/api/v0/stemcell_assignments");
-        return
-            tokenProvider.obtainAccessToken()
-                .flatMap(
-                    token ->
-                        client
-                            .get()
-                            .uri(uri)
-                            .headers(h -> h.setBearerAuth(token))
-                            .retrieve()
-                                .bodyToMono(StemcellAssignments.class)
-                );
-    }
-
-    public Mono<StemcellAssociations> getStemcellAssociations() {
-        String uri = String.format(URI_TEMPLATE, settings.getApiHost(), "/api/v0/stemcell_associations");
-        return
-            getOmVersion()
-            .filter(version -> Double.valueOf(version) >= 2.6)
-            .flatMap(
-                r ->
-                    tokenProvider.obtainAccessToken()
-                        .flatMap(
-                            token ->
-                                client
-                                    .get()
-                                    .uri(uri)
-                                    .headers(h -> h.setBearerAuth(token))
-                                    .retrieve()
-                                        .bodyToMono(StemcellAssociations.class)
-                        )
-            );
+                        .get()
+                        .uri(uri)
+                        .headers(h -> h.setBearerAuth(token))
+                        .retrieve()
+                        .bodyToFlux(DeployedProduct.class)
+                        .collectList()
+                        );
     }
 
     public Mono<OmInfo> getOmInfo() {
         String uri = String.format(URI_TEMPLATE, settings.getApiHost(), "/api/v0/info");
         return
-            tokenProvider.obtainAccessToken()
-            .flatMap(
-                token ->
-                    client
+                tokenProvider.obtainAccessToken()
+                .flatMap(
+                        token ->
+                        client
                         .get()
                         .uri(uri)
                         .headers(h -> h.setBearerAuth(token))
                         .retrieve()
-                            .bodyToMono(OmInfo.class)
-            );
+                        .bodyToMono(OmInfo.class)
+                        );
     }
 
     public Mono<String> getOmVersion() {
         String uri = String.format(URI_TEMPLATE, settings.getApiHost(), "/api/v0/info");
         return
-            client
+                client
                 .get()
                 .uri(uri)
                 .retrieve()
-                    .bodyToMono(OmInfo.class)
-                    .map(response -> response.getInfo().getVersion());
+                .bodyToMono(OmInfo.class)
+                .map(response -> response.getInfo().getVersion());
+    }
+
+    public Mono<StemcellAssignments> getStemcellAssignments() {
+        String uri = String.format(URI_TEMPLATE, settings.getApiHost(), "/api/v0/stemcell_assignments");
+        return
+                tokenProvider.obtainAccessToken()
+                .flatMap(
+                        token ->
+                        client
+                        .get()
+                        .uri(uri)
+                        .headers(h -> h.setBearerAuth(token))
+                        .retrieve()
+                        .bodyToMono(StemcellAssignments.class)
+                        );
+    }
+
+    public Mono<StemcellAssociations> getStemcellAssociations() {
+        String uri = String.format(URI_TEMPLATE, settings.getApiHost(), "/api/v0/stemcell_associations");
+        return
+                getOmVersion()
+                .filter(version -> Double.valueOf(version) >= 2.6)
+                .flatMap(
+                        r ->
+                        tokenProvider.obtainAccessToken()
+                        .flatMap(
+                                token ->
+                                client
+                                .get()
+                                .uri(uri)
+                                .headers(h -> h.setBearerAuth(token))
+                                .retrieve()
+                                .bodyToMono(StemcellAssociations.class)
+                                )
+                        );
     }
 
 }

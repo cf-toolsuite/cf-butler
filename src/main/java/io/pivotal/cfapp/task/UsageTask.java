@@ -1,11 +1,11 @@
 package io.pivotal.cfapp.task;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.pivotal.cfapp.event.TkRetrievedEvent;
 import io.pivotal.cfapp.service.UsageCache;
@@ -30,32 +30,27 @@ public class UsageTask implements ApplicationListener<TkRetrievedEvent> {
         this.mapper = mapper;
     }
 
-    @Override
-    public void onApplicationEvent(TkRetrievedEvent event) {
-        collect();
-    }
-
     public void collect() {
         log.info("UsageTask started");
         service.getApplicationReport()
-            .doOnNext(r -> {
-                log.trace(mapWithException("AppUsageReport", r));
-                cache.setApplicationReport(r);
-            })
+        .doOnNext(r -> {
+            log.trace(mapWithException("AppUsageReport", r));
+            cache.setApplicationReport(r);
+        })
         .then(service.getServiceReport())
-            .doOnNext(r -> {
-                log.trace(mapWithException("ServiceUsageReport", r));
-                cache.setServiceReport(r);
-            })
+        .doOnNext(r -> {
+            log.trace(mapWithException("ServiceUsageReport", r));
+            cache.setServiceReport(r);
+        })
         .then(service.getTaskReport())
-            .doOnNext(r -> {
-                log.trace(mapWithException("TaskUsageReport", r));
-                cache.setTaskReport(r);
-            })
+        .doOnNext(r -> {
+            log.trace(mapWithException("TaskUsageReport", r));
+            cache.setTaskReport(r);
+        })
         .subscribe(
-            result -> log.info("UsageTask completed"),
-            error -> log.error("usageTask terminated with error", error)
-        );
+                result -> log.info("UsageTask completed"),
+                error -> log.error("usageTask terminated with error", error)
+                );
     }
 
     private String mapWithException(String type, Object value) {
@@ -64,6 +59,11 @@ public class UsageTask implements ApplicationListener<TkRetrievedEvent> {
         } catch (JsonProcessingException jpe) {
             throw new RuntimeException("Problem mapping " + type);
         }
+    }
+
+    @Override
+    public void onApplicationEvent(TkRetrievedEvent event) {
+        collect();
     }
 
 }

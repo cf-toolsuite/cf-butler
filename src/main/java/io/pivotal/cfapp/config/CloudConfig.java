@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Profile("cloud")
-@Configuration
+@Configuration(proxyBeanMethods = false)
 class CloudConfig {
 
     private static final List<String> SUPPORTED_SCHEMES = Arrays.asList(new String[] { "mysql", "postgresql"});
@@ -50,8 +50,8 @@ class CloudConfig {
         }
         if (properties.getProperties() != null) {
             properties.getProperties()
-                    .forEach((key, value) -> builder
-                            .option(Option.valueOf(key), value));
+            .forEach((key, value) -> builder
+                    .option(Option.valueOf(key), value));
         }
         return ConnectionFactories.get(builder.build());
     }

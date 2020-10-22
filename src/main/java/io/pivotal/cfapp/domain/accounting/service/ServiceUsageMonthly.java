@@ -5,8 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import lombok.Builder;
-import lombok.Getter;
 import lombok.Builder.Default;
+import lombok.Getter;
 
 @Builder
 @Getter
@@ -33,11 +33,11 @@ public class ServiceUsageMonthly {
 
     @JsonCreator
     public ServiceUsageMonthly(
-        @JsonProperty("month") Integer month,
-        @JsonProperty("year") Integer year,
-        @JsonProperty("duration_in_hours") Double durationInHours,
-        @JsonProperty("average_instances") Double averageInstances,
-        @JsonProperty("maximum_instances") Integer maximumInstances) {
+            @JsonProperty("month") Integer month,
+            @JsonProperty("year") Integer year,
+            @JsonProperty("duration_in_hours") Double durationInHours,
+            @JsonProperty("average_instances") Double averageInstances,
+            @JsonProperty("maximum_instances") Integer maximumInstances) {
         this.month = month;
         this.year = year;
         this.durationInHours = durationInHours;

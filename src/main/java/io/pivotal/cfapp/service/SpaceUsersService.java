@@ -9,28 +9,28 @@ import reactor.core.publisher.Mono;
 
 public interface SpaceUsersService {
 
-	Mono<Void> deleteAll();
+    Mono<Map<String, Integer>> countByOrganization();
 
-	Mono<SpaceUsers> save(SpaceUsers entity);
+    Mono<Void> deleteAll();
 
-	Flux<SpaceUsers> findAll();
+    Flux<SpaceUsers> findAll();
 
-	Flux<SpaceUsers> findByAccountName(String name);
+    Flux<SpaceUsers> findByAccountName(String name);
 
-	Mono<SpaceUsers> findByOrganizationAndSpace(String organization, String space);
+    Mono<SpaceUsers> findByOrganizationAndSpace(String organization, String space);
 
-	Mono<Long> totalUserAccounts();
+    Flux<String> obtainAccountNames();
 
-	Mono<Long> totalServiceAccounts();
+    Flux<String> obtainServiceAccountNames();
 
-	Mono<Map<String, Integer>> countByOrganization();
+    Flux<String> obtainUserAccountNames();
 
-	Flux<UserAccounts> obtainUserAccounts();
+    Flux<UserAccounts> obtainUserAccounts();
 
-	Flux<String> obtainUserAccountNames();
+    Mono<SpaceUsers> save(SpaceUsers entity);
 
-	Flux<String> obtainServiceAccountNames();
+    Mono<Long> totalServiceAccounts();
 
-	Flux<String> obtainAccountNames();
+    Mono<Long> totalUserAccounts();
 
 }

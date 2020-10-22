@@ -9,7 +9,7 @@ import lombok.Getter;
 @Getter
 public class WorkloadsFilter {
 
-    private Set<String> stacks; 
-    private Set<String> serviceOfferings; 
+    private Set<String> stacks;
+    private Set<String> serviceOfferings;
 
 }

@@ -18,22 +18,11 @@ class OpsmanAccessTokenProvider {
 
     @Autowired
     public OpsmanAccessTokenProvider(
-        WebClient client,
-        OpsmanSettings settings
-    ) {
+            WebClient client,
+            OpsmanSettings settings
+            ) {
         this.client = client;
         this.settings = settings;
-    }
-
-    Mono<Void> revokeAccessToken(String existingToken) {
-        String revoke = String.format(URI_TEMPLATE, settings.getApiHost(), "/uaa/oauth/revoke/client");
-        return
-            client
-                .get()
-                .uri(revoke + "/opsman")
-                .headers(h -> h.setBearerAuth(existingToken))
-                .retrieve()
-                .bodyToMono(Void.class);
     }
 
     // @see https://docs.cloudfoundry.org/api/uaa/version/4.35.0/index.html#password-grant
@@ -51,7 +40,18 @@ class OpsmanAccessTokenProvider {
                 .bodyValue(request)
                 .retrieve()
                 .bodyToMono(GetTokenByPasswordResponse.class)
-                .map(r -> r.getAccessToken());
+                .map(GetTokenByPasswordResponse::getAccessToken);
+    }
+
+    Mono<Void> revokeAccessToken(String existingToken) {
+        String revoke = String.format(URI_TEMPLATE, settings.getApiHost(), "/uaa/oauth/revoke/client");
+        return
+                client
+                .get()
+                .uri(revoke + "/opsman")
+                .headers(h -> h.setBearerAuth(existingToken))
+                .retrieve()
+                .bodyToMono(Void.class);
     }
 
 }

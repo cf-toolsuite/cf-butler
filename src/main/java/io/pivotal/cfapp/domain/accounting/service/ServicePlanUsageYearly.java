@@ -36,12 +36,12 @@ public class ServicePlanUsageYearly {
 
     @JsonCreator
     public ServicePlanUsageYearly(
-        @JsonProperty("service_plan_name") String servicePlanName,
-        @JsonProperty("service_plan_guid") String servicePlanGuid,
-        @JsonProperty("year") Integer year,
-        @JsonProperty("duration_in_hours") Double durationInHours,
-        @JsonProperty("maximum_instances") Integer maximumInstances,
-        @JsonProperty("average_instances") Double averageInstances) {
+            @JsonProperty("service_plan_name") String servicePlanName,
+            @JsonProperty("service_plan_guid") String servicePlanGuid,
+            @JsonProperty("year") Integer year,
+            @JsonProperty("duration_in_hours") Double durationInHours,
+            @JsonProperty("maximum_instances") Integer maximumInstances,
+            @JsonProperty("average_instances") Double averageInstances) {
         this.servicePlanName = servicePlanName;
         this.servicePlanGuid = servicePlanGuid;
         this.year = year;

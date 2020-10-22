@@ -12,8 +12,8 @@ import lombok.Getter;
 @Getter
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-"entity",
-"metadata"
+    "entity",
+    "metadata"
 })
 public class Resource {
 
@@ -25,9 +25,9 @@ public class Resource {
 
     @JsonCreator
     public Resource(
-        @JsonProperty("entity") Entity entity,
-        @JsonProperty("metadata") ResourceMetadata metadata
-    ) {
+            @JsonProperty("entity") Entity entity,
+            @JsonProperty("metadata") ResourceMetadata metadata
+            ) {
         this.entity = entity;
         this.metadata = metadata;
     }

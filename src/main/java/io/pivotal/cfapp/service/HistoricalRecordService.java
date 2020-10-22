@@ -8,7 +8,7 @@ import reactor.core.publisher.Mono;
 
 public interface HistoricalRecordService {
 
-	Mono<HistoricalRecord> save(HistoricalRecord entity);
-	Flux<HistoricalRecord> findAll();
-	Flux<HistoricalRecord> findByDateRange(LocalDate start, LocalDate end);
+    Flux<HistoricalRecord> findAll();
+    Flux<HistoricalRecord> findByDateRange(LocalDate start, LocalDate end);
+    Mono<HistoricalRecord> save(HistoricalRecord entity);
 }

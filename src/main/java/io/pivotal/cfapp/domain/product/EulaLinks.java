@@ -19,8 +19,8 @@ public class EulaLinks {
     private Self self;
 
     public EulaLinks(
-        @JsonProperty("self") Self self
-    ) {
+            @JsonProperty("self") Self self
+            ) {
         this.self = self;
     }
 

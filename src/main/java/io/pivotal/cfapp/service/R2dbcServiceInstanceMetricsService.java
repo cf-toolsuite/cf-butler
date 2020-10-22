@@ -11,36 +11,36 @@ import reactor.util.function.Tuple2;
 @Service
 public class R2dbcServiceInstanceMetricsService implements ServiceInstanceMetricsService {
 
-	private final R2dbcServiceInstanceMetricsRepository repo;
+    private final R2dbcServiceInstanceMetricsRepository repo;
 
-	@Autowired
-	public R2dbcServiceInstanceMetricsService(R2dbcServiceInstanceMetricsRepository repo) {
-		this.repo = repo;
-	}
+    @Autowired
+    public R2dbcServiceInstanceMetricsService(R2dbcServiceInstanceMetricsRepository repo) {
+        this.repo = repo;
+    }
 
-	@Override
-	public Flux<Tuple2<String, Long>> byOrganization() {
-		return repo.byOrganization();
-	}
+    @Override
+    public Flux<Tuple2<String, Long>> byOrganization() {
+        return repo.byOrganization();
+    }
 
-	@Override
-	public Flux<Tuple2<String, Long>> byService() {
-		return repo.byService();
-	}
+    @Override
+    public Flux<Tuple2<String, Long>> byService() {
+        return repo.byService();
+    }
 
-	@Override
-	public Flux<Tuple2<String, Long>> byServiceAndPlan() {
-		return repo.byServiceAndPlan();
-	}
+    @Override
+    public Flux<Tuple2<String, Long>> byServiceAndPlan() {
+        return repo.byServiceAndPlan();
+    }
 
-	@Override
-	public Mono<Long> totalServiceInstances() {
-		return repo.totalServiceInstances();
-	}
+    @Override
+    public Mono<Long> totalServiceInstances() {
+        return repo.totalServiceInstances();
+    }
 
-	@Override
-	public Flux<Tuple2<String, Long>> totalVelocity() {
-		return repo.totalVelocity();
-	}
+    @Override
+    public Flux<Tuple2<String, Long>> totalVelocity() {
+        return repo.totalVelocity();
+    }
 
 }

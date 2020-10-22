@@ -43,14 +43,14 @@ public class DeployedProduct {
 
     @JsonCreator
     public DeployedProduct(
-        @JsonProperty("installation_name") String installationName,
-        @JsonProperty("guid") String guid,
-        @JsonProperty("type") String type,
-        @JsonProperty("product_version") String productVersion,
-        @JsonProperty("label") String label,
-        @JsonProperty("service_broker") Boolean serviceBroker,
-        @JsonProperty("stale") Staleness stale
-    ) {
+            @JsonProperty("installation_name") String installationName,
+            @JsonProperty("guid") String guid,
+            @JsonProperty("type") String type,
+            @JsonProperty("product_version") String productVersion,
+            @JsonProperty("label") String label,
+            @JsonProperty("service_broker") Boolean serviceBroker,
+            @JsonProperty("stale") Staleness stale
+            ) {
         this.installationName = installationName;
         this.guid = guid;
         this.type = type;

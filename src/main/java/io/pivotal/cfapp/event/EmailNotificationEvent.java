@@ -22,13 +22,48 @@ public class EmailNotificationEvent extends ApplicationEvent {
         super(source);
     }
 
+    public EmailNotificationEvent attachments(List<EmailAttachment> attachments) {
+        this.attachments = attachments;
+        return this;
+    }
+
+    public EmailNotificationEvent body(String body) {
+        this.body = body;
+        return this;
+    }
+
     public EmailNotificationEvent domain(String domain) {
         this.domain = domain;
         return this;
     }
 
+    public EmailNotificationEvent from(String from) {
+        this.from = from;
+        return this;
+    }
+
+    public List<EmailAttachment> getAttachments() {
+        return attachments;
+    }
+
+    public String getBody() {
+        return body;
+    }
+
     public String getDomain() {
         return domain;
+    }
+
+    public String getFrom() {
+        return from;
+    }
+
+    public List<String> getRecipients() {
+        return recipients;
+    }
+
+    public String getSubject() {
+        return subject;
     }
 
     public EmailNotificationEvent recipient(String recipient) {
@@ -44,44 +79,9 @@ public class EmailNotificationEvent extends ApplicationEvent {
         return this;
     }
 
-    public List<String> getRecipients() {
-        return recipients;
-    }
-
-    public EmailNotificationEvent from(String from) {
-        this.from = from;
-        return this;
-    }
-
-    public String getFrom() {
-        return from;
-    }
-
     public EmailNotificationEvent subject(String subject) {
         this.subject = subject;
         return this;
-    }
-
-    public String getSubject() {
-        return subject;
-    }
-
-    public EmailNotificationEvent body(String body) {
-        this.body = body;
-        return this;
-    }
-
-    public String getBody() {
-        return body;
-    }
-
-    public EmailNotificationEvent attachments(List<EmailAttachment> attachments) {
-        this.attachments = attachments;
-        return this;
-    }
-
-    public List<EmailAttachment> getAttachments() {
-        return attachments;
     }
 
 }

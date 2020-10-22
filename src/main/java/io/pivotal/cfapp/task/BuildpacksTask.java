@@ -23,26 +23,21 @@ public class BuildpacksTask implements ApplicationListener<TkRetrievedEvent> {
 
     @Autowired
     public BuildpacksTask(
-        DefaultCloudFoundryOperations opsClient,
-        BuildpacksCache cache,
-        ApplicationEventPublisher publisher) {
+            DefaultCloudFoundryOperations opsClient,
+            BuildpacksCache cache,
+            ApplicationEventPublisher publisher) {
         this.opsClient = opsClient;
         this.cache = cache;
         this.publisher = publisher;
     }
 
 
-    @Override
-    public void onApplicationEvent(TkRetrievedEvent event) {
-        collect();
-    }
-
     public void collect() {
         log.info("BuildpacksTask started");
         getBuildpacks()
-            .collectList()
-            .map(list -> cache.from(list))
-            .subscribe(
+        .collectList()
+        .map(list -> cache.from(list))
+        .subscribe(
                 result -> {
                     publisher.publishEvent(new BuildpacksRetrievedEvent(this));
                     log.trace("Buildpack cache contains {}", result);
@@ -57,7 +52,12 @@ public class BuildpacksTask implements ApplicationListener<TkRetrievedEvent> {
     protected Flux<Buildpack> getBuildpacks() {
         return opsClient
                 .buildpacks()
-                    .list();
+                .list();
+    }
+
+    @Override
+    public void onApplicationEvent(TkRetrievedEvent event) {
+        collect();
     }
 
 

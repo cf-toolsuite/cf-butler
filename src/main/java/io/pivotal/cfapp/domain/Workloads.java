@@ -34,10 +34,10 @@ public class Workloads {
 
     @JsonCreator
     public Workloads(
-        @JsonProperty("applications") List<AppDetail> applications,
-        @JsonProperty("service-instances") List<ServiceInstanceDetail> serviceInstances,
-        @JsonProperty("application-relationships") List<AppRelationship> appRelationships
-    ) {
+            @JsonProperty("applications") List<AppDetail> applications,
+            @JsonProperty("service-instances") List<ServiceInstanceDetail> serviceInstances,
+            @JsonProperty("application-relationships") List<AppRelationship> appRelationships
+            ) {
         this.applications = applications;
         this.serviceInstances = serviceInstances;
         this.appRelationships = appRelationships;
@@ -50,33 +50,34 @@ public class Workloads {
         for (Space s: spaces) {
             matchingApps.addAll(applications
                     .stream()
-                        .filter(application ->
-                            application.getOrganization().equalsIgnoreCase(s.getOrganizationName())
-                                && application.getSpace().equalsIgnoreCase(s.getSpaceName()))
-                        .collect(Collectors.toList()));
+                    .filter(application ->
+                    application.getOrganization().equalsIgnoreCase(s.getOrganizationName())
+                    && application.getSpace().equalsIgnoreCase(s.getSpaceName()))
+                    .collect(Collectors.toList()));
             matchingServiceInstances.addAll(serviceInstances
                     .stream()
-                        .filter(serviceInstance ->
-                            serviceInstance.getOrganization().equalsIgnoreCase(s.getOrganizationName())
-                                && serviceInstance.getSpace().equalsIgnoreCase(s.getSpaceName()))
-                        .collect(Collectors.toList()));
+                    .filter(serviceInstance ->
+                    serviceInstance.getOrganization().equalsIgnoreCase(s.getOrganizationName())
+                    && serviceInstance.getSpace().equalsIgnoreCase(s.getSpaceName()))
+                    .collect(Collectors.toList()));
             matchingAppRelationships.addAll(appRelationships
                     .stream()
-                        .filter(appRelationship -> 
-                        appRelationship.getOrganization().equalsIgnoreCase(s.getOrganizationName())
-                                && appRelationship.getSpace().equalsIgnoreCase(s.getSpaceName()))
-                        .collect(Collectors.toList()));
+                    .filter(appRelationship ->
+                    appRelationship.getOrganization().equalsIgnoreCase(s.getOrganizationName())
+                    && appRelationship.getSpace().equalsIgnoreCase(s.getSpaceName()))
+                    .collect(Collectors.toList()));
         }
         return Workloads.builder().applications(matchingApps).serviceInstances(matchingServiceInstances).appRelationships(matchingAppRelationships).build();
     }
 
+    @Override
     public String toString() {
         return String
                 .format(
-                    "Workloads comprised of... \n\tApplications: [%s],\n\tService Instances [%s],\n\tApplication Relationships [%s]",
-                    String.join(",", getApplications().stream().map(a -> a.getAppName()).collect(Collectors.toList())),
-                    String.join(",", getServiceInstances().stream().map(s -> s.getName()).collect(Collectors.toList())),
-                    String.join(",", getAppRelationships().stream().map(r -> r.getAppName()).collect(Collectors.toList()))
-                );
+                        "Workloads comprised of... \n\tApplications: [%s],\n\tService Instances [%s],\n\tApplication Relationships [%s]",
+                        String.join(",", getApplications().stream().map(AppDetail::getAppName).collect(Collectors.toList())),
+                        String.join(",", getServiceInstances().stream().map(ServiceInstanceDetail::getName).collect(Collectors.toList())),
+                        String.join(",", getAppRelationships().stream().map(AppRelationship::getAppName).collect(Collectors.toList()))
+                        );
     }
 }

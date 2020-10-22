@@ -12,8 +12,8 @@ import reactor.core.publisher.Mono;
 
 @RestController
 @ConditionalOnExpression(
-    "${om.enabled:false} and ${pivnet.enabled:false}"
-)
+        "${om.enabled:false} and ${pivnet.enabled:false}"
+        )
 public class ProductMetricsController {
 
     private final ProductMetricsService service;
@@ -27,7 +27,7 @@ public class ProductMetricsController {
     public Mono<ResponseEntity<ProductMetrics>> getProductMetrics() {
         return service
                 .getProductMetrics()
-                .map(metrics -> ResponseEntity.ok(metrics))
+                .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 

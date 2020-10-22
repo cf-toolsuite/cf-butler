@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import io.pivotal.cfapp.domain.Workloads;
 import io.pivotal.cfapp.domain.Workloads.WorkloadsBuilder;
 import io.pivotal.cfapp.service.DormantWorkloadsService;
-import io.pivotal.cfapp.service.TkService;
+import io.pivotal.cfapp.service.TimeKeeperService;
 import io.pivotal.cfapp.service.TkServiceUtil;
 import reactor.core.publisher.Mono;
 
@@ -22,14 +22,14 @@ public class DormantWorkloadsController {
 
     @Autowired
     public DormantWorkloadsController(
-        DormantWorkloadsService service,
-        TkService tkService) {
+            DormantWorkloadsService service,
+            TimeKeeperService tkService) {
         this.service = service;
         this.util = new TkServiceUtil(tkService);
     }
 
     @GetMapping(value = { "/snapshot/detail/dormant/{daysSinceLastUpdate}" } )
-	public Mono<ResponseEntity<Workloads>> getDormantWorkloads(@PathVariable("daysSinceLastUpdate") Integer daysSinceLastUpdate) {
+    public Mono<ResponseEntity<Workloads>> getDormantWorkloads(@PathVariable("daysSinceLastUpdate") Integer daysSinceLastUpdate) {
         final WorkloadsBuilder builder = Workloads.builder();
         return service
                 .getDormantApplications(daysSinceLastUpdate)
@@ -37,9 +37,9 @@ public class DormantWorkloadsController {
                 .then(service.getDormantServiceInstances(daysSinceLastUpdate))
                 .map(list -> builder.serviceInstances(list))
                 .flatMap(dwb -> util
-                                .getHeaders()
-                                    .map(h -> new ResponseEntity<Workloads>(dwb.build(), h, HttpStatus.OK)))
+                        .getHeaders()
+                        .map(h -> new ResponseEntity<Workloads>(dwb.build(), h, HttpStatus.OK)))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
-	}
+    }
 
 }

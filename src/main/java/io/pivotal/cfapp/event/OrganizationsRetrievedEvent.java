@@ -16,13 +16,13 @@ public class OrganizationsRetrievedEvent extends ApplicationEvent {
         super(source);
     }
 
+    public List<Organization> getOrganizations() {
+        return organizations;
+    }
+
     public OrganizationsRetrievedEvent organizations(List<Organization> organizations) {
         this.organizations = organizations;
         return this;
-    }
-
-    public List<Organization> getOrganizations() {
-        return organizations;
     }
 
 }

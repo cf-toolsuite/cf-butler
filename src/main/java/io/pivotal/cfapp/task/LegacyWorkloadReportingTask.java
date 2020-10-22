@@ -37,22 +37,97 @@ import reactor.util.function.Tuples;
 @Component
 public class LegacyWorkloadReportingTask implements PolicyExecutorTask {
 
+    private static List<EmailAttachment> buildAttachments(Tuple2<LegacyPolicy, Workloads> tuple) {
+        String cr = System.getProperty("line.separator");
+        List<EmailAttachment> result = new ArrayList<>();
+        StringBuilder content = new StringBuilder();
+        if (!tuple.getT2().getApplications().isEmpty()){
+            tuple.getT2()
+            .getApplications()
+            .forEach(app -> content.append(app.toCsv()).append(cr));
+            result.add(
+                    EmailAttachment
+                    .builder()
+                    .filename(getFileNamePrefix(tuple.getT1()) + "applications")
+                    .extension(".csv")
+                    .mimeType("text/plain;charset=UTF-8")
+                    .content(content.toString())
+                    .headers(AppDetail.headers())
+                    .build()
+                    );
+        }
+        if (!tuple.getT2().getAppRelationships().isEmpty()){
+            tuple.getT2()
+            .getAppRelationships()
+            .forEach(app -> content.append(app.toCsv()).append(cr));
+            result.add(
+                    EmailAttachment
+                    .builder()
+                    .filename(getFileNamePrefix(tuple.getT1()) + "applications")
+                    .extension(".csv")
+                    .mimeType("text/plain;charset=UTF-8")
+                    .content(content.toString())
+                    .headers(AppRelationship.headers())
+                    .build()
+                    );
+        }
+        return result;
+    }
+    private static Mono<Tuple2<UserSpaces, Workloads>> filterWorkloads(UserSpaces userSpaces, Workloads input){
+        Workloads workloads = input.matchBySpace(userSpaces.getSpaces());
+        log.trace(userSpaces.toString() + ", " + workloads.toString());
+        return Mono.just(Tuples.of(userSpaces, workloads));
+
+    }
+    private static String getFileNamePrefix(LegacyPolicy policy) {
+        return "legacy-";
+    }
+    private static Set<Space> getSpaces(Workloads workloads) {
+        Set<Space> applicationSpaces =
+                workloads
+                .getApplications()
+                .stream()
+                .map(app -> Space
+                        .builder()
+                        .organizationName(app.getOrganization())
+                        .spaceName(app.getSpace())
+                        .build())
+                .collect(Collectors.toSet());
+        Set<Space> appRelationshipsSpaces =
+                workloads
+                .getAppRelationships()
+                .stream()
+                .map(app -> Space
+                        .builder()
+                        .organizationName(app.getOrganization())
+                        .spaceName(app.getSpace())
+                        .build())
+                .collect(Collectors.toSet());
+        Set<Space> result = new HashSet<>();
+        result.addAll(applicationSpaces);
+        result.addAll(appRelationshipsSpaces);
+        return result;
+    }
     private final PasSettings settings;
     private final PoliciesService policiesService;
+
     private final SpaceUsersService spaceUsersService;
+
     private final UserSpacesService userSpacesService;
+
     private final LegacyWorkloadsService legacyWorkloadsService;
+
     private final ApplicationEventPublisher publisher;
 
     @Autowired
     public LegacyWorkloadReportingTask(
-        PasSettings settings,
-        PoliciesService policiesService,
-        SpaceUsersService spaceUsersService,
-        UserSpacesService userSpacesService,
-        LegacyWorkloadsService legacyWorkloadsService,
-        ApplicationEventPublisher publisher
-    ) {
+            PasSettings settings,
+            PoliciesService policiesService,
+            SpaceUsersService spaceUsersService,
+            UserSpacesService userSpacesService,
+            LegacyWorkloadsService legacyWorkloadsService,
+            ApplicationEventPublisher publisher
+            ) {
         this.settings = settings;
         this.policiesService = policiesService;
         this.spaceUsersService = spaceUsersService;
@@ -61,167 +136,92 @@ public class LegacyWorkloadReportingTask implements PolicyExecutorTask {
         this.publisher = publisher;
     }
 
-	@Override
+    @Override
     public void execute() {
-	    log.info("LegacyWorkloadReportingTask started");
+        log.info("LegacyWorkloadReportingTask started");
         fetchLegacyPolicies()
-            .concatMap(hp -> executePolicy(hp).map(result -> Tuples.of(hp, result)))
-            .collectList()
-	    	.subscribe(
+        .concatMap(hp -> executePolicy(hp).map(result -> Tuples.of(hp, result)))
+        .collectList()
+        .subscribe(
                 results -> {
                     results.forEach(tuple -> {
                         notifyOperator(tuple);
                         notifyUsers(tuple);
                     });
-		            log.info("LegacyWorkloadReportingTask completed");
-		            log.info("-- {} legacy workload policies executed.", results.size());
-		        },
-		        error -> {
-		            log.error("LegacyWorkloadReportingTask terminated with error", error);
-		        }
-	        );
+                    log.info("LegacyWorkloadReportingTask completed");
+                    log.info("-- {} legacy workload policies executed.", results.size());
+                },
+                error -> {
+                    log.error("LegacyWorkloadReportingTask terminated with error", error);
+                }
+                );
+    }
+
+    protected Mono<Workloads> executePolicy(LegacyPolicy policy) {
+        final WorkloadsBuilder builder = Workloads.builder();
+        return legacyWorkloadsService
+                .getLegacyApplications(policy)
+                .map(list -> builder.applications(list))
+                .then(legacyWorkloadsService.getLegacyApplicationRelationships(policy))
+                .map(list -> builder.appRelationships(list).build());
+    }
+
+    protected Flux<LegacyPolicy> fetchLegacyPolicies() {
+        return
+                policiesService
+                .findAllLegacyPolicies()
+                .flatMapMany(policy -> Flux.fromIterable(policy.getLegacyPolicies()));
     }
 
     private void notifyOperator(Tuple2<LegacyPolicy, Workloads> tuple) {
         log.trace("User: admin, " + tuple.getT2().toString());
         publisher.publishEvent(
-            new EmailNotificationEvent(this)
+                new EmailNotificationEvent(this)
                 .domain(settings.getAppsDomain())
                 .from(tuple.getT1().getOperatorTemplate().getFrom())
                 .recipients(tuple.getT1().getOperatorTemplate().getTo())
                 .subject(tuple.getT1().getOperatorTemplate().getSubject())
                 .body(tuple.getT1().getOperatorTemplate().getBody())
                 .attachments(buildAttachments(tuple))
-        );
+                );
     }
 
     private void notifyUsers(Tuple2<LegacyPolicy, Workloads> tuple) {
         if (tuple.getT1().getNotifyeeTemplate() != null) {
             // Pull distinct Set<Space> from applications and service instances
             Flux
-                .fromIterable(getSpaces(tuple.getT2()))
+            .fromIterable(getSpaces(tuple.getT2()))
             // For each Space in Set<Space>, obtain SpaceUsers#getUsers()
-                .concatMap(space -> spaceUsersService.findByOrganizationAndSpace(space.getOrganizationName(), space.getSpaceName()))
+            .concatMap(space -> spaceUsersService.findByOrganizationAndSpace(space.getOrganizationName(), space.getSpaceName()))
             // then pair with matching space(s) that contain applications and service instances
-                .concatMap(spaceUser -> Flux.fromIterable(spaceUser.getUsers()))
-                .distinct()
+            .concatMap(spaceUser -> Flux.fromIterable(spaceUser.getUsers()))
+            .distinct()
             // filter out account names that are not email addresses
-                .filter(userName -> EmailValidator.isValid(userName))
-                .concatMap(userName -> userSpacesService.getUserSpaces(userName))
+            .filter(EmailValidator::isValid)
+            .concatMap(userName -> userSpacesService.getUserSpaces(userName))
             // Create a list where each item is a tuple of user account and filtered workloads
-                .concatMap(userSpace -> filterWorkloads(userSpace, tuple.getT2()))
-                .delayElements(Duration.ofMillis(250))
-                .doOnNext(
-                        userWorkloads -> {
-                                    publisher.publishEvent(
-                                        new EmailNotificationEvent(this)
-                                            .domain(settings.getAppsDomain())
-                                            .from(tuple.getT1().getNotifyeeTemplate().getFrom())
-                                            .recipient(userWorkloads.getT1().getAccountName())
-                                            .subject(tuple.getT1().getNotifyeeTemplate().getSubject())
-                                            .body(tuple.getT1().getNotifyeeTemplate().getBody())
-                                            .attachments(buildAttachments(Tuples.of(tuple.getT1(), userWorkloads.getT2())))
-                                    );
-                        }
-                )
-                .subscribe();
+            .concatMap(userSpace -> filterWorkloads(userSpace, tuple.getT2()))
+            .delayElements(Duration.ofMillis(250))
+            .doOnNext(
+                    userWorkloads -> {
+                        publisher.publishEvent(
+                                new EmailNotificationEvent(this)
+                                .domain(settings.getAppsDomain())
+                                .from(tuple.getT1().getNotifyeeTemplate().getFrom())
+                                .recipient(userWorkloads.getT1().getAccountName())
+                                .subject(tuple.getT1().getNotifyeeTemplate().getSubject())
+                                .body(tuple.getT1().getNotifyeeTemplate().getBody())
+                                .attachments(buildAttachments(Tuples.of(tuple.getT1(), userWorkloads.getT2())))
+                                );
+                    }
+                    )
+            .subscribe();
         }
     }
 
     @Scheduled(cron = "${cron.execution}")
     protected void runTask() {
-    	execute();
+        execute();
     }
 
-	protected Flux<LegacyPolicy> fetchLegacyPolicies() {
-        return
-            policiesService
-		        .findAllLegacyPolicies()
-                .flatMapMany(policy -> Flux.fromIterable(policy.getLegacyPolicies()));
-    }
-
-    protected Mono<Workloads> executePolicy(LegacyPolicy policy) {
-        final WorkloadsBuilder builder = Workloads.builder();
-        return legacyWorkloadsService
-            .getLegacyApplications(policy)
-            .map(list -> builder.applications(list))
-            .then(legacyWorkloadsService.getLegacyApplicationRelationships(policy))
-            .map(list -> builder.appRelationships(list).build());
-    }
-
-    private static Mono<Tuple2<UserSpaces, Workloads>> filterWorkloads(UserSpaces userSpaces, Workloads input){
-        Workloads workloads = input.matchBySpace(userSpaces.getSpaces());
-        log.trace(userSpaces.toString() + ", " + workloads.toString());
-        return Mono.just(Tuples.of(userSpaces, workloads));
-
-    }
-
-    private static List<EmailAttachment> buildAttachments(Tuple2<LegacyPolicy, Workloads> tuple) {
-	    String cr = System.getProperty("line.separator");
-        List<EmailAttachment> result = new ArrayList<>();
-        StringBuilder content = new StringBuilder();
-        if (!tuple.getT2().getApplications().isEmpty()){
-            tuple.getT2()
-                .getApplications()
-                    .forEach(app -> content.append(app.toCsv()).append(cr));
-            result.add(
-                EmailAttachment
-                    .builder()
-                        .filename(getFileNamePrefix(tuple.getT1()) + "applications")
-                        .extension(".csv")
-                        .mimeType("text/plain;charset=UTF-8")
-                        .content(content.toString())
-                        .headers(AppDetail.headers())
-                        .build()
-            );
-        }
-        if (!tuple.getT2().getAppRelationships().isEmpty()){
-            tuple.getT2()
-                .getAppRelationships()
-                    .forEach(app -> content.append(app.toCsv()).append(cr));               
-            result.add(
-                EmailAttachment
-                    .builder()
-                        .filename(getFileNamePrefix(tuple.getT1()) + "applications")
-                        .extension(".csv")
-                        .mimeType("text/plain;charset=UTF-8")
-                        .content(content.toString())
-                        .headers(AppRelationship.headers())
-                        .build()
-            );
-        }
-        return result;
-    }
-
-    private static String getFileNamePrefix(LegacyPolicy policy) {
-        return "legacy-";
-    }
-
-    private static Set<Space> getSpaces(Workloads workloads) {
-        Set<Space> applicationSpaces =
-            workloads
-                .getApplications()
-                    .stream()
-                        .map(app -> Space
-                                        .builder()
-                                            .organizationName(app.getOrganization())
-                                            .spaceName(app.getSpace())
-                                        .build())
-                        .collect(Collectors.toSet());
-        Set<Space> appRelationshipsSpaces =
-            workloads
-                .getAppRelationships()
-                    .stream()
-                        .map(app -> Space
-                                        .builder()
-                                            .organizationName(app.getOrganization())
-                                            .spaceName(app.getSpace())
-                                        .build())
-                        .collect(Collectors.toSet());       
-        Set<Space> result = new HashSet<>();
-        result.addAll(applicationSpaces);
-        result.addAll(appRelationshipsSpaces);
-        return result;
-    }
-    
 }
