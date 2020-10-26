@@ -153,6 +153,22 @@ public class PoliciesValidator {
         return valid;
     }
 
+    public boolean validate(MessagePolicy policy) {
+        boolean hasId = Optional.ofNullable(policy.getId()).isPresent();
+        boolean hasOwnerTemplate = Optional.ofNullable(policy.getOwnerTemplate()).isPresent();
+        boolean valid = !hasId && hasOwnerTemplate;
+        if (hasOwnerTemplate) {
+            if (!policy.getOwnerTemplate().isValid()) {
+                valid = false;
+                log.warn(EMAIL_NOTIFICATION_TEMPLATE_REJECTED_MESSAGE, policy.toString());
+            }
+        }
+        if (valid == false) {
+            log.warn(REQUIRED_PROPERTIES_REJECTED_MESSAGE, policy.toString());
+        }
+        return valid;
+    }
+
     public boolean validate(LegacyPolicy policy) {
         boolean hasId = Optional.ofNullable(policy.getId()).isPresent();
         boolean hasOperatorTemplate = Optional.ofNullable(policy.getOperatorTemplate()).isPresent();

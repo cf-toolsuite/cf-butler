@@ -236,6 +236,17 @@ As mentioned previously the policy file must adhere to a naming convention
 See additional property requirements in Query policies and the aforementioned sample Github repository.
 
 
+#### Message Policies
+
+Message policies are useful when platform team wants to send notification to primary and secondary organization owners. 
+The primary and secondary owner information is captured as PrimaryOwner, SecondaryOwner labels on Organizations.  
+
+As mentioned previously the policy file must adhere to a naming convention
+
+* a filename ending with `-MP.json` encapsulates an individual [MessagePolicy](src/main/java/io/pivotal/cfapp/domain/MessagePolicy.java)
+
+See additional property requirements in Message policies and the aforementioned sample Github repository.
+
 #### Endpoint Policies
 
 Endpoint policies are useful when you want to exercise any of the available GET endpoints and have the results sent to one or more designated email recipients.

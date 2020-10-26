@@ -11,12 +11,14 @@ public interface PoliciesService {
     Mono<Void> deleteApplicationPolicyById(String id);
     Mono<Void> deleteEndpointPolicyById(String id);
     Mono<Void> deleteHygienePolicyById(String id);
+    Mono<Void> deleteMessagePolicyById(String id);
     Mono<Void> deleteLegacyPolicyById(String id);
     Mono<Void> deleteQueryPolicyById(String id);
     Mono<Void> deleteServiceInstancePolicyById(String id);
     Mono<Policies> findAll();
     Mono<Policies> findAllEndpointPolicies();
     Mono<Policies> findAllHygienePolicies();
+    Mono<Policies> findAllMessagePolicies();
     Mono<Policies> findAllLegacyPolicies();
     Mono<Policies> findAllQueryPolicies();
     Mono<Policies> findApplicationPolicyById(String id);
@@ -24,6 +26,7 @@ public interface PoliciesService {
     Mono<Policies> findByServiceInstanceOperation(ServiceInstanceOperation operation);
     Mono<Policies> findEndpointPolicyById(String id);
     Mono<Policies> findHygienePolicyById(String id);
+    Mono<Policies> findMessagePolicyById(String id);
     Mono<Policies> findLegacyPolicyById(String id);
     Mono<Policies> findQueryPolicyById(String id);
     Mono<Policies> findServiceInstancePolicyById(String id);

@@ -43,6 +43,12 @@ public class DbmsOnlyPoliciesController {
                 .map(ResponseEntity::ok);
     }
 
+    @DeleteMapping("/policies/message/{id}")
+    public Mono<ResponseEntity<Void>> deleteMessagePolicy(@PathVariable String id) {
+        return policiesService.deleteMessagePolicyById(id)
+                .map(ResponseEntity::ok);
+    }
+
     @DeleteMapping("/policies/legacy/{id}")
     public Mono<ResponseEntity<Void>> deleteLegacyPolicy(@PathVariable String id) {
         return policiesService.deleteLegacyPolicyById(id)
