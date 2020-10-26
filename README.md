@@ -1150,7 +1150,7 @@ POST /policies
   "legacy-policies": [
     {
       "notifyee-email-template": {
-        "body": "<h3>TThese applications are deployed to a legacy stack</h3><p>To avoid repeated notification:</p><ul><li>for each application please execute a cf push and update the stack to a modern alternative or cf delete</li></ul><p>depending on whether or not you want to keep the workload running.</p>",
+        "body": "<h3>These applications are deployed to a legacy stack</h3><p>To avoid repeated notification:</p><ul><li>for each application please execute a cf push and update the stack to a modern alternative or cf delete</li></ul><p>depending on whether or not you want to keep the workload running.</p>",
         "from": "admin@pcf.demo.ironleg.me",
         "subject": "Legacy Policy Sample Report"
       },
@@ -1186,7 +1186,22 @@ POST /policies
       "service-offerings": [
         "p-config-server"
       ]
-    }
+    },
+    {
+    "message-policies": [
+        {
+            "id": "b56fdcce40fd0dbe1c74791343850f6881595b26",
+            "owner-email-template": {
+                "from": "admin@pcf.demo.ironleg.me",
+                "subject": "Platform Updates",
+                "body": "Please take a moment to review the platform updates and share it with your Org users"
+            },
+            "organization-whitelist": [
+                "p-config-server"
+            ]
+        }
+    ]
+}
   ]
 }
 ```
