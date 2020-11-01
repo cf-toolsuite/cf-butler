@@ -43,9 +43,9 @@ public class DbmsOnlyPoliciesController {
                 .map(ResponseEntity::ok);
     }
 
-    @DeleteMapping("/policies/message/{id}")
-    public Mono<ResponseEntity<Void>> deleteMessagePolicy(@PathVariable String id) {
-        return policiesService.deleteMessagePolicyById(id)
+    @DeleteMapping("/policies/resourcenotification/{id}")
+    public Mono<ResponseEntity<Void>> deleteResourceNotificationPolicy(@PathVariable String id) {
+        return policiesService.deleteResourceNotificationPolicyById(id)
                 .map(ResponseEntity::ok);
     }
 

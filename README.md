@@ -236,16 +236,16 @@ As mentioned previously the policy file must adhere to a naming convention
 See additional property requirements in Query policies and the aforementioned sample Github repository.
 
 
-#### Message Policies
+#### Resource Notification Policies
 
-Message policies are useful when platform team wants to send notification to primary and secondary organization owners. 
-The primary and secondary owner information is captured as PrimaryOwner, SecondaryOwner labels on Organizations.  
+Resource Notification policies are useful when you wants to send notification for a resource(Org, Apps, Services) to the emailid's configured on the resources as labels. 
+Consider sending email to primary and secondary organization owners where The primary and secondary owner information is captured as PrimaryOwner, SecondaryOwner labels on Organizations.  
 
 As mentioned previously the policy file must adhere to a naming convention
 
-* a filename ending with `-MP.json` encapsulates an individual [MessagePolicy](src/main/java/io/pivotal/cfapp/domain/MessagePolicy.java)
+* a filename ending with `-RNP.json` encapsulates an individual [ResourceNotificationPolicy](src/main/java/io/pivotal/cfapp/domain/ResourceNotificationPolicy.java)
 
-See additional property requirements in Message policies and the aforementioned sample Github repository.
+See additional property requirements in Resource Notification policies and the aforementioned sample Github repository.
 
 #### Endpoint Policies
 
@@ -1188,16 +1188,26 @@ POST /policies
       ]
     },
     {
-    "message-policies": [
+    "resource-notification-policies": [
         {
-            "id": "b56fdcce40fd0dbe1c74791343850f6881595b26",
-            "owner-email-template": {
+            "resource-email-template": {
                 "from": "admin@pcf.demo.ironleg.me",
                 "subject": "Platform Updates",
                 "body": "Please take a moment to review the platform updates and share it with your Org users"
             },
-            "organization-whitelist": [
+            "resource-email-metadata": {
+                "resource": "organizations",
+                "labels": [
+                            "PrimaryOwner",
+                            "SecondaryOwner"
+                          ],
+                "domain": "pivotal.io"
+            }
+            "resource-whitelist": [
                 "p-config-server"
+            ]
+            "resource-blacklist": [
+                "pivot-sample-org"
             ]
         }
     ]

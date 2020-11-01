@@ -60,11 +60,11 @@ public class R2dbcPoliciesService implements PoliciesService {
 
     @Override
     @Transactional
-    public Mono<Void> deleteMessagePolicyById(String id) {
+    public Mono<Void> deleteResourceNotificationPolicyById(String id) {
         if (settings.isVersionManaged()) {
             throw new UnsupportedOperationException(UNSUPPORTED_OP_MESSAGE);
         }
-        return repo.deleteMessagePolicyById(id);
+        return repo.deleteResourceNotificationPolicyById(id);
     }
 
     @Override
@@ -110,8 +110,8 @@ public class R2dbcPoliciesService implements PoliciesService {
     }
 
     @Override
-    public Mono<Policies> findAllMessagePolicies() {
-        return repo.findAllMessagePolicies();
+    public Mono<Policies> findAllResourceNotificationPolicies() {
+        return repo.findAllResourceNotificationPolicies();
     }
 
     @Override
@@ -150,8 +150,8 @@ public class R2dbcPoliciesService implements PoliciesService {
     }
 
     @Override
-    public Mono<Policies> findMessagePolicyById(String id) {
-        return repo.findMessagePolicyById(id);
+    public Mono<Policies> findResourceNotificationPolicyById(String id) {
+        return repo.findResourceNotificationPolicyById(id);
     }
 
     @Override

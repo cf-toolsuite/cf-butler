@@ -13,7 +13,7 @@ import lombok.Builder;
 
 @Builder
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-@JsonPropertyOrder({ "application-policies", "service-instance-policies", "endpoint-policies", "query-policies", "hygiene-policies", "legacy-policies","message-policies" })
+@JsonPropertyOrder({ "application-policies", "service-instance-policies", "endpoint-policies", "query-policies", "hygiene-policies", "legacy-policies","resource-notification-policies" })
 public class Policies {
 
     @JsonProperty("application-policies")
@@ -34,8 +34,8 @@ public class Policies {
     @JsonProperty("legacy-policies")
     private List<LegacyPolicy> legacyPolicies;
 
-    @JsonProperty("message-policies")
-    private List<MessagePolicy> messagePolicies;
+    @JsonProperty("resource-notification-policies")
+    private List<ResourceNotificationPolicy> resourceNotificationPolicies;
 
     @JsonCreator
     Policies(
@@ -45,14 +45,14 @@ public class Policies {
             @JsonProperty("query-policies") List<QueryPolicy> queryPolicies,
             @JsonProperty("hygiene-policies") List<HygienePolicy> hygienePolicies,
             @JsonProperty("legacy-policies") List<LegacyPolicy> legacyPolicies,
-            @JsonProperty("message-policies") List<MessagePolicy> messagePolicies) {
+            @JsonProperty("resource-notification-policies") List<ResourceNotificationPolicy> resourceNotificationPolicies) {
         this.applicationPolicies = applicationPolicies;
         this.serviceInstancePolicies = serviceInstancePolicies;
         this.endpointPolicies = endpointPolicies;
         this.queryPolicies = queryPolicies;
         this.hygienePolicies = hygienePolicies;
         this.legacyPolicies = legacyPolicies;
-        this.messagePolicies = messagePolicies;
+        this.resourceNotificationPolicies = resourceNotificationPolicies;
 
     }
 
@@ -80,8 +80,8 @@ public class Policies {
         return serviceInstancePolicies != null ? serviceInstancePolicies: Collections.emptyList();
     }
 
-    public List<MessagePolicy> getMessagePolicies() {
-        return messagePolicies != null ? messagePolicies: Collections.emptyList();
+    public List<ResourceNotificationPolicy> getResourceNotificationPolicies() {
+        return resourceNotificationPolicies != null ? resourceNotificationPolicies: Collections.emptyList();
     }
 
     @JsonIgnore
@@ -92,7 +92,7 @@ public class Policies {
                 && getQueryPolicies().isEmpty()
                 && getHygienePolicies().isEmpty()
                 && getLegacyPolicies().isEmpty()
-                && getMessagePolicies().isEmpty();
+                && getResourceNotificationPolicies().isEmpty();
     }
 
 }

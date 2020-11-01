@@ -17,7 +17,7 @@ import io.pivotal.cfapp.config.GitSettings;
 import io.pivotal.cfapp.domain.ApplicationPolicy;
 import io.pivotal.cfapp.domain.EndpointPolicy;
 import io.pivotal.cfapp.domain.HygienePolicy;
-import io.pivotal.cfapp.domain.MessagePolicy;
+import io.pivotal.cfapp.domain.ResourceNotificationPolicy;
 import io.pivotal.cfapp.domain.LegacyPolicy;
 import io.pivotal.cfapp.domain.Policies;
 import io.pivotal.cfapp.domain.PoliciesValidator;
@@ -39,7 +39,7 @@ public class PoliciesLoader implements ApplicationListener<StacksRetrievedEvent>
     private static final String ENDPOINT_POLICY_SUFFIX = "-EP.json";
     private static final String QUERY_POLICY_SUFFIX = "-QP.json";
     private static final String HYGIENE_POLICY_SUFFIX = "-HP.json";
-    private static final String MESSAGE_POLICY_SUFFIX = "-MP.json";
+    private static final String RESOURCE_NOTIFICATION_POLICY_SUFFIX = "-RNP.json";
     private static final String LEGACY_POLICY_SUFFIX = "-LP.json";
 
     private final GitClient client;
@@ -73,7 +73,7 @@ public class PoliciesLoader implements ApplicationListener<StacksRetrievedEvent>
             List<EndpointPolicy> endpointPolicies = new ArrayList<>();
             List<QueryPolicy> queryPolicies = new ArrayList<>();
             List<HygienePolicy> hygienePolicies = new ArrayList<>();
-            List<MessagePolicy> messagePolicies = new ArrayList<>();
+            List<ResourceNotificationPolicy> resourceNotificationPolicies = new ArrayList<>();
             List<LegacyPolicy> legacyPolicies = new ArrayList<>();
             String commit = client.orLatestCommit(settings.getCommit(), repo);
             log.info("-- Fetching policies from {} using commit {}", uri, commit);
@@ -110,10 +110,10 @@ public class PoliciesLoader implements ApplicationListener<StacksRetrievedEvent>
                         if (validator.validate(policy)) {
                             hygienePolicies.add(policy);
                         }
-                    } else if (fp.endsWith(MESSAGE_POLICY_SUFFIX)) {
-                        MessagePolicy policy = mapper.readValue(fileContent, MessagePolicy.class);
+                    } else if (fp.endsWith(RESOURCE_NOTIFICATION_POLICY_SUFFIX)) {
+                        ResourceNotificationPolicy policy = mapper.readValue(fileContent, ResourceNotificationPolicy.class);
                         if (validator.validate(policy)) {
-                            messagePolicies.add(policy);
+                            resourceNotificationPolicies.add(policy);
                         }
                     } else if (fp.endsWith(LEGACY_POLICY_SUFFIX)) {
                         LegacyPolicy policy = mapper.readValue(fileContent, LegacyPolicy.class);
@@ -123,7 +123,7 @@ public class PoliciesLoader implements ApplicationListener<StacksRetrievedEvent>
                     } else {
                         log.warn(
                                 "Policy file {} does not adhere to naming convention. File name must end with one of {}.",
-                                fp, List.of(APPLICATION_POLICY_SUFFIX, SERVICE_INSTANCE_POLICY_SUFFIX, QUERY_POLICY_SUFFIX, HYGIENE_POLICY_SUFFIX, MESSAGE_POLICY_SUFFIX, LEGACY_POLICY_SUFFIX));
+                                fp, List.of(APPLICATION_POLICY_SUFFIX, SERVICE_INSTANCE_POLICY_SUFFIX, QUERY_POLICY_SUFFIX, HYGIENE_POLICY_SUFFIX, RESOURCE_NOTIFICATION_POLICY_SUFFIX, LEGACY_POLICY_SUFFIX));
                     }
                 } catch (IOException e1) {
                     log.warn("Could not read {} from {} with commit {} ", fp, uri, commit);
@@ -139,7 +139,7 @@ public class PoliciesLoader implements ApplicationListener<StacksRetrievedEvent>
                     .endpointPolicies(endpointPolicies)
                     .queryPolicies(queryPolicies)
                     .hygienePolicies(hygienePolicies)
-                    .messagePolicies(messagePolicies)
+                    .resourceNotificationPolicies(resourceNotificationPolicies)
                     .legacyPolicies(legacyPolicies)
                     .build()
                     ))
@@ -147,13 +147,13 @@ public class PoliciesLoader implements ApplicationListener<StacksRetrievedEvent>
                     result -> {
                         log.info("PoliciesLoader completed");
                         log.info(
-                                String.format("-- Loaded %d application policies, %d service instance policies, %d endpoint policies, %d query policies, %d hygiene policies, %d message policies, and %d legacy policies.",
+                                String.format("-- Loaded %d application policies, %d service instance policies, %d endpoint policies, %d query policies, %d hygiene policies, %d resource notification policies, and %d legacy policies.",
                                         result.getApplicationPolicies().size(),
                                         result.getServiceInstancePolicies().size(),
                                         result.getEndpointPolicies().size(),
                                         result.getQueryPolicies().size(),
                                         result.getHygienePolicies().size(),
-                                        result.getMessagePolicies().size(),
+                                        result.getResourceNotificationPolicies().size(),
                                         result.getLegacyPolicies().size()
                                         )
                                 );
