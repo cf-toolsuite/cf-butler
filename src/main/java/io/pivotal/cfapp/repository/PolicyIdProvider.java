@@ -9,6 +9,7 @@ import io.pivotal.cfapp.config.GitSettings;
 import io.pivotal.cfapp.domain.ApplicationPolicy;
 import io.pivotal.cfapp.domain.EndpointPolicy;
 import io.pivotal.cfapp.domain.HygienePolicy;
+import io.pivotal.cfapp.domain.ResourceNotificationPolicy;
 import io.pivotal.cfapp.domain.LegacyPolicy;
 import io.pivotal.cfapp.domain.QueryPolicy;
 import io.pivotal.cfapp.domain.ServiceInstancePolicy;
@@ -45,6 +46,10 @@ public class PolicyIdProvider {
 
     public HygienePolicy seedHygienePolicy(HygienePolicy policy) {
         return settings.isVersionManaged() ? HygienePolicy.seedWith(policy, commit): HygienePolicy.seed(policy);
+    }
+
+    public ResourceNotificationPolicy seedResourceNotificationPolicy(ResourceNotificationPolicy policy) {
+        return settings.isVersionManaged() ? ResourceNotificationPolicy.seedWith(policy, commit): ResourceNotificationPolicy.seed(policy);
     }
 
     public LegacyPolicy seedLegacyPolicy(LegacyPolicy policy) {

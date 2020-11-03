@@ -7,10 +7,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.pivotal.cfapp.domain.Metadata;
 import io.pivotal.cfapp.domain.Resource;
+import io.pivotal.cfapp.domain.Resources;
 import io.pivotal.cfapp.service.ResourceMetadataService;
 import reactor.core.publisher.Mono;
 
@@ -26,6 +28,21 @@ public class OnDemandResourceMetadataController {
             ResourceMetadataService service
             ) {
         this.service = service;
+    }
+
+    @GetMapping("/metadata/{type}")
+    public Mono<ResponseEntity<Resources>> getResourcesMetadata(
+    @PathVariable("type") String type,
+    @RequestParam(value = "label_selector", required = false) String labelSelector
+    ) {
+        if (labelSelector != null){
+            return service.getResources(type,labelSelector)
+            .map(r -> ResponseEntity.ok(r))
+            .defaultIfEmpty(ResponseEntity.notFound().build());
+        }
+        return service.getResources(type)
+                        .map(r -> ResponseEntity.ok(r))
+                        .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/metadata/{type}/{id}")

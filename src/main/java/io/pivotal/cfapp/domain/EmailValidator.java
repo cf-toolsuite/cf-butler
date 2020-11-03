@@ -16,12 +16,12 @@ public class EmailValidator {
 
     public static boolean isValid(String email) {
 
-        if (StringUtils.isBlank(email)) {
-            return false;
-        }
+		if (StringUtils.isBlank(email)) {
+			return false;
+		}
 
-        Matcher matcher = EMAIL_PATTERN.matcher(email);
-        return matcher.matches();
-    }
+		Matcher matcher = EMAIL_PATTERN.matcher(email);
+		return matcher.matches();
+	}
 
 }

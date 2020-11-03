@@ -27,6 +27,7 @@ public class PoliciesValidator {
     private static final String QUERY_REJECTED_MESSAGE = "-- {} was rejected because either name or sql was blank or sql did not start with SELECT.";
     private static final String EMAIL_NOTIFICATION_TEMPLATE_REJECTED_MESSAGE = "-- {} was rejected because either the email template did not contain valid email addresses for from/to or the subject/body was blank.";
     private static final String LEGACY_FILTER_REJECTED_MESSAGE = "-- {} was rejected because it must have only one filter. Choose either stacks or service-offerings filter.";
+    private static final String RESOURCE_EMAIL_METADATA_REJECTED_MESSAGE = "-- {} was rejected because either the metadata template did not contain valid resource type or the labels/domain was blank.";
 
 
     private final StacksCache stacksCache;
@@ -145,6 +146,30 @@ public class PoliciesValidator {
             if (!policy.getNotifyeeTemplate().isValid()) {
                 valid = false;
                 log.warn(EMAIL_NOTIFICATION_TEMPLATE_REJECTED_MESSAGE, policy.toString());
+            }
+        }
+        if (valid == false) {
+            log.warn(REQUIRED_PROPERTIES_REJECTED_MESSAGE, policy.toString());
+        }
+        return valid;
+    }
+
+    public boolean validate(ResourceNotificationPolicy policy) {
+        boolean hasId = Optional.ofNullable(policy.getId()).isPresent();
+        boolean hasResourceEmailTemplate = Optional.ofNullable(policy.getResourceEmailTemplate()).isPresent();
+        boolean hasResourceEmailMetadata = Optional.ofNullable(policy.getResourceEmailMetadata()).isPresent();
+
+        boolean valid = !hasId && hasResourceEmailTemplate && hasResourceEmailMetadata;
+        if (hasResourceEmailTemplate) {
+            if (!policy.getResourceEmailTemplate().isValid()) {
+                valid = false;
+                log.warn(EMAIL_NOTIFICATION_TEMPLATE_REJECTED_MESSAGE, policy.toString());
+            }
+        }
+        if (hasResourceEmailMetadata) {
+            if (!policy.getResourceEmailMetadata().isValid()) {
+                valid = false;
+                log.warn(RESOURCE_EMAIL_METADATA_REJECTED_MESSAGE, policy.toString());
             }
         }
         if (valid == false) {
