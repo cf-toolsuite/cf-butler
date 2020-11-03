@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -66,15 +67,15 @@ public abstract class EmailNotifier implements ApplicationListener<EmailNotifica
         String subject = event.getSubject();
         final String body = buildBody(template, event.getBody(), subject, footer);
         log.trace("About to send email using ||> From: {}, To: {}, Subject: {}, Body: {}", from, recipients.toString(), subject, body);
-        List<EmailAttachment> prunedAttachments = event.getAttachments().stream().filter(EmailAttachment::hasContent).collect(Collectors.toList());
-        boolean shouldSend = !prunedAttachments.isEmpty();
+        List<EmailAttachment> prunedAttachments = new ArrayList<EmailAttachment>();;
+        if (event.getAttachments()!=null){
+            prunedAttachments = event.getAttachments().stream().filter(EmailAttachment::hasContent).collect(Collectors.toList());
+        }
+        List<EmailAttachment> attachments = prunedAttachments;
         recipients.forEach(recipient -> {
-            if (shouldSend) {
-                sendMail(from, recipient, subject, body, prunedAttachments);
-            }
+                sendMail(from, recipient, subject, body, attachments);
         });
     }
-
     public abstract void sendMail(String from, String to, String subject, String body, List<EmailAttachment> attachments);
 
 }

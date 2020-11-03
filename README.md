@@ -236,6 +236,18 @@ As mentioned previously the policy file must adhere to a naming convention
 See additional property requirements in Query policies and the aforementioned sample Github repository.
 
 
+#### Resource Notification Policies
+
+Resource Notification policies are useful when you want to generate a report containing resources of a particular type and send that report to email recipients identified by one or more label values ascribed to the those resources.
+
+For example, you might notify primary and/or secondary owners of a collection of a resources.
+
+As mentioned previously the policy file must adhere to a naming convention
+
+* a filename ending with `-RNP.json` encapsulates an individual [ResourceNotificationPolicy](src/main/java/io/pivotal/cfapp/domain/ResourceNotificationPolicy.java)
+
+See additional property requirements in Resource Notification policies and the aforementioned sample Github repository.
+
 #### Endpoint Policies
 
 Endpoint policies are useful when you want to exercise any of the available GET endpoints and have the results sent to one or more designated email recipients.
@@ -1139,7 +1151,7 @@ POST /policies
   "legacy-policies": [
     {
       "notifyee-email-template": {
-        "body": "<h3>TThese applications are deployed to a legacy stack</h3><p>To avoid repeated notification:</p><ul><li>for each application please execute a cf push and update the stack to a modern alternative or cf delete</li></ul><p>depending on whether or not you want to keep the workload running.</p>",
+        "body": "<h3>These applications are deployed to a legacy stack</h3><p>To avoid repeated notification:</p><ul><li>for each application please execute a cf push and update the stack to a modern alternative or cf delete</li></ul><p>depending on whether or not you want to keep the workload running.</p>",
         "from": "admin@pcf.demo.ironleg.me",
         "subject": "Legacy Policy Sample Report"
       },
@@ -1175,7 +1187,32 @@ POST /policies
       "service-offerings": [
         "p-config-server"
       ]
-    }
+    },
+    {
+    "resource-notification-policies": [
+        {
+            "resource-email-template": {
+                "from": "admin@pcf.demo.ironleg.me",
+                "subject": "Platform Updates",
+                "body": "Please take a moment to review the platform updates and share it with your Org users"
+            },
+            "resource-email-metadata": {
+                "resource": "organizations",
+                "labels": [
+                            "PrimaryOwner",
+                            "SecondaryOwner"
+                          ],
+                "email-domain": "pivotal.io"
+            }
+            "resource-whitelist": [
+                "p-config-server"
+            ]
+            "resource-blacklist": [
+                "pivot-sample-org"
+            ]
+        }
+    ]
+}
   ]
 }
 ```

@@ -12,6 +12,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import io.pivotal.cfapp.config.PasSettings;
 import io.pivotal.cfapp.domain.Metadata;
 import io.pivotal.cfapp.domain.Resource;
+import io.pivotal.cfapp.domain.Resources;
 import io.pivotal.cfapp.domain.ResourceType;
 import reactor.core.publisher.Mono;
 
@@ -34,10 +35,51 @@ public class ResourceMetadataService {
         this.tokenProvider = tokenProvider;
         this.settings = settings;
     }
-
     private Mono<String> getOauthToken() {
         tokenProvider.invalidate(connectionContext);
         return tokenProvider.getToken(connectionContext);
+    }
+    public Mono<Resources> getResources(String type) {
+        ResourceType rt = ResourceType.from(type);
+        final String uri =
+            UriComponentsBuilder
+                .newInstance()
+                    .scheme("https")
+                    .host(settings.getApiHost())
+                    .path("/v3/{type}")
+                    .buildAndExpand(rt.getId())
+                    .encode()
+                    .toUriString();
+        return
+            getOauthToken()
+                .flatMap(t -> webClient
+                                .get()
+                                    .uri(uri)
+                                    .header(HttpHeaders.AUTHORIZATION, t)
+                                        .retrieve()
+                                            .bodyToMono(Resources.class));
+    }
+
+
+    public Mono<Resources> getResources(String type, String labelSelector) {
+        ResourceType rt = ResourceType.from(type);
+        final String uri =
+            UriComponentsBuilder
+                .newInstance()
+                    .scheme("https")
+                    .host(settings.getApiHost())
+                    .path("/v3/{type}")
+                    .queryParam("label_selector", labelSelector)
+                    .buildAndExpand(rt.getId())
+                    .toUriString();
+        return
+            getOauthToken()
+                .flatMap(t -> webClient
+                                .get()
+                                    .uri(uri)
+                                    .header(HttpHeaders.AUTHORIZATION, t)
+                                        .retrieve()
+                                            .bodyToMono(Resources.class));
     }
 
     public Mono<Resource> getResource(String type, String id) {
