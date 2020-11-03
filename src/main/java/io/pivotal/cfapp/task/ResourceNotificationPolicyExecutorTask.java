@@ -80,7 +80,7 @@ public class ResourceNotificationPolicyExecutorTask implements PolicyExecutorTas
                 .delayElements(Duration.ofMillis(250))
                 .filter(resource -> isBlacklisted(resourceNotificationPolicy, resource.getName()))
                 .filter(resource -> isWhitelisted(resourceNotificationPolicy, resource.getName()))
-                .map(resource -> new String(resource.getMetadata().getLabels().get(label) + "@" + resourceNotificationPolicy.getResourceEmailMetadata().getDomain()))
+                .map(resource -> new String(resource.getMetadata().getLabels().get(label) + "@" + resourceNotificationPolicy.getResourceEmailMetadata().getEmailDomain()))
                 .collectList();
     }
 

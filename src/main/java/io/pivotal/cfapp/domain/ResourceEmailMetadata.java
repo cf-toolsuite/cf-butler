@@ -18,7 +18,7 @@ import lombok.Getter;
 
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({ "resource", "labels", "domain" })
+@JsonPropertyOrder({ "resource", "labels", "email-domain" })
 @Getter
 public class ResourceEmailMetadata {
 
@@ -29,26 +29,26 @@ public class ResourceEmailMetadata {
     @JsonProperty("labels")
     private List<String> labels = new ArrayList<>();
 
-    @JsonProperty("domain")
-    private String domain;
+    @JsonProperty("email-domain")
+    private String emailDomain;
 
 
     @JsonCreator
     public ResourceEmailMetadata(
             @JsonProperty("resource") String resource,
             @JsonProperty("labels") List<String> labels,
-            @JsonProperty("domain") String domain
+            @JsonProperty("email-domain") String emailDomain
             ) {
         this.resource = resource;
         this.labels = labels;
-        this.domain = domain;
+        this.emailDomain = emailDomain;
     }
 
     @JsonIgnore
     public boolean isValid() {
         return isValidResource(resource)
                 && !Collections.isEmpty(labels)
-                && StringUtils.isNotBlank(domain);
+                && StringUtils.isNotBlank(emailDomain);
     }
     
     private static boolean isValidResource(String resource) {

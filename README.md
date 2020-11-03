@@ -238,8 +238,9 @@ See additional property requirements in Query policies and the aforementioned sa
 
 #### Resource Notification Policies
 
-Resource Notification policies are useful when you wants to send notification for a resource(Org, Apps, Services) to the emailid's configured on the resources as labels. 
-Consider sending email to primary and secondary organization owners where The primary and secondary owner information is captured as PrimaryOwner, SecondaryOwner labels on Organizations.  
+Resource Notification policies are useful when you want to generate a report containing resources of a particular type and send that report to email recipients identified by one or more label values ascribed to the those resources.
+
+For example, you might notify primary and/or secondary owners of a collection of a resources.
 
 As mentioned previously the policy file must adhere to a naming convention
 
@@ -1201,7 +1202,7 @@ POST /policies
                             "PrimaryOwner",
                             "SecondaryOwner"
                           ],
-                "domain": "pivotal.io"
+                "email-domain": "pivotal.io"
             }
             "resource-whitelist": [
                 "p-config-server"
