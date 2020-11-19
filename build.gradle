@@ -1,13 +1,13 @@
 plugins {
-    id 'org.springframework.boot' version '2.4.0-M2'
+    id 'org.springframework.boot' version '2.4.0-M4'
     id 'io.spring.dependency-management' version '1.0.10.RELEASE'
-    id 'com.github.ben-manes.versions' version '0.33.0'
+    id 'com.github.ben-manes.versions' version '0.36.0'
     id 'io.franzbecker.gradle-lombok' version '4.0.0'
 	id 'java'
     id 'jacoco'
     id 'com.google.cloud.tools.jib' version '2.6.0'
     id 'maven-publish'
-    id 'com.github.spotbugs' version '4.5.1'
+    id 'com.github.spotbugs' version '4.6.0'
     id 'info.solidsoft.pitest' version '1.5.2'
 }
 
@@ -110,7 +110,7 @@ dependencies {
     implementation('com.fasterxml.jackson.datatype:jackson-datatype-jsr310')
     implementation('com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.11.3')
     implementation('com.fasterxml.uuid:java-uuid-generator:4.0.1')
-    implementation('io.pivotal.cfenv:java-cfenv-boot:2.2.2.RELEASE')
+    implementation('io.pivotal.cfenv:java-cfenv-boot:2.2.3.RELEASE')
     implementation('org.springframework.credhub:spring-credhub-cloud-connector:2.0.1.RELEASE')
     implementation('org.springframework.boot:spring-boot-starter-actuator')
     implementation('org.springframework.boot:spring-boot-starter-webflux')
@@ -128,15 +128,15 @@ dependencies {
     }
     implementation('org.eclipse.jgit:org.eclipse.jgit:5.9.0.202009080501-r')
     implementation('org.springframework.boot:spring-boot-starter-mail')
-    implementation('com.sendgrid:sendgrid-java:4.6.7') {
+    implementation('com.sendgrid:sendgrid-java:4.6.8') {
         exclude group: 'org.apache.httpcomponents', module: 'httpclient'
     }
     implementation('org.apache.httpcomponents:httpclient:4.5.13')
-    implementation('org.cloudfoundry:cloudfoundry-client-reactor:4.11.0.RELEASE')
-    implementation('org.cloudfoundry:cloudfoundry-operations:4.11.0.RELEASE')
+    implementation('org.cloudfoundry:cloudfoundry-client-reactor:4.12.0.RELEASE')
+    implementation('org.cloudfoundry:cloudfoundry-operations:4.12.0.RELEASE')
     implementation('io.micrometer:micrometer-registry-prometheus')
     testImplementation('io.projectreactor:reactor-test')
-    testImplementation('org.assertj:assertj-core:3.17.2')
+    testImplementation('org.assertj:assertj-core:3.18.1')
     testImplementation('org.junit.jupiter:junit-jupiter-api')
     testImplementation('org.junit.jupiter:junit-jupiter-params')
     testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine')
