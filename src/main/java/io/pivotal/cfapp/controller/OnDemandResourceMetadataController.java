@@ -33,10 +33,12 @@ public class OnDemandResourceMetadataController {
     @GetMapping("/metadata/{type}")
     public Mono<ResponseEntity<Resources>> getResourcesMetadata(
     @PathVariable("type") String type,
-    @RequestParam(value = "label_selector", required = false) String labelSelector
+    @RequestParam(value = "label_selector", required = false) String labelSelector,
+    @RequestParam(value = "page", required = false) Integer page,
+    @RequestParam(value = "per_page", required = false) Integer perPage
     ) {
         if (labelSelector != null){
-            return service.getResources(type,labelSelector)
+            return service.getResources(type,labelSelector,page,perPage)
             .map(r -> ResponseEntity.ok(r))
             .defaultIfEmpty(ResponseEntity.notFound().build());
         }

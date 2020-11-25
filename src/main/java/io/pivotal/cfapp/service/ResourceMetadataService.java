@@ -61,7 +61,7 @@ public class ResourceMetadataService {
     }
 
 
-    public Mono<Resources> getResources(String type, String labelSelector) {
+    public Mono<Resources> getResources(String type, String labelSelector, Integer page, Integer perPage) {
         ResourceType rt = ResourceType.from(type);
         final String uri =
             UriComponentsBuilder
@@ -70,7 +70,9 @@ public class ResourceMetadataService {
                     .host(settings.getApiHost())
                     .path("/v3/{type}")
                     .queryParam("label_selector", labelSelector)
-                    .buildAndExpand(rt.getId())
+                    .queryParam("page", "{page}")
+                    .queryParam("per_page", "{perPage}")
+                    .buildAndExpand(rt.getId(),page ==null ? 1:page ,perPage == null ? 50:perPage)
                     .toUriString();
         return
             getOauthToken()
