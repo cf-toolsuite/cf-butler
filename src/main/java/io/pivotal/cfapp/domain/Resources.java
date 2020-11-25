@@ -20,9 +20,14 @@ public class Resources {
     @JsonProperty("resources")
     private List<Resource> resources = new ArrayList<>();
 
+    @JsonProperty("pagination")
+    private Pagination pagination;
 
     @JsonCreator
-    public Resources(@JsonProperty("resources") List<Resource> resources) {
+    public Resources(@JsonProperty("resources") List<Resource> resources,
+    @JsonProperty("pagination") Pagination pagination
+    ) {
         this.resources = resources;
+        this.pagination = pagination;
     }
 }
