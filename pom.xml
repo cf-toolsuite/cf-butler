@@ -47,7 +47,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>2.4.0-M4</version>
+    <version>2.4.1</version>
     <relativePath/>
     <!-- lookup parent from repository -->
   </parent>
@@ -98,7 +98,7 @@
     <dependency>
       <groupId>com.fasterxml.jackson.dataformat</groupId>
       <artifactId>jackson-dataformat-csv</artifactId>
-      <version>2.11.3</version>
+      <version>2.12.0</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.uuid</groupId>
@@ -108,7 +108,7 @@
     <dependency>
       <groupId>io.pivotal.cfenv</groupId>
       <artifactId>java-cfenv-boot</artifactId>
-      <version>2.2.3.RELEASE</version>
+      <version>2.2.4.RELEASE</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.credhub</groupId>
@@ -149,7 +149,7 @@
     <dependency>
       <groupId>org.locationtech.jts</groupId>
       <artifactId>jts-core</artifactId>
-      <version>1.17.1</version>
+      <version>1.18.0</version>
     </dependency>
     <dependency>
       <groupId>io.r2dbc</groupId>
@@ -167,7 +167,7 @@
     <dependency>
       <groupId>org.eclipse.jgit</groupId>
       <artifactId>org.eclipse.jgit</artifactId>
-      <version>5.9.0.202009080501-r</version>
+      <version>5.10.0.202012080955-r</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -176,7 +176,7 @@
     <dependency>
       <groupId>com.sendgrid</groupId>
       <artifactId>sendgrid-java</artifactId>
-      <version>4.6.8</version>
+      <version>4.7.1</version>
       <exclusions>
         <exclusion>
           <artifactId>spring-boot-starter-logging</artifactId>
@@ -251,14 +251,14 @@
       <dependency>
         <groupId>io.pivotal.spring.cloud</groupId>
         <artifactId>spring-cloud-services-dependencies</artifactId>
-        <version>3.1.5.RELEASE</version>
+        <version>3.1.6.RELEASE</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
       <dependency>
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-dependencies</artifactId>
-        <version>2020.0.0-M3</version>
+        <version>2020.0.0</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
