@@ -529,7 +529,7 @@ GET /products/stemcell/assignments
 GET /products/stemcell/associations
 ```
 > Lists all stemcells associated with installed tiles (includes staged and available stemcell versions).
-> Only available from Operations Manager 2.6.0 onward.
+> Only available from Operations Manager 2.7.0 onward.
 
 ```
 GET /products/om/info
@@ -560,7 +560,7 @@ Sample output
         },
         {
             "currently-installed-release-date": "2019-06-19",
-            "currently-installed-version": "2.6.0",
+            "currently-installed-version": "2.7.0",
             "end-of-life": false,
             "end-of-support-date": "2020-03-31",
             "latest-available-release-date": "2019-07-15",
