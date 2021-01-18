@@ -132,7 +132,7 @@ dependencies {
         exclude group: 'org.apache.httpcomponents', module: 'httpclient'
     }
     implementation('org.apache.httpcomponents:httpclient:4.5.13')
-    implementation('org.cloudfoundry:cloudfoundry-client-reactor:5.0.0.RELEASE')
+    implementation('org.cloudfoundry:cloudfoundry-client-reactor:5.1.0.RELEASE')
     implementation('org.cloudfoundry:cloudfoundry-operations:5.0.0.RELEASE')
     implementation('io.micrometer:micrometer-registry-prometheus')
     testImplementation('io.projectreactor:reactor-test')
