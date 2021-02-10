@@ -110,7 +110,7 @@ dependencies {
     implementation('com.fasterxml.jackson.datatype:jackson-datatype-jsr310')
     implementation('com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.12.1')
     implementation('com.fasterxml.uuid:java-uuid-generator:4.0.1')
-    implementation('io.pivotal.cfenv:java-cfenv-boot:2.2.4.RELEASE')
+    implementation('io.pivotal.cfenv:java-cfenv-boot:2.2.5.RELEASE')
     implementation('org.springframework.credhub:spring-credhub-cloud-connector:2.0.1.RELEASE')
     implementation('org.springframework.boot:spring-boot-starter-actuator')
     implementation('org.springframework.boot:spring-boot-starter-webflux')
@@ -132,11 +132,11 @@ dependencies {
         exclude group: 'org.apache.httpcomponents', module: 'httpclient'
     }
     implementation('org.apache.httpcomponents:httpclient:4.5.13')
-    implementation('org.cloudfoundry:cloudfoundry-client-reactor:5.0.0.RELEASE')
-    implementation('org.cloudfoundry:cloudfoundry-operations:5.0.0.RELEASE')
+    implementation('org.cloudfoundry:cloudfoundry-client-reactor:5.1.0.RELEASE')
+    implementation('org.cloudfoundry:cloudfoundry-operations:5.1.0.RELEASE')
     implementation('io.micrometer:micrometer-registry-prometheus')
     testImplementation('io.projectreactor:reactor-test')
-    testImplementation('org.assertj:assertj-core:3.18.1')
+    testImplementation('org.assertj:assertj-core:3.19.0')
     testImplementation('org.junit.jupiter:junit-jupiter-api')
     testImplementation('org.junit.jupiter:junit-jupiter-params')
     testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine')
