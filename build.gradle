@@ -12,7 +12,7 @@ plugins {
 }
 
 spotbugs {
-    toolVersion = '4.0.3'
+    toolVersion = '4.2.1'
     ignoreFailures = true
     effort = 'max'
     reportLevel = 'low'
@@ -45,7 +45,7 @@ repositories {
 
 ext {
     set('springCloudServicesVersion', '3.1.5.RELEASE')
-	set('springCloudVersion', "2020.0.0")
+	set('springCloudVersion', "2020.0.1")
     // @see https://github.com/spring-projects/spring-boot/blob/master/spring-boot-project/spring-boot-dependencies/pom.xml
 }
 
