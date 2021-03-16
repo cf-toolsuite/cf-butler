@@ -1,14 +1,14 @@
 plugins {
-    id 'org.springframework.boot' version '2.4.2'
+    id 'org.springframework.boot' version '2.4.3'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
-    id 'com.github.ben-manes.versions' version '0.36.0'
+    id 'com.github.ben-manes.versions' version '0.38.0'
     id 'io.franzbecker.gradle-lombok' version '4.0.0'
 	id 'java'
     id 'jacoco'
-    id 'com.google.cloud.tools.jib' version '2.7.1'
+    id 'com.google.cloud.tools.jib' version '2.8.0'
     id 'maven-publish'
-    id 'com.github.spotbugs' version '4.6.0'
-    id 'info.solidsoft.pitest' version '1.5.2'
+    id 'com.github.spotbugs' version '4.7.0'
+    id 'info.solidsoft.pitest' version '1.6.0'
 }
 
 spotbugs {
@@ -108,16 +108,16 @@ dependencies {
     implementation('org.springframework.boot:spring-boot-configuration-processor')
     implementation('org.apache.commons:commons-lang3')
     implementation('com.fasterxml.jackson.datatype:jackson-datatype-jsr310')
-    implementation('com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.12.1')
+    implementation('com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.12.2')
     implementation('com.fasterxml.uuid:java-uuid-generator:4.0.1')
-    implementation('io.pivotal.cfenv:java-cfenv-boot:2.2.5.RELEASE')
+    implementation('io.pivotal.cfenv:java-cfenv-boot:2.3.0')
     implementation('org.springframework.credhub:spring-credhub-cloud-connector:2.0.1.RELEASE')
     implementation('org.springframework.boot:spring-boot-starter-actuator')
     implementation('org.springframework.boot:spring-boot-starter-webflux')
     implementation('org.springframework.boot:spring-boot-starter-log4j2')
     implementation('com.lmax:disruptor:3.4.2')
     implementation('org.springframework.boot:spring-boot-starter-data-r2dbc')
-    implementation('org.locationtech.jts:jts-core:1.18.0')
+    implementation('org.locationtech.jts:jts-core:1.18.1')
     implementation('io.r2dbc:r2dbc-spi')
     runtime('io.r2dbc:r2dbc-pool')
     implementation('io.r2dbc:r2dbc-h2')
@@ -126,9 +126,9 @@ dependencies {
     } else {
         runtime('io.r2dbc:r2dbc-postgresql')
     }
-    implementation('org.eclipse.jgit:org.eclipse.jgit:5.10.0.202012080955-r')
+    implementation('org.eclipse.jgit:org.eclipse.jgit:5.11.0.202103091610-r')
     implementation('org.springframework.boot:spring-boot-starter-mail')
-    implementation('com.sendgrid:sendgrid-java:4.7.1') {
+    implementation('com.sendgrid:sendgrid-java:4.7.2') {
         exclude group: 'org.apache.httpcomponents', module: 'httpclient'
     }
     implementation('org.apache.httpcomponents:httpclient:4.5.13')
