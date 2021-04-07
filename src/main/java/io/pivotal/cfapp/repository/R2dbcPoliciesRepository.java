@@ -143,12 +143,12 @@ public class R2dbcPoliciesRepository {
                 .thenMany(
                         Flux
                         .from(dbClient.select(ResourceNotificationPolicy.class).all())
-                        .map(rnp -> resourceNotificationPolicies.add(rnp)))                
+                        .map(rnp -> resourceNotificationPolicies.add(rnp)))
                 .thenMany(
                         Flux
                         .from(dbClient.select(LegacyPolicy.class).all())
                         .map(lp -> legacyPolicies.add(lp)))
-                .then(Mono.just(Policies.builder().applicationPolicies(applicationPolicies).serviceInstancePolicies(serviceInstancePolicies).queryPolicies(queryPolicies).hygienePolicies(hygienePolicies).resourceNotificationPolicies(resourceNotificationPolicies).legacyPolicies(legacyPolicies).build()))
+                .then(Mono.just(Policies.builder().applicationPolicies(applicationPolicies).endpointPolicies(endpointPolicies).serviceInstancePolicies(serviceInstancePolicies).queryPolicies(queryPolicies).hygienePolicies(hygienePolicies).resourceNotificationPolicies(resourceNotificationPolicies).legacyPolicies(legacyPolicies).build()))
                 .flatMap(p -> p.isEmpty() ? Mono.empty(): Mono.just(p));
     }
 
@@ -339,7 +339,7 @@ public class R2dbcPoliciesRepository {
         List<HygienePolicy> hygienePolicies =
                 entity.getHygienePolicies().stream()
                 .map(p -> idProvider.seedHygienePolicy(p)).collect(Collectors.toList());
-        
+
         List<ResourceNotificationPolicy> resourceNotificationPolicies =
                 entity.getResourceNotificationPolicies().stream()
                 .map(p -> idProvider.seedResourceNotificationPolicy(p)).collect(Collectors.toList());

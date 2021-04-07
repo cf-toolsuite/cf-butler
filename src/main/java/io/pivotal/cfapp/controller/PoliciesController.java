@@ -41,6 +41,13 @@ public class PoliciesController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+    @GetMapping(value = { "/policies/endpoint/{id}" }, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<Policies>> obtainEndpointPolicy(@PathVariable String id) {
+        return policiesService.findEndpointPolicyById(id)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
     @GetMapping(value = { "/policies/hygiene/{id}" }, produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<Policies>> obtainHygienePolicy(@PathVariable String id) {
         return policiesService.findHygienePolicyById(id)
