@@ -53,6 +53,7 @@ This is where `cf-butler` has your back.
       * [Snapshot](#snapshot)
       * [Accounting](#accounting)
       * [Policies](#policies)
+      * [Collection and Execution](#collection-and-execution)
   * [Credits](#credits)
 
 ## What does it do?
@@ -1295,6 +1296,20 @@ GET /policies/report?start={startDate}&end={endDate}
 ```
 > Produces `text/plain` historical output detailing what policies had an effect on applications and service instances constrained by date range.  `{startDate}` must be before `{endDate}`.  Both parameters are [LocalDate](https://docs.oracle.com/javase/8/docs/api/java/time/LocalDate.html).  (Does not track execution of query policies).
 
+
+### Collection and Execution
+
+These endpoints are exposed only when `spring.profiles.active` includes the `on-demand` profile.  These are expensive operations meant to be triggered on a cron schedule rather than manually invoked.
+
+```
+POST /collect
+```
+> On-demand trigger for collecting snapshot data
+
+```
+POST /policies/execute
+```
+> On-demand trigger for executing all registered policies.  You'll absolutely want to trigger the `/collect` endpoint and wait for it to complete before triggering this endpoint.
 
 ## Credits
 
