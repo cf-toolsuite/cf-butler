@@ -86,6 +86,8 @@ notification:
 spring:
   codec:
     max-in-memory-size: 512000000
+  main:
+    allow-bean-definition-overriding: true
   r2dbc:
     url: r2dbc:pool:h2:mem:///cf-butler?options=DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false
     name: cf-butler

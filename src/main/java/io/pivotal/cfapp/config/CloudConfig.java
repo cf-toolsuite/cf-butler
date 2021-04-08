@@ -4,15 +4,15 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.r2dbc.R2dbcProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.core.env.Environment;
+import org.springframework.data.r2dbc.config.AbstractR2dbcConfiguration;
 import org.springframework.util.StringUtils;
 
+import io.pivotal.cfenv.core.CfEnv;
+import io.pivotal.cfenv.core.CfService;
 import io.r2dbc.spi.ConnectionFactories;
 import io.r2dbc.spi.ConnectionFactory;
 import io.r2dbc.spi.ConnectionFactoryOptions;
@@ -22,17 +22,13 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Profile("cloud")
 @Configuration(proxyBeanMethods = false)
-class CloudConfig {
+class CloudConfig extends AbstractR2dbcConfiguration {
 
     private static final List<String> SUPPORTED_SCHEMES = Arrays.asList(new String[] { "mysql", "postgresql"});
-    private static final String VCAP_SERVICE_VARIABLE = "vcap.services.cf-butler-backend.credentials.uri";
-
-    @Autowired
-    private Environment env;
+    private static final String VCAP_SERVICE = "cf-butler-backend";
 
     @Bean
-    @ConditionalOnProperty(VCAP_SERVICE_VARIABLE)
-    ConnectionFactory connectionFactory() {
+    public ConnectionFactory connectionFactory() {
         R2dbcProperties properties = r2dbcProperties();
         ConnectionFactoryOptions.Builder builder = ConnectionFactoryOptions
                 .parse(properties.getUrl()).mutate();
@@ -58,7 +54,12 @@ class CloudConfig {
 
     // support for external R2DBC source is limited to providers that support URI scheme
     private R2dbcProperties r2dbcProperties() {
-        URI uri = env.getRequiredProperty(VCAP_SERVICE_VARIABLE, URI.class);
+    	CfEnv cfenv = new CfEnv();
+    	CfService service = cfenv.findServiceByName(VCAP_SERVICE);
+    	if (service == null) {
+    		throw new IllegalStateException(String.format("No service instance was found with name [ %s ]", VCAP_SERVICE));
+    	}
+    	URI uri = service.getCredentials().getUriInfo().getUri();
         String scheme = uri.getScheme();
         log.info("Attempting to connnect to a {} database instance.", scheme);
         if (scheme.startsWith("postgres")) {
