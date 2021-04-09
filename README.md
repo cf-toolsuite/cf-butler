@@ -1217,7 +1217,7 @@ POST /policies
   ]
 }
 ```
-> Establish policies to delete and scale applications, delete service instances, and query for anything from schema. This endpoint is only available when `cf.policies.git.uri` is set to an empty string.
+> Establish policies to delete and scale applications, delete service instances, and query for anything from schema. This endpoint is only available when `cf.policies.git.uri` is not set.
 
 > Consult the [java.time.Duration](https://docs.oracle.com/javase/8/docs/api/java/time/Duration.html#parse-java.lang.CharSequence-) javadoc for other examples of what you can specify when setting values for `from-duration` properties above.
 
@@ -1259,27 +1259,27 @@ GET /policies/legacy/{id}
 ```
 DELETE /policies/application/{id}
 ```
-> Delete an application policy by its id. This endpoint is only available when `cf.policies.git.uri` is set to an empty string.
+> Delete an application policy by its id. This endpoint is only available when `cf.policies.git.uri` is not set.
 
 ```
 DELETE /policies/serviceInstance/{id}
 ```
-> Delete a service instance policy by its id. This endpoint is only available when `cf.policies.git.uri` is set to an empty string.
+> Delete a service instance policy by its id. This endpoint is only available when `cf.policies.git.uri` is not set.
 
 ```
 DELETE /policies/query/{id}
 ```
-> Delete a query policy by its id. This endpoint is only available when `cf.policies.git.uri` is set to an empty string.
+> Delete a query policy by its id. This endpoint is only available when `cf.policies.git.uri` is not set.
 
 ```
 DELETE /policies/hygiene/{id}
 ```
-> Delete a hygiene policy by its id. This endpoint is only available when `cf.policies.git.uri` is set to an empty string.
+> Delete a hygiene policy by its id. This endpoint is only available when `cf.policies.git.uri` is not set.
 
 ```
 DELETE /policies/legacy/{id}
 ```
-> Delete a legacy policy by its id. This endpoint is only available when `cf.policies.git.uri` is set to an empty string.
+> Delete a legacy policy by its id. This endpoint is only available when `cf.policies.git.uri` is not set.
 
 ```
 POST /policies/refresh

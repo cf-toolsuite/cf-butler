@@ -1,7 +1,7 @@
 package io.pivotal.cfapp.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,10 +11,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.pivotal.cfapp.domain.Policies;
 import io.pivotal.cfapp.service.PoliciesService;
+import io.pivotal.cfapp.util.DbmsOnlyCondition;
+
 import reactor.core.publisher.Mono;
 
 @RestController
-@ConditionalOnProperty(prefix = "cf.policies.git", name = "uri")
+@Conditional(DbmsOnlyCondition.class)
 public class DbmsOnlyPoliciesController {
 
     private final PoliciesService policiesService;
