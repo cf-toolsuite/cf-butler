@@ -25,7 +25,7 @@ import lombok.Getter;
 @JsonPropertyOrder({ "id", "stacks", "service-offerings", "operator-email-template", "notifyee-email-template", "organization-whitelist" })
 @Getter
 @Table("legacy_policy")
-public class LegacyPolicy {
+public class LegacyPolicy implements HasOrganizationWhiteList {
 
     public static LegacyPolicy seed(LegacyPolicy policy) {
         return LegacyPolicy

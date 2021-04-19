@@ -1,5 +1,6 @@
 package io.pivotal.cfapp.config;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -16,7 +17,8 @@ import lombok.Data;
 public class PasSettings {
 
     public static final String SYSTEM_ORG = "system";
-    private static final Set<String> DEFAULT_BLACKLIST = Set.of(SYSTEM_ORG);
+    private static final Set<String> DEFAULT_ORG_BLACKLIST = Set.of(SYSTEM_ORG);
+    private static final Set<String> DEFAULT_SPACE_BLACKLIST = Collections.emptySet();
     private static final String[] KNOWN_BUILDPACKS = "apt,binary,clojure,dotnet,elixir,emberjs,erlang,go,haskell,hwc,java,jboss,jetty,liberty,markdown,mendix,meta,meteor,nginx,nodejs,php,pyspark,python,r_buildpack,ruby,rust,staticfile,swift,tc,tomcat,tomee,virgo,weblogic".split(",");
     private static final Set<String> DEFAULT_BUILDPACKS = Set.of(KNOWN_BUILDPACKS);
     // user accounts are typically email addresses, so we'll define a regex to match on recognizable email pattern
@@ -34,7 +36,8 @@ public class PasSettings {
     // this is the value of RefreshToken within ~/.cf/config.json after one authenticates w/ cf login -a {api_endpoint} -sso
     private String refreshToken;
     private String accountRegex;
-    private Set<String> organizationBlackList = DEFAULT_BLACKLIST;
+    private Set<String> organizationBlackList = DEFAULT_ORG_BLACKLIST;
+    private Set<String> spaceBlackList = DEFAULT_SPACE_BLACKLIST;
 
 
     public String getAccountRegex() {
@@ -68,8 +71,17 @@ public class PasSettings {
     public Set<String> getOrganizationBlackList() {
         while (organizationBlackList.remove(""));
         Set<String> nonEmptyBlacklist = CollectionUtils.isEmpty(organizationBlackList) ?
-                DEFAULT_BLACKLIST: organizationBlackList;
-        return merge(nonEmptyBlacklist, DEFAULT_BLACKLIST);
+                DEFAULT_ORG_BLACKLIST: organizationBlackList;
+        return merge(nonEmptyBlacklist, DEFAULT_ORG_BLACKLIST);
+    }
+
+    public Set<String> getSpaceBlackList() {
+        while(spaceBlackList.remove(""));
+        return CollectionUtils.isEmpty(spaceBlackList) ? DEFAULT_SPACE_BLACKLIST: spaceBlackList;
+    }
+
+    public boolean hasSpaceBlackList() {
+        return !CollectionUtils.isEmpty(spaceBlackList);
     }
 
     public String getUsageDomain() {

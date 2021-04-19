@@ -1,18 +1,15 @@
 package io.pivotal.cfapp.service;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
-import io.pivotal.cfapp.config.PasSettings;
 import io.pivotal.cfapp.domain.AppDetail;
 import io.pivotal.cfapp.domain.AppRelationship;
 import io.pivotal.cfapp.domain.LegacyPolicy;
 import io.pivotal.cfapp.domain.WorkloadsFilter;
+import io.pivotal.cfapp.util.PolicyFilter;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -20,23 +17,23 @@ import reactor.core.publisher.Mono;
 public class LegacyWorkloadsService {
 
     private final SnapshotService snapshotService;
-    private final PasSettings settings;
+    private final PolicyFilter filter;
 
     @Autowired
     public LegacyWorkloadsService(
             SnapshotService snapshotService,
-            PasSettings settings
+            PolicyFilter filter
             ) {
         this.snapshotService = snapshotService;
-        this.settings = settings;
+        this.filter = filter;
     }
 
     public Mono<List<AppRelationship>> getLegacyApplicationRelationships(LegacyPolicy policy) {
         return snapshotService
                 .assembleSnapshotDetail()
                 .flatMapMany(sd -> Flux.fromIterable(sd.getApplicationRelationships()))
-                .filter(app -> isWhitelisted(policy, app.getOrganization()))
-                .filter(app -> isBlacklisted(app.getOrganization()))
+                .filter(app -> filter.isWhitelisted(policy, app.getOrganization()))
+                .filter(app -> filter.isBlacklisted(app.getOrganization(), app.getSpace()))
                 .filter(app -> app.getServiceOffering()!=null ? policy.getServiceOfferings().contains(app.getServiceOffering()):false)
                 .collectList();
     }
@@ -49,28 +46,14 @@ public class LegacyWorkloadsService {
         return snapshotService
                 .assembleSnapshotDetail()
                 .flatMapMany(sd -> Flux.fromIterable(sd.getApplications()))
-                .filter(app -> isWhitelisted(policy, app.getOrganization()))
-                .filter(app -> isBlacklisted(app.getOrganization()))
+                .filter(app -> filter.isWhitelisted(policy, app.getOrganization()))
+                .filter(app -> filter.isBlacklisted(app.getOrganization(), app.getSpace()))
                 .filter(app -> policy.getStacks().contains(app.getStack()))
                 .collectList();
     }
 
     public Mono<List<AppDetail>> getLegacyApplications(WorkloadsFilter workloadsFilter) {
         return getLegacyApplications(LegacyPolicy.builder().stacks(workloadsFilter.getStacks()).build());
-    }
-
-    private boolean isBlacklisted(String organization) {
-        return !settings.getOrganizationBlackList().contains(organization);
-    }
-
-    private boolean isWhitelisted(LegacyPolicy policy, String organization) {
-        Set<String> prunedSet = new HashSet<>(policy.getOrganizationWhiteList());
-        while (prunedSet.remove(""));
-        Set<String> whitelist =
-                CollectionUtils.isEmpty(prunedSet) ?
-                        prunedSet: policy.getOrganizationWhiteList();
-        return
-                whitelist.isEmpty() ? true: policy.getOrganizationWhiteList().contains(organization);
-    }
+    }   
 
 }

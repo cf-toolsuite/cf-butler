@@ -351,6 +351,32 @@ Within each [ApplicationPolicy](https://github.com/pacphi/cf-butler/blob/master/
 
 > If the organization whitelist is not specified in a policy then that policy's execution applies to all organizations on the foundation (except for those in the organization blacklist).
 
+
+### Filtering spaces
+
+> Note: if you activate a space blacklist it will take precedence over an organization blacklist!
+
+#### Blacklist
+
+Set `cf.spaceBlackList`.
+
+Edit `application.yml` and add
+
+```
+cf:
+  spaceBlackList:
+    - "orgA:spaceA"
+    - "orgB:spaceB"
+```
+
+or
+
+Add an entry in your `config/secrets.json` like
+
+```
+  "CF_SPACE-BLACK-LIST": [ "orgA:spaceA", "orgB:spaceB" ]
+```
+
 ### Integration w/ Operations Manager
 
 You must add the following configuration properties to `application-{env}.yml` if you want to enable integration with an operations manager instance

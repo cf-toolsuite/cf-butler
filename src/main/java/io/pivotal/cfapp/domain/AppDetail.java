@@ -56,15 +56,18 @@ public class AppDetail {
                 .buildpackLatestVersion(detail.getBuildpackLatestVersion())
                 .buildpackLatestUrl(detail.getBuildpackLatestUrl());
     }
+
     public static String headers() {
         return String.join(",", "organization", "space", "application id", "application name", "buildpack", "buildpack version", "image",
                 "stack", "running instances", "total instances", "memory used (in gb)", "disk used (in gb)", "urls", "last pushed", "last event",
                 "last event actor", "last event time", "requested state",
                 "latest buildpack release type", "latest buildpack release date", "latest buildpack version", "latest buildpack Url" );
     }
+
     private static String wrap(String value) {
         return value != null ? StringUtils.wrap(value, '"') : StringUtils.wrap("", '"');
     }
+
     @Id
     @JsonIgnore
     private Long pk;
@@ -80,19 +83,18 @@ public class AppDetail {
     private Integer totalInstances;
     private Long memoryUsed;
     private Long diskUsed;
+    
     @Default
     private List<String> urls = new ArrayList<>();
+    
     private LocalDateTime lastPushed;
     private String lastEvent;
     private String lastEventActor;
     private LocalDateTime lastEventTime;
     private String requestedState;
     private String buildpackReleaseType;
-
     private LocalDateTime buildpackReleaseDate;
-
     private String buildpackLatestVersion;
-
     private String buildpackLatestUrl;
 
     public String toCsv() {
