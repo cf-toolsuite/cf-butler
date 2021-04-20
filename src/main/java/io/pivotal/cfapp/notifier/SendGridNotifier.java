@@ -25,7 +25,9 @@ public class SendGridNotifier extends EmailNotifier {
     private static void addAttachments(Mail mail, List<EmailAttachment> attachments) {
         attachments.forEach(ea -> {
             Attachments payload = new Attachments();
-            payload.setContent(new String(Base64.getEncoder().encode(ea.getHeadedContent().getBytes())));
+            String content = new String(Base64.getEncoder().encode(ea.getHeadedContent().getBytes()));
+            log.trace("Content of attachment {}", content);
+            payload.setContent(content);
             payload.setType(ea.getMimeType());
             payload.setFilename(ea.getFilename() + ea.getExtension());
             payload.setDisposition("attachment");
@@ -53,9 +55,9 @@ public class SendGridNotifier extends EmailNotifier {
             request.setMethod(Method.POST);
             request.setEndpoint("mail/send");
             request.setBody(mail.build());
+            log.info("About to send email to {} with subject: {}!", to.getEmail(), subject);
             Response response = sendGrid.api(request);
-            log.info("Email sent to {} with subject: {}!", to, subject);
-            log.info(HttpStatus.valueOf(response.getStatusCode()).getReasonPhrase());
+            log.info(String.format("\n\tStatus: %s\n\t%s", HttpStatus.valueOf(response.getStatusCode()).getReasonPhrase(), response.getBody()));
         } catch (IOException ioe) {
             log.warn("Could not send email!", ioe);
         }
