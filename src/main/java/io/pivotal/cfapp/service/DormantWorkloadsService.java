@@ -1,19 +1,16 @@
 package io.pivotal.cfapp.service;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
-import io.pivotal.cfapp.config.PasSettings;
 import io.pivotal.cfapp.domain.AppDetail;
 import io.pivotal.cfapp.domain.AppRelationship;
 import io.pivotal.cfapp.domain.HygienePolicy;
 import io.pivotal.cfapp.domain.ServiceInstanceDetail;
+import io.pivotal.cfapp.util.PolicyFilter;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -24,7 +21,7 @@ public class DormantWorkloadsService {
     private final SnapshotService snapshotService;
     private final AppDetailService appDetailService;
     private final AppRelationshipService relationshipService;
-    private final PasSettings settings;
+    private final PolicyFilter filter;
 
     @Autowired
     public DormantWorkloadsService(
@@ -32,13 +29,13 @@ public class DormantWorkloadsService {
             SnapshotService snapshotService,
             AppDetailService appDetailService,
             AppRelationshipService relationshipService,
-            PasSettings settings
+            PolicyFilter filter
             ) {
         this.eventsService = eventsService;
         this.snapshotService = snapshotService;
         this.appDetailService = appDetailService;
         this.relationshipService = relationshipService;
-        this.settings = settings;
+        this.filter = filter;
     }
 
     private Mono<Boolean> areAnyRelationsDormant(ServiceInstanceDetail sid, Integer daysSinceLastUpdate) {
@@ -60,8 +57,8 @@ public class DormantWorkloadsService {
         return snapshotService
                 .assembleSnapshotDetail()
                 .flatMapMany(sd -> Flux.fromIterable(sd.getApplications()))
-                .filter(app -> isWhitelisted(policy, app.getOrganization()))
-                .filter(app -> isBlacklisted(app.getOrganization()))
+                .filter(app -> filter.isWhitelisted(policy, app.getOrganization()))
+                .filter(app -> filter.isBlacklisted(app.getOrganization(), app.getSpace()))
                 .filter(app -> app.getRequestedState().equalsIgnoreCase("started"))
                 // @see https://github.com/reactor/reactor-core/issues/498
                 .filterWhen(app -> eventsService.isDormantApplication(app, policy.getDaysSinceLastUpdate()))
@@ -76,8 +73,8 @@ public class DormantWorkloadsService {
         return snapshotService
                 .assembleSnapshotDetail()
                 .flatMapMany(sd -> Flux.fromIterable(sd.getServiceInstances()))
-                .filter(sid -> isWhitelisted(policy, sid.getOrganization()))
-                .filter(sid -> isBlacklisted(sid.getOrganization()))
+                .filter(sid -> filter.isWhitelisted(policy, sid.getOrganization()))
+                .filter(sid -> filter.isBlacklisted(sid.getOrganization(), sid.getSpace()))
                 // @see https://github.com/reactor/reactor-core/issues/498
                 .filterWhen(sid -> eventsService.isDormantServiceInstance(sid, policy.getDaysSinceLastUpdate()))
                 // we should also check that if service instance is bound to one or more apps,
@@ -90,17 +87,4 @@ public class DormantWorkloadsService {
         return getDormantServiceInstances(HygienePolicy.builder().daysSinceLastUpdate(daysSinceLastUpdate).build());
     }
 
-    private boolean isBlacklisted(String organization) {
-        return !settings.getOrganizationBlackList().contains(organization);
-    }
-
-    private boolean isWhitelisted(HygienePolicy policy, String organization) {
-        Set<String> prunedSet = new HashSet<>(policy.getOrganizationWhiteList());
-        while (prunedSet.remove(""));
-        Set<String> whitelist =
-                CollectionUtils.isEmpty(prunedSet) ?
-                        prunedSet: policy.getOrganizationWhiteList();
-        return
-                whitelist.isEmpty() ? true: policy.getOrganizationWhiteList().contains(organization);
-    }
 }

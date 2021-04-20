@@ -1,8 +1,6 @@
 package io.pivotal.cfapp.task;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
 
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.operations.applications.DeleteApplicationRequest;
@@ -11,18 +9,16 @@ import org.cloudfoundry.operations.services.UnbindServiceInstanceRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
-import io.pivotal.cfapp.config.PasSettings;
 import io.pivotal.cfapp.domain.AppDetail;
 import io.pivotal.cfapp.domain.AppRelationship;
 import io.pivotal.cfapp.domain.ApplicationOperation;
-import io.pivotal.cfapp.domain.ApplicationPolicy;
 import io.pivotal.cfapp.domain.HistoricalRecord;
 import io.pivotal.cfapp.service.AppDetailService;
 import io.pivotal.cfapp.service.AppRelationshipService;
 import io.pivotal.cfapp.service.HistoricalRecordService;
 import io.pivotal.cfapp.service.PoliciesService;
+import io.pivotal.cfapp.util.PolicyFilter;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -31,7 +27,7 @@ import reactor.core.publisher.Mono;
 @Component
 public class DeleteAppPolicyExecutorTask implements PolicyExecutorTask {
 
-    private PasSettings settings;
+    private PolicyFilter filter;
     private DefaultCloudFoundryOperations opsClient;
     private AppDetailService appInfoService;
     private AppRelationshipService appRelationshipService;
@@ -40,14 +36,14 @@ public class DeleteAppPolicyExecutorTask implements PolicyExecutorTask {
 
     @Autowired
     public DeleteAppPolicyExecutorTask(
-            PasSettings settings,
+            PolicyFilter filter,
             DefaultCloudFoundryOperations opsClient,
             AppDetailService appInfoService,
             AppRelationshipService appRelationshipService,
             PoliciesService policiesService,
             HistoricalRecordService historicalRecordService
             ) {
-        this.settings = settings;
+        this.filter = filter;
         this.opsClient = opsClient;
         this.appInfoService = appInfoService;
         this.appRelationshipService = appRelationshipService;
@@ -88,8 +84,8 @@ public class DeleteAppPolicyExecutorTask implements PolicyExecutorTask {
                 .flux()
                 .flatMap(p -> Flux.fromIterable(p.getApplicationPolicies()))
                 .flatMap(ap -> appInfoService.findByApplicationPolicy(ap, false))
-                .filter(wl -> isWhitelisted(wl.getT2(), wl.getT1().getOrganization()))
-                .filter(bl -> isBlacklisted(bl.getT1().getOrganization()))
+                .filter(wl -> filter.isWhitelisted(wl.getT2(), wl.getT1().getOrganization()))
+                .filter(bl -> filter.isBlacklisted(bl.getT1().getOrganization(), bl.getT1().getSpace()))
                 .flatMap(ad -> deleteApplication(ad.getT1()))
                 .flatMap(historicalRecordService::save);
     }
@@ -105,8 +101,8 @@ public class DeleteAppPolicyExecutorTask implements PolicyExecutorTask {
                 .flatMap(p -> Flux.fromIterable(p.getApplicationPolicies()))
                 .filter(f -> f.getOption("delete-services", Boolean.class) == true)
                 .flatMap(ap -> appInfoService.findByApplicationPolicy(ap, true))
-                .filter(wl -> isWhitelisted(wl.getT2(), wl.getT1().getOrganization()))
-                .filter(bl -> isBlacklisted(bl.getT1().getOrganization()))
+                .filter(wl -> filter.isWhitelisted(wl.getT2(), wl.getT1().getOrganization()))
+                .filter(bl -> filter.isBlacklisted(bl.getT1().getOrganization(), bl.getT1().getSpace()))
                 .flatMap(ar -> appRelationshipService.findByApplicationId(ar.getT1().getAppId()))
                 .flatMap(this::unbindServiceInstance)
                 .flatMap(historicalRecordService::save)
@@ -129,8 +125,8 @@ public class DeleteAppPolicyExecutorTask implements PolicyExecutorTask {
                 .flatMap(p -> Flux.fromIterable(p.getApplicationPolicies()))
                 .filter(f -> f.getOption("delete-services", Boolean.class) == false)
                 .flatMap(ap -> appInfoService.findByApplicationPolicy(ap, true))
-                .filter(wl -> isWhitelisted(wl.getT2(), wl.getT1().getOrganization()))
-                .filter(bl -> isBlacklisted(bl.getT1().getOrganization()))
+                .filter(wl -> filter.isWhitelisted(wl.getT2(), wl.getT1().getOrganization()))
+                .filter(bl -> filter.isBlacklisted(bl.getT1().getOrganization(), bl.getT1().getSpace()))
                 .flatMap(ar -> appRelationshipService.findByApplicationId(ar.getT1().getAppId()))
                 .flatMap(this::unbindServiceInstance)
                 .flatMap(historicalRecordService::save)
@@ -180,20 +176,6 @@ public class DeleteAppPolicyExecutorTask implements PolicyExecutorTask {
                     log.error("DeleteAppPolicyExecutorTask terminated with error", error);
                 }
                 );
-    }
-
-    private boolean isBlacklisted(String  organization) {
-        return !settings.getOrganizationBlackList().contains(organization);
-    }
-
-    private boolean isWhitelisted(ApplicationPolicy policy, String organization) {
-        Set<String> prunedSet = new HashSet<>(policy.getOrganizationWhiteList());
-        while (prunedSet.remove(""));
-        Set<String> whitelist =
-                CollectionUtils.isEmpty(prunedSet) ?
-                        prunedSet: policy.getOrganizationWhiteList();
-        return
-                whitelist.isEmpty() ? true: policy.getOrganizationWhiteList().contains(organization);
     }
 
     @Scheduled(cron = "${cron.execution}")

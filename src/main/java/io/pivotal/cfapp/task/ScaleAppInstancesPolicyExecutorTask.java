@@ -1,18 +1,14 @@
 package io.pivotal.cfapp.task;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.operations.applications.ScaleApplicationRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
-import io.pivotal.cfapp.config.PasSettings;
 import io.pivotal.cfapp.domain.AppDetail;
 import io.pivotal.cfapp.domain.ApplicationOperation;
 import io.pivotal.cfapp.domain.ApplicationPolicy;
@@ -20,6 +16,7 @@ import io.pivotal.cfapp.domain.HistoricalRecord;
 import io.pivotal.cfapp.service.AppDetailService;
 import io.pivotal.cfapp.service.HistoricalRecordService;
 import io.pivotal.cfapp.service.PoliciesService;
+import io.pivotal.cfapp.util.PolicyFilter;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -28,7 +25,7 @@ import reactor.core.publisher.Mono;
 @Component
 public class ScaleAppInstancesPolicyExecutorTask implements PolicyExecutorTask {
 
-    private PasSettings settings;
+    private PolicyFilter filter;
     private DefaultCloudFoundryOperations opsClient;
     private AppDetailService appInfoService;
     private PoliciesService policiesService;
@@ -36,13 +33,13 @@ public class ScaleAppInstancesPolicyExecutorTask implements PolicyExecutorTask {
 
     @Autowired
     public ScaleAppInstancesPolicyExecutorTask(
-            PasSettings settings,
+        PolicyFilter filter,
             DefaultCloudFoundryOperations opsClient,
             AppDetailService appInfoService,
             PoliciesService policiesService,
             HistoricalRecordService historicalRecordService
             ) {
-        this.settings = settings;
+        this.filter = filter;
         this.opsClient = opsClient;
         this.appInfoService = appInfoService;
         this.policiesService = policiesService;
@@ -62,20 +59,6 @@ public class ScaleAppInstancesPolicyExecutorTask implements PolicyExecutorTask {
                     log.error("ScaleAppInstancesPolicyExecutorTask terminated with error", error);
                 }
                 );
-    }
-
-    private boolean isBlacklisted(String  organization) {
-        return !settings.getOrganizationBlackList().contains(organization);
-    }
-
-    private boolean isWhitelisted(ApplicationPolicy policy, String organization) {
-        Set<String> prunedSet = new HashSet<>(policy.getOrganizationWhiteList());
-        while (prunedSet.remove(""));
-        Set<String> whitelist =
-                CollectionUtils.isEmpty(prunedSet) ?
-                        prunedSet: policy.getOrganizationWhiteList();
-        return
-                whitelist.isEmpty() ? true: policy.getOrganizationWhiteList().contains(organization);
     }
 
     @Scheduled(cron = "${cron.execution}")
@@ -116,8 +99,8 @@ public class ScaleAppInstancesPolicyExecutorTask implements PolicyExecutorTask {
                 .flatMap(p -> Flux.fromIterable(p.getApplicationPolicies()))
                 .flatMap(ap -> Flux.concat(appInfoService.findByApplicationPolicy(ap, false), appInfoService.findByApplicationPolicy(ap, true)))
                 .distinct()
-                .filter(wl -> isWhitelisted(wl.getT2(), wl.getT1().getOrganization()))
-                .filter(bl -> isBlacklisted(bl.getT1().getOrganization()))
+                .filter(wl -> filter.isWhitelisted(wl.getT2(), wl.getT1().getOrganization()))
+                .filter(bl -> filter.isBlacklisted(bl.getT1().getOrganization(), bl.getT1().getSpace()))
                 .filter(from -> from.getT1().getRunningInstances().equals(from.getT2().getOption("instances-from", Integer.class)))
                 .flatMap(ad -> scaleApplication(ad.getT2(), ad.getT1()))
                 .flatMap(historicalRecordService::save)

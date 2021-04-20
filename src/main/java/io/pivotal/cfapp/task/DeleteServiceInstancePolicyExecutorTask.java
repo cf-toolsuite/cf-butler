@@ -1,24 +1,20 @@
 package io.pivotal.cfapp.task;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
 
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.operations.services.DeleteServiceInstanceRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
-import io.pivotal.cfapp.config.PasSettings;
 import io.pivotal.cfapp.domain.HistoricalRecord;
 import io.pivotal.cfapp.domain.ServiceInstanceDetail;
 import io.pivotal.cfapp.domain.ServiceInstanceOperation;
-import io.pivotal.cfapp.domain.ServiceInstancePolicy;
 import io.pivotal.cfapp.service.HistoricalRecordService;
 import io.pivotal.cfapp.service.PoliciesService;
 import io.pivotal.cfapp.service.ServiceInstanceDetailService;
+import io.pivotal.cfapp.util.PolicyFilter;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -27,7 +23,7 @@ import reactor.core.publisher.Mono;
 @Component
 public class DeleteServiceInstancePolicyExecutorTask implements PolicyExecutorTask {
 
-    private PasSettings settings;
+    private PolicyFilter filter;
     private DefaultCloudFoundryOperations opsClient;
     private ServiceInstanceDetailService serviceInfoService;
     private PoliciesService policiesService;
@@ -35,13 +31,13 @@ public class DeleteServiceInstancePolicyExecutorTask implements PolicyExecutorTa
 
     @Autowired
     public DeleteServiceInstancePolicyExecutorTask(
-            PasSettings settings,
+            PolicyFilter filter,
             DefaultCloudFoundryOperations opsClient,
             ServiceInstanceDetailService serviceInfoService,
             PoliciesService policiesService,
             HistoricalRecordService historicalRecordService
             ) {
-        this.settings = settings;
+        this.filter = filter;
         this.opsClient = opsClient;
         this.serviceInfoService = serviceInfoService;
         this.policiesService = policiesService;
@@ -76,8 +72,8 @@ public class DeleteServiceInstancePolicyExecutorTask implements PolicyExecutorTa
         .flux()
         .flatMap(p -> Flux.fromIterable(p.getServiceInstancePolicies()))
         .flatMap(sp -> serviceInfoService.findByServiceInstancePolicy(sp))
-        .filter(wl -> isWhitelisted(wl.getT2(), wl.getT1().getOrganization()))
-        .filter(bl -> isBlacklisted(bl.getT1().getOrganization()))
+        .filter(wl -> filter.isWhitelisted(wl.getT2(), wl.getT1().getOrganization()))
+        .filter(bl -> filter.isBlacklisted(bl.getT1().getOrganization(), bl.getT1().getSpace()))
         .flatMap(ds -> deleteServiceInstance(ds.getT1()))
         .flatMap(historicalRecordService::save)
         .collectList()
@@ -90,20 +86,6 @@ public class DeleteServiceInstancePolicyExecutorTask implements PolicyExecutorTa
                     log.error("DeleteServiceInstancePolicyExecutorTask terminated with error", error);
                 }
                 );
-    }
-
-    private boolean isBlacklisted(String  organization) {
-        return !settings.getOrganizationBlackList().contains(organization);
-    }
-
-    private boolean isWhitelisted(ServiceInstancePolicy policy, String organization) {
-        Set<String> prunedSet = new HashSet<>(policy.getOrganizationWhiteList());
-        while (prunedSet.remove(""));
-        Set<String> whitelist =
-                CollectionUtils.isEmpty(prunedSet) ?
-                        prunedSet: policy.getOrganizationWhiteList();
-        return
-                whitelist.isEmpty() ? true: policy.getOrganizationWhiteList().contains(organization);
     }
 
     @Scheduled(cron = "${cron.execution}")

@@ -25,7 +25,7 @@ import lombok.Getter;
 @JsonPropertyOrder({ "id", "days-since-last-update", "operator-email-template", "notifyee-email-template", "organization-whitelist" })
 @Getter
 @Table("hygiene_policy")
-public class HygienePolicy {
+public class HygienePolicy implements HasOrganizationWhiteList {
 
     public static HygienePolicy seed(HygienePolicy policy) {
         return HygienePolicy

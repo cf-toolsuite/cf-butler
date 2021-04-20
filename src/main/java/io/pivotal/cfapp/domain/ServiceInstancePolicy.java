@@ -28,7 +28,7 @@ import lombok.ToString;
 @JsonPropertyOrder({ "id", "operation", "description", "options", "organization-whitelist" })
 @Getter
 @ToString
-public class ServiceInstancePolicy {
+public class ServiceInstancePolicy implements HasOrganizationWhiteList {
 
     public static String[] columnNames() {
         return
