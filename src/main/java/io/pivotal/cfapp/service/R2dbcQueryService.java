@@ -26,6 +26,7 @@ public class R2dbcQueryService implements QueryService {
     @Override
     @Transactional
     public Flux<Tuple2<Row, RowMetadata>> executeQuery(Query query) {
+        log.trace(String.format("Attempting to execute a query named [ %s ] and the statement is [ %s ]", query.getName(), query.getSql()));
         return repo
                 .executeQuery(query)
                 .onErrorContinue(

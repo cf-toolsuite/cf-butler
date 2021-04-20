@@ -41,7 +41,7 @@ public class QueryPolicyExecutorTask implements PolicyExecutorTask {
                         .filename(t.getT1())
                         .content(t.getT2())
                         .extension(".csv")
-                        .mimeType("text/plain;charset=UTF-8")
+                        .mimeType("text/plain")
                         .build()
                         );
             } else {
@@ -51,7 +51,7 @@ public class QueryPolicyExecutorTask implements PolicyExecutorTask {
                         .filename(t.getT1())
                         .content("No results.")
                         .extension(".csv")
-                        .mimeType("text/plain;charset=UTF-8")
+                        .mimeType("text/plain")
                         .build()
                         );
             }

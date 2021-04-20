@@ -8,6 +8,9 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import javax.mail.util.ByteArrayDataSource;
 
+import org.springframework.mail.MailAuthenticationException;
+import org.springframework.mail.MailException;
+import org.springframework.mail.MailSendException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 
@@ -43,9 +46,9 @@ public class JavaMailNotifier extends EmailNotifier {
             helper.setTo(to);
             helper.setText(body, true);
             attachments.forEach(ea -> addAttachment(helper, ea));
+            log.info("About to send email to {} with subject: {}!", to, subject);
             javaMailSender.send(message);
-            log.info("Email sent to {} with subject: {}!", to, subject);
-        } catch (MessagingException me) {
+        } catch (MailException | MessagingException me) {
             log.warn("Could not send email!", me);
         }
     }

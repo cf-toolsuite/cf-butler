@@ -40,7 +40,7 @@ public class Defaults {
         try {
             Object value = row.get(columnName);
             return value == null ? defaultValue : value;
-        } catch (ClassCastException cce) {
+        } catch (Exception cce) {
             return defaultValue;
         }
     }
