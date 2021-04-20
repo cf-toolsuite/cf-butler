@@ -46,8 +46,9 @@ public class JavaMailNotifier extends EmailNotifier {
             helper.setTo(to);
             helper.setText(body, true);
             attachments.forEach(ea -> addAttachment(helper, ea));
-            log.info("About to send email to {} with subject: {}!", to, subject);
+            log.trace("About to send email to {} with subject: {}!", to, subject);
             javaMailSender.send(message);
+            log.info("Email sent to {} with subject: {}!", to, subject);
         } catch (MailException | MessagingException me) {
             log.warn("Could not send email!", me);
         }
