@@ -354,7 +354,7 @@ Within each [ApplicationPolicy](https://github.com/pacphi/cf-butler/blob/master/
 
 ### Filtering spaces
 
-> Note: if you activate a space blacklist it will take precedence over an organization blacklist!
+> Note: if you activate a space blacklist it will take precedence over an organization blacklist! Only one type of blacklist may be in effect.
 
 #### Blacklist
 
@@ -376,6 +376,8 @@ Add an entry in your `config/secrets.json` like
 ```
   "CF_SPACE-BLACK-LIST": [ "orgA:spaceA", "orgB:spaceB" ]
 ```
+
+> All spaces you define in the blacklist are excluded from consideration by policies. 
 
 ### Integration w/ Operations Manager
 
