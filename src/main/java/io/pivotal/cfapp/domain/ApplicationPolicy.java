@@ -31,7 +31,7 @@ import lombok.ToString;
 @Getter
 @ToString
 @Table("application_policy")
-public class ApplicationPolicy {
+public class ApplicationPolicy implements HasOrganizationWhiteList {
 
     public static ApplicationPolicy seed(ApplicationPolicy policy) {
         return ApplicationPolicy

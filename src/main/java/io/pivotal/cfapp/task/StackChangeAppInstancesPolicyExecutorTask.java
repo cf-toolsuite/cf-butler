@@ -2,10 +2,8 @@ package io.pivotal.cfapp.task;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Predicate;
 
 import org.cloudfoundry.client.v3.Lifecycle;
@@ -32,9 +30,7 @@ import org.cloudfoundry.util.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
-import io.pivotal.cfapp.config.PasSettings;
 import io.pivotal.cfapp.domain.AppDetail;
 import io.pivotal.cfapp.domain.ApplicationOperation;
 import io.pivotal.cfapp.domain.ApplicationPolicy;
@@ -42,6 +38,7 @@ import io.pivotal.cfapp.domain.HistoricalRecord;
 import io.pivotal.cfapp.service.AppDetailService;
 import io.pivotal.cfapp.service.HistoricalRecordService;
 import io.pivotal.cfapp.service.PoliciesService;
+import io.pivotal.cfapp.util.PolicyFilter;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -65,7 +62,7 @@ public class StackChangeAppInstancesPolicyExecutorTask implements PolicyExecutor
     private static Predicate<GetBuildResponse> isStagingComplete() {
         return response -> response.getState().equals(BuildState.STAGED) || response.getState().equals(BuildState.FAILED);
     }
-    private final PasSettings settings;
+    private final PolicyFilter filter;
     private final DefaultCloudFoundryOperations opsClient;
 
     private final AppDetailService appInfoService;
@@ -76,13 +73,13 @@ public class StackChangeAppInstancesPolicyExecutorTask implements PolicyExecutor
 
     @Autowired
     public StackChangeAppInstancesPolicyExecutorTask(
-            PasSettings settings,
+            PolicyFilter filter,
             DefaultCloudFoundryOperations opsClient,
             AppDetailService appInfoService,
             PoliciesService policiesService,
             HistoricalRecordService historicalRecordService
             ) {
-        this.settings = settings;
+        this.filter = filter;
         this.opsClient = opsClient;
         this.appInfoService = appInfoService;
         this.policiesService = policiesService;
@@ -170,20 +167,6 @@ public class StackChangeAppInstancesPolicyExecutorTask implements PolicyExecutor
                 .next();
     }
 
-    private boolean isBlacklisted(String  organization) {
-        return !settings.getOrganizationBlackList().contains(organization);
-    }
-
-    private boolean isWhitelisted(ApplicationPolicy policy, String organization) {
-        Set<String> prunedSet = new HashSet<>(policy.getOrganizationWhiteList());
-        while (prunedSet.remove(""));
-        Set<String> whitelist =
-                CollectionUtils.isEmpty(prunedSet) ?
-                        prunedSet: policy.getOrganizationWhiteList();
-        return
-                whitelist.isEmpty() ? true: policy.getOrganizationWhiteList().contains(organization);
-    }
-
     private Mono<Void> restartApp(AppDetail detail) {
         return DefaultCloudFoundryOperations.builder()
                 .from(opsClient)
@@ -239,8 +222,8 @@ public class StackChangeAppInstancesPolicyExecutorTask implements PolicyExecutor
                 .flatMap(p -> Flux.fromIterable(p.getApplicationPolicies()))
                 .flatMap(ap -> Flux.concat(appInfoService.findByApplicationPolicy(ap, false), appInfoService.findByApplicationPolicy(ap, true)))
                 .distinct()
-                .filter(wl -> isWhitelisted(wl.getT2(), wl.getT1().getOrganization()))
-                .filter(bl -> isBlacklisted(bl.getT1().getOrganization()))
+                .filter(wl -> filter.isWhitelisted(wl.getT2(), wl.getT1().getOrganization()))
+                .filter(bl -> filter.isBlacklisted(bl.getT1().getOrganization(), bl.getT1().getSpace()))
                 .filter(from -> from.getT1().getStack().equals(from.getT2().getOption("stack-from", String.class)))
                 .flatMap(ad -> {
                     log.info("{} is a candidate for stack change using policy {}.", ad.getT1(), ad.getT2());

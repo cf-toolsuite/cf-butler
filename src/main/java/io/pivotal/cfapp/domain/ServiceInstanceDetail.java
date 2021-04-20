@@ -12,49 +12,19 @@ import org.springframework.data.relational.core.mapping.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Builder.Default;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 @Builder
-@AllArgsConstructor(access=AccessLevel.PACKAGE)
-@NoArgsConstructor(access=AccessLevel.PACKAGE)
 @Getter
 @EqualsAndHashCode
 @ToString
 @Table("service_instance_detail")
 public class ServiceInstanceDetail {
 
-    public static ServiceInstanceDetailBuilder from(ServiceInstanceDetail detail) {
-        return ServiceInstanceDetail
-                .builder()
-                .pk(detail.getPk())
-                .organization(detail.getOrganization())
-                .space(detail.getSpace())
-                .serviceInstanceId(detail.getServiceInstanceId())
-                .name(detail.getName())
-                .service(detail.getService())
-                .description(detail.getDescription())
-                .plan(detail.getPlan())
-                .type(detail.getType())
-                .applications(detail.getApplications())
-                .lastOperation(detail.getLastOperation())
-                .lastUpdated(detail.getLastUpdated())
-                .dashboardUrl(detail.getDashboardUrl())
-                .requestedState(detail.getRequestedState());
-    }
-    public static String headers() {
-        return String.join(",", "organization", "space", "service instance id",
-                "name", "service", "description", "plan", "type", "bound applications", "last operation", "last updated", "dashboard url", "requested state");
-    }
-    private static String wrap(String value) {
-        return value != null ? StringUtils.wrap(value, '"') : StringUtils.wrap("", '"');
-    }
     @Id
     @JsonIgnore
     private Long pk;
@@ -79,6 +49,34 @@ public class ServiceInstanceDetail {
     private String dashboardUrl;
 
     private String requestedState;
+
+    public static ServiceInstanceDetailBuilder from(ServiceInstanceDetail detail) {
+        return ServiceInstanceDetail
+                .builder()
+                .pk(detail.getPk())
+                .organization(detail.getOrganization())
+                .space(detail.getSpace())
+                .serviceInstanceId(detail.getServiceInstanceId())
+                .name(detail.getName())
+                .service(detail.getService())
+                .description(detail.getDescription())
+                .plan(detail.getPlan())
+                .type(detail.getType())
+                .applications(detail.getApplications())
+                .lastOperation(detail.getLastOperation())
+                .lastUpdated(detail.getLastUpdated())
+                .dashboardUrl(detail.getDashboardUrl())
+                .requestedState(detail.getRequestedState());
+    }
+
+    public static String headers() {
+        return String.join(",", "organization", "space", "service instance id",
+                "name", "service", "description", "plan", "type", "bound applications", "last operation", "last updated", "dashboard url", "requested state");
+    }
+    
+    private static String wrap(String value) {
+        return value != null ? StringUtils.wrap(value, '"') : StringUtils.wrap("", '"');
+    }
 
     public String toCsv() {
         return String.join(",", wrap(getOrganization()), wrap(getSpace()), wrap(getServiceInstanceId()), wrap(getName()),
