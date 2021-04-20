@@ -32,7 +32,7 @@ public class R2dbcAppDetailRepository {
 
     public Mono<Void> deleteAll() {
         return
-                client
+            client
                 .delete(AppDetail.class)
                 .all()
                 .then();
@@ -41,7 +41,7 @@ public class R2dbcAppDetailRepository {
     public Flux<AppDetail> findAll() {
         Sort order = Sort.by(Order.asc("organization"), Order.asc("space"), Order.asc("app_name"));
         return
-                client
+            client
                 .select(AppDetail.class)
                 .matching(Query.empty().sort(order))
                 .all();
@@ -64,7 +64,7 @@ public class R2dbcAppDetailRepository {
             criteria = Criteria.where("requested_state").is(policy.getState()).and("service_instance_id").isNull();
         }
         return
-                client
+            client
                 .select(AppDetail.class)
                 .from("service_bindings")
                 .matching(Query.query(criteria).sort(Sort.by(Order.asc("organization"), Order.asc("space"), Order.asc("app_name"))))
@@ -89,7 +89,7 @@ public class R2dbcAppDetailRepository {
             criteria = Criteria.where("requested_state").is(policy.getState());
         }
         return
-                client
+            client
                 .select(AppDetail.class)
                 .matching(Query.query(criteria).sort(Sort.by(Order.asc("organization"), Order.asc("space"), Order.asc("app_name"))))
                 .all()
@@ -101,7 +101,7 @@ public class R2dbcAppDetailRepository {
                 Criteria
                 .where("app_id").is(appId);
         return
-                client
+            client
                 .select(AppDetail.class)
                 .matching(Query.query(criteria))
                 .one();
@@ -122,7 +122,7 @@ public class R2dbcAppDetailRepository {
                 .greaterThan(LocalDateTime.of(start, LocalTime.MIDNIGHT));
         Sort order = Sort.by(Order.desc("last_pushed"));
         return
-                client
+            client
                 .select(AppDetail.class)
                 .matching(Query.query(criteria).sort(order))
                 .all();
@@ -130,7 +130,7 @@ public class R2dbcAppDetailRepository {
 
     public Mono<AppDetail> save(AppDetail entity) {
         return
-                client
+            client
                 .insert(entity);
     }
 

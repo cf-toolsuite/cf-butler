@@ -11,23 +11,45 @@ import org.springframework.data.relational.core.mapping.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Builder.Default;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 @Builder
-@AllArgsConstructor(access=AccessLevel.PACKAGE)
-@NoArgsConstructor(access=AccessLevel.PACKAGE)
 @Getter
 @EqualsAndHashCode
 @ToString
 @Table("application_detail")
 public class AppDetail {
+
+    @Id
+    @JsonIgnore
+    private Long pk;
+    private String organization;
+    private String space;
+    private String appId;
+    private String appName;
+    private String buildpack;
+    private String buildpackVersion;
+    private String image;
+    private String stack;
+    private Integer runningInstances;
+    private Integer totalInstances;
+    private Long memoryUsed;
+    private Long diskUsed;
+    private LocalDateTime lastPushed;
+    private String lastEvent;
+    private String lastEventActor;
+    private LocalDateTime lastEventTime;
+    private String requestedState;
+    private String buildpackReleaseType;
+    private LocalDateTime buildpackReleaseDate;
+    private String buildpackLatestVersion;
+    private String buildpackLatestUrl;
+    @Default
+    private List<String> urls = new ArrayList<>();
 
     public static AppDetailBuilder from(AppDetail detail) {
         return AppDetail
@@ -67,35 +89,6 @@ public class AppDetail {
     private static String wrap(String value) {
         return value != null ? StringUtils.wrap(value, '"') : StringUtils.wrap("", '"');
     }
-
-    @Id
-    @JsonIgnore
-    private Long pk;
-    private String organization;
-    private String space;
-    private String appId;
-    private String appName;
-    private String buildpack;
-    private String buildpackVersion;
-    private String image;
-    private String stack;
-    private Integer runningInstances;
-    private Integer totalInstances;
-    private Long memoryUsed;
-    private Long diskUsed;
-    
-    @Default
-    private List<String> urls = new ArrayList<>();
-    
-    private LocalDateTime lastPushed;
-    private String lastEvent;
-    private String lastEventActor;
-    private LocalDateTime lastEventTime;
-    private String requestedState;
-    private String buildpackReleaseType;
-    private LocalDateTime buildpackReleaseDate;
-    private String buildpackLatestVersion;
-    private String buildpackLatestUrl;
 
     public String toCsv() {
         return String.join(",", wrap(getOrganization()), wrap(getSpace()), wrap(getAppId()), wrap(getAppName()),
