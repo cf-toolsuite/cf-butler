@@ -60,6 +60,7 @@ public class ButlerCfEnvProcessor implements CfEnvProcessor {
         addOrUpdatePropertyValue("cf.tokenProvider", "CF_TOKEN-PROVIDER", cfCredentials, properties);
         addOrUpdatePropertyValue("cf.refreshToken", "CF_REFRESH-TOKEN", cfCredentials, properties);
         addOrUpdatePropertyValue("cf.organizationBlackList", "CF_ORGANIZATION-BLACK-LIST", cfCredentials, properties);
+        addOrUpdatePropertyValue("cf.spaceBlackList", "CF_SPACE-BLACK-LIST", cfCredentials, properties);
         addOrUpdatePropertyValue("cf.accountRegex", "CF_ACCOUNT-REGEX", cfCredentials, properties);
         addOrUpdatePropertyValue("cf.policies.git.uri", "CF_POLICIES_GIT_URI", cfCredentials, properties);
         addOrUpdatePropertyValue("cf.policies.git.username", "CF_POLICIES_GIT_USERNAME", cfCredentials, properties);
