@@ -81,7 +81,7 @@ public class PasSettings {
     }
 
     public boolean hasSpaceBlackList() {
-        return !CollectionUtils.isEmpty(spaceBlackList);
+        return !CollectionUtils.isEmpty(getSpaceBlackList());
     }
 
     public String getUsageDomain() {
