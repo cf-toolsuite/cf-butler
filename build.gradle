@@ -114,7 +114,7 @@ dependencies {
     implementation('org.springframework.boot:spring-boot-starter-actuator')
     implementation('org.springframework.boot:spring-boot-starter-webflux')
     implementation('org.springframework.boot:spring-boot-starter-log4j2')
-    implementation('com.lmax:disruptor:3.4.3')
+    implementation('com.lmax:disruptor:3.4.4')
     implementation('org.springframework.boot:spring-boot-starter-data-r2dbc')
     implementation('org.locationtech.jts:jts-core:1.18.1')
     implementation('io.r2dbc:r2dbc-spi')
