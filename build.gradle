@@ -3,7 +3,7 @@ plugins {
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'com.github.ben-manes.versions' version '0.38.0'
     id 'io.franzbecker.gradle-lombok' version '4.0.0'
-  id 'java'
+    id 'java'
     id 'jacoco'
     id 'com.google.cloud.tools.jib' version '3.0.0'
     id 'maven-publish'
@@ -37,9 +37,9 @@ version = '0.1-SNAPSHOT'
 sourceCompatibility = JavaVersion.VERSION_11
 
 repositories {
-  mavenCentral()
+    mavenCentral()
     maven { url "https://repo.spring.io/snapshot" }
-  maven { url "https://repo.spring.io/milestone" }
+    maven { url "https://repo.spring.io/milestone" }
     maven { url "https://jitpack.io" }
 }
 
@@ -118,12 +118,12 @@ dependencies {
     implementation('org.springframework.boot:spring-boot-starter-data-r2dbc')
     implementation('org.locationtech.jts:jts-core:1.18.1')
     implementation('io.r2dbc:r2dbc-spi')
-    runtime('io.r2dbc:r2dbc-pool')
+    runtimeOnly('io.r2dbc:r2dbc-pool')
     implementation('io.r2dbc:r2dbc-h2')
     if (project.hasProperty("mysql")) {
-        runtime('dev.miku:r2dbc-mysql:0.8.2.RELEASE')
+        runtimeOnly('dev.miku:r2dbc-mysql:0.8.2.RELEASE')
     } else {
-        runtime('io.r2dbc:r2dbc-postgresql')
+        runtimeOnly('io.r2dbc:r2dbc-postgresql')
     }
     implementation('org.eclipse.jgit:org.eclipse.jgit:5.11.0.202103091610-r')
     implementation('org.springframework.boot:spring-boot-starter-mail')
@@ -183,9 +183,8 @@ publishing {
     }
     repositories {
         maven {
-            // change URLs to point to your repos, e.g. http://my.org/repo
-            def releasesRepoUrl = "$buildDir/repos/releases"
-            def snapshotsRepoUrl = "$buildDir/repos/snapshots"
+            def releasesRepoUrl = layout.buildDirectory.dir('repos/releases')
+            def snapshotsRepoUrl = layout.buildDirectory.dir('repos/snapshots')
             url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
         }
     }
@@ -194,7 +193,7 @@ publishing {
 import io.franzbecker.gradle.lombok.task.DelombokTask
 
 task delombok(type: DelombokTask, dependsOn: compileJava) {
-    ext.outputDir = file("$buildDir/delombok")
+    ext.outputDir = file(layout.buildDirectory.dir('delombok'))
     outputs.dir(outputDir)
     sourceSets.main.java.srcDirs.each {
         inputs.dir(it)
