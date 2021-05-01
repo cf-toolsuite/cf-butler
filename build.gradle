@@ -7,12 +7,12 @@ plugins {
     id 'jacoco'
     id 'com.google.cloud.tools.jib' version '3.0.0'
     id 'maven-publish'
-    id 'com.github.spotbugs' version '4.7.0'
+    id 'com.github.spotbugs' version '4.7.1'
     id 'info.solidsoft.pitest' version '1.6.0'
 }
 
 spotbugs {
-    toolVersion = '4.2.1'
+    toolVersion = '4.2.3'
     ignoreFailures = true
     effort = 'max'
     reportLevel = 'low'
@@ -114,7 +114,7 @@ dependencies {
     implementation('org.springframework.boot:spring-boot-starter-actuator')
     implementation('org.springframework.boot:spring-boot-starter-webflux')
     implementation('org.springframework.boot:spring-boot-starter-log4j2')
-    implementation('com.lmax:disruptor:3.4.3')
+    implementation('com.lmax:disruptor:3.4.4')
     implementation('org.springframework.boot:spring-boot-starter-data-r2dbc')
     implementation('org.locationtech.jts:jts-core:1.18.1')
     implementation('io.r2dbc:r2dbc-spi')
