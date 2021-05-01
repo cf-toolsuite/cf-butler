@@ -136,7 +136,7 @@
     <dependency>
       <groupId>com.lmax</groupId>
       <artifactId>disruptor</artifactId>
-      <version>3.4.3</version>
+      <version>3.4.4</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -578,7 +578,7 @@
       <plugin>
         <groupId>com.github.spotbugs</groupId>
         <artifactId>spotbugs-maven-plugin</artifactId>
-        <version>4.2.0</version>
+        <version>4.2.3</version>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
