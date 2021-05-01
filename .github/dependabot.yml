@@ -1,0 +1,56 @@
+version: 2
+updates:
+- package-ecosystem: gradle
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "13:00"
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: org.springframework.boot
+    versions:
+    - 2.4.3
+    - 2.4.4
+    - 2.4.5
+  - dependency-name: com.lmax:disruptor
+    versions:
+    - 3.4.3
+  - dependency-name: com.fasterxml.jackson.dataformat:jackson-dataformat-csv
+    versions:
+    - 2.12.2
+    - 2.12.3
+  - dependency-name: org.eclipse.jgit:org.eclipse.jgit
+    versions:
+    - 5.11.0.202103091610-r
+  - dependency-name: io.pivotal.cfenv:java-cfenv-boot
+    versions:
+    - 2.2.5.RELEASE
+    - 2.3.0
+  - dependency-name: com.github.spotbugs
+    versions:
+    - 4.6.2
+    - 4.7.0
+  - dependency-name: info.solidsoft.pitest
+    versions:
+    - 1.6.0
+  - dependency-name: com.github.ben-manes.versions
+    versions:
+    - 0.38.0
+  - dependency-name: org.locationtech.jts:jts-core
+    versions:
+    - 1.18.1
+  - dependency-name: com.sendgrid:sendgrid-java
+    versions:
+    - 4.7.2
+  - dependency-name: com.google.cloud.tools.jib
+    versions:
+    - 2.8.0
+  - dependency-name: org.assertj:assertj-core
+    versions:
+    - 3.19.0
+  - dependency-name: org.cloudfoundry:cloudfoundry-operations
+    versions:
+    - 5.1.0.RELEASE
+  - dependency-name: org.cloudfoundry:cloudfoundry-client-reactor
+    versions:
+    - 5.1.0.RELEASE
