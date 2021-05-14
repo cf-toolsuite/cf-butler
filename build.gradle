@@ -125,7 +125,7 @@ dependencies {
     } else {
         runtimeOnly('io.r2dbc:r2dbc-postgresql')
     }
-    implementation('org.eclipse.jgit:org.eclipse.jgit:5.11.0.202103091610-r')
+    implementation('org.eclipse.jgit:org.eclipse.jgit:5.11.1.202105131744-r')
     implementation('org.springframework.boot:spring-boot-starter-mail')
     implementation('com.sendgrid:sendgrid-java:4.7.2') {
         exclude group: 'org.apache.httpcomponents', module: 'httpclient'
