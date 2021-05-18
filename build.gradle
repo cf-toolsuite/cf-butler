@@ -83,7 +83,7 @@ java {
 }
 
 jacoco {
-  toolVersion = "0.8.6"
+  toolVersion = "0.8.7"
 }
 
 jacocoTestReport {
@@ -114,7 +114,7 @@ dependencies {
     implementation('org.springframework.boot:spring-boot-starter-actuator')
     implementation('org.springframework.boot:spring-boot-starter-webflux')
     implementation('org.springframework.boot:spring-boot-starter-log4j2')
-    implementation('com.lmax:disruptor:3.4.4')
+    runtimeOnly('com.lmax:disruptor:3.4.4')
     implementation('org.springframework.boot:spring-boot-starter-data-r2dbc')
     implementation('org.locationtech.jts:jts-core:1.18.1')
     implementation('io.r2dbc:r2dbc-spi')
@@ -125,7 +125,7 @@ dependencies {
     } else {
         runtimeOnly('io.r2dbc:r2dbc-postgresql')
     }
-    implementation('org.eclipse.jgit:org.eclipse.jgit:5.11.0.202103091610-r')
+    implementation('org.eclipse.jgit:org.eclipse.jgit:5.11.1.202105131744-r')
     implementation('org.springframework.boot:spring-boot-starter-mail')
     implementation('com.sendgrid:sendgrid-java:4.7.2') {
         exclude group: 'org.apache.httpcomponents', module: 'httpclient'
