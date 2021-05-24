@@ -34,7 +34,6 @@ spotbugsMain {
 }
 
 group = 'io.pivotal'
-version = '0.1-SNAPSHOT'
 sourceCompatibility = JavaVersion.VERSION_11
 
 repositories {
@@ -68,8 +67,12 @@ bootRun {
 }
 
 configurations {
-  // exclude Logback
+    // exclude Logback
     implementation.exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+    [apiElements, runtimeElements].each {
+      it.outgoing.artifacts.removeIf { it.buildDependencies.getDependencies(null).contains(jar) }
+      it.outgoing.artifact(bootJar)
+    }
 }
 
 test {
@@ -156,7 +159,8 @@ dependencies {
 
 publishing {
     publications {
-        mavenJava(MavenPublication) {
+        gpr(MavenPublication) {
+
             from components.java
             versionMapping {
                 usage('java-api') {
