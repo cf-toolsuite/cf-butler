@@ -15,6 +15,7 @@ jobs:
       - name: Set up Java
         uses: actions/setup-java@v1
         with:
+          distribution: 'adopt'
           java-version: ${{ matrix.java }}
       - name: Cache Gradle packages
         uses: actions/cache@v1
@@ -24,8 +25,3 @@ jobs:
           restore-keys: ${{ runner.os }}-gradle
       - name: Build with Gradle
         run: ./gradlew build
-      # - name: Upload Artifacts
-      #   uses: actions/upload-artifact@v1
-      #   with:
-      #     name: Package
-      #     path: build/libs
