@@ -405,7 +405,7 @@ Add entries in your `config/secrets.json` like
 
 ### Alternative build with MySQL support
 
-If you want to target a MySQL database as your back-end you will need to use an alternate Gradle build file.  It adds a dependency on [r2dbc-mysql](https://github.com/mirromutth/r2dbc-mysql) which is sourced from a [jitpack.io](https://jitpack.io/#mirromutth/r2dbc-mysql/master-SNAPSHOT) repository.
+If you want to target a MySQL database as your back-end you will need to use an alternate Gradle build file.  It adds a dependency on [r2dbc-mysql](https://github.com/mirromutth/r2dbc-mysql).
 
 ```
 ./gradlew build -Pmysql
