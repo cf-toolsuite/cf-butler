@@ -2,7 +2,7 @@ plugins {
     id 'org.springframework.boot' version '2.4.5'
     // id 'org.springframework.experimental.aot' version '0.9.2'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
-    id 'com.github.ben-manes.versions' version '0.38.0'
+    id 'com.github.ben-manes.versions' version '0.39.0'
     id 'io.franzbecker.gradle-lombok' version '4.0.0'
     id 'java'
     id 'jacoco'
@@ -43,7 +43,7 @@ repositories {
 
 ext {
     set('springCloudServicesVersion', '3.2.1.RELEASE')
-    set('springCloudVersion', '2020.0.2')
+    set('springCloudVersion', '2020.0.3')
     // @see https://github.com/spring-projects/spring-boot/blob/master/spring-boot-project/spring-boot-dependencies/pom.xml
 }
 
@@ -143,8 +143,8 @@ dependencies {
         exclude group: 'org.apache.httpcomponents', module: 'httpclient'
     }
     implementation('org.apache.httpcomponents:httpclient:4.5.13')
-    implementation('org.cloudfoundry:cloudfoundry-client-reactor:5.1.0.RELEASE')
-    implementation('org.cloudfoundry:cloudfoundry-operations:5.1.0.RELEASE')
+    implementation('org.cloudfoundry:cloudfoundry-client-reactor:5.5.0.RELEASE')
+    implementation('org.cloudfoundry:cloudfoundry-operations:5.5.0.RELEASE')
     implementation('io.micrometer:micrometer-registry-prometheus')
     testImplementation('io.projectreactor:reactor-test')
     testImplementation('org.assertj:assertj-core:3.19.0')

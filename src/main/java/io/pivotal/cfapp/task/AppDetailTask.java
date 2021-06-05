@@ -51,6 +51,7 @@ public class AppDetailTask {
                 .spaceName(space)
                 .build();
     }
+
     private static Long nullSafeDiskUsed(ApplicationStatisticsResponse stats) {
         Long result = 0L;
         Map<String, InstanceStatistics> instances = stats.getInstances();
@@ -69,14 +70,17 @@ public class AppDetailTask {
         }
         return result;
     }
+
     private static Integer nullSafeInteger(Integer value) {
         return value != null ? value: 0;
     }
+
     private static LocalDateTime nullSafeLocalDateTime(String value) {
         return StringUtils.isNotBlank(value)
                 ? Instant.parse(value).atZone(ZoneId.systemDefault()).toLocalDateTime()
                         : null;
     }
+
     private static Long nullSafeMemoryUsed(ApplicationStatisticsResponse stats) {
         Long result = 0L;
         Map<String, InstanceStatistics> instances = stats.getInstances();
@@ -95,6 +99,7 @@ public class AppDetailTask {
         }
         return result;
     }
+
     private final PasSettings settings;
     private final DefaultCloudFoundryOperations opsClient;
     private final AppDetailService appDetailsService;
@@ -155,14 +160,14 @@ public class AppDetailTask {
         .thenMany(appDetailsService.findAll())
         .collectList()
         .subscribe(
-                result -> {
-                    publisher.publishEvent(new AppDetailRetrievedEvent(this).detail(result));
-                    log.info("AppDetailTask completed");
-                },
-                error -> {
-                    log.error("AppDetailTask terminated with error", error);
-                }
-                );
+            result -> {
+                publisher.publishEvent(new AppDetailRetrievedEvent(this).detail(result));
+                log.info("AppDetailTask completed");
+            },
+            error -> {
+                log.error("AppDetailTask terminated with error", error);
+            }
+        );
     }
 
     private String getBuildpack(String buildpackId) {
@@ -206,14 +211,16 @@ public class AppDetailTask {
         return eventsService.getEvents(fragment.getAppId(), 1)
                 .flatMapMany(envelope -> eventsService.toFlux(envelope))
                 .next()
-                .flatMap(
-                        e -> Mono.just(
-                                AppDetail
-                                .from(fragment)
-                                .lastEvent(e.getType())
-                                .lastEventActor(e.getActor())
-                                .lastEventTime(e.getTime())
-                                .build()))
+                .flatMap(e -> 
+                    Mono.just(
+                            AppDetail
+                            .from(fragment)
+                            .lastEvent(e.getType())
+                            .lastEventActor(e.getActor())
+                            .lastEventTime(e.getTime())
+                            .build()
+                    )
+                )
                 .defaultIfEmpty(fragment);
     }
 
@@ -224,14 +231,14 @@ public class AppDetailTask {
                 .applicationsV2()
                 .statistics(ApplicationStatisticsRequest.builder().applicationId(fragment.getAppId()).build())
                 .flatMap(stats ->
-                Mono
-                .just(AppDetail
-                        .from(fragment)
-                        .diskUsed(nullSafeDiskUsed(stats))
-                        .memoryUsed(nullSafeMemoryUsed(stats))
-                        .build()
+                    Mono
+                        .just(AppDetail
+                            .from(fragment)
+                            .diskUsed(nullSafeDiskUsed(stats))
+                            .memoryUsed(nullSafeMemoryUsed(stats))
+                            .build()
                         )
-                        )
+                )
                 .onErrorResume(ClientV2Exception.class, e -> Mono.just(fragment));
 
     }
@@ -243,21 +250,21 @@ public class AppDetailTask {
                 .applicationsV2()
                 .summary(SummaryApplicationRequest.builder().applicationId(fragment.getAppId()).build())
                 .flatMap(sar ->
-                Mono
-                .just(AppDetail
-                        .from(fragment)
-                        .buildpack(getBuildpack(sar.getDetectedBuildpackId()))
-                        .buildpackVersion(getBuildpackVersion(sar.getDetectedBuildpackId()))
-                        .image(sar.getDockerImage())
-                        .stack(nullSafeStack(sar.getStackId()))
-                        .lastPushed(nullSafeLocalDateTime(sar.getPackageUpdatedAt()))
-                        .buildpackReleaseType(getBuildpackReleaseType(sar.getDetectedBuildpackId()))
-                        .buildpackReleaseDate(getBuildpackReleaseDate(sar.getDetectedBuildpackId()))
-                        .buildpackLatestVersion(getBuildpackLatestVersion(sar.getDetectedBuildpackId()))
-                        .buildpackLatestUrl(getBuildpackReleaseNotesUrl(sar.getDetectedBuildpackId()))
-                        .build()
+                    Mono
+                        .just(AppDetail
+                            .from(fragment)
+                            .buildpack(getBuildpack(sar.getDetectedBuildpackId()))
+                            .buildpackVersion(getBuildpackVersion(sar.getDetectedBuildpackId()))
+                            .image(sar.getDockerImage())
+                            .stack(nullSafeStack(sar.getStackId()))
+                            .lastPushed(nullSafeLocalDateTime(sar.getPackageUpdatedAt()))
+                            .buildpackReleaseType(getBuildpackReleaseType(sar.getDetectedBuildpackId()))
+                            .buildpackReleaseDate(getBuildpackReleaseDate(sar.getDetectedBuildpackId()))
+                            .buildpackLatestVersion(getBuildpackLatestVersion(sar.getDetectedBuildpackId()))
+                            .buildpackLatestUrl(getBuildpackReleaseNotesUrl(sar.getDetectedBuildpackId()))
+                            .build()
                         )
-                        )
+                )
                 .onErrorResume(ClientV2Exception.class, e -> Mono.just(fragment));
     }
 
@@ -284,25 +291,25 @@ public class AppDetailTask {
 
     protected Flux<AppDetail> listApplications(Space target) {
         return
-                buildClient(target)
+            buildClient(target)
                 .applications()
                 .list()
                 .delayElements(Duration.ofMillis(250))
                 .flatMap(as ->
-                Mono
-                .just(AppDetail
-                        .builder()
-                        .appId(as.getId())
-                        .appName(as.getName())
-                        .organization(target.getOrganizationName())
-                        .space(target.getSpaceName())
-                        .runningInstances(nullSafeInteger(as.getRunningInstances()))
-                        .totalInstances(nullSafeInteger(as.getInstances()))
-                        .requestedState(as.getRequestedState().toLowerCase())
-                        .urls(as.getUrls())
-                        .build()
+                    Mono
+                        .just(AppDetail
+                            .builder()
+                            .appId(as.getId())
+                            .appName(as.getName())
+                            .organization(target.getOrganizationName())
+                            .space(target.getSpaceName())
+                            .runningInstances(nullSafeInteger(as.getRunningInstances()))
+                            .totalInstances(nullSafeInteger(as.getInstances()))
+                            .requestedState(as.getRequestedState().toLowerCase())
+                            .urls(as.getUrls())
+                            .build()
                         )
-                        );
+                );
     }
 
     private String nullSafeStack(String stackId) {

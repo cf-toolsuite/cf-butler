@@ -12,7 +12,6 @@ import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import reactor.netty.http.client.HttpClient;
-import reactor.netty.tcp.TcpClient;
 
 @Configuration
 public class WebClientConfig {
@@ -22,22 +21,14 @@ public class WebClientConfig {
     @Bean
     @ConditionalOnProperty(name = "cf.sslValidationSkipped", havingValue="true")
     public WebClient insecureWebClient(WebClient.Builder builder) throws SSLException {
-        SslContext sslContext =
-                SslContextBuilder
-                .forClient()
-                .trustManager(InsecureTrustManagerFactory.INSTANCE)
-                .build();
-        TcpClient tcpClient = TcpClient.create().secure(sslProviderBuilder -> sslProviderBuilder.sslContext(sslContext));
-        HttpClient httpClient = HttpClient.from(tcpClient);
-        return builder
-                .clientConnector(new ReactorClientHttpConnector(httpClient))
-                .build();
+        SslContext context = SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build();
+        HttpClient httpClient = HttpClient.create().secure(t -> t.sslContext(context));
+        return WebClient.builder().clientConnector(new ReactorClientHttpConnector(httpClient)).build();
     }
 
     @Bean
     @ConditionalOnProperty(name = "cf.sslValidationSkipped", havingValue="false", matchIfMissing=true)
     public WebClient secureWebClient(WebClient.Builder builder) {
-        return builder
-                .build();
+        return builder.build();
     }
 }

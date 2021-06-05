@@ -13,21 +13,12 @@ import org.cloudfoundry.reactor.tokenprovider.RefreshTokenGrantTokenProvider;
 import org.cloudfoundry.reactor.uaa.ReactorUaaClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.context.event.SimpleApplicationEventMulticaster;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 
-import io.pivotal.cfenv.core.CfEnv;
-
 @Configuration(proxyBeanMethods = false)
 public class ButlerConfig {
-
-    @Bean
-    @Profile("cloud")
-    public CfEnv cfEnv() {
-        return new CfEnv();
-    }
 
     @Bean
     public ReactorCloudFoundryClient cloudFoundryClient(ConnectionContext connectionContext, TokenProvider tokenProvider) {
