@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.autoconfigure.r2dbc.R2dbcProperties;
 import org.springframework.context.annotation.Bean;
@@ -27,16 +26,19 @@ import io.r2dbc.spi.Option;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Configuration(proxyBeanMethods = false)
+@Configuration
 class R2dbcConfig extends AbstractR2dbcConfiguration {
     
     private static final String DOMAIN_PACKAGE = "io.pivotal.cfapp.domain";
     private static final List<String> SUPPORTED_SCHEMES = Arrays.asList(new String[] { "mysql", "postgresql"});
     private static final String VCAP_SERVICE = "cf-butler-backend";
     
-    @Autowired
     private R2dbcProperties r2dbcProperties;
 
+    public R2dbcConfig(R2dbcProperties r2dbcProperties) {
+        super();
+        this.r2dbcProperties = r2dbcProperties;
+    }
 
     @Bean
     @Profile("cloud")

@@ -47,7 +47,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>2.4.5</version>
+    <version>2.5.1</version>
     <relativePath/>
     <!-- lookup parent from repository -->
   </parent>
@@ -159,7 +159,7 @@
     <dependency>
       <groupId>org.eclipse.jgit</groupId>
       <artifactId>org.eclipse.jgit</artifactId>
-      <version>5.11.1.202105131744-r</version>
+      <version>5.12.0.202106070339-r</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -505,6 +505,7 @@
         </dependency>
       </dependencies>
     </profile>
+
     <profile>
       <id>mysql</id>
       <dependencies>
@@ -515,13 +516,14 @@
         </dependency>
       </dependencies>
     </profile>
+
     <profile>
       <id>native</id>
       <dependencies>
 	      <dependency>
 	      <groupId>org.springframework.experimental</groupId>
 	      <artifactId>spring-native</artifactId>
-	      <version>0.9.2</version>
+	      <version>0.10.0</version>
 	    </dependency>
       </dependencies>
       <build>
@@ -529,7 +531,7 @@
           <plugin>
             <groupId>org.springframework.experimental</groupId>
             <artifactId>spring-aot-maven-plugin</artifactId>
-            <version>0.9.2</version>
+            <version>0.10.0</version>
             <executions>
                 <execution>
                     <id>test-generate</id>
@@ -548,7 +550,7 @@
           <plugin>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-maven-plugin</artifactId>
-            <version>2.4.5</version>
+            <version>2.5.1</version>
             <configuration>
             <excludes>
                 <exclude>
@@ -568,6 +570,7 @@
         </plugins>
       </build>
     </profile>
+
     <profile>
       <id>wavefront</id>
       <dependencies>
