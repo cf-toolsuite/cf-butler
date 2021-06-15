@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.autoconfigure.r2dbc.R2dbcProperties;
 import org.springframework.context.annotation.Bean;
@@ -33,10 +34,13 @@ class R2dbcConfig extends AbstractR2dbcConfiguration {
     private static final List<String> SUPPORTED_SCHEMES = Arrays.asList(new String[] { "mysql", "postgresql"});
     private static final String VCAP_SERVICE = "cf-butler-backend";
     
+    private CfEnv cfEnv;
     private R2dbcProperties r2dbcProperties;
 
-    public R2dbcConfig(R2dbcProperties r2dbcProperties) {
+    
+    public R2dbcConfig(@Autowired(required = false) CfEnv cfEnv, @Autowired R2dbcProperties r2dbcProperties) {
         super();
+        this.cfEnv = cfEnv;
         this.r2dbcProperties = r2dbcProperties;
     }
 
@@ -49,7 +53,7 @@ class R2dbcConfig extends AbstractR2dbcConfiguration {
     @Bean
     @Profile("cloud")
     public ConnectionFactory connectionFactory() {
-        R2dbcProperties properties = r2dbcProperties(cfEnv());
+        R2dbcProperties properties = r2dbcProperties(this.cfEnv);
         ConnectionFactoryOptions.Builder builder = ConnectionFactoryOptions
                 .parse(properties.getUrl()).mutate();
         String username = properties.getUsername();
