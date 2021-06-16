@@ -61,10 +61,13 @@
 
   <properties>
     <java.version>11</java.version>
+    <repackage.classifier/>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
+    <spring-native.version>0.10.0</spring-native.version>
+    <slf4j.version>2.0.0-alpha1</slf4j.version>
   </properties>
 
   <dependencies>
@@ -78,15 +81,6 @@
       <groupId>javax.validation</groupId>
       <artifactId>validation-api</artifactId>
       <version>2.0.1.Final</version>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-configuration-processor</artifactId>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-context-indexer</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
@@ -151,10 +145,6 @@
       <version>4.7.2</version>
       <exclusions>
         <exclusion>
-          <artifactId>spring-boot-starter-logging</artifactId>
-          <groupId>org.springframework.boot</groupId>
-        </exclusion>
-        <exclusion>
           <artifactId>httpclient</artifactId>
           <groupId>org.apache.httpcomponents</groupId>
         </exclusion>
@@ -168,12 +158,12 @@
     <dependency>
       <groupId>org.cloudfoundry</groupId>
       <artifactId>cloudfoundry-client-reactor</artifactId>
-      <version>5.1.0.RELEASE</version>
+      <version>5.5.0.RELEASE</version>
     </dependency>
     <dependency>
       <groupId>org.cloudfoundry</groupId>
       <artifactId>cloudfoundry-operations</artifactId>
-      <version>5.1.0.RELEASE</version>
+      <version>5.5.0.RELEASE</version>
     </dependency>
     <dependency>
       <groupId>io.micrometer</groupId>
@@ -493,6 +483,7 @@
           <groupId>dev.miku</groupId>
           <artifactId>r2dbc-mysql</artifactId>
           <version>0.8.2.RELEASE</version>
+          <scope>runtime</scope>
         </dependency>
       </dependencies>
     </profile>
@@ -529,7 +520,7 @@
 	      <dependency>
 	      <groupId>org.springframework.experimental</groupId>
 	      <artifactId>spring-native</artifactId>
-	      <version>0.10.0</version>
+	      <version>${spring-native.version}</version>
 	    </dependency>
       </dependencies>
       <build>
@@ -547,7 +538,7 @@
           <plugin>
             <groupId>org.springframework.experimental</groupId>
             <artifactId>spring-aot-maven-plugin</artifactId>
-            <version>0.10.0</version>
+            <version>${spring-native.version}</version>
             <executions>
                 <execution>
                     <id>test-generate</id>
@@ -568,17 +559,12 @@
             <artifactId>spring-boot-maven-plugin</artifactId>
             <version>2.5.1</version>
             <configuration>
-                <excludes>
-                    <exclude>
-                      <groupId>org.projectlombok</groupId>
-                      <artifactId>lombok</artifactId>
-                    </exclude>
-                </excludes>
+                <classifier>${repackage.classifier}</classifier>
                 <image>
                     <builder>paketobuildpacks/builder:tiny</builder>
                     <env>
                         <BP_NATIVE_IMAGE>true</BP_NATIVE_IMAGE>
-                        <BP_NATIVE_IMAGE_BUILD_ARGUMENTS>--verbose -H:+ReportExceptionStackTraces -H:+PrintAnalysisCallTree --enable-https --trace-class-initialization=org.apache.commons.logging.impl.SLF4JLocationAwareLog</BP_NATIVE_IMAGE_BUILD_ARGUMENTS>
+                        <BP_NATIVE_IMAGE_BUILD_ARGUMENTS>--verbose -H:+ReportExceptionStackTraces -H:+PrintAnalysisCallTree --enable-https</BP_NATIVE_IMAGE_BUILD_ARGUMENTS>
                     </env>
                 </image>
             </configuration>
