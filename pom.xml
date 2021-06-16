@@ -121,26 +121,6 @@
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>org.springframework.boot</groupId>
-          <artifactId>spring-boot-starter-logging</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-log4j2</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.lmax</groupId>
-      <artifactId>disruptor</artifactId>
-      <version>3.4.4</version>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-data-r2dbc</artifactId>
     </dependency>
     <dependency>
@@ -250,7 +230,7 @@
       <dependency>
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-dependencies</artifactId>
-        <version>2020.0.2</version>
+        <version>2020.0.3</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
@@ -288,7 +268,7 @@
       <plugin>
         <groupId>pl.project13.maven</groupId>
         <artifactId>git-commit-id-plugin</artifactId>
-        <version>4.0.4</version>
+        <version>4.0.5</version>
         <configuration>
           <failOnNoGitDirectory>false</failOnNoGitDirectory>
         </configuration>
@@ -518,6 +498,32 @@
     </profile>
 
     <profile>
+      <id>log4j2</id>
+      <dependencies>
+        <dependency>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter</artifactId>
+          <exclusions>
+            <exclusion>
+              <groupId>org.springframework.boot</groupId>
+              <artifactId>spring-boot-starter-logging</artifactId>
+            </exclusion>
+          </exclusions>
+        </dependency>
+        <dependency>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-log4j2</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>com.lmax</groupId>
+          <artifactId>disruptor</artifactId>
+          <version>3.4.4</version>
+          <scope>runtime</scope>
+        </dependency>
+      </dependencies>
+    </profile>
+
+    <profile>
       <id>native</id>
       <dependencies>
 	      <dependency>
@@ -572,7 +578,7 @@
                     <builder>paketobuildpacks/builder:tiny</builder>
                     <env>
                         <BP_NATIVE_IMAGE>true</BP_NATIVE_IMAGE>
-                        <BP_NATIVE_IMAGE_BUILD_ARGUMENTS>-H:+ReportExceptionStackTraces --enable-https --features=org.graalvm.home.HomeFinderFeature</BP_NATIVE_IMAGE_BUILD_ARGUMENTS>
+                        <BP_NATIVE_IMAGE_BUILD_ARGUMENTS>--verbose -H:+ReportExceptionStackTraces -H:+PrintAnalysisCallTree --enable-https --trace-class-initialization=org.apache.commons.logging.impl.SLF4JLocationAwareLog</BP_NATIVE_IMAGE_BUILD_ARGUMENTS>
                     </env>
                 </image>
             </configuration>
