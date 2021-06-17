@@ -68,11 +68,9 @@ Cf-butler exposes a number of self-service endpoints that perform house-keeping 
 
 ### And what about VMware Tanzu Telemetry Collector?
 
-[VMware Tanzu Telemetry Collector](https://docs.pivotal.io/telemetry/1-0/index.html) supports collection of configuration data from Operations Manager, certificate data from Credhub, and usage data from VMware Tanzu Application Service.  Customers download and install a [CLI](https://network.pivotal.io/products/pivotal-telemetry-collector/) from VMware Tanzu Network.  Typically, a [Concourse](https://concourse-ci.org) [pipeline](https://docs.pivotal.io/telemetry/1-0/using-concourse.html) is configured to automate collection.  The result of collection is a foundation details [tarball](https://docs.pivotal.io/telemetry/1-0/data.html#collected). Customers may opt to transmit this data to VMware Tanzu.
+[VMware Tanzu Telemetry Collector](https://docs.pivotal.io/telemetry-collector/1-1/index.html) supports collection of configuration data from Operations Manager, certificate data from Credhub, and usage data from VMware Tanzu Application Service.  Customers download and install a [CLI](https://network.pivotal.io/products/pivotal-telemetry-collector/) from VMware Tanzu Network.  Typically, a [Concourse](https://concourse-ci.org) [pipeline](https://docs.pivotal.io/telemetry-collector/1-1/using-concourse.html) is configured to automate collection.  The result of collection is a foundation details [tarball](https://docs.pivotal.io/telemetry-collector/1-1/data.html#collected). Customers may opt to transmit this data to VMware Tanzu.
 
-Telemetry is also available for [PCF Dev](https://docs.pivotal.io/pcf-dev/telemetry.html) and [VMware Tanzu Container Service](https://docs.pivotal.io/runtimes/pks/1-4/telemetry.html).
-
-> Note: the [VMware Tanzu Telemetry]((https://tanzu.vmware.com/legal/telemetry)) program is opt-in.
+> Note: [Pivotal Telemetry](https://tanzu.vmware.com/legal/telemetry) and [VMware's Customer Experience Improvement Program](https://www.vmware.com/solutions/trustvmware/ceip.html) are opt-in.
 
 Cf-butler is configured and deployed as an application instance. Its capabilities overlap only on usage data collection from VMware Tanzu Application Service.  However, cf-butler performs other useful duties like a) snapshot usage reporting and b) policy registration and execution.
 
@@ -452,7 +450,7 @@ Start application
 ```
 docker run -p:8080:8080 -it -e PIVNET_API-TOKEN=xxx -e CF_TOKEN-PROVIDER=sso -e CF_API-HOST=api.run.pcfone.io -e CF_REFRESH-TOKEN=xxx cf-butler:1.0-SNAPSHOT
 ```
-> **Note**: The environment variables declared above represent a minimum required to authorize cf-butler to collect data from PCFOne.  Consult the `*.json` secret file [samples](samples) for your specific needs to vary behavior and features. 
+> **Note**: The environment variables declared above represent a minimum required to authorize cf-butler to collect data from [PCFOne](https://login.run.pcfone.io/login).  Consult the `*.json` secret file [samples](samples) for your specific needs to vary behavior and features. 
 
 Stop
 
