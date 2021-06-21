@@ -66,8 +66,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
-    <spring-native.version>0.10.0</spring-native.version>
-    <slf4j.version>2.0.0-alpha1</slf4j.version>
+    <spring-native.version>0.10.1-SNAPSHOT</spring-native.version>
   </properties>
 
   <dependencies>
@@ -182,7 +181,7 @@
     <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
-      <version>3.19.0</version>
+      <version>3.20.1</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -238,6 +237,11 @@
       <name>Spring milestone</name>
       <url>https://repo.spring.io/milestone</url>
     </repository>
+    <repository>
+      <id>spring-snapshots</id>
+      <name>Spring snapshots</name>
+      <url>https://repo.spring.io/snapshot</url>
+    </repository>
   </repositories>
 
   <pluginRepositories>
@@ -250,6 +254,11 @@
       <id>spring-milestone</id>
       <name>Spring milestone</name>
       <url>https://repo.spring.io/plugins-milestone</url>
+    </pluginRepository>
+    <pluginRepository>
+      <id>spring-snapshots</id>
+      <name>Spring snapshots</name>
+      <url>https://repo.spring.io/plugins-snapshot</url>
     </pluginRepository>
   </pluginRepositories>
 
@@ -426,10 +435,26 @@
         <version>1.18.20.0</version>
         <executions>
           <execution>
+            <id>delombok</id>
             <phase>generate-sources</phase>
             <goals>
               <goal>delombok</goal>
             </goals>
+            <configuration>
+              <addOutputDirectory>false</addOutputDirectory>
+              <sourceDirectory>src/main/java</sourceDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>test-delombok</id>
+            <phase>generate-test-sources</phase>
+            <goals>
+              <goal>testDelombok</goal>
+            </goals>
+            <configuration>
+              <addOutputDirectory>false</addOutputDirectory>
+              <sourceDirectory>src/test/java</sourceDirectory>
+            </configuration>
           </execution>
         </executions>
       </plugin>
@@ -524,6 +549,15 @@
 	    </dependency>
       </dependencies>
       <build>
+        <resources>
+          <resource>
+            <directory>src/main/resources</directory>
+            <excludes>
+              <exclude>logback-spring.xml</exclude>
+            </excludes>
+            <filtering>false</filtering>
+          </resource>
+        </resources>
         <plugins>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
@@ -536,9 +570,20 @@
             </configuration>
           </plugin>
           <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <version>3.0.0-M5</version>
+            <configuration>
+              <argLine>-DspringAot=true -agentlib:native-image-agent=access-filter-file=src/test/resources/access-filter.json,config-merge-dir=target/classes/META-INF/native-image --illegal-access=permit ${surefire.jacoco.args}</argLine>
+            </configuration>
+          </plugin>
+          <plugin>
             <groupId>org.springframework.experimental</groupId>
             <artifactId>spring-aot-maven-plugin</artifactId>
             <version>${spring-native.version}</version>
+            <configuration>
+              <mode>native-agent</mode>
+            </configuration>
             <executions>
                 <execution>
                     <id>test-generate</id>
@@ -564,7 +609,7 @@
                     <builder>paketobuildpacks/builder:tiny</builder>
                     <env>
                         <BP_NATIVE_IMAGE>true</BP_NATIVE_IMAGE>
-                        <BP_NATIVE_IMAGE_BUILD_ARGUMENTS>--verbose -H:+ReportExceptionStackTraces -H:+PrintAnalysisCallTree --enable-https</BP_NATIVE_IMAGE_BUILD_ARGUMENTS>
+                        <BP_NATIVE_IMAGE_BUILD_ARGUMENTS>--verbose -H:+ReportExceptionStackTraces -H:+PrintAnalysisCallTree --enable-https --trace-class-initialization=org.apache.commons.logging.impl.SLF4JLocationAwareLog</BP_NATIVE_IMAGE_BUILD_ARGUMENTS>
                     </env>
                 </image>
             </configuration>
