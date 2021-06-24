@@ -434,7 +434,7 @@ The below represent a collection of Maven profiles available in the Maven POM.
 ```
 ./mvnw clean package -Pnative
 ```
-> Compiles a native executable and produces a container image.  You will need Docker.  And you will need to clone and install [cf-butler-hints](https://github.com/cf-butler-hints) into a Maven repository.  For the time-being the aforementioned Github repository is private.  (This packaging option is currently under development).
+> Compiles a native executable and produces a container image.  You will need Docker.  And you will need to clone and install [cf-butler-hints](https://github.com/pacphi/cf-butler-hints) into a Maven repository.  For the time-being the aforementioned Github repository is private.  (This packaging option is currently under development).
 
 ## How to Run with Maven
 
