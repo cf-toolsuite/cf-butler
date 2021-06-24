@@ -37,6 +37,11 @@
       <name>Deployment through Maven's SCM Publish Plugin</name>
       <url>scm:git:git@github.com:pacphi/cf-butler.git</url>
     </site>
+    <repository>
+      <id>github</id>
+      <name>GitHub Packages</name>
+      <url>https://maven.pkg.github.com/pacphi/cf-butler</url>
+    </repository>
   </distributionManagement>
 
   <issueManagement>
