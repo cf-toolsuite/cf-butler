@@ -39,7 +39,7 @@ This is where `cf-butler` has your back.
       * [Integration w/ Operations Manager](#integration-w-operations-manager)
   * [How to Build](#how-to-build)
       * [Alternative build with MySQL support](#alternative-build-with-mysql-support)
-  * [How to Run with Gradle](#how-to-run-with-gradle)
+  * [How to Run with Maven](#how-to-run-with-maven)
   * [How to Run with Docker](#how-to-run-with-docker)
   * [How to deploy to VMware Tanzu Application Service](#how-to-deploy-to-vmware-tanzu-application-service)
       * [with Username and password authorization](#with-username-and-password-authorization)
@@ -152,7 +152,7 @@ If you copied and appended a suffix to the original `application.yml` then you w
 E.g., if you had a configuration file named `application-pws.yml`
 
 ```
-./gradlew bootRun -Dspring.profiles.active=pws
+./mvnw spring-boot:run -Dspring.profiles.active=pws
 ```
 
 > See the [samples](samples) directory for some examples of configuration when deploying to [VMware Tanzu Web Services](https://login.run.tanzu.vmware.com/login) or [PCF One](https://login.run.pcfone.io/login).
@@ -398,21 +398,48 @@ Add entries in your `config/secrets.json` like
 ## How to Build
 
 ```
-./gradlew build
+./mvnw clean package                    ## defaults to H2 in-memory backend
 ```
 
-### Alternative build with MySQL support
+### Alternatives
 
-If you want to target a MySQL database as your back-end you will need to use an alternate Gradle build file.  It adds a dependency on [r2dbc-mysql](https://github.com/mirromutth/r2dbc-mysql).
+The below represent a collection of Maven profiles available in the Maven POM.
+
+* MySQL (mysql)
+  * adds a dependency on [r2dbc-mysql](https://github.com/mirromutth/r2dbc-mysql)
+* Postgres (postgres)
+  * adds a dependency on [r2dbc-postrgesql](https://github.com/pgjdbc/r2dbc-postgresql)
+* Log4J2 logging (log4j2)
+  * swaps out [Logback](http://logback.qos.ch/documentation.html) logging provider for [Log4J2](https://logging.apache.org/log4j/2.x/manual/async.html) and [Disruptor](https://lmax-exchange.github.io/disruptor/user-guide/index.html#_introduction)
+* Native image (native)
+  * uses [Spring AOT](https://docs.spring.io/spring-native/docs/current/reference/htmlsingle/#spring-aot-maven) to compile a native executable with [GraalVM](https://www.graalvm.org/docs/introduction/)
+
 
 ```
-./gradlew build -Pmysql
+./mvnw clean package -Ddbms=mysql
 ```
-
-## How to Run with Gradle
+> Work with MySQL backend
 
 ```
-./gradlew bootRun -Dspring.profiles.active={target_foundation_profile}
+./mvnw clean package -Ddbms=postgres
+```
+> Work with Postgres backend
+
+```
+./mvnw clean package -Plog4j2
+```
+> Swap out default "lossy" logging provider
+
+
+```
+./mvnw clean package -Pnative
+```
+> Compiles a native executable and produces a container image.  You will need Docker.  And you will need to clone and install [cf-butler-hints](https://github.com/cf-butler-hints) into a Maven repository.  For the time-being the aforementioned Github repository is private.  (This packaging option is currently under development).
+
+## How to Run with Maven
+
+```
+./mvnw spring-boot:run -Dspring.profiles.active={target_foundation_profile}
 ```
 where `{target_foundation_profile}` is something like `pws` or `pcfone`
 
@@ -1341,5 +1368,5 @@ POST /policies/execute
 
 * [Oleh Dokuka](https://github.com/OlegDokuka) for writing [Hands-on Reactive Programming in Spring 5](https://www.packtpub.com/application-development/hands-reactive-programming-spring-5); it really helped level-up my understanding and practice on more than a few occasions
 * [Stephane Maldini](https://github.com/smaldini) for all the coaching on [Reactor](https://projectreactor.io); especially error handling
-* [Mark Paluch](https://github.com/mp911de) for coaching on [R2DBC](https://r2dbc.io) and helping me untangle Gradle dependencies
+* [Mark Paluch](https://github.com/mp911de) for coaching on [R2DBC](https://r2dbc.io) and helping me untangle dependencies
 * [Peter Royal](https://github.com/osi) for [assistance](https://gitter.im/reactor/reactor?at=5c38c24966f3433023afceb2) troubleshooting some design and implementation of policy execution tasks

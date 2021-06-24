@@ -20,9 +20,6 @@
         },
         {
             "excludeClasses": "org.springframework.boot.test.**"
-        },
-        {
-            "excludeClasses": "io.pivotal.cfapp.**"
         }
     ]
 }

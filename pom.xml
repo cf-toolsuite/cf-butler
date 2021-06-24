@@ -126,10 +126,6 @@
       <artifactId>r2dbc-spi</artifactId>
     </dependency>
     <dependency>
-      <groupId>io.r2dbc</groupId>
-      <artifactId>r2dbc-h2</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.eclipse.jgit</groupId>
       <artifactId>org.eclipse.jgit</artifactId>
       <version>5.12.0.202106070339-r</version>
@@ -430,35 +426,6 @@
         </executions>
       </plugin>
       <plugin>
-        <groupId>org.projectlombok</groupId>
-        <artifactId>lombok-maven-plugin</artifactId>
-        <version>1.18.20.0</version>
-        <executions>
-          <execution>
-            <id>delombok</id>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>delombok</goal>
-            </goals>
-            <configuration>
-              <addOutputDirectory>false</addOutputDirectory>
-              <sourceDirectory>src/main/java</sourceDirectory>
-            </configuration>
-          </execution>
-          <execution>
-            <id>test-delombok</id>
-            <phase>generate-test-sources</phase>
-            <goals>
-              <goal>testDelombok</goal>
-            </goals>
-            <configuration>
-              <addOutputDirectory>false</addOutputDirectory>
-              <sourceDirectory>src/test/java</sourceDirectory>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
         <version>2.5.1</version>
@@ -491,18 +458,65 @@
 
   <profiles>
     <profile>
+      <id>h2</id>
+      <activation>
+        <property>
+          <name>!rdbms</name>
+        </property>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>io.r2dbc</groupId>
+          <artifactId>r2dbc-h2</artifactId>
+        </dependency>
+      </dependencies>
+    </profile>
+
+    <profile>
       <id>postgres</id>
+      <activation>
+        <property>
+          <name>rdbms</name>
+          <value>postgres</value>
+        </property>
+      </activation>
       <dependencies>
         <dependency>
           <groupId>io.r2dbc</groupId>
           <artifactId>r2dbc-postgresql</artifactId>
           <scope>runtime</scope>
         </dependency>
+        <dependency>
+          <groupId>io.r2dbc</groupId>
+          <artifactId>r2dbc-h2</artifactId>
+          <scope>test</scope>
+        </dependency>
       </dependencies>
+      <build>
+        <finalName>${project.artifactId}-postgres-${project.version}</finalName>
+        <plugins>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-compiler-plugin</artifactId>
+              <version>3.8.1</version>
+              <configuration>
+                <excludes>
+                  <exclude>**/H2ConsoleConfig*</exclude>
+                </excludes>
+              </configuration>
+            </plugin>
+        </plugins>
+      </build>
     </profile>
 
     <profile>
       <id>mysql</id>
+      <activation>
+        <property>
+          <name>rdbms</name>
+          <value>mysql</value>
+        </property>
+      </activation>
       <dependencies>
         <dependency>
           <groupId>dev.miku</groupId>
@@ -510,7 +524,27 @@
           <version>0.8.2.RELEASE</version>
           <scope>runtime</scope>
         </dependency>
+        <dependency>
+          <groupId>io.r2dbc</groupId>
+          <artifactId>r2dbc-h2</artifactId>
+          <scope>test</scope>
+        </dependency>
       </dependencies>
+      <build>
+        <finalName>${project.artifactId}-mysql-${project.version}</finalName>
+        <plugins>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-compiler-plugin</artifactId>
+              <version>3.8.1</version>
+              <configuration>
+                <excludes>
+                  <exclude>**/H2ConsoleConfig*</exclude>
+                </excludes>
+              </configuration>
+            </plugin>
+        </plugins>
+      </build>
     </profile>
 
     <profile>
@@ -537,16 +571,38 @@
           <scope>runtime</scope>
         </dependency>
       </dependencies>
+      <build>
+        <resources>
+          <resource>
+            <directory>src/main/resources</directory>
+            <excludes>
+              <exclude>logback-spring.xml</exclude>
+            </excludes>
+            <filtering>false</filtering>
+          </resource>
+        </resources>
+      </build>
     </profile>
 
     <profile>
       <id>native</id>
       <dependencies>
 	      <dependency>
-	      <groupId>org.springframework.experimental</groupId>
-	      <artifactId>spring-native</artifactId>
-	      <version>${spring-native.version}</version>
-	    </dependency>
+          <groupId>org.springframework.experimental</groupId>
+          <artifactId>spring-native</artifactId>
+          <version>${spring-native.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.cloudfoundry</groupId>
+          <artifactId>cloudfoundry-client-reactor</artifactId>
+          <version>5.5.0.RELEASE</version>
+          <exclusions>
+            <exclusion>
+              <groupId>org.slf4j</groupId>
+              <artifactId>jcl-over-slf4j</artifactId>
+            </exclusion>
+          </exclusions>
+        </dependency>
       </dependencies>
       <build>
         <resources>
@@ -554,6 +610,8 @@
             <directory>src/main/resources</directory>
             <excludes>
               <exclude>logback-spring.xml</exclude>
+              <exclude>log4j2-spring.xml</exclude>
+              <exclude>log4j2.component.properties</exclude>
             </excludes>
             <filtering>false</filtering>
           </resource>
@@ -584,6 +642,13 @@
             <configuration>
               <mode>native-agent</mode>
             </configuration>
+            <dependencies>
+              <dependency>
+                <groupId>io.pivotal</groupId>
+                <artifactId>cf-butler-hints</artifactId>
+                <version>${project.version}</version>
+              </dependency>
+            </dependencies>
             <executions>
                 <execution>
                     <id>test-generate</id>
@@ -609,7 +674,7 @@
                     <builder>paketobuildpacks/builder:tiny</builder>
                     <env>
                         <BP_NATIVE_IMAGE>true</BP_NATIVE_IMAGE>
-                        <BP_NATIVE_IMAGE_BUILD_ARGUMENTS>--verbose -H:+ReportExceptionStackTraces -H:+PrintAnalysisCallTree --enable-https --trace-class-initialization=org.apache.commons.logging.impl.SLF4JLocationAwareLog</BP_NATIVE_IMAGE_BUILD_ARGUMENTS>
+                        <BP_NATIVE_IMAGE_BUILD_ARGUMENTS>--verbose -H:+ReportExceptionStackTraces -H:+PrintAnalysisCallTree --enable-https --initialize-at-build-time=sun.instrument.InstrumentationImpl</BP_NATIVE_IMAGE_BUILD_ARGUMENTS>
                     </env>
                 </image>
             </configuration>

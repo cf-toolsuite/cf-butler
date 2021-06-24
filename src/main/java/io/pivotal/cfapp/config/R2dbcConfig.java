@@ -28,7 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Configuration
-class R2dbcConfig extends AbstractR2dbcConfiguration {
+public class R2dbcConfig extends AbstractR2dbcConfiguration {
     
     private static final String DOMAIN_PACKAGE = "io.pivotal.cfapp.domain";
     private static final List<String> SUPPORTED_SCHEMES = Arrays.asList(new String[] { "mysql", "postgresql"});
@@ -37,10 +37,13 @@ class R2dbcConfig extends AbstractR2dbcConfiguration {
     private CfEnv cfEnv;
     private R2dbcProperties r2dbcProperties;
 
-    
-    public R2dbcConfig(@Autowired(required = false) CfEnv cfEnv, @Autowired R2dbcProperties r2dbcProperties) {
-        super();
+    @Autowired(required = false)
+    public void setCfEnv(CfEnv cfEnv) {
         this.cfEnv = cfEnv;
+    }
+
+    @Autowired
+    public void setR2dbcProperties(R2dbcProperties r2dbcProperties) {
         this.r2dbcProperties = r2dbcProperties;
     }
 
@@ -51,7 +54,6 @@ class R2dbcConfig extends AbstractR2dbcConfiguration {
     }
 
     @Bean
-    @Profile("cloud")
     public ConnectionFactory connectionFactory() {
         R2dbcProperties properties = r2dbcProperties(this.cfEnv);
         ConnectionFactoryOptions.Builder builder = ConnectionFactoryOptions
@@ -108,6 +110,9 @@ class R2dbcConfig extends AbstractR2dbcConfiguration {
             }
         } catch (IllegalArgumentException iae) {
             log.info("No bound service instance named {} was found. Falling back to embedded database.", VCAP_SERVICE);
+            return this.r2dbcProperties;
+        } catch (NullPointerException npe) {
+            log.debug("Not running on Cloud Foundry.");
             return this.r2dbcProperties;
         }
     }
