@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableScheduling
 @EnableTransactionManagement
 @ConfigurationPropertiesScan
-@SpringBootApplication(proxyBeanMethods = false)
+@SpringBootApplication
 public class AppInit {
 
     public static void main(String[] args) {

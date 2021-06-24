@@ -17,7 +17,7 @@ import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.context.event.SimpleApplicationEventMulticaster;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 
-@Configuration(proxyBeanMethods = false)
+@Configuration
 public class ButlerConfig {
 
     @Bean

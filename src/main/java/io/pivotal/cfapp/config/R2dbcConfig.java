@@ -27,16 +27,25 @@ import io.r2dbc.spi.Option;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Configuration(proxyBeanMethods = false)
-class R2dbcConfig extends AbstractR2dbcConfiguration {
+@Configuration
+public class R2dbcConfig extends AbstractR2dbcConfiguration {
     
     private static final String DOMAIN_PACKAGE = "io.pivotal.cfapp.domain";
     private static final List<String> SUPPORTED_SCHEMES = Arrays.asList(new String[] { "mysql", "postgresql"});
     private static final String VCAP_SERVICE = "cf-butler-backend";
     
-    @Autowired
+    private CfEnv cfEnv;
     private R2dbcProperties r2dbcProperties;
 
+    @Autowired(required = false)
+    public void setCfEnv(CfEnv cfEnv) {
+        this.cfEnv = cfEnv;
+    }
+
+    @Autowired
+    public void setR2dbcProperties(R2dbcProperties r2dbcProperties) {
+        this.r2dbcProperties = r2dbcProperties;
+    }
 
     @Bean
     @Profile("cloud")
@@ -45,9 +54,8 @@ class R2dbcConfig extends AbstractR2dbcConfiguration {
     }
 
     @Bean
-    @Profile("cloud")
     public ConnectionFactory connectionFactory() {
-        R2dbcProperties properties = r2dbcProperties(cfEnv());
+        R2dbcProperties properties = r2dbcProperties(this.cfEnv);
         ConnectionFactoryOptions.Builder builder = ConnectionFactoryOptions
                 .parse(properties.getUrl()).mutate();
         String username = properties.getUsername();
@@ -102,6 +110,9 @@ class R2dbcConfig extends AbstractR2dbcConfiguration {
             }
         } catch (IllegalArgumentException iae) {
             log.info("No bound service instance named {} was found. Falling back to embedded database.", VCAP_SERVICE);
+            return this.r2dbcProperties;
+        } catch (NullPointerException npe) {
+            log.debug("Not running on Cloud Foundry.");
             return this.r2dbcProperties;
         }
     }
