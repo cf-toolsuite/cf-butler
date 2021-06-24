@@ -24,8 +24,8 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
       - name: Build with Maven targeting H2 backend
-        run: ./mvnw --batch-mode --update-snapshots -Plog4j2 verify
+        run: ./mvnw --batch-mode --update-snapshots -Plog4j2 clean verify
       - name: Build with Maven targeting MySQL backend
-        run: ./mvnw --batch-mode --update-snapshots -Drdbms=mysql -Plog4j2 verify
+        run: ./mvnw --batch-mode --update-snapshots -Drdbms=mysql -Plog4j2 clean verify
       - name: Build with Maven targeting Postgresql backend
-        run: ./mvnw --batch-mode --update-snapshots -Drdbms=postgres -Plog4j2 verify
+        run: ./mvnw --batch-mode --update-snapshots -Drdbms=postgres -Plog4j2 clean verify
