@@ -93,6 +93,11 @@ spring:
     name: cf-butler
     username: sa
     password: 
+  ## Disable org.springframework.boot.autoconfigure.sql.init.SqlInitializationAutoConfiguration
+  ## It curently interferes with startup login in Cloud Foundry operational context when either a MySQL or Postgres service instance is bound to application
+  sql:
+    init:
+      enabled: false
 
 # Java Mail
 # Reset the values for spring.mail.username, spring.mail.password

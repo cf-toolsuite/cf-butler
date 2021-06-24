@@ -1,4 +1,4 @@
-# Pivotal Application Service > Butler
+# VMware Tanzu Application Service > Butler
 
 [![Beta](https://img.shields.io/badge/Stability-Beta-orange)](https://img.shields.io/badge/Stability-Beta-orange) [![Build Status](https://travis-ci.org/pacphi/cf-butler.svg?branch=master)](https://travis-ci.org/pacphi/cf-butler) [![Known Vulnerabilities](https://snyk.io/test/github/pacphi/cf-butler/badge.svg?style=plastic)](https://snyk.io/test/github/pacphi/cf-butler) [![Release](https://jitpack.io/v/pacphi/cf-butler.svg)](https://jitpack.io/#pacphi/cf-butler/master-SNAPSHOT) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
@@ -15,7 +15,7 @@ This is where `cf-butler` has your back.
 
   * [What does it do?](#what-does-it-do)
       * [Tell me, don't show me](#tell-me-dont-show-me)
-      * [And what about Pivotal Telemetry Collector?](#and-what-about-pivotal-telemetry-collector)
+      * [And what about VMware Tanzu Telemetry Collector?](#and-what-about-vmware-tanzu-telemetry-collector)
   * [Prerequisites](#prerequisites)
   * [Tools](#tools)
   * [Clone](#clone)
@@ -39,15 +39,15 @@ This is where `cf-butler` has your back.
       * [Integration w/ Operations Manager](#integration-w-operations-manager)
   * [How to Build](#how-to-build)
       * [Alternative build with MySQL support](#alternative-build-with-mysql-support)
-  * [How to Run with Gradle](#how-to-run-with-gradle)
+  * [How to Run with Maven](#how-to-run-with-maven)
   * [How to Run with Docker](#how-to-run-with-docker)
-  * [How to deploy to Pivotal Application Service](#how-to-deploy-to-pivotal-application-service)
+  * [How to deploy to VMware Tanzu Application Service](#how-to-deploy-to-vmware-tanzu-application-service)
       * [with Username and password authorization](#with-username-and-password-authorization)
       * [with SSO authorization](#with-sso-authorization)
       * [using scripts](#using-scripts)
   * [Endpoints](#endpoints)
       * [Operations Manager](#operations-manager)
-      * [Pivotal Network](#pivotal-network)
+      * [VMware Tanzu Network](#vmware-tanzu-network)
       * [Events](#events)
       * [Metadata](#metadata)
       * [Snapshot](#snapshot)
@@ -66,28 +66,26 @@ Please take 5-10 mintues to view this short video demonstration to get a sense o
 
 Cf-butler exposes a number of self-service endpoints that perform house-keeping for your foundation.  You define policies and an execution schedule.  E.g., applications and service instances could be removed based on policy crtieria.  Cf-butler also provides detail and summary snapshot reporting on all applications, service instances, user accounts, organizations and spaces.  Lastly, cf-butler [aspires](https://github.com/pacphi/cf-butler/issues/62) to provide operators insight into the "freshness" of installed tiles, stemcells and buildpacks.
 
-### And what about Pivotal Telemetry Collector?
+### And what about VMware Tanzu Telemetry Collector?
 
-[Pivotal Telemetry Collector](https://docs.pivotal.io/telemetry/1-0/index.html) supports collection of configuration data from Operations Manager, certificate data from Credhub, and usage data from Pivotal Application Service.  Customers download and install a [CLI](https://network.pivotal.io/products/pivotal-telemetry-collector/) from Pivotal Network.  Typically, a [Concourse](https://concourse-ci.org) [pipeline](https://docs.pivotal.io/telemetry/1-0/using-concourse.html) is configured to automate collection.  The result of collection is a foundation details [tarball](https://docs.pivotal.io/telemetry/1-0/data.html#collected). Customers may opt to transmit this data to Pivotal.
+[VMware Tanzu Telemetry Collector](https://docs.pivotal.io/telemetry-collector/1-1/index.html) supports collection of configuration data from Operations Manager, certificate data from Credhub, and usage data from VMware Tanzu Application Service.  Customers download and install a [CLI](https://network.pivotal.io/products/pivotal-telemetry-collector/) from VMware Tanzu Network.  Typically, a [Concourse](https://concourse-ci.org) [pipeline](https://docs.pivotal.io/telemetry-collector/1-1/using-concourse.html) is configured to automate collection.  The result of collection is a foundation details [tarball](https://docs.pivotal.io/telemetry-collector/1-1/data.html#collected). Customers may opt to transmit this data to VMware Tanzu.
 
-Telemetry is also available for [PCF Dev](https://docs.pivotal.io/pcf-dev/telemetry.html) and [Pivotal Container Service](https://docs.pivotal.io/runtimes/pks/1-4/telemetry.html).
+> Note: [Pivotal Telemetry](https://tanzu.vmware.com/legal/telemetry) and [VMware's Customer Experience Improvement Program](https://www.vmware.com/solutions/trustvmware/ceip.html) are opt-in.
 
-> Note: the [Pivotal Telemetry]((https://pivotal.io/legal/telemetry)) program is opt-in.
-
-Cf-butler is configured and deployed as an application instance. Its capabilities overlap only on usage data collection from Pivotal Application Service.  However, cf-butler performs other useful duties like a) snapshot usage reporting and b) policy registration and execution.
+Cf-butler is configured and deployed as an application instance. Its capabilities overlap only on usage data collection from VMware Tanzu Application Service.  However, cf-butler performs other useful duties like a) snapshot usage reporting and b) policy registration and execution.
 
 
 ## Prerequisites
 
 Required
 
-* Access to a foundation with Pivotal Application Service 2.6 or better installed
-  * and [Pivotal Application Service](https://pivotal.io/platform/pivotal-application-service) admin account credentials
+* Access to a foundation with VMware Tanzu Application Service 2.6 or better installed
+  * and [VMware Tanzu Application Service](https://tanzu.vmware.com/platform/vmware-tanzu-application-service) admin account credentials
 
 Optional
 
-* [Pivotal Network](https://network.pivotal.io) account credentials
-* [Pivotal Operations Manager](https://pivotal.io/platform/pcf-components/pcf-ops-manager) admin account credentials
+* [VMware Tanzu Network](https://network.pivotal.io) account credentials
+* [VMware Tanzu Operations Manager](https://tanzu.vmware.com/platform/pcf-components/pcf-ops-manager) admin account credentials
 
 
 ## Tools
@@ -132,16 +130,16 @@ We'll use this file later as input configuration for the creation of either a [c
 
 At a minimum you should supply values for the following keys
 
-* `cf.apiHost` - a Pivotal Application Service API endpoint
-* `cf.tokenProvider` - Pivotal Application Service authorization token provider, options are: `userpass` or `sso`
-* `pivnet.apiToken` - a Pivotal Network legacy API Token, visit your [profile](https://network.pivotal.io/users/dashboard/edit-profile)
+* `cf.apiHost` - a VMware Tanzu Application Service API endpoint
+* `cf.tokenProvider` - VMware Tanzu Application Service authorization token provider, options are: `userpass` or `sso`
+* `pivnet.apiToken` - a VMware Tanzu Network legacy API Token, visit your [profile](https://network.pivotal.io/users/dashboard/edit-profile)
 
 Based on choice of the authorization token provider
 
 #### Username and password
 
-* `cf.username` - a Pivotal Application Service account username (typically an administrator account)
-* `cf.password` - a Pivotal Application Service account password
+* `cf.username` - a VMware Tanzu Application Service account username (typically an administrator account)
+* `cf.password` - a VMware Tanzu Application Service account password
 
 #### Single-sign on
 
@@ -154,10 +152,10 @@ If you copied and appended a suffix to the original `application.yml` then you w
 E.g., if you had a configuration file named `application-pws.yml`
 
 ```
-./gradlew bootRun -Dspring.profiles.active=pws
+./mvnw spring-boot:run -Dspring.profiles.active=pws
 ```
 
-> See the [samples](samples) directory for some examples of configuration when deploying to [Pivotal Web Services](https://login.run.pivotal.io/login) or [PCF One](https://login.run.pcfone.io/login).
+> See the [samples](samples) directory for some examples of configuration when deploying to [VMware Tanzu Web Services](https://login.run.tanzu.vmware.com/login) or [PCF One](https://login.run.pcfone.io/login).
 
 For an exhaustive listing of all overridable configuration properties consult [ButlerCfEnvProcessor.java](https://github.com/pacphi/cf-butler/blob/master/src/main/java/io/pivotal/cfapp/config/ButlerCfEnvProcessor.java).
 
@@ -183,7 +181,7 @@ Or you may wish to `cf bind-service` to a database service instance. In this cas
 
 [DDL](https://en.wikipedia.org/wiki/Data_definition_language) scripts for each supported database are managed underneath [src/main/resources/db](src/main/resources/db). Supported databases are: [h2](src/main/resources/db/h2/schema.ddl), [mysql](src/main/resources/db/mysql/schema.ddl) and [postgresql](src/main/resources/db/postgresql/schema.ddl).
 
-> A sample [script](scripts/deploy.postgres.sh) and [secrets](samples/secrets.pws.with-postgres.json) for deploying `cf-butler` to Pivotal Web Services with an [ElephantSQL](https://www.elephantsql.com) backend exists for your perusal.  If you're rather interested in MySQL as a backend, take a look at this version of [secrets](samples/secrets.pws.with-mysql.json) and the accompanying [script](scripts/deploy.mysql.sh).
+> A sample [script](scripts/deploy.postgres.sh) and [secrets](samples/secrets.pws.with-postgres.json) for deploying `cf-butler` to VMware Tanzu Web Services with an [ElephantSQL](https://www.elephantsql.com) backend exists for your perusal.  If you're rather interested in MySQL as a backend, take a look at this version of [secrets](samples/secrets.pws.with-mysql.json) and the accompanying [script](scripts/deploy.mysql.sh).
 
 ### Managing policies
 
@@ -383,7 +381,7 @@ Add an entry in your `config/secrets.json` like
 
 You must add the following configuration properties to `application-{env}.yml` if you want to enable integration with an operations manager instance
 
-* `om.apiHost` - a Pivotal Operations Manager API endpoint
+* `om.apiHost` - a VMware Tanzu Operations Manager API endpoint
 * `om.enabled` - a boolean property that must be set to `true`
 
 > the `{env}` filename suffix above denotes the Spring Profile you would activate for your environment
@@ -400,21 +398,48 @@ Add entries in your `config/secrets.json` like
 ## How to Build
 
 ```
-./gradlew build
+./mvnw clean package                    ## defaults to H2 in-memory backend
 ```
 
-### Alternative build with MySQL support
+### Alternatives
 
-If you want to target a MySQL database as your back-end you will need to use an alternate Gradle build file.  It adds a dependency on [r2dbc-mysql](https://github.com/mirromutth/r2dbc-mysql).
+The below represent a collection of Maven profiles available in the Maven POM.
+
+* MySQL (mysql)
+  * adds a dependency on [r2dbc-mysql](https://github.com/mirromutth/r2dbc-mysql)
+* Postgres (postgres)
+  * adds a dependency on [r2dbc-postrgesql](https://github.com/pgjdbc/r2dbc-postgresql)
+* Log4J2 logging (log4j2)
+  * swaps out [Logback](http://logback.qos.ch/documentation.html) logging provider for [Log4J2](https://logging.apache.org/log4j/2.x/manual/async.html) and [Disruptor](https://lmax-exchange.github.io/disruptor/user-guide/index.html#_introduction)
+* Native image (native)
+  * uses [Spring AOT](https://docs.spring.io/spring-native/docs/current/reference/htmlsingle/#spring-aot-maven) to compile a native executable with [GraalVM](https://www.graalvm.org/docs/introduction/)
+
 
 ```
-./gradlew build -Pmysql
+./mvnw clean package -Ddbms=mysql
 ```
-
-## How to Run with Gradle
+> Work with MySQL backend
 
 ```
-./gradlew bootRun -Dspring.profiles.active={target_foundation_profile}
+./mvnw clean package -Ddbms=postgres
+```
+> Work with Postgres backend
+
+```
+./mvnw clean package -Plog4j2
+```
+> Swap out default "lossy" logging provider
+
+
+```
+./mvnw clean package -Pnative
+```
+> Compiles a native executable and produces a container image.  You will need Docker.  And you will need to clone and install [cf-butler-hints](https://github.com/cf-butler-hints) into a Maven repository.  For the time-being the aforementioned Github repository is private.  (This packaging option is currently under development).
+
+## How to Run with Maven
+
+```
+./mvnw spring-boot:run -Dspring.profiles.active={target_foundation_profile}
 ```
 where `{target_foundation_profile}` is something like `pws` or `pcfone`
 
@@ -450,9 +475,9 @@ docker run --name butler-postgres -e POSTGRES_DB=butler -e POSTGRES_USER=butler 
 Start application
 
 ```
-docker run -it --rm -e SPRING_PROFILES_ACTIVE={env} pivotalio/cf-butler
+docker run -p:8080:8080 -it -e PIVNET_API-TOKEN=xxx -e CF_TOKEN-PROVIDER=sso -e CF_API-HOST=api.run.pcfone.io -e CF_REFRESH-TOKEN=xxx cf-butler:1.0-SNAPSHOT
 ```
-> **Note**: You should have authored an `application-{env}.yml` that encapsulates the appropriate configuration within `src/main/resources` before you built the `cf-butler-{version}-SNAPSHOT.jar` artifact with Gradle
+> **Note**: The environment variables declared above represent a minimum required to authorize cf-butler to collect data from [PCFOne](https://login.run.pcfone.io/login).  Consult the `*.json` secret file [samples](samples) for your specific needs to vary behavior and features. 
 
 Stop
 
@@ -470,7 +495,7 @@ docker rm {pid}
 > where `{pid}` is the Docker process id
 
 
-## How to deploy to Pivotal Application Service
+## How to deploy to VMware Tanzu Application Service
 
 ### with Username and password authorization
 
@@ -478,10 +503,10 @@ The following instructions explain how to get started when `cf.tokenProvider` is
 
 Authenticate to a foundation using the API endpoint.
 
-> E.g., login to [Pivotal Web Services](https://login.run.pivotal.io)
+> E.g., login to [VMware Tanzu Web Services](https://login.run.tanzu.vmware.com)
 
 ```
-cf login -a https://api.run.pivotal.io
+cf login -a https://api.run.tanzu.vmware.com
 ```
 
 ### with SSO authorization
@@ -534,7 +559,7 @@ Shutdown and destroy the app and service instances
 ./scripts/destroy.sh
 ```
 
-> Note: If you are seeing [OutOfMemory exceptions](https://dzone.com/articles/troubleshooting-problems-with-native-off-heap-memo) shortly after startup you may need to [cf scale](https://docs.run.pivotal.io/devguide/deploy-apps/cf-scale.html#vertical) the available memory for large foundations.
+> Note: If you are seeing [OutOfMemory exceptions](https://dzone.com/articles/troubleshooting-problems-with-native-off-heap-memo) shortly after startup you may need to [cf scale](https://docs.run.tanzu.vmware.com/devguide/deploy-apps/cf-scale.html#vertical) the available memory for large foundations.
 
 ## Endpoints
 
@@ -542,7 +567,7 @@ These REST endpoints have been exposed for reporting and administrative purposes
 
 ### Operations Manager
 
-These endpoints are only available when the `om.enabled` property is set to `true`. `om.apiHost`, `om.username` and `om.password` properties must also have been defined.  Mimics a reduced set of the [Operations Manager API](https://docs.pivotal.io/pivotalcf/2-6/opsman-api/).
+These endpoints are only available when the `om.enabled` property is set to `true`. `om.apiHost`, `om.username` and `om.password` properties must also have been defined.  Mimics a reduced set of the [Operations Manager API](https://docs.pivotal.io/vmware-tanzucf/2-6/opsman-api/).
 
 ```
 GET /products/deployed
@@ -664,29 +689,29 @@ Sample output
 ```
 
 
-### Pivotal Network
+### VMware Tanzu Network
 
-These endpoints are only available when the `pivnet.enabled` property is set to `true`. A valid `pivnet.apiToken` property must also have been defined.  Mimics a reduced set of the [Pivotal Network API](https://network.pivotal.io/docs/api).
+These endpoints are only available when the `pivnet.enabled` property is set to `true`. A valid `pivnet.apiToken` property must also have been defined.  Mimics a reduced set of the [VMware Tanzu Network API](https://network.pivotal.io/docs/api).
 
 ```
 GET /store/product/catalog
 ```
-> Retrieves a list of all products from Pivotal Network (includes buildpacks, stemcells and tiles)
+> Retrieves a list of all products from VMware Tanzu Network (includes buildpacks, stemcells and tiles)
 
 ```
 GET /store/product/releases?q=latest
 ```
-> Returns a list of the latest available releases for all products on Pivotal Network (includes buildpacks, stemcells and tiles)
+> Returns a list of the latest available releases for all products on VMware Tanzu Network (includes buildpacks, stemcells and tiles)
 
 ```
 GET /store/product/releases?q=all
 ```
-> Returns a list of all available releases for all products on Pivotal Network (includes buildpacks, stemcells and tiles)
+> Returns a list of all available releases for all products on VMware Tanzu Network (includes buildpacks, stemcells and tiles)
 
 ```
 GET /store/product/releases?q=recent
 ```
-> Returns a list of releases released within the last 7 days for all products on Pivotal Network (includes buildpacks, stemcells and tiles)
+> Returns a list of releases released within the last 7 days for all products on VMware Tanzu Network (includes buildpacks, stemcells and tiles)
 
 
 ### Events
@@ -763,16 +788,16 @@ Sample output
     space: "akarode",
     auditors: [ ],
     developers: [
-      "wlund@pivotal.io",
-      "akarode@pivotal.io"
+      "wlund@tanzu.vmware.com",
+      "akarode@tanzu.vmware.com"
     ],
     managers: [
-      "wlund@pivotal.io",
-      "akarode@pivotal.io"
+      "wlund@tanzu.vmware.com",
+      "akarode@tanzu.vmware.com"
     ],
     users: [
-      "wlund@pivotal.io",
-      "akarode@pivotal.io"
+      "wlund@tanzu.vmware.com",
+      "akarode@tanzu.vmware.com"
     ],
     user-count: 2,
   },
@@ -781,13 +806,13 @@ Sample output
     space: "arao",
     auditors: [ ],
     developers: [
-      "arao@pivotal.io"
+      "arao@tanzu.vmware.com"
     ],
     managers: [
-      "arao@pivotal.io"
+      "arao@tanzu.vmware.com"
     ],
     users: [
-      "arao@pivotal.io"
+      "arao@tanzu.vmware.com"
     ],
     user-count: 1
   },
@@ -933,7 +958,7 @@ organization,space,application id,application name,buildpack,buildpack version,i
 "blast-radius","substratum","f34fdbcb-3cb8-4d76-90ad-aafb1e64b5b6","cf-hoover","java","v4.18",,"cflinuxfs3","1","1","0.241331355","0.187875328","cf-hoover.apps.demo.ironleg.me","2019-07-30T06:06:28","audit.app.droplet.create","admin","2019-07-30T06:18:42","started"
 "blast-radius","substratum","fdcc6a1c-d457-4418-b80c-9b630c59df92","cf-hoover-ui","java","v4.18",,"cflinuxfs3","1","1","0.376542052","0.213118976","cf-hoover-ui.apps.demo.ironleg.me","2019-07-30T06:22:27","audit.app.droplet.create","admin","2019-07-30T06:23:47","started"
 "credhub-service-broker-org","credhub-service-broker-space","8b71f3f7-e678-49a1-b33f-9602a361fd6f","credhub-broker-1.3.3","binary","v1.0.32",,"cflinuxfs3","1","1","0.015036871","0.009777152","credhub-broker.apps.demo.ironleg.me","2019-07-28T17:37:13","audit.app.droplet.create","system_services","2019-07-28T17:37:43","started"
-"killens","dev","b1406fd6-7394-4182-928a-e9e7c606f711","lighthouseweb","hwc","v3.1.10",,"windows","1","1","0.323162112","0.131223552","lighthouseweb.apps.demo.ironleg.me","2019-08-13T12:14:16","audit.app.droplet.create","mkillens@pivotal.io","2019-08-13T12:14:48","started"
+"killens","dev","b1406fd6-7394-4182-928a-e9e7c606f711","lighthouseweb","hwc","v3.1.10",,"windows","1","1","0.323162112","0.131223552","lighthouseweb.apps.demo.ironleg.me","2019-08-13T12:14:16","audit.app.droplet.create","mkillens@tanzu.vmware.com","2019-08-13T12:14:48","started"
 "p-spring-cloud-services","5095d5ca-a7cf-4456-b8ea-2cfd5549327c","a5508727-788c-446a-aa17-1f8c028196e8","config-server","java","v4.18",,"cflinuxfs3","1","1","0.246387556","0.169598976","config-server-8095d5ca-a7cf-4456-b8ea-2cfd5549327c.apps.demo.ironleg.me","2019-07-30T06:08:25","audit.app.droplet.create",,"2019-07-30T06:09:23","started"
 "p-spring-cloud-services","instances","c2917b8d-54e1-48c7-a3d4-38137d4623cb","eureka-29239c3f-b89e-4da1-b579-0338176146f8","java","v4.18",,"cflinuxfs3","1","1","0.372844233","0.198602752","eureka-24239c3f-b89e-4da1-b579-0338176146f8.apps.demo.ironleg.me","2019-07-30T06:08:46","audit.app.droplet.create",,"2019-07-30T06:11:14","started"
 ```
@@ -998,8 +1023,8 @@ User accounts from api.sys.cf.zoo.labs.foo.org generated 2019-05-17T00:19:45.932
 
 
 organization,space,user accounts
-"mvptime","default","cphillipson@pivotal.io,bruce.lee@kungfulegends.com,vmanoharan@pivotal.io"
-"planespotter","default","stan.lee@marvel.com,vmanoharan@pivotal.io"
+"mvptime","default","cphillipson@tanzu.vmware.com,bruce.lee@kungfulegends.com,vmanoharan@tanzu.vmware.com"
+"planespotter","default","stan.lee@marvel.com,vmanoharan@tanzu.vmware.com"
 ```
 
 ```
@@ -1021,41 +1046,41 @@ Sample output
 
 ### Accounting
 
-> Note: `/accounting/**` endpoints below require a user with `cloud_controller.admin` or `usage_service.audit` scope.  See [Creating and Managing Users with the UAA CLI (UAAC)](https://docs.pivotal.io/pivotalcf/2-5/uaa/uaa-user-management.html).
+> Note: `/accounting/**` endpoints below require a user with `cloud_controller.admin` or `usage_service.audit` scope.  See [Creating and Managing Users with the UAA CLI (UAAC)](https://docs.pivotal.io/vmware-tanzucf/2-5/uaa/uaa-user-management.html).
 
 ```
 GET /accounting/applications
 ```
-> Produces a system-wide account report of [application usage](https://docs.pivotal.io/pivotalcf/2-6/opsguide/accounting-report.html#app-usage)
+> Produces a system-wide account report of [application usage](https://docs.pivotal.io/vmware-tanzucf/2-6/opsguide/accounting-report.html#app-usage)
 
 > **Note**: Report excludes application instances in the `system` org
 
 ```
 GET /accounting/services
 ```
-> Produces a system-wide account report of [service usage](https://docs.pivotal.io/pivotalcf/2-6/opsguide/accounting-report.html#service-usage)
+> Produces a system-wide account report of [service usage](https://docs.pivotal.io/vmware-tanzucf/2-6/opsguide/accounting-report.html#service-usage)
 
 > **Note**: Report excludes user-provided service instances
 
 ```
 GET /accounting/tasks
 ```
-> Produces a system-wide account report of [task usage](https://docs.pivotal.io/pivotalcf/2-6/opsguide/accounting-report.html#task-usage)
+> Produces a system-wide account report of [task usage](https://docs.pivotal.io/vmware-tanzucf/2-6/opsguide/accounting-report.html#task-usage)
 
 ```
 GET /accounting/applications/{orgName}/{startDate}/{endDate}
 ```
-> Produces an [application usage](https://docs.pivotal.io/pivotalcf/2-6/opsguide/accounting-report.html#org-app-usage) constrained to single organization and time period
+> Produces an [application usage](https://docs.pivotal.io/vmware-tanzucf/2-6/opsguide/accounting-report.html#org-app-usage) constrained to single organization and time period
 
 ```
 GET /accounting/services/{orgName}/{startDate}/{endDate}
 ```
-> Produces a [service usage](https://docs.pivotal.io/pivotalcf/2-6/opsguide/accounting-report.html#org-service-usage) constrained to single organization and time period
+> Produces a [service usage](https://docs.pivotal.io/vmware-tanzucf/2-6/opsguide/accounting-report.html#org-service-usage) constrained to single organization and time period
 
 ```
 GET /accounting/tasks/{orgName}/{startDate}/{endDate}
 ```
-> Produces a [task usage](https://docs.pivotal.io/pivotalcf/2-6/opsguide/accounting-report.html#org-task-usage) constrained to single organization and time period
+> Produces a [task usage](https://docs.pivotal.io/vmware-tanzucf/2-6/opsguide/accounting-report.html#org-task-usage) constrained to single organization and time period
 
 
 ### Policies
@@ -1162,7 +1187,7 @@ POST /policies
       "operator-email-template": {
         "from": "admin@nowhere.me",
         "to": [
-          "cphillipson@pivotal.io"
+          "cphillipson@tanzu.vmware.com"
         ],
         "subject": "Hygiene Policy Platform Operator Report",
         "body": "These are the dormant workloads in a single organization"
@@ -1189,7 +1214,7 @@ POST /policies
         "from": "admin@pcf.demo.ironleg.me",
         "subject": "Legacy Policy Sample Report",
         "to": [
-          "cphillipson@pivotal.io"
+          "cphillipson@tanzu.vmware.com"
         ]
       },
       "organization-whitelist": [],
@@ -1209,7 +1234,7 @@ POST /policies
         "from": "admin@pcf.demo.ironleg.me",
         "subject": "Legacy Policy Sample Report",
         "to": [
-          "cphillipson@pivotal.io"
+          "cphillipson@tanzu.vmware.com"
         ]
       },
       "organization-whitelist": [],
@@ -1231,7 +1256,7 @@ POST /policies
                             "PrimaryOwner",
                             "SecondaryOwner"
                           ],
-                "email-domain": "pivotal.io"
+                "email-domain": "tanzu.vmware.com"
             }
             "resource-whitelist": [
                 "p-config-server"
@@ -1343,5 +1368,5 @@ POST /policies/execute
 
 * [Oleh Dokuka](https://github.com/OlegDokuka) for writing [Hands-on Reactive Programming in Spring 5](https://www.packtpub.com/application-development/hands-reactive-programming-spring-5); it really helped level-up my understanding and practice on more than a few occasions
 * [Stephane Maldini](https://github.com/smaldini) for all the coaching on [Reactor](https://projectreactor.io); especially error handling
-* [Mark Paluch](https://github.com/mp911de) for coaching on [R2DBC](https://r2dbc.io) and helping me untangle Gradle dependencies
+* [Mark Paluch](https://github.com/mp911de) for coaching on [R2DBC](https://r2dbc.io) and helping me untangle dependencies
 * [Peter Royal](https://github.com/osi) for [assistance](https://gitter.im/reactor/reactor?at=5c38c24966f3433023afceb2) troubleshooting some design and implementation of policy execution tasks

@@ -14,7 +14,15 @@ jobs:
         with:
           java-version: '11'
           distribution: 'adopt'
-      - name: Publish package
-        run: ./gradlew -Pversion=${{ github.event.release.tag_name }} publish
+      - name: Publish package capable of targeting H2 in-memory backend
+        run: ./mvnw versions:set -DnewVersion=${{ github.event.release.tag_name }} && ./mvnw --batch-mode --update-snapshots -Plog4j2 clean deploy
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish package capable of targeting MySQL backend
+        run: ./mvnw versions:set -DnewVersion=${{ github.event.release.tag_name }} && ./mvnw --batch-mode --update-snapshots -Ddbms=mysql -Plog4j2 clean deploy
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish package capable of targeting Postgresql backend
+        run: ./mvnw versions:set -DnewVersion=${{ github.event.release.tag_name }} && ./mvnw --batch-mode --update-snapshots -Drdbms=postgres -Plog4j2 clean deploy
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

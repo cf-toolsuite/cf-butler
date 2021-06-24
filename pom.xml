@@ -47,7 +47,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>2.4.5</version>
+    <version>2.5.1</version>
     <relativePath/>
     <!-- lookup parent from repository -->
   </parent>
@@ -61,10 +61,12 @@
 
   <properties>
     <java.version>11</java.version>
+    <repackage.classifier/>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
+    <spring-native.version>0.10.1-SNAPSHOT</spring-native.version>
   </properties>
 
   <dependencies>
@@ -78,15 +80,6 @@
       <groupId>javax.validation</groupId>
       <artifactId>validation-api</artifactId>
       <version>2.0.1.Final</version>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-configuration-processor</artifactId>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-context-indexer</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
@@ -121,26 +114,6 @@
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>org.springframework.boot</groupId>
-          <artifactId>spring-boot-starter-logging</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-log4j2</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.lmax</groupId>
-      <artifactId>disruptor</artifactId>
-      <version>3.4.4</version>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-data-r2dbc</artifactId>
     </dependency>
     <dependency>
@@ -153,13 +126,9 @@
       <artifactId>r2dbc-spi</artifactId>
     </dependency>
     <dependency>
-      <groupId>io.r2dbc</groupId>
-      <artifactId>r2dbc-h2</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.eclipse.jgit</groupId>
       <artifactId>org.eclipse.jgit</artifactId>
-      <version>5.11.1.202105131744-r</version>
+      <version>5.12.0.202106070339-r</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -170,10 +139,6 @@
       <artifactId>sendgrid-java</artifactId>
       <version>4.7.2</version>
       <exclusions>
-        <exclusion>
-          <artifactId>spring-boot-starter-logging</artifactId>
-          <groupId>org.springframework.boot</groupId>
-        </exclusion>
         <exclusion>
           <artifactId>httpclient</artifactId>
           <groupId>org.apache.httpcomponents</groupId>
@@ -188,12 +153,12 @@
     <dependency>
       <groupId>org.cloudfoundry</groupId>
       <artifactId>cloudfoundry-client-reactor</artifactId>
-      <version>5.1.0.RELEASE</version>
+      <version>5.5.0.RELEASE</version>
     </dependency>
     <dependency>
       <groupId>org.cloudfoundry</groupId>
       <artifactId>cloudfoundry-operations</artifactId>
-      <version>5.1.0.RELEASE</version>
+      <version>5.5.0.RELEASE</version>
     </dependency>
     <dependency>
       <groupId>io.micrometer</groupId>
@@ -212,7 +177,7 @@
     <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
-      <version>3.19.0</version>
+      <version>3.20.1</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -250,7 +215,7 @@
       <dependency>
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-dependencies</artifactId>
-        <version>2020.0.2</version>
+        <version>2020.0.3</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
@@ -268,6 +233,11 @@
       <name>Spring milestone</name>
       <url>https://repo.spring.io/milestone</url>
     </repository>
+    <repository>
+      <id>spring-snapshots</id>
+      <name>Spring snapshots</name>
+      <url>https://repo.spring.io/snapshot</url>
+    </repository>
   </repositories>
 
   <pluginRepositories>
@@ -281,6 +251,11 @@
       <name>Spring milestone</name>
       <url>https://repo.spring.io/plugins-milestone</url>
     </pluginRepository>
+    <pluginRepository>
+      <id>spring-snapshots</id>
+      <name>Spring snapshots</name>
+      <url>https://repo.spring.io/plugins-snapshot</url>
+    </pluginRepository>
   </pluginRepositories>
 
   <build>
@@ -288,7 +263,7 @@
       <plugin>
         <groupId>pl.project13.maven</groupId>
         <artifactId>git-commit-id-plugin</artifactId>
-        <version>4.0.4</version>
+        <version>4.0.5</version>
         <configuration>
           <failOnNoGitDirectory>false</failOnNoGitDirectory>
         </configuration>
@@ -451,22 +426,9 @@
         </executions>
       </plugin>
       <plugin>
-        <groupId>org.projectlombok</groupId>
-        <artifactId>lombok-maven-plugin</artifactId>
-        <version>1.18.20.0</version>
-        <executions>
-          <execution>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>delombok</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
-        <version>2.4.3</version>
+        <version>2.5.1</version>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -496,40 +458,197 @@
 
   <profiles>
     <profile>
+      <id>h2</id>
+      <activation>
+        <property>
+          <name>!rdbms</name>
+        </property>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>io.r2dbc</groupId>
+          <artifactId>r2dbc-h2</artifactId>
+        </dependency>
+      </dependencies>
+    </profile>
+
+    <profile>
       <id>postgres</id>
+      <activation>
+        <property>
+          <name>rdbms</name>
+          <value>postgres</value>
+        </property>
+      </activation>
       <dependencies>
         <dependency>
           <groupId>io.r2dbc</groupId>
           <artifactId>r2dbc-postgresql</artifactId>
           <scope>runtime</scope>
         </dependency>
+        <dependency>
+          <groupId>io.r2dbc</groupId>
+          <artifactId>r2dbc-h2</artifactId>
+          <scope>test</scope>
+        </dependency>
       </dependencies>
+      <build>
+        <finalName>${project.artifactId}-postgres-${project.version}</finalName>
+        <plugins>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-compiler-plugin</artifactId>
+              <version>3.8.1</version>
+              <configuration>
+                <excludes>
+                  <exclude>**/H2ConsoleConfig*</exclude>
+                </excludes>
+              </configuration>
+            </plugin>
+        </plugins>
+      </build>
     </profile>
+
     <profile>
       <id>mysql</id>
+      <activation>
+        <property>
+          <name>rdbms</name>
+          <value>mysql</value>
+        </property>
+      </activation>
       <dependencies>
         <dependency>
           <groupId>dev.miku</groupId>
           <artifactId>r2dbc-mysql</artifactId>
           <version>0.8.2.RELEASE</version>
+          <scope>runtime</scope>
+        </dependency>
+        <dependency>
+          <groupId>io.r2dbc</groupId>
+          <artifactId>r2dbc-h2</artifactId>
+          <scope>test</scope>
         </dependency>
       </dependencies>
+      <build>
+        <finalName>${project.artifactId}-mysql-${project.version}</finalName>
+        <plugins>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-compiler-plugin</artifactId>
+              <version>3.8.1</version>
+              <configuration>
+                <excludes>
+                  <exclude>**/H2ConsoleConfig*</exclude>
+                </excludes>
+              </configuration>
+            </plugin>
+        </plugins>
+      </build>
     </profile>
+
+    <profile>
+      <id>log4j2</id>
+      <dependencies>
+        <dependency>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter</artifactId>
+          <exclusions>
+            <exclusion>
+              <groupId>org.springframework.boot</groupId>
+              <artifactId>spring-boot-starter-logging</artifactId>
+            </exclusion>
+          </exclusions>
+        </dependency>
+        <dependency>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-log4j2</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>com.lmax</groupId>
+          <artifactId>disruptor</artifactId>
+          <version>3.4.4</version>
+          <scope>runtime</scope>
+        </dependency>
+      </dependencies>
+      <build>
+        <resources>
+          <resource>
+            <directory>src/main/resources</directory>
+            <excludes>
+              <exclude>logback-spring.xml</exclude>
+            </excludes>
+            <filtering>false</filtering>
+          </resource>
+        </resources>
+      </build>
+    </profile>
+
     <profile>
       <id>native</id>
       <dependencies>
 	      <dependency>
-	      <groupId>org.springframework.experimental</groupId>
-	      <artifactId>spring-native</artifactId>
-	      <version>0.9.2</version>
-	    </dependency>
+          <groupId>org.springframework.experimental</groupId>
+          <artifactId>spring-native</artifactId>
+          <version>${spring-native.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.cloudfoundry</groupId>
+          <artifactId>cloudfoundry-client-reactor</artifactId>
+          <version>5.5.0.RELEASE</version>
+          <exclusions>
+            <exclusion>
+              <groupId>org.slf4j</groupId>
+              <artifactId>jcl-over-slf4j</artifactId>
+            </exclusion>
+          </exclusions>
+        </dependency>
       </dependencies>
       <build>
+        <resources>
+          <resource>
+            <directory>src/main/resources</directory>
+            <excludes>
+              <exclude>logback-spring.xml</exclude>
+              <exclude>log4j2-spring.xml</exclude>
+              <exclude>log4j2.component.properties</exclude>
+            </excludes>
+            <filtering>false</filtering>
+          </resource>
+        </resources>
         <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.8.1</version>
+            <configuration>
+              <excludes>
+                <exclude>**/InventoryReportAggregator*</exclude>
+              </excludes>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <version>3.0.0-M5</version>
+            <configuration>
+              <argLine>-DspringAot=true -agentlib:native-image-agent=access-filter-file=src/test/resources/access-filter.json,config-merge-dir=target/classes/META-INF/native-image --illegal-access=permit ${surefire.jacoco.args}</argLine>
+            </configuration>
+          </plugin>
           <plugin>
             <groupId>org.springframework.experimental</groupId>
             <artifactId>spring-aot-maven-plugin</artifactId>
-            <version>0.9.2</version>
+            <version>${spring-native.version}</version>
+            <configuration>
+              <mode>native-agent</mode>
+            </configuration>
+            <dependencies>
+              <dependency>
+                <groupId>io.pivotal</groupId>
+                <artifactId>cf-butler-hints</artifactId>
+                <version>${project.version}</version>
+              </dependency>
+            </dependencies>
             <executions>
                 <execution>
                     <id>test-generate</id>
@@ -548,26 +667,22 @@
           <plugin>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-maven-plugin</artifactId>
-            <version>2.4.5</version>
+            <version>2.5.1</version>
             <configuration>
-            <excludes>
-                <exclude>
-                  <groupId>org.projectlombok</groupId>
-                  <artifactId>lombok</artifactId>
-                </exclude>
-            </excludes>
-		        <image>
-		            <builder>paketobuildpacks/builder:tiny</builder>
-		            <env>
-		                <BP_NATIVE_IMAGE>true</BP_NATIVE_IMAGE>
-		                <BP_NATIVE_IMAGE_BUILD_ARGUMENTS>-H:+ReportExceptionStackTraces --enable-https --features=org.graalvm.home.HomeFinderFeature</BP_NATIVE_IMAGE_BUILD_ARGUMENTS>
-		            </env>
-		        </image>
-		    </configuration>
+                <classifier>${repackage.classifier}</classifier>
+                <image>
+                    <builder>paketobuildpacks/builder:tiny</builder>
+                    <env>
+                        <BP_NATIVE_IMAGE>true</BP_NATIVE_IMAGE>
+                        <BP_NATIVE_IMAGE_BUILD_ARGUMENTS>--verbose -H:+ReportExceptionStackTraces -H:+PrintAnalysisCallTree --enable-https --initialize-at-build-time=sun.instrument.InstrumentationImpl</BP_NATIVE_IMAGE_BUILD_ARGUMENTS>
+                    </env>
+                </image>
+            </configuration>
           </plugin>
         </plugins>
       </build>
     </profile>
+
     <profile>
       <id>wavefront</id>
       <dependencies>
