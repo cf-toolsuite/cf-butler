@@ -71,7 +71,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
-    <spring-native.version>0.10.1-SNAPSHOT</spring-native.version>
+    <spring-native.version>0.10.1</spring-native.version>
   </properties>
 
   <dependencies>
