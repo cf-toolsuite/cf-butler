@@ -38,7 +38,7 @@ This is where `cf-butler` has your back.
         * [Whitelist](#whitelist)
       * [Integration w/ Operations Manager](#integration-w-operations-manager)
   * [How to Build](#how-to-build)
-      * [Alternative build with MySQL support](#alternative-build-with-mysql-support)
+      * [Alternatives](#alternatives)
   * [How to Run with Maven](#how-to-run-with-maven)
   * [How to Run with Docker](#how-to-run-with-docker)
   * [How to deploy to VMware Tanzu Application Service](#how-to-deploy-to-vmware-tanzu-application-service)
@@ -398,8 +398,9 @@ Add entries in your `config/secrets.json` like
 ## How to Build
 
 ```
-./mvnw clean package                    ## defaults to H2 in-memory backend
+./mvnw clean package
 ```
+> Defaults to H2 in-memory backend
 
 ### Alternatives
 
@@ -432,7 +433,7 @@ The below represent a collection of Maven profiles available in the Maven POM.
 
 
 ```
-./mvnw clean package -Pnative
+./mvnw clean spring-boot:build-image -Pnative
 ```
 > Compiles a native executable and produces a container image.  You will need Docker.  And you will need to clone and install [cf-butler-hints](https://github.com/pacphi/cf-butler-hints) into a Maven repository.  For the time-being the aforementioned Github repository is private.  (This packaging option is currently under development).
 
