@@ -1,8 +1,7 @@
 package io.pivotal.cfapp.client;
 
-import org.cloudfoundry.uaa.tokens.GetTokenByPasswordResponse;
 import org.cloudfoundry.uaa.tokens.GetTokenByClientCredentialsResponse;
-import org.cloudfoundry.uaa.tokens.GrantType;
+import org.cloudfoundry.uaa.tokens.GetTokenByPasswordResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
