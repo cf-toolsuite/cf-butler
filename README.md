@@ -583,7 +583,7 @@ These REST endpoints have been exposed for reporting and administrative purposes
 
 ### Operations Manager
 
-These endpoints are only available when the `om.enabled` property is set to `true`, `om.apiHost` has been set to a valid URL, along requisite credentials properties based on supported token grant type.  Mimics a reduced set of the [Operations Manager API](https://docs.pivotal.io/vmware-tanzucf/2-6/opsman-api/).
+These endpoints are only available when the `om.enabled` property is set to `true`, `om.apiHost` has been set to a valid URL, along with requisite credentials properties based on a supported token grant type.  Mimics a reduced set of the [Operations Manager API](https://docs.pivotal.io/vmware-tanzucf/2-6/opsman-api/).
 
 ```
 GET /products/deployed
