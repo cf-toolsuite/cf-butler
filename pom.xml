@@ -71,7 +71,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
-    <spring-native.version>0.10.1</spring-native.version>
+    <spring-native.version>0.10.2-SNAPSHOT</spring-native.version>
   </properties>
 
   <dependencies>
@@ -590,6 +590,94 @@
     </profile>
 
     <profile>
+      <id>native-without-tracing-agent</id>
+      <dependencies>
+	      <dependency>
+          <groupId>org.springframework.experimental</groupId>
+          <artifactId>spring-native</artifactId>
+          <version>${spring-native.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.cloudfoundry</groupId>
+          <artifactId>cloudfoundry-client-reactor</artifactId>
+          <version>5.5.0.RELEASE</version>
+          <exclusions>
+            <exclusion>
+              <groupId>org.slf4j</groupId>
+              <artifactId>jcl-over-slf4j</artifactId>
+            </exclusion>
+          </exclusions>
+        </dependency>
+      </dependencies>
+      <build>
+        <resources>
+          <resource>
+            <directory>src/main/resources</directory>
+            <excludes>
+              <exclude>logback-spring.xml</exclude>
+              <exclude>log4j2-spring.xml</exclude>
+              <exclude>log4j2.component.properties</exclude>
+            </excludes>
+            <filtering>false</filtering>
+          </resource>
+        </resources>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.8.1</version>
+            <configuration>
+              <excludes>
+                <exclude>**/InventoryReportAggregator*</exclude>
+              </excludes>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.springframework.experimental</groupId>
+            <artifactId>spring-aot-maven-plugin</artifactId>
+            <version>${spring-native.version}</version>
+            <dependencies>
+              <dependency>
+                <groupId>io.pivotal</groupId>
+                <artifactId>cf-butler-hints</artifactId>
+                <version>${project.version}</version>
+              </dependency>
+            </dependencies>
+            <executions>
+                <execution>
+                    <id>test-generate</id>
+                    <goals>
+                        <goal>test-generate</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>generate</id>
+                    <goals>
+                        <goal>generate</goal>
+                    </goals>
+                </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+            <version>2.5.2</version>
+            <configuration>
+                <classifier>${repackage.classifier}</classifier>
+                <image>
+                    <builder>paketobuildpacks/builder:tiny</builder>
+                    <env>
+                        <BP_NATIVE_IMAGE>true</BP_NATIVE_IMAGE>
+                        <BP_NATIVE_IMAGE_BUILD_ARGUMENTS>--verbose -H:+ReportExceptionStackTraces -H:+PrintAnalysisCallTree --enable-https --initialize-at-build-time=sun.instrument.InstrumentationImpl</BP_NATIVE_IMAGE_BUILD_ARGUMENTS>
+                    </env>
+                </image>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
       <id>native</id>
       <dependencies>
 	      <dependency>
@@ -694,7 +782,7 @@
         <dependency>
           <groupId>com.wavefront</groupId>
           <artifactId>wavefront-spring-boot-starter</artifactId>
-          <version>2.0.1</version>
+          <version>2.2.0</version>
         </dependency>
       </dependencies>
     </profile>
