@@ -14,7 +14,7 @@ public class OpsmanSettings {
     private String clientSecret = "";
     private String username;
     private String password;
-    private boolean enabled;
     private GrantType grantType = GrantType.PASSWORD;
+    private boolean enabled;
 
 }
