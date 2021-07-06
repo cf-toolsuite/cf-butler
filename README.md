@@ -85,7 +85,7 @@ Required
 Optional
 
 * [VMware Tanzu Network](https://network.pivotal.io) account credentials
-* [VMware Tanzu Operations Manager](https://tanzu.vmware.com/platform/pcf-components/pcf-ops-manager) admin account credentials
+* [VMware Tanzu Operations Manager](https://tanzu.vmware.com/platform/pcf-components/pcf-ops-manager) admin account credentials (or client id and client secret)
 
 
 ## Tools
@@ -379,10 +379,25 @@ Add an entry in your `config/secrets.json` like
 
 ### Integration w/ Operations Manager
 
-You must add the following configuration properties to `application-{env}.yml` if you want to enable integration with an operations manager instance
+You must add the following configuration properties to `application-{env}.yml` if you want to enable integration with an Operations Manager instance
 
 * `om.apiHost` - a VMware Tanzu Operations Manager API endpoint
 * `om.enabled` - a boolean property that must be set to `true`
+* `om.grantType` - [Token](https://docs.cloudfoundry.org/api/uaa/version/75.4.0/index.html#token) grant type
+
+If `om.grantType` is set to `password`
+
+* `om.username` - username for Operations Manager admin account
+* `om.password` - password for Operations Manager admin account
+* `om.clientId` - must be set to `opsman`
+* `om.clientSecret` - must be set to blank
+
+If `om.grantType` is set to `client_credentials`
+
+* `om.username` - must be set to blank 
+* `om.password` - must be set to blank
+* `om.clientId` - the recipient of the token
+* `om.clientSecret` - the secret passphrase configured for the OAuth client
 
 > the `{env}` filename suffix above denotes the Spring Profile you would activate for your environment
 
@@ -568,7 +583,7 @@ These REST endpoints have been exposed for reporting and administrative purposes
 
 ### Operations Manager
 
-These endpoints are only available when the `om.enabled` property is set to `true`. `om.apiHost`, `om.username` and `om.password` properties must also have been defined.  Mimics a reduced set of the [Operations Manager API](https://docs.pivotal.io/vmware-tanzucf/2-6/opsman-api/).
+These endpoints are only available when the `om.enabled` property is set to `true`, `om.apiHost` has been set to a valid URL, along with requisite credentials properties based on a supported token grant type.  Mimics a reduced set of the [Operations Manager API](https://docs.pivotal.io/vmware-tanzucf/2-6/opsman-api/).
 
 ```
 GET /products/deployed

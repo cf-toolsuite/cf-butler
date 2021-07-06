@@ -70,9 +70,11 @@ public class ButlerCfEnvProcessor implements CfEnvProcessor {
         addOrUpdatePropertyValue("cf.buildpacks", "CF_BUILDPACKS", cfCredentials, properties);
         addOrUpdatePropertyValue("om.apiHost", "OM_API-HOST", cfCredentials, properties);
         addOrUpdatePropertyValue("om.clientId", "OM_CLIENT-ID", cfCredentials, properties);
+        addOrUpdatePropertyValue("om.clientSecret", "OM_CLIENT-SECRET", cfCredentials, properties);
         addOrUpdatePropertyValue("om.username", "OM_USERNAME", cfCredentials, properties);
         addOrUpdatePropertyValue("om.password", "OM_PASSWORD", cfCredentials, properties);
         addOrUpdatePropertyValue("om.enabled", "OM_ENABLED", cfCredentials, properties);
+        addOrUpdatePropertyValue("om.grantType", "OM_GRANT-TYPE", cfCredentials, properties);
         addOrUpdatePropertyValue("pivnet.apiToken", "PIVNET_API-TOKEN", cfCredentials, properties);
         addOrUpdatePropertyValue("pivnet.enabled", "PIVNET_ENABLED", cfCredentials, properties);
         addOrUpdatePropertyValue("cron.collection", "CRON_COLLECTION", cfCredentials, properties);
