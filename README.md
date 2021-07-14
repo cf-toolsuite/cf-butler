@@ -432,12 +432,12 @@ The below represent a collection of Maven profiles available in the Maven POM.
 
 
 ```
-./mvnw clean package -Ddbms=mysql
+./mvnw clean package -Drdbms=mysql
 ```
 > Work with MySQL backend
 
 ```
-./mvnw clean package -Ddbms=postgres
+./mvnw clean package -Drdbms=postgres
 ```
 > Work with Postgres backend
 
