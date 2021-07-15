@@ -667,7 +667,7 @@
                     <builder>paketobuildpacks/builder:tiny</builder>
                     <env>
                         <BP_NATIVE_IMAGE>true</BP_NATIVE_IMAGE>
-                        <BP_NATIVE_IMAGE_BUILD_ARGUMENTS>-g --verbose -H:+ReportExceptionStackTraces -H:+PrintAnalysisCallTree --enable-https --initialize-at-build-time=sun.instrument.InstrumentationImpl</BP_NATIVE_IMAGE_BUILD_ARGUMENTS>
+                        <BP_NATIVE_IMAGE_BUILD_ARGUMENTS>-H:+ReportExceptionStackTraces --initialize-at-build-time=sun.instrument.InstrumentationImpl</BP_NATIVE_IMAGE_BUILD_ARGUMENTS>
                     </env>
                 </image>
             </configuration>
