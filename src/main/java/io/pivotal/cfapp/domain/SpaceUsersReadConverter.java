@@ -2,9 +2,11 @@ package io.pivotal.cfapp.domain;
 
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.convert.ReadingConverter;
+import org.springframework.stereotype.Indexed;
 
 import io.r2dbc.spi.Row;
 
+@Indexed
 @ReadingConverter
 public class SpaceUsersReadConverter implements Converter<Row, SpaceUsers> {
 

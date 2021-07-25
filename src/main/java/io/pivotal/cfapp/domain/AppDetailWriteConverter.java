@@ -8,7 +8,9 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.convert.WritingConverter;
 import org.springframework.data.r2dbc.mapping.OutboundRow;
 import org.springframework.r2dbc.core.Parameter;
+import org.springframework.stereotype.Indexed;
 
+@Indexed
 @WritingConverter
 public class AppDetailWriteConverter implements Converter<AppDetail, OutboundRow> {
 

@@ -52,7 +52,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>2.5.2</version>
+    <version>2.5.3</version>
     <relativePath/>
     <!-- lookup parent from repository -->
   </parent>
@@ -432,7 +432,7 @@
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
-        <version>2.5.2</version>
+        <version>2.5.3</version>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -661,7 +661,7 @@
           <plugin>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-maven-plugin</artifactId>
-            <version>2.5.2</version>
+            <version>2.5.3</version>
             <configuration>
                 <image>
                     <builder>paketobuildpacks/builder:tiny</builder>
