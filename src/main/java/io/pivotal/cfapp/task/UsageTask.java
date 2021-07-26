@@ -49,7 +49,7 @@ public class UsageTask implements ApplicationListener<TkRetrievedEvent> {
         })
         .subscribe(
                 result -> log.info("UsageTask completed"),
-                error -> log.error("usageTask terminated with error", error)
+                error -> log.error("UsageTask terminated with error", error)
                 );
     }
 
