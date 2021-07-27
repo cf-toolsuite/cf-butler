@@ -59,21 +59,26 @@ public class DeleteAppPolicyExecutorTask implements PolicyExecutorTask {
                 .build()
                 .applications()
                 .delete(
-                        DeleteApplicationRequest
+                    DeleteApplicationRequest
                         .builder()
                         .name(detail.getAppName())
                         .deleteRoutes(true)
-                        .build())
-                .then(Mono.just(HistoricalRecord
-                        .builder()
-                        .transactionDateTime(LocalDateTime.now())
-                        .actionTaken("delete")
-                        .organization(detail.getOrganization())
-                        .space(detail.getSpace())
-                        .appId(detail.getAppId())
-                        .type("application")
-                        .name(detail.getAppName())
-                        .build()));
+                        .build()
+                )
+                .then(
+                    Mono.just(
+                        HistoricalRecord
+                            .builder()
+                            .transactionDateTime(LocalDateTime.now())
+                            .actionTaken("delete")
+                            .organization(detail.getOrganization())
+                            .space(detail.getSpace())
+                            .appId(detail.getAppId())
+                            .type("application")
+                            .name(detail.getAppName())
+                            .build()
+                    )
+                );
     }
 
     protected Flux<HistoricalRecord> deleteApplicationsWithNoServiceBindings() {
@@ -144,38 +149,41 @@ public class DeleteAppPolicyExecutorTask implements PolicyExecutorTask {
                 .build()
                 .services()
                 .deleteInstance(DeleteServiceInstanceRequest.builder().name(relationship.getServiceName()).build())
-                .then(Mono.just(HistoricalRecord
-                        .builder()
-                        .transactionDateTime(LocalDateTime.now())
-                        .actionTaken("delete")
-                        .organization(relationship.getOrganization())
-                        .space(relationship.getSpace())
-                        .appId(relationship.getAppId())
-                        .serviceInstanceId(relationship.getServiceInstanceId())
-                        .type("service-instance")
-                        .name(serviceInstanceName(relationship))
-                        .build()));
+                .then(
+                    Mono.just(
+                        HistoricalRecord
+                            .builder()
+                            .transactionDateTime(LocalDateTime.now())
+                            .actionTaken("delete")
+                            .organization(relationship.getOrganization())
+                            .space(relationship.getSpace())
+                            .appId(relationship.getAppId())
+                            .serviceInstanceId(relationship.getServiceInstanceId())
+                            .type("service-instance")
+                            .name(serviceInstanceName(relationship))
+                            .build()
+                    )
+                );
     }
 
     @Override
     public void execute() {
         log.info("DeleteAppPolicyExecutorTask started");
-        Flux
-        .concat(
-                deleteApplicationsWithNoServiceBindings(),
-                deleteApplicationsWithServiceBindingsButDoNotDeleteBoundServiceInstances(),
-                deleteApplicationsWithServiceBindingsAndDeleteBoundServiceInstances()
-                )
+        Flux.concat(
+            deleteApplicationsWithNoServiceBindings(),
+            deleteApplicationsWithServiceBindingsButDoNotDeleteBoundServiceInstances(),
+            deleteApplicationsWithServiceBindingsAndDeleteBoundServiceInstances()
+        )
         .collectList()
         .subscribe(
-                result -> {
-                    log.info("DeleteAppPolicyExecutorTask completed");
-                    log.info("-- {} applications deleted.", result.size());
-                },
-                error -> {
-                    log.error("DeleteAppPolicyExecutorTask terminated with error", error);
-                }
-                );
+            result -> {
+                log.info("DeleteAppPolicyExecutorTask completed");
+                log.info("-- {} applications deleted.", result.size());
+            },
+            error -> {
+                log.error("DeleteAppPolicyExecutorTask terminated with error", error);
+            }
+        );
     }
 
     @Scheduled(cron = "${cron.execution}")
@@ -195,21 +203,26 @@ public class DeleteAppPolicyExecutorTask implements PolicyExecutorTask {
                 .build()
                 .services()
                 .unbind(
-                        UnbindServiceInstanceRequest
+                    UnbindServiceInstanceRequest
                         .builder()
                         .applicationName(relationship.getAppName())
                         .serviceInstanceName(relationship.getServiceName())
-                        .build())
-                .then(Mono.just(HistoricalRecord
-                        .builder()
-                        .transactionDateTime(LocalDateTime.now())
-                        .actionTaken("unbind")
-                        .organization(relationship.getOrganization())
-                        .space(relationship.getSpace())
-                        .appId(relationship.getAppId())
-                        .serviceInstanceId(relationship.getServiceInstanceId())
-                        .type("service-instance")
-                        .name(serviceInstanceName(relationship))
-                        .build()));
+                        .build()
+                )
+                .then(
+                    Mono.just(
+                        HistoricalRecord
+                            .builder()
+                            .transactionDateTime(LocalDateTime.now())
+                            .actionTaken("unbind")
+                            .organization(relationship.getOrganization())
+                            .space(relationship.getSpace())
+                            .appId(relationship.getAppId())
+                            .serviceInstanceId(relationship.getServiceInstanceId())
+                            .type("service-instance")
+                            .name(serviceInstanceName(relationship))
+                            .build()
+                    )
+                );
     }
 }

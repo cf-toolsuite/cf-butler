@@ -38,15 +38,16 @@ public class StacksTask implements ApplicationListener<TkRetrievedEvent> {
         .collectList()
         .map(list -> cache.from(list))
         .subscribe(
-                result -> {
-                    publisher.publishEvent(new StacksRetrievedEvent(this));
-                    log.trace("Stacks cache contains {}", result);
-                    log.info("StacksTask completed");
-                    log.trace("Retrieved {} stacks", result.size());
-                },
-                error -> {
-                    log.error("StacksTask terminated with error", error);
-                });
+            result -> {
+                publisher.publishEvent(new StacksRetrievedEvent(this));
+                log.trace("Stacks cache contains {}", result);
+                log.info("StacksTask completed");
+                log.trace("Retrieved {} stacks", result.size());
+            },
+            error -> {
+                log.error("StacksTask terminated with error", error);
+            }
+        );
     }
 
     protected Flux<Stack> getStacks() {

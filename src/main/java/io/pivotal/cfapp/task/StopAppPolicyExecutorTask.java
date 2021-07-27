@@ -50,14 +50,14 @@ public class StopAppPolicyExecutorTask implements PolicyExecutorTask {
         stopApplications()
         .collectList()
         .subscribe(
-                result -> {
-                    log.info("StopAppPolicyExecutorTask completed");
-                    log.info("-- {} applications stopped.", result.size());
-                },
-                error -> {
-                    log.error("StopAppPolicyExecutorTask terminated with error", error);
-                }
-                );
+            result -> {
+                log.info("StopAppPolicyExecutorTask completed");
+                log.info("-- {} applications stopped.", result.size());
+            },
+            error -> {
+                log.error("StopAppPolicyExecutorTask terminated with error", error);
+            }
+        );
     }
 
     @Scheduled(cron = "${cron.execution}")
@@ -74,20 +74,25 @@ public class StopAppPolicyExecutorTask implements PolicyExecutorTask {
                 .getCloudFoundryClient()
                 .applicationsV3()
                 .stop(
-                        StopApplicationRequest
+                    StopApplicationRequest
                         .builder()
                         .applicationId(detail.getAppId())
-                        .build())
-                .then(Mono.just(HistoricalRecord
-                        .builder()
-                        .transactionDateTime(LocalDateTime.now())
-                        .actionTaken("stop")
-                        .organization(detail.getOrganization())
-                        .space(detail.getSpace())
-                        .appId(detail.getAppId())
-                        .type("application")
-                        .name(detail.getAppName())
-                        .build()));
+                        .build()
+                )
+                .then(
+                    Mono.just(
+                        HistoricalRecord
+                            .builder()
+                            .transactionDateTime(LocalDateTime.now())
+                            .actionTaken("stop")
+                            .organization(detail.getOrganization())
+                            .space(detail.getSpace())
+                            .appId(detail.getAppId())
+                            .type("application")
+                            .name(detail.getAppName())
+                            .build()
+                    )
+                );
     }
 
     protected Flux<HistoricalRecord> stopApplications() {

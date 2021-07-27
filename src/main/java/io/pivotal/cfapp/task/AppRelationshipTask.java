@@ -45,15 +45,15 @@ public class AppRelationshipTask implements ApplicationListener<ServiceInstanceD
     public void collect(List<ServiceInstanceDetail> serviceInstances) {
         log.info("AppRelationshipTask started");
         service
-        .deleteAll()
-        .thenMany(Flux.fromIterable(serviceInstances))
-        .filter(sid -> !CollectionUtils.isEmpty(sid.getApplications()))
-        .flatMap(si -> Flux.fromIterable(AppRelationshipRequest.listOf(si)))
-        .flatMap(this::getAppRelationship)
-        .flatMap(service::save)
-        .thenMany(service.findAll())
-        .collectList()
-        .subscribe(
+            .deleteAll()
+            .thenMany(Flux.fromIterable(serviceInstances))
+            .filter(sid -> !CollectionUtils.isEmpty(sid.getApplications()))
+            .flatMap(si -> Flux.fromIterable(AppRelationshipRequest.listOf(si)))
+            .flatMap(this::getAppRelationship)
+            .flatMap(service::save)
+            .thenMany(service.findAll())
+            .collectList()
+            .subscribe(
                 result -> {
                     publisher.publishEvent(new AppRelationshipRetrievedEvent(this).relations(result));
                     log.info("AppRelationshipTask completed");
@@ -61,7 +61,7 @@ public class AppRelationshipTask implements ApplicationListener<ServiceInstanceD
                 error -> {
                     log.error("AppRelationshipTask terminated with error", error);
                 }
-                );
+            );
     }
 
     protected Mono<AppRelationship> getAppRelationship(AppRelationshipRequest request) {
@@ -78,7 +78,8 @@ public class AppRelationshipTask implements ApplicationListener<ServiceInstanceD
                         .list(ListApplicationsRequest.builder().page(page).addAllNames(Arrays.asList(new String[] { request.getApplicationName() })).build()));
         return resources
                 .next()
-                .map(ar -> AppRelationship
+                .map(ar ->
+                    AppRelationship
                         .builder()
                         .organization(request.getOrganization())
                         .space(request.getSpace())

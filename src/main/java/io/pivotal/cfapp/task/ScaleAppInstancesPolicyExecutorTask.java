@@ -50,7 +50,7 @@ public class ScaleAppInstancesPolicyExecutorTask implements PolicyExecutorTask {
     public void execute() {
         log.info("ScaleAppInstancesPolicyExecutorTask started");
         scaleApplications()
-        .subscribe(
+            .subscribe(
                 result -> {
                     log.info("ScaleAppInstancesPolicyExecutorTask completed");
                     log.info("-- {} applications scaled.", result.size());
@@ -58,7 +58,7 @@ public class ScaleAppInstancesPolicyExecutorTask implements PolicyExecutorTask {
                 error -> {
                     log.error("ScaleAppInstancesPolicyExecutorTask terminated with error", error);
                 }
-                );
+            );
     }
 
     @Scheduled(cron = "${cron.execution}")
@@ -74,26 +74,31 @@ public class ScaleAppInstancesPolicyExecutorTask implements PolicyExecutorTask {
                 .build()
                 .applications()
                 .scale(
-                        ScaleApplicationRequest
+                    ScaleApplicationRequest
                         .builder()
                         .name(detail.getAppName())
                         .instances(policy.getOption("instances-to", Integer.class))
-                        .build())
-                .then(Mono.just(HistoricalRecord
-                        .builder()
-                        .transactionDateTime(LocalDateTime.now())
-                        .actionTaken("scale-instances")
-                        .organization(detail.getOrganization())
-                        .space(detail.getSpace())
-                        .appId(detail.getAppId())
-                        .type("application")
-                        .name(detail.getAppName())
-                        .build()));
+                        .build()
+                )
+                .then(
+                    Mono.just(
+                        HistoricalRecord
+                            .builder()
+                            .transactionDateTime(LocalDateTime.now())
+                            .actionTaken("scale-instances")
+                            .organization(detail.getOrganization())
+                            .space(detail.getSpace())
+                            .appId(detail.getAppId())
+                            .type("application")
+                            .name(detail.getAppName())
+                            .build()
+                    )
+                );
     }
 
     protected Mono<List<HistoricalRecord>> scaleApplications() {
         return
-                policiesService
+            policiesService
                 .findByApplicationOperation(ApplicationOperation.SCALE_INSTANCES)
                 .flux()
                 .flatMap(p -> Flux.fromIterable(p.getApplicationPolicies()))
