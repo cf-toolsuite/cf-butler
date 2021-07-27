@@ -36,12 +36,12 @@ public class OrganizationsTask implements ApplicationListener<TkRetrievedEvent> 
     public void collect() {
         log.info("OrganizationTask started");
         organizationService
-        .deleteAll()
-        .thenMany(getOrganizations())
-        .flatMap(organizationService::save)
-        .thenMany(organizationService.findAll())
-        .collectList()
-        .subscribe(
+            .deleteAll()
+            .thenMany(getOrganizations())
+            .flatMap(organizationService::save)
+            .thenMany(organizationService.findAll())
+            .collectList()
+            .subscribe(
                 result -> {
                     publisher.publishEvent(new OrganizationsRetrievedEvent(this).organizations(result));
                     log.info("OrganizationTask completed");
@@ -50,7 +50,7 @@ public class OrganizationsTask implements ApplicationListener<TkRetrievedEvent> 
                 error -> {
                     log.error("OrganizationTask terminated with error", error);
                 }
-                );
+            );
     }
 
     protected Flux<Organization> getOrganizations() {
