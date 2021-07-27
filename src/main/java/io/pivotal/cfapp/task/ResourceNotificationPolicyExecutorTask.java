@@ -49,33 +49,33 @@ public class ResourceNotificationPolicyExecutorTask implements PolicyExecutorTas
     public void execute() {
         log.info("ResourceNotificationPolicyExecutorTask started");
         fetchResourceNotificationPolicies()
-        .collectList()
-        .subscribe(
+            .collectList()
+            .subscribe(
                 results -> {
                     results.forEach(mp -> {
                         mp.getResourceEmailMetadata().getLabels().forEach(label -> {
-                            notifyOwners(mp,label);  
+                            notifyOwners(mp,label);
                         });
                     });
                     log.info("ResourceNotificationPolicyExecutorTask completed");
-                    log.info("-- {} message policies executed.", results.size());
+                    log.info("-- {} resource notification policies executed.", results.size());
                 },
                 error -> {
                     log.error("ResourceNotificationPolicyExecutorTask terminated with error", error);
                 }
-                );
+            );
     }
 
     protected Flux<ResourceNotificationPolicy> fetchResourceNotificationPolicies() {
         return
-                policiesService
+            policiesService
                 .findAllResourceNotificationPolicies()
                 .flatMapMany(policy -> Flux.fromIterable(policy.getResourceNotificationPolicies()));
     }
 
     private Mono<List<String>> fetchRecipientList(ResourceNotificationPolicy resourceNotificationPolicy, String label, Integer page, Integer perPage){
-        return 
-                resourceMetadataService.getResources(resourceNotificationPolicy.getResourceEmailMetadata().getResource(),label,page,perPage)
+        return
+            resourceMetadataService.getResources(resourceNotificationPolicy.getResourceEmailMetadata().getResource(),label,page,perPage)
                 .flatMapMany(resources -> Flux.fromIterable(resources.getResources()))
                 .delayElements(Duration.ofMillis(250))
                 .filter(resource -> isBlacklisted(resourceNotificationPolicy, resource.getName()))
@@ -86,28 +86,27 @@ public class ResourceNotificationPolicyExecutorTask implements PolicyExecutorTas
 
     private void notifyOwners(ResourceNotificationPolicy resourceNotificationPolicy, String label) {
         resourceMetadataService.getResources(resourceNotificationPolicy.getResourceEmailMetadata().getResource(),label,null,null)
-        .delayElement(Duration.ofMillis(250))
-        .doOnNext(resources -> {
-            for (Integer page=1; page <= resources.getPagination().getTotalPages(); page++) {
-                fetchRecipientList(resourceNotificationPolicy,label,page,null)
-                    .doOnNext(
-                            recepient -> {
-                                publisher.publishEvent(
-                                    new EmailNotificationEvent(this)
-                                        .domain(settings.getAppsDomain())
-                                        .from(resourceNotificationPolicy.getResourceEmailTemplate().getFrom())
-                                        .recipients(recepient)
-                                        .subject(resourceNotificationPolicy.getResourceEmailTemplate().getSubject())
-                                        .body(resourceNotificationPolicy.getResourceEmailTemplate().getBody()));
-                            })
-                    .subscribe();
-                }
-            })
-        .subscribe();
+            .delayElement(Duration.ofMillis(250))
+            .doOnNext(resources -> {
+                for (Integer page=1; page <= resources.getPagination().getTotalPages(); page++) {
+                    fetchRecipientList(resourceNotificationPolicy,label,page,null)
+                        .doOnNext(
+                                recepient -> {
+                                    publisher.publishEvent(
+                                        new EmailNotificationEvent(this)
+                                            .domain(settings.getAppsDomain())
+                                            .from(resourceNotificationPolicy.getResourceEmailTemplate().getFrom())
+                                            .recipients(recepient)
+                                            .subject(resourceNotificationPolicy.getResourceEmailTemplate().getSubject())
+                                            .body(resourceNotificationPolicy.getResourceEmailTemplate().getBody()));
+                                })
+                        .subscribe();
+                    }
+                })
+            .subscribe();
     }
-        
-    private boolean isBlacklisted(ResourceNotificationPolicy policy, String resource) {
 
+    private boolean isBlacklisted(ResourceNotificationPolicy policy, String resource) {
         return !policy.getResourceBlackList().contains(resource);
     }
 
