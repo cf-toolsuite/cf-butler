@@ -30,4 +30,17 @@ public class OmInfo {
     public OmInfo(@JsonProperty("info") Info info) {
         this.info = info;
     }
+
+    public Double getMajorMinorVersion() {
+        String[] versionParts = info.getVersion().split("v");
+        String[] buildParts = versionParts[0].split("-");
+        int lastDot = buildParts[0].lastIndexOf(".");
+        Double result;
+        if (lastDot > 1) {
+            result = Double.valueOf(buildParts[0].substring(0, lastDot));
+        } else {
+            result = Double.valueOf(buildParts[0]);
+        }
+        return result;
+    }
 }

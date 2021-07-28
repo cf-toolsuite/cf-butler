@@ -37,38 +37,38 @@ public class OpsmanClient {
     public Mono<List<DeployedProduct>> getDeployedProducts() {
         String uri = String.format(URI_TEMPLATE, settings.getApiHost(), "/api/v0/deployed/products");
         return
-                tokenProvider.obtainAccessToken()
-                .flatMap(
-                        token ->
-                        client
+            tokenProvider
+                .obtainAccessToken()
+                .flatMap(token ->
+                    client
                         .get()
                         .uri(uri)
                         .headers(h -> h.setBearerAuth(token))
                         .retrieve()
                         .bodyToFlux(DeployedProduct.class)
                         .collectList()
-                        );
+                );
     }
 
     public Mono<OmInfo> getOmInfo() {
         String uri = String.format(URI_TEMPLATE, settings.getApiHost(), "/api/v0/info");
         return
-                tokenProvider.obtainAccessToken()
-                .flatMap(
-                        token ->
-                        client
+            tokenProvider
+                .obtainAccessToken()
+                .flatMap(token ->
+                    client
                         .get()
                         .uri(uri)
                         .headers(h -> h.setBearerAuth(token))
                         .retrieve()
                         .bodyToMono(OmInfo.class)
-                        );
+                );
     }
 
     public Mono<String> getOmVersion() {
         String uri = String.format(URI_TEMPLATE, settings.getApiHost(), "/api/v0/info");
         return
-                client
+            client
                 .get()
                 .uri(uri)
                 .retrieve()
@@ -76,39 +76,48 @@ public class OpsmanClient {
                 .map(response -> response.getInfo().getVersion());
     }
 
+    public Mono<Double> getOmMajorMinorVersion() {
+        String uri = String.format(URI_TEMPLATE, settings.getApiHost(), "/api/v0/info");
+        return
+            client
+                .get()
+                .uri(uri)
+                .retrieve()
+                .bodyToMono(OmInfo.class)
+                .map(response -> response.getMajorMinorVersion());
+    }
+
     public Mono<StemcellAssignments> getStemcellAssignments() {
         String uri = String.format(URI_TEMPLATE, settings.getApiHost(), "/api/v0/stemcell_assignments");
         return
-                tokenProvider.obtainAccessToken()
-                .flatMap(
-                        token ->
-                        client
+            tokenProvider
+                .obtainAccessToken()
+                .flatMap(token ->
+                    client
                         .get()
                         .uri(uri)
                         .headers(h -> h.setBearerAuth(token))
                         .retrieve()
                         .bodyToMono(StemcellAssignments.class)
-                        );
+                );
     }
 
     public Mono<StemcellAssociations> getStemcellAssociations() {
         String uri = String.format(URI_TEMPLATE, settings.getApiHost(), "/api/v0/stemcell_associations");
         return
-                getOmVersion()
-                .filter(version -> Double.valueOf(version) >= 2.6)
-                .flatMap(
-                        r ->
-                        tokenProvider.obtainAccessToken()
-                        .flatMap(
-                                token ->
-                                client
+            getOmMajorMinorVersion()
+                .filter(version -> version >= 2.6)
+                .flatMap(r ->
+                    tokenProvider
+                        .obtainAccessToken()
+                        .flatMap(token ->
+                            client
                                 .get()
                                 .uri(uri)
                                 .headers(h -> h.setBearerAuth(token))
                                 .retrieve()
                                 .bodyToMono(StemcellAssociations.class)
-                                )
-                        );
+                        )
+                );
     }
-
 }
