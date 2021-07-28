@@ -76,17 +76,6 @@ public class OpsmanClient {
                 .map(response -> response.getInfo().getVersion());
     }
 
-    public Mono<Double> getOmMajorMinorVersion() {
-        String uri = String.format(URI_TEMPLATE, settings.getApiHost(), "/api/v0/info");
-        return
-            client
-                .get()
-                .uri(uri)
-                .retrieve()
-                .bodyToMono(OmInfo.class)
-                .map(response -> response.getMajorMinorVersion());
-    }
-
     public Mono<StemcellAssignments> getStemcellAssignments() {
         String uri = String.format(URI_TEMPLATE, settings.getApiHost(), "/api/v0/stemcell_assignments");
         return
@@ -105,8 +94,8 @@ public class OpsmanClient {
     public Mono<StemcellAssociations> getStemcellAssociations() {
         String uri = String.format(URI_TEMPLATE, settings.getApiHost(), "/api/v0/stemcell_associations");
         return
-            getOmMajorMinorVersion()
-                .filter(version -> version >= 2.6)
+            getOmInfo()
+                .filter(info -> info.getMajorVersion() >= 2 && info.getMinorVersion() >= 6)
                 .flatMap(r ->
                     tokenProvider
                         .obtainAccessToken()
