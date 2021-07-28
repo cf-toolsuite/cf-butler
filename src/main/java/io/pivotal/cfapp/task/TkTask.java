@@ -29,10 +29,10 @@ public class TkTask implements ApplicationListener<DatabaseCreatedEvent> {
     public void collect() {
         log.info("TkTask started");
         tkService
-        .deleteOne()
-        .then(tkService.save())
-        .then(tkService.findOne())
-        .subscribe(
+            .deleteOne()
+            .then(tkService.save())
+            .then(tkService.findOne())
+            .subscribe(
                 result -> {
                     publisher.publishEvent(new TkRetrievedEvent(this).lastCollected(result));
                     log.info("TkTask completed");
@@ -41,7 +41,7 @@ public class TkTask implements ApplicationListener<DatabaseCreatedEvent> {
                 error -> {
                     log.error("TkTask terminated with error", error);
                 }
-                );
+            );
     }
 
     @Override

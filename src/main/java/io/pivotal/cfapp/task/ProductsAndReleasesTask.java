@@ -36,25 +36,30 @@ public class ProductsAndReleasesTask implements ApplicationRunner {
     public void collect() {
         log.info("ProductsAndReleasesTask started");
         client
-        .getProducts()
-        .flatMap(products -> {
-            cache.setProducts(products);
-            return Mono.empty(); })
-        .then(
+            .getProducts()
+            .flatMap(products -> {
+                cache.setProducts(products);
+                return Mono.empty();
+            })
+            .then(
                 client
-                .getAllProductReleases()
-                .collectList()
-                .flatMap(releases -> {
-                    cache.setAllProductReleases(releases);
-                    return Mono.empty(); }))
-        .then(
+                    .getAllProductReleases()
+                    .collectList()
+                    .flatMap(releases -> {
+                        cache.setAllProductReleases(releases);
+                        return Mono.empty();
+                    })
+            )
+            .then(
                 client
-                .getLatestProductReleases()
-                .collectList()
-                .flatMap(releases -> {
-                    cache.setLatestProductReleases(releases);
-                    return Mono.justOrEmpty(releases); }))
-        .subscribe(
+                    .getLatestProductReleases()
+                    .collectList()
+                    .flatMap(releases -> {
+                        cache.setLatestProductReleases(releases);
+                        return Mono.justOrEmpty(releases);
+                    })
+            )
+            .subscribe(
                 result -> {
                     publisher.publishEvent(
                             new ProductsAndReleasesRetrievedEvent(this)
@@ -66,7 +71,7 @@ public class ProductsAndReleasesTask implements ApplicationRunner {
                 error -> {
                     log.error("ProductsAndReleasesTask terminated with error", error);
                 }
-                );
+            );
     }
 
     @Override

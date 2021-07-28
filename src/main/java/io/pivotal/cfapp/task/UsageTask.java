@@ -32,25 +32,26 @@ public class UsageTask implements ApplicationListener<TkRetrievedEvent> {
 
     public void collect() {
         log.info("UsageTask started");
-        service.getApplicationReport()
-        .doOnNext(r -> {
-            log.trace(mapWithException("AppUsageReport", r));
-            cache.setApplicationReport(r);
-        })
-        .then(service.getServiceReport())
-        .doOnNext(r -> {
-            log.trace(mapWithException("ServiceUsageReport", r));
-            cache.setServiceReport(r);
-        })
-        .then(service.getTaskReport())
-        .doOnNext(r -> {
-            log.trace(mapWithException("TaskUsageReport", r));
-            cache.setTaskReport(r);
-        })
-        .subscribe(
+        service
+            .getApplicationReport()
+            .doOnNext(r -> {
+                log.trace(mapWithException("AppUsageReport", r));
+                cache.setApplicationReport(r);
+            })
+            .then(service.getServiceReport())
+            .doOnNext(r -> {
+                log.trace(mapWithException("ServiceUsageReport", r));
+                cache.setServiceReport(r);
+            })
+            .then(service.getTaskReport())
+            .doOnNext(r -> {
+                log.trace(mapWithException("TaskUsageReport", r));
+                cache.setTaskReport(r);
+            })
+            .subscribe(
                 result -> log.info("UsageTask completed"),
-                error -> log.error("usageTask terminated with error", error)
-                );
+                error -> log.error("UsageTask terminated with error", error)
+            );
     }
 
     private String mapWithException(String type, Object value) {
