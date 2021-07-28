@@ -39,13 +39,13 @@ public class SpacesTask implements ApplicationListener<OrganizationsRetrievedEve
     public void collect(List<Organization> organizations) {
         log.info("SpacesTask started");
         service
-        .deleteAll()
-        .thenMany(Flux.fromIterable(organizations))
-        .flatMap(this::getSpaces)
-        .flatMap(service::save)
-        .thenMany(service.findAll())
-        .collectList()
-        .subscribe(
+            .deleteAll()
+            .thenMany(Flux.fromIterable(organizations))
+            .flatMap(this::getSpaces)
+            .flatMap(service::save)
+            .thenMany(service.findAll())
+            .collectList()
+            .subscribe(
                 result -> {
                     publisher.publishEvent(new SpacesRetrievedEvent(this).spaces(result));
                     log.info("SpacesTask completed");
@@ -54,22 +54,25 @@ public class SpacesTask implements ApplicationListener<OrganizationsRetrievedEve
                 error -> {
                     log.error("SpacesTask terminated with error", error);
                 }
-                );
+            );
     }
 
     protected Flux<Space> getSpaces(Organization organization) {
         return PaginationUtils.requestClientV3Resources(
-                page -> opsClient
-                .getCloudFoundryClient()
-                .spacesV3()
-                .list(ListSpacesRequest.builder().page(page).organizationIds(new String[] { organization.getId() }).build()))
-                .map(response -> Space
-                        .builder()
-                        .organizationId(organization.getId())
-                        .organizationName(organization.getName())
-                        .spaceId(response.getId())
-                        .spaceName(response.getName())
-                        .build());
+                page ->
+                    opsClient
+                        .getCloudFoundryClient()
+                        .spacesV3()
+                        .list(ListSpacesRequest.builder().page(page).organizationIds(new String[] { organization.getId() }).build()))
+                        .map(response ->
+                            Space
+                                .builder()
+                                .organizationId(organization.getId())
+                                .organizationName(organization.getName())
+                                .spaceId(response.getId())
+                                .spaceName(response.getName())
+                                .build()
+                        );
     }
 
     @Override

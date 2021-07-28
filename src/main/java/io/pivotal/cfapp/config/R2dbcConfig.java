@@ -1,23 +1,18 @@
 package io.pivotal.cfapp.config;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.autoconfigure.r2dbc.R2dbcProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.core.type.filter.AnnotationTypeFilter;
-import org.springframework.data.convert.ReadingConverter;
-import org.springframework.data.convert.WritingConverter;
 import org.springframework.data.r2dbc.config.AbstractR2dbcConfiguration;
 import org.springframework.util.StringUtils;
 
+import io.pivotal.cfapp.domain.CustomConverters;
 import io.pivotal.cfenv.core.CfEnv;
 import io.pivotal.cfenv.core.CfService;
 import io.r2dbc.spi.ConnectionFactories;
@@ -29,11 +24,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Configuration
 public class R2dbcConfig extends AbstractR2dbcConfiguration {
-    
-    private static final String DOMAIN_PACKAGE = "io.pivotal.cfapp.domain";
+
     private static final List<String> SUPPORTED_SCHEMES = Arrays.asList(new String[] { "mysql", "postgresql"});
     private static final String VCAP_SERVICE = "cf-butler-backend";
-    
+
     private CfEnv cfEnv;
     private R2dbcProperties r2dbcProperties;
 
@@ -118,20 +112,7 @@ public class R2dbcConfig extends AbstractR2dbcConfiguration {
     }
 
     protected List<Object> getCustomConverters() {
-        List<Object> converterList = new ArrayList<>();
-        ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(false);
-        provider.addIncludeFilter(new AnnotationTypeFilter(ReadingConverter.class));
-        provider.addIncludeFilter(new AnnotationTypeFilter(WritingConverter.class));
-        for (BeanDefinition beanDef : provider.findCandidateComponents(DOMAIN_PACKAGE)) {
-            try {
-                Class<?> cl = Class.forName(beanDef.getBeanClassName());
-                converterList.add(cl.getDeclaredConstructor().newInstance());
-                log.info("Added an instance of " + beanDef.getBeanClassName() + " to list of custom converters.");
-            } catch (Exception e) {
-                log.error("Could not add an instance of "+ beanDef.getBeanClassName() + " to list of custom converters.", e);
-            }
-        }
-        return converterList;
+        return CustomConverters.get();
     }
 
 }

@@ -49,26 +49,10 @@ import reactor.core.publisher.Mono;
 @Component
 public class StackChangeAppInstancesPolicyExecutorTask implements PolicyExecutorTask {
 
-    @Builder
-    @Getter
-    static class BuildpackLifecycleData implements LifecycleData {
-
-        private List<String> buildpacks;
-        private String stack;
-    }
-    private static Predicate<GetBuildResponse> isStaged() {
-        return response -> response.getState().equals(BuildState.STAGED);
-    }
-    private static Predicate<GetBuildResponse> isStagingComplete() {
-        return response -> response.getState().equals(BuildState.STAGED) || response.getState().equals(BuildState.FAILED);
-    }
     private final PolicyFilter filter;
     private final DefaultCloudFoundryOperations opsClient;
-
     private final AppDetailService appInfoService;
-
     private final PoliciesService policiesService;
-
     private final HistoricalRecordService historicalRecordService;
 
     @Autowired
@@ -88,12 +72,12 @@ public class StackChangeAppInstancesPolicyExecutorTask implements PolicyExecutor
 
     private Mono<UpdateApplicationResponse> assignTargetStack(ApplicationPolicy policy, AppDetail detail) {
         LifecycleData data =
-                BuildpackLifecycleData
+            BuildpackLifecycleData
                 .builder()
                 .stack(policy.getOption("stack-to", String.class))
                 .build();
         Lifecycle lifecycle =
-                Lifecycle
+            Lifecycle
                 .builder()
                 .type(LifecycleType.BUILDPACK)
                 .data(data)
@@ -106,11 +90,12 @@ public class StackChangeAppInstancesPolicyExecutorTask implements PolicyExecutor
                 .getCloudFoundryClient()
                 .applicationsV3()
                 .update(
-                        UpdateApplicationRequest
+                    UpdateApplicationRequest
                         .builder()
                         .applicationId(detail.getAppId())
                         .lifecycle(lifecycle)
-                        .build());
+                        .build()
+                );
     }
 
     private Mono<CreateBuildResponse> createBuild(PackageResource packageResource, AppDetail detail) {
@@ -130,7 +115,7 @@ public class StackChangeAppInstancesPolicyExecutorTask implements PolicyExecutor
     public void execute() {
         log.info("StackChangeAppInstancesPolicyExecutorTask started");
         stackChangeApplications()
-        .subscribe(
+            .subscribe(
                 result -> {
                     log.info("StackChangeAppInstancesPolicyExecutorTask completed");
                     log.info("-- {} applications updated.", result.size());
@@ -138,7 +123,7 @@ public class StackChangeAppInstancesPolicyExecutorTask implements PolicyExecutor
                 error -> {
                     log.error("StackChangeAppInstancesPolicyExecutorTask terminated with error", error);
                 }
-                );
+            );
     }
 
     private Mono<GetBuildResponse> getBuild(CreateBuildResponse build, AppDetail detail) {
@@ -201,22 +186,26 @@ public class StackChangeAppInstancesPolicyExecutorTask implements PolicyExecutor
                 .flatMap(build -> waitForStagedBuild(build, detail, null))
                 .flatMap(build -> setDroplet(build, detail))
                 .flatMap(build -> restartApp(detail))
-                .then(Mono.just(HistoricalRecord
-                        .builder()
-                        .transactionDateTime(LocalDateTime.now())
-                        .actionTaken("change-stack")
-                        .organization(detail.getOrganization())
-                        .space(detail.getSpace())
-                        .appId(detail.getAppId())
-                        .type("application")
-                        .name(detail.getAppName())
-                        .build()));
+                .then(
+                    Mono.just(
+                        HistoricalRecord
+                            .builder()
+                            .transactionDateTime(LocalDateTime.now())
+                            .actionTaken("change-stack")
+                            .organization(detail.getOrganization())
+                            .space(detail.getSpace())
+                            .appId(detail.getAppId())
+                            .type("application")
+                            .name(detail.getAppName())
+                            .build()
+                    )
+                );
     }
 
     // FIXME current implementation has no recoverability and is not capable of zero-downtime deployment
     protected Mono<List<HistoricalRecord>> stackChangeApplications() {
         return
-                policiesService
+            policiesService
                 .findByApplicationOperation(ApplicationOperation.CHANGE_STACK)
                 .flux()
                 .flatMap(p -> Flux.fromIterable(p.getApplicationPolicies()))
@@ -241,5 +230,20 @@ public class StackChangeAppInstancesPolicyExecutorTask implements PolicyExecutor
                 .filter(isStaged())
                 .switchIfEmpty(ExceptionUtils.illegalState("Build %s failed during staging", build.getId()))
                 .onErrorResume(DelayTimeoutException.class, t -> ExceptionUtils.illegalState("Build %s timed out during staging", build.getId()));
+    }
+
+    @Builder
+    @Getter
+    static class BuildpackLifecycleData implements LifecycleData {
+        private List<String> buildpacks;
+        private String stack;
+    }
+
+    private static Predicate<GetBuildResponse> isStaged() {
+        return response -> response.getState().equals(BuildState.STAGED);
+    }
+
+    private static Predicate<GetBuildResponse> isStagingComplete() {
+        return response -> response.getState().equals(BuildState.STAGED) || response.getState().equals(BuildState.FAILED);
     }
 }

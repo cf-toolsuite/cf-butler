@@ -1,13 +1,28 @@
 {
     "rules": [
         {
+            "excludeClasses": "com.vaadin.external.google.**"
+        },
+        {
             "excludeClasses": "org.apache.maven.surefire.**"
         },
         {
             "excludeClasses": "net.bytebuddy.**"
         },
         {
+            "excludeClasses": "org.jayway.**"
+        },
+        {
+            "excludeClasses": "net.minidev.**"
+        },
+        {
             "excludeClasses": "org.apiguardian.**"
+        },
+        {
+            "excludeClasses": "org.assertj.**"
+        },
+        {
+            "excludeClasses": "org.hamcrest.**"
         },
         {
             "excludeClasses": "org.junit.**"
@@ -16,10 +31,19 @@
             "excludeClasses": "org.mockito.**"
         },
         {
+            "excludeClasses": "org.objenesis.**"
+        },
+        {
+            "excludeClasses": "org.skyscreamer.**"
+        },
+        {
             "excludeClasses": "org.springframework.test.**"
         },
         {
             "excludeClasses": "org.springframework.boot.test.**"
+        },
+        {
+            "excludeClasses": "org.xmlunit.**"
         }
     ]
 }

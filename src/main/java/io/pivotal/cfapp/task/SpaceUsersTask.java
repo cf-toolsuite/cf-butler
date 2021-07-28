@@ -34,13 +34,13 @@ public class SpaceUsersTask implements ApplicationListener<SpacesRetrievedEvent>
     public void collect(List<Space> spaces) {
         log.info("SpaceUsersTask started");
         service
-        .deleteAll()
-        .thenMany(Flux.fromIterable(spaces))
-        .concatMap(this::getSpaceUsers)
-        .flatMap(service::save)
-        .thenMany(service.findAll())
-        .collectList()
-        .subscribe(
+            .deleteAll()
+            .thenMany(Flux.fromIterable(spaces))
+            .concatMap(this::getSpaceUsers)
+            .flatMap(service::save)
+            .thenMany(service.findAll())
+            .collectList()
+            .subscribe(
                 result -> {
                     log.info("SpaceUsersTask completed");
                     log.trace("Retrieved {} space user records", result.size());
@@ -48,7 +48,7 @@ public class SpaceUsersTask implements ApplicationListener<SpacesRetrievedEvent>
                 error -> {
                     log.error("SpaceUsersTask terminated with error", error);
                 }
-                );
+            );
     }
 
     protected Mono<SpaceUsers> getSpaceUsers(Space space) {
@@ -56,22 +56,22 @@ public class SpaceUsersTask implements ApplicationListener<SpacesRetrievedEvent>
         return opsClient
                 .userAdmin()
                 .listSpaceUsers(
-                        ListSpaceUsersRequest
+                    ListSpaceUsersRequest
                         .builder()
                         .organizationName(space.getOrganizationName())
                         .spaceName(space.getSpaceName())
                         .build()
-                        )
+                )
                 .map(su ->
-                SpaceUsers
-                .builder()
-                .organization(space.getOrganizationName())
-                .space(space.getSpaceName())
-                .auditors(su.getAuditors())
-                .managers(su.getManagers())
-                .developers(su.getDevelopers())
-                .build()
-                        );
+                    SpaceUsers
+                        .builder()
+                        .organization(space.getOrganizationName())
+                        .space(space.getSpaceName())
+                        .auditors(su.getAuditors())
+                        .managers(su.getManagers())
+                        .developers(su.getDevelopers())
+                        .build()
+                );
     }
 
     @Override

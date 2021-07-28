@@ -52,32 +52,36 @@ public class DeleteServiceInstancePolicyExecutorTask implements PolicyExecutorTa
                 .build()
                 .services()
                 .deleteInstance(DeleteServiceInstanceRequest.builder().name(sd.getName()).build())
-                .then(Mono.just(HistoricalRecord
-                        .builder()
-                        .transactionDateTime(LocalDateTime.now())
-                        .actionTaken("delete")
-                        .organization(sd.getOrganization())
-                        .space(sd.getSpace())
-                        .serviceInstanceId(sd.getServiceInstanceId())
-                        .type("service-instance")
-                        .name(String.join("__", sd.getName(), sd.getType(), sd.getPlan()))
-                        .build()));
+                .then(
+                    Mono.just(
+                        HistoricalRecord
+                            .builder()
+                            .transactionDateTime(LocalDateTime.now())
+                            .actionTaken("delete")
+                            .organization(sd.getOrganization())
+                            .space(sd.getSpace())
+                            .serviceInstanceId(sd.getServiceInstanceId())
+                            .type("service-instance")
+                            .name(String.join("__", sd.getName(), sd.getType(), sd.getPlan()))
+                            .build()
+                    )
+                );
     }
 
     @Override
     public void execute() {
         log.info("DeleteServiceInstancePolicyExecutorTask started");
         policiesService
-        .findByServiceInstanceOperation(ServiceInstanceOperation.DELETE)
-        .flux()
-        .flatMap(p -> Flux.fromIterable(p.getServiceInstancePolicies()))
-        .flatMap(sp -> serviceInfoService.findByServiceInstancePolicy(sp))
-        .filter(wl -> filter.isWhitelisted(wl.getT2(), wl.getT1().getOrganization()))
-        .filter(bl -> filter.isBlacklisted(bl.getT1().getOrganization(), bl.getT1().getSpace()))
-        .flatMap(ds -> deleteServiceInstance(ds.getT1()))
-        .flatMap(historicalRecordService::save)
-        .collectList()
-        .subscribe(
+            .findByServiceInstanceOperation(ServiceInstanceOperation.DELETE)
+            .flux()
+            .flatMap(p -> Flux.fromIterable(p.getServiceInstancePolicies()))
+            .flatMap(sp -> serviceInfoService.findByServiceInstancePolicy(sp))
+            .filter(wl -> filter.isWhitelisted(wl.getT2(), wl.getT1().getOrganization()))
+            .filter(bl -> filter.isBlacklisted(bl.getT1().getOrganization(), bl.getT1().getSpace()))
+            .flatMap(ds -> deleteServiceInstance(ds.getT1()))
+            .flatMap(historicalRecordService::save)
+            .collectList()
+            .subscribe(
                 result -> {
                     log.info("DeleteServiceInstancePolicyExecutorTask completed");
                     log.info("-- {} service instances deleted.", result.size());
@@ -85,7 +89,7 @@ public class DeleteServiceInstancePolicyExecutorTask implements PolicyExecutorTa
                 error -> {
                     log.error("DeleteServiceInstancePolicyExecutorTask terminated with error", error);
                 }
-                );
+            );
     }
 
     @Scheduled(cron = "${cron.execution}")

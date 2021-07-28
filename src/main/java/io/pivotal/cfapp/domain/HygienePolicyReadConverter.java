@@ -6,11 +6,13 @@ import java.util.HashSet;
 
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.convert.ReadingConverter;
+import org.springframework.stereotype.Indexed;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.r2dbc.spi.Row;
 
+@Indexed
 @ReadingConverter
 public class HygienePolicyReadConverter implements Converter<Row, HygienePolicy> {
 

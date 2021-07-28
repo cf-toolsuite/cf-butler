@@ -31,22 +31,22 @@ public class BuildpacksTask implements ApplicationListener<TkRetrievedEvent> {
         this.publisher = publisher;
     }
 
-
     public void collect() {
         log.info("BuildpacksTask started");
         getBuildpacks()
         .collectList()
         .map(list -> cache.from(list))
         .subscribe(
-                result -> {
-                    publisher.publishEvent(new BuildpacksRetrievedEvent(this));
-                    log.trace("Buildpack cache contains {}", result);
-                    log.info("BuildpacksTask completed");
-                    log.trace("Retrieved {} buildpacks", result.size());
-                },
-                error -> {
-                    log.error("BuildpacksTask terminated with error", error);
-                });
+            result -> {
+                publisher.publishEvent(new BuildpacksRetrievedEvent(this));
+                log.trace("Buildpack cache contains {}", result);
+                log.info("BuildpacksTask completed");
+                log.trace("Retrieved {} buildpacks", result.size());
+            },
+            error -> {
+                log.error("BuildpacksTask terminated with error", error);
+            }
+        );
     }
 
     protected Flux<Buildpack> getBuildpacks() {
@@ -59,6 +59,5 @@ public class BuildpacksTask implements ApplicationListener<TkRetrievedEvent> {
     public void onApplicationEvent(TkRetrievedEvent event) {
         collect();
     }
-
 
 }

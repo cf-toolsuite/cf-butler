@@ -1,6 +1,5 @@
 package io.pivotal.cfapp.task;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.List;
@@ -26,16 +25,8 @@ import reactor.core.publisher.Mono;
 @Component
 public class ServiceInstanceDetailTask implements ApplicationListener<SpacesRetrievedEvent> {
 
-    private static Space buildSpace(String organization, String space) {
-        return Space
-                .builder()
-                .organizationName(organization)
-                .spaceName(space)
-                .build();
-    }
     private DefaultCloudFoundryOperations opsClient;
     private ServiceInstanceDetailService service;
-
     private ApplicationEventPublisher publisher;
 
     @Autowired
@@ -61,14 +52,14 @@ public class ServiceInstanceDetailTask implements ApplicationListener<SpacesRetr
     public void collect(List<Space> spaces) {
         log.info("ServiceInstanceDetailTask started");
         service
-        .deleteAll()
-        .thenMany(Flux.fromIterable(spaces))
-        .concatMap(this::listServiceInstances)
-        .flatMap(this::getServiceInstanceDetail)
-        .flatMap(service::save)
-        .thenMany(service.findAll())
-        .collectList()
-        .subscribe(
+            .deleteAll()
+            .thenMany(Flux.fromIterable(spaces))
+            .concatMap(this::listServiceInstances)
+            .flatMap(this::getServiceInstanceDetail)
+            .flatMap(service::save)
+            .thenMany(service.findAll())
+            .collectList()
+            .subscribe(
                 result -> {
                     publisher.publishEvent(new ServiceInstanceDetailRetrievedEvent(this).detail(result));
                     log.info("ServiceInstanceDetailTask completed");
@@ -76,37 +67,37 @@ public class ServiceInstanceDetailTask implements ApplicationListener<SpacesRetr
                 error -> {
                     log.error("ServiceInstanceDetailTask terminated with error", error);
                 }
-                );
+            );
     }
+
     protected Mono<ServiceInstanceDetail> getServiceInstanceDetail(ServiceInstanceDetail fragment) {
         log.trace("Fetching service instance detail for org={}, space={}, id={}, name={}", fragment.getOrganization(), fragment.getSpace(), fragment.getServiceInstanceId(), fragment.getName());
         return buildClient(buildSpace(fragment.getOrganization(), fragment.getSpace()))
                 .services()
                 .getInstance(GetServiceInstanceRequest.builder().name(fragment.getName()).build())
                 .map(sid ->
-                ServiceInstanceDetail
-                .from(fragment)
-                .description(sid.getDescription())
-                .type(sid.getType() != null ? sid.getType().getValue(): null)
-                .lastOperation(sid.getLastOperation())
-                .lastUpdated(StringUtils.isNotBlank(sid.getUpdatedAt()) ? Instant.parse(sid.getUpdatedAt())
-                        .atZone(ZoneId.systemDefault())
-                        .toLocalDateTime() : null)
-                .dashboardUrl(sid.getDashboardUrl())
-                .requestedState(StringUtils.isNotBlank(sid.getStatus()) ? sid.getStatus().toLowerCase(): null)
-                .build()
-                        )
+                    ServiceInstanceDetail
+                        .from(fragment)
+                        .description(sid.getDescription())
+                        .type(sid.getType() != null ? sid.getType().getValue(): null)
+                        .lastOperation(sid.getLastOperation())
+                        .lastUpdated(StringUtils.isNotBlank(sid.getUpdatedAt()) ? Instant.parse(sid.getUpdatedAt())
+                                .atZone(ZoneId.systemDefault())
+                                .toLocalDateTime() : null)
+                        .dashboardUrl(sid.getDashboardUrl())
+                        .requestedState(StringUtils.isNotBlank(sid.getStatus()) ? sid.getStatus().toLowerCase(): null)
+                        .build()
+                )
                 .onErrorResume(e -> Mono.just(fragment));
     }
 
     protected Flux<ServiceInstanceDetail> listServiceInstances(Space target) {
         return
-                buildClient(target)
+            buildClient(target)
                 .services()
                 .listInstances()
-                .delayElements(Duration.ofMillis(250))
-                .flatMap(sis -> Mono.just(
-                        ServiceInstanceDetail
+                .map(sis ->
+                    ServiceInstanceDetail
                         .builder()
                         .serviceInstanceId(sis.getId())
                         .organization(target.getOrganizationName())
@@ -116,8 +107,7 @@ public class ServiceInstanceDetailTask implements ApplicationListener<SpacesRetr
                         .plan(sis.getPlan())
                         .applications(sis.getApplications())
                         .build()
-                        )
-                        );
+                );
     }
 
     @Override
@@ -125,4 +115,11 @@ public class ServiceInstanceDetailTask implements ApplicationListener<SpacesRetr
         collect(List.copyOf(event.getSpaces()));
     }
 
+    private static Space buildSpace(String organization, String space) {
+        return Space
+                .builder()
+                .organizationName(organization)
+                .spaceName(space)
+                .build();
+    }
 }

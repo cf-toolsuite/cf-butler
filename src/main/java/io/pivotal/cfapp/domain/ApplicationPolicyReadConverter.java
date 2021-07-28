@@ -7,12 +7,14 @@ import java.util.Map;
 
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.convert.ReadingConverter;
+import org.springframework.stereotype.Indexed;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.r2dbc.spi.Row;
 
+@Indexed
 @ReadingConverter
 public class ApplicationPolicyReadConverter implements Converter<Row, ApplicationPolicy> {
 
