@@ -41,41 +41,43 @@ public class ProductMetricsService {
         return cfClient
                 .buildpacks()
                 .list()
-                .map(b ->
-                    ProductMetric
+                .flatMap(b ->
+                    Mono.justOrEmpty(
+                        ProductMetric
                         .builder()
                         .name(refineName(b.getName()))
                         .currentlyInstalledVersion(obtainVersionFromBuildpackFilename(b.getFilename()))
                         .currentlyInstalledReleaseDate(
-                            pivnetCache
+                        pivnetCache
                                 .findProductReleaseBySlugAndVersion(
-                                    refineName(b.getName()), obtainVersionFromBuildpackFilename(b.getFilename())
+                                refineName(b.getName()), obtainVersionFromBuildpackFilename(b.getFilename())
                                 )
                                 .getReleaseDate()
                         )
                         .latestAvailableVersion(
-                            pivnetCache
+                        pivnetCache
                                 .findLatestProductReleaseBySlug(
-                                    refineName(b.getName())
+                                refineName(b.getName())
                                 )
                                 .getVersion()
                         )
                         .latestAvailableReleaseDate(
-                            pivnetCache
+                        pivnetCache
                                 .findLatestProductReleaseBySlug(
-                                    refineName(b.getName())
+                                refineName(b.getName())
                                 )
                                 .getReleaseDate()
                         )
                         .type(ProductType.from(refineName(b.getName())))
                         .endOfSupportDate(
-                            pivnetCache
+                        pivnetCache
                                 .findProductReleaseBySlugAndVersion(
-                                    refineName(b.getName()), obtainVersionFromBuildpackFilename(b.getFilename())
+                                refineName(b.getName()), obtainVersionFromBuildpackFilename(b.getFilename())
                                 )
                                 .getEndOfSupportDate()
                         )
                         .build()
+                    )
                 );
     }
 
@@ -85,10 +87,10 @@ public class ProductMetricsService {
                 .distinct()
                 .collect(Collectors.toSet())
                 .map(metrics ->
-                    ProductMetrics
-                        .builder()
-                        .productMetrics(metrics)
-                        .build()
+                        ProductMetrics
+                            .builder()
+                            .productMetrics(metrics)
+                            .build()
                 );
     }
 
@@ -96,6 +98,7 @@ public class ProductMetricsService {
         return opsmanClient
                 .getStemcellAssociations()
                 .flatMapMany(associations -> Flux.fromIterable(associations.getProducts()))
+                .filter(sa -> sa.getDeployedStemcells().size() > 0)
                 .map(sa ->
                     ProductMetric
                         .builder()
