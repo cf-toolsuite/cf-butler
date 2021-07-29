@@ -1,5 +1,6 @@
 package io.pivotal.cfapp.service;
 
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -44,39 +45,39 @@ public class ProductMetricsService {
                 .flatMap(b ->
                     Mono.justOrEmpty(
                         ProductMetric
-                        .builder()
-                        .name(refineName(b.getName()))
-                        .currentlyInstalledVersion(obtainVersionFromBuildpackFilename(b.getFilename()))
-                        .currentlyInstalledReleaseDate(
-                        pivnetCache
-                                .findProductReleaseBySlugAndVersion(
-                                refineName(b.getName()), obtainVersionFromBuildpackFilename(b.getFilename())
-                                )
-                                .getReleaseDate()
-                        )
-                        .latestAvailableVersion(
-                        pivnetCache
-                                .findLatestProductReleaseBySlug(
-                                refineName(b.getName())
-                                )
-                                .getVersion()
-                        )
-                        .latestAvailableReleaseDate(
-                        pivnetCache
-                                .findLatestProductReleaseBySlug(
-                                refineName(b.getName())
-                                )
-                                .getReleaseDate()
-                        )
-                        .type(ProductType.from(refineName(b.getName())))
-                        .endOfSupportDate(
-                        pivnetCache
-                                .findProductReleaseBySlugAndVersion(
-                                refineName(b.getName()), obtainVersionFromBuildpackFilename(b.getFilename())
-                                )
-                                .getEndOfSupportDate()
-                        )
-                        .build()
+                            .builder()
+                            .name(refineName(b.getName()))
+                            .currentlyInstalledVersion(obtainVersionFromBuildpackFilename(b.getFilename()))
+                            .currentlyInstalledReleaseDate(
+                                pivnetCache
+                                    .findProductReleaseBySlugAndVersion(
+                                        refineName(b.getName()), obtainVersionFromBuildpackFilename(b.getFilename())
+                                    )
+                                    .getReleaseDate()
+                            )
+                            .latestAvailableVersion(
+                                pivnetCache
+                                    .findLatestProductReleaseBySlug(
+                                        refineName(b.getName())
+                                    )
+                                    .getVersion()
+                            )
+                            .latestAvailableReleaseDate(
+                                pivnetCache
+                                    .findLatestProductReleaseBySlug(
+                                        refineName(b.getName())
+                                    )
+                                    .getReleaseDate()
+                            )
+                            .type(ProductType.from(refineName(b.getName())))
+                            .endOfSupportDate(
+                                pivnetCache
+                                    .findProductReleaseBySlugAndVersion(
+                                        refineName(b.getName()), obtainVersionFromBuildpackFilename(b.getFilename())
+                                    )
+                                    .getEndOfSupportDate()
+                            )
+                            .build()
                     )
                 );
     }
@@ -107,21 +108,21 @@ public class ProductMetricsService {
                         .currentlyInstalledReleaseDate(
                             pivnetCache
                                 .findProductReleaseBySlugAndVersion(
-                                    "stemcells-" + sa.getDeployedStemcells().get(0).getOs(), sa.getDeployedStemcells().get(0).getVersion()
+                                    refineType("stemcells-" + sa.getDeployedStemcells().get(0).getOs()), sa.getDeployedStemcells().get(0).getVersion()
                                 )
                                 .getReleaseDate()
                         )
                         .latestAvailableVersion(
                             pivnetCache
                                 .findLatestMinorProductReleaseBySlugAndVersion(
-                                    "stemcells-" + sa.getDeployedStemcells().get(0).getOs(), sa.getDeployedStemcells().get(0).getVersion()
+                                    refineType("stemcells-" + sa.getDeployedStemcells().get(0).getOs()), sa.getDeployedStemcells().get(0).getVersion()
                                 )
                                 .getVersion()
                         )
                         .latestAvailableReleaseDate(
                             pivnetCache
                                 .findLatestMinorProductReleaseBySlugAndVersion(
-                                    "stemcells-" + sa.getDeployedStemcells().get(0).getOs(), sa.getDeployedStemcells().get(0).getVersion()
+                                    refineType("stemcells-" + sa.getDeployedStemcells().get(0).getOs()), sa.getDeployedStemcells().get(0).getVersion()
                                 )
                                 .getReleaseDate()
                         )
@@ -129,7 +130,7 @@ public class ProductMetricsService {
                         .endOfSupportDate(
                             pivnetCache
                                 .findProductReleaseBySlugAndVersion(
-                                    "stemcells-" + sa.getDeployedStemcells().get(0).getOs(), sa.getDeployedStemcells().get(0).getVersion()
+                                    refineType("stemcells-" + sa.getDeployedStemcells().get(0).getOs()), sa.getDeployedStemcells().get(0).getVersion()
                                 )
                                 .getEndOfSupportDate()
                         )
@@ -141,7 +142,7 @@ public class ProductMetricsService {
     protected Flux<ProductMetric> getTiles() {
         return opsmanClient
                 .getDeployedProducts()
-                .flatMapMany(Flux::fromIterable)
+                .flatMapIterable(products -> products)
                 .map(deployedProduct ->
                     ProductMetric
                         .builder()
@@ -181,7 +182,7 @@ public class ProductMetricsService {
                 .filter(productExclusions());
     }
 
-    private static final String BOSH_EXCLUDE = "p-bosh";
+    private static final List<String> EXCLUDES = List.of("p-bosh");
 
     private static String obtainVersionFromBuildpackFilename(String filename) {
         String rawVersion = filename.substring(filename.lastIndexOf("-") + 1);
@@ -189,7 +190,7 @@ public class ProductMetricsService {
     }
 
     private static Predicate<ProductMetric> productExclusions() {
-        return productMetric -> !productMetric.getName().startsWith(BOSH_EXCLUDE);
+        return productMetric -> EXCLUDES.stream().filter(e -> productMetric.getName().startsWith(e)).collect(Collectors.toList()).isEmpty();
     }
 
     private static String refineName(String value) {
@@ -198,10 +199,16 @@ public class ProductMetricsService {
 
     private static String refineType(String value) {
         String normalizedValue = value.replaceAll("_", "-");
-        if (normalizedValue.startsWith("apm")) {
+        if (normalizedValue.startsWith("apm") || normalizedValue.startsWith("appMetrics")) {
             return "apm";
         } else if (normalizedValue.startsWith("cf")) {
             return "elastic-runtime";
+        } else if (normalizedValue.startsWith("metric-store")) {
+            return "p-metric-store";
+        } else if (normalizedValue.startsWith("p-healthwatch2")) {
+            return "p-healthwatch";
+        } else if (normalizedValue.startsWith("stemcells-windows")) {
+            return "stemcells-windows-server";
         }
         return normalizedValue;
     }

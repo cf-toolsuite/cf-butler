@@ -9,9 +9,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 @Data
 @Component
+@Slf4j
 public class PivnetCache {
 
     private Products products;
@@ -27,8 +29,10 @@ public class PivnetCache {
                 .sorted(Comparator.comparing(Release::getReleaseDate).reversed())
                 .collect(Collectors.toList());
         if (!CollectionUtils.isEmpty(candidates)) {
+            log.trace("Found latest minor release by {} and {}. \n\t {}", slug, version, candidates.get(0).toCsv());
             return candidates.get(0);
         } else {
+            log.trace("No match found for latest minor release by {} and {}.", slug, version);
             return Release.empty();
         }
     }
@@ -40,8 +44,10 @@ public class PivnetCache {
                 .filter(release -> release.getSlug().equals(slug))
                 .collect(Collectors.toList());
         if (!CollectionUtils.isEmpty(candidates)) {
+            log.trace("Found latest release by {}. \n\t {}", slug, candidates.get(0).toCsv());
             return candidates.get(0);
         } else {
+            log.trace("No match found for latest release by {}.", slug);
             return Release.empty();
         }
     }
@@ -50,11 +56,15 @@ public class PivnetCache {
         List<Release> candidates =
             allProductReleases
                 .stream()
-                .filter(release -> release.getSlug().equals(slug) && release.getVersion().equals(version))
+                .filter(release ->
+                    release.getSlug().equals(slug) &&
+                        (release.getVersion().equals(version) || version.startsWith(release.getVersion())))
                 .collect(Collectors.toList());
         if (!CollectionUtils.isEmpty(candidates)) {
+            log.trace("Found release by {} and {}. \n\t {}", slug, version, candidates.get(0).toCsv());
             return candidates.get(0);
         } else {
+            log.trace("No match found for release by {} and {}.", slug, version);
             return Release.empty();
         }
     }
