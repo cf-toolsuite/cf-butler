@@ -18,37 +18,12 @@ import reactor.core.publisher.Mono;
 
 @Service
 @ConditionalOnExpression(
-        "${om.enabled:false} and ${pivnet.enabled:false}"
-        )
+    "${om.enabled:false} and ${pivnet.enabled:false}"
+)
 public class ProductMetricsService {
 
-    private static final String BOSH_EXCLUDE = "p-bosh";
-
-    private static String obtainVersionFromBuildpackFilename(String filename) {
-        String rawVersion = filename.substring(filename.lastIndexOf("-") + 1);
-        return rawVersion.replaceAll(".zip", "").replaceAll("v", "");
-    }
-    private static Predicate<ProductMetric> productExclusions() {
-        return productMetric -> !productMetric.getName().startsWith(BOSH_EXCLUDE);
-    }
-    private static String refineName(String value) {
-        return value.replaceAll("_", "-").replaceAll("-offline", "");
-    }
-
-    private static String refineType(String value) {
-        String normalizedValue = value.replaceAll("_", "-");
-        if (normalizedValue.startsWith("apm")) {
-            return "apm";
-        } else if (normalizedValue.startsWith("cf")) {
-            return "elastic-runtime";
-        }
-        return normalizedValue;
-    }
-
     private final PivnetCache pivnetCache;
-
     private final OpsmanClient opsmanClient;
-
     private final DefaultCloudFoundryOperations cfClient;
 
     @Autowired
@@ -67,37 +42,41 @@ public class ProductMetricsService {
                 .buildpacks()
                 .list()
                 .map(b ->
-                ProductMetric
-                .builder()
-                .name(refineName(b.getName()))
-                .currentlyInstalledVersion(obtainVersionFromBuildpackFilename(b.getFilename()))
-                .currentlyInstalledReleaseDate(
-                        pivnetCache.findProductReleaseBySlugAndVersion(
-                                refineName(b.getName()), obtainVersionFromBuildpackFilename(b.getFilename())
+                    ProductMetric
+                        .builder()
+                        .name(refineName(b.getName()))
+                        .currentlyInstalledVersion(obtainVersionFromBuildpackFilename(b.getFilename()))
+                        .currentlyInstalledReleaseDate(
+                            pivnetCache
+                                .findProductReleaseBySlugAndVersion(
+                                    refineName(b.getName()), obtainVersionFromBuildpackFilename(b.getFilename())
                                 )
-                        .getReleaseDate()
+                                .getReleaseDate()
                         )
-                .latestAvailableVersion(
-                        pivnetCache.findLatestProductReleaseBySlug(
-                                refineName(b.getName())
+                        .latestAvailableVersion(
+                            pivnetCache
+                                .findLatestProductReleaseBySlug(
+                                    refineName(b.getName())
                                 )
-                        .getVersion()
+                                .getVersion()
                         )
-                .latestAvailableReleaseDate(
-                        pivnetCache.findLatestProductReleaseBySlug(
-                                refineName(b.getName())
+                        .latestAvailableReleaseDate(
+                            pivnetCache
+                                .findLatestProductReleaseBySlug(
+                                    refineName(b.getName())
                                 )
-                        .getReleaseDate()
+                                .getReleaseDate()
                         )
-                .type(ProductType.from(refineName(b.getName())))
-                .endOfSupportDate(
-                        pivnetCache.findProductReleaseBySlugAndVersion(
-                                refineName(b.getName()), obtainVersionFromBuildpackFilename(b.getFilename())
+                        .type(ProductType.from(refineName(b.getName())))
+                        .endOfSupportDate(
+                            pivnetCache
+                                .findProductReleaseBySlugAndVersion(
+                                    refineName(b.getName()), obtainVersionFromBuildpackFilename(b.getFilename())
                                 )
-                        .getEndOfSupportDate()
+                                .getEndOfSupportDate()
                         )
-                .build()
-                        );
+                        .build()
+                );
     }
 
     public Mono<ProductMetrics> getProductMetrics() {
@@ -106,11 +85,11 @@ public class ProductMetricsService {
                 .distinct()
                 .collect(Collectors.toSet())
                 .map(metrics ->
-                ProductMetrics
-                .builder()
-                .productMetrics(metrics)
-                .build()
-                        );
+                    ProductMetrics
+                        .builder()
+                        .productMetrics(metrics)
+                        .build()
+                );
     }
 
     protected Flux<ProductMetric> getStemcells() {
@@ -118,37 +97,41 @@ public class ProductMetricsService {
                 .getStemcellAssociations()
                 .flatMapMany(associations -> Flux.fromIterable(associations.getProducts()))
                 .map(sa ->
-                ProductMetric
-                .builder()
-                .name(String.format("%s:%s:%s", refineType(sa.getIdentifier()), sa.getDeployedProductVersion(), sa.getDeployedStemcells().get(0).getOs()))
-                .currentlyInstalledVersion(sa.getDeployedStemcells().get(0).getVersion())
-                .currentlyInstalledReleaseDate(
-                        pivnetCache.findProductReleaseBySlugAndVersion(
-                                "stemcells-" + sa.getDeployedStemcells().get(0).getOs(), sa.getDeployedStemcells().get(0).getVersion()
+                    ProductMetric
+                        .builder()
+                        .name(String.format("%s:%s:%s", refineType(sa.getIdentifier()), sa.getDeployedProductVersion(), sa.getDeployedStemcells().get(0).getOs()))
+                        .currentlyInstalledVersion(sa.getDeployedStemcells().get(0).getVersion())
+                        .currentlyInstalledReleaseDate(
+                            pivnetCache
+                                .findProductReleaseBySlugAndVersion(
+                                    "stemcells-" + sa.getDeployedStemcells().get(0).getOs(), sa.getDeployedStemcells().get(0).getVersion()
                                 )
-                        .getReleaseDate()
+                                .getReleaseDate()
                         )
-                .latestAvailableVersion(
-                        pivnetCache.findLatestMinorProductReleaseBySlugAndVersion(
-                                "stemcells-" + sa.getDeployedStemcells().get(0).getOs(), sa.getDeployedStemcells().get(0).getVersion()
+                        .latestAvailableVersion(
+                            pivnetCache
+                                .findLatestMinorProductReleaseBySlugAndVersion(
+                                    "stemcells-" + sa.getDeployedStemcells().get(0).getOs(), sa.getDeployedStemcells().get(0).getVersion()
                                 )
-                        .getVersion()
+                                .getVersion()
                         )
-                .latestAvailableReleaseDate(
-                        pivnetCache.findLatestMinorProductReleaseBySlugAndVersion(
-                                "stemcells-" + sa.getDeployedStemcells().get(0).getOs(), sa.getDeployedStemcells().get(0).getVersion()
+                        .latestAvailableReleaseDate(
+                            pivnetCache
+                                .findLatestMinorProductReleaseBySlugAndVersion(
+                                    "stemcells-" + sa.getDeployedStemcells().get(0).getOs(), sa.getDeployedStemcells().get(0).getVersion()
                                 )
-                        .getReleaseDate()
+                                .getReleaseDate()
                         )
-                .type(ProductType.STEMCELL)
-                .endOfSupportDate(
-                        pivnetCache.findProductReleaseBySlugAndVersion(
-                                "stemcells-" + sa.getDeployedStemcells().get(0).getOs(), sa.getDeployedStemcells().get(0).getVersion()
+                        .type(ProductType.STEMCELL)
+                        .endOfSupportDate(
+                            pivnetCache
+                                .findProductReleaseBySlugAndVersion(
+                                    "stemcells-" + sa.getDeployedStemcells().get(0).getOs(), sa.getDeployedStemcells().get(0).getVersion()
                                 )
-                        .getEndOfSupportDate()
+                                .getEndOfSupportDate()
                         )
-                .build()
-                        )
+                        .build()
+                )
                 .filter(productExclusions());
     }
 
@@ -157,38 +140,67 @@ public class ProductMetricsService {
                 .getDeployedProducts()
                 .flatMapMany(Flux::fromIterable)
                 .map(deployedProduct ->
-                ProductMetric
-                .builder()
-                .name(refineType(deployedProduct.getType()))
-                .currentlyInstalledVersion(deployedProduct.getProductVersion())
-                .currentlyInstalledReleaseDate(
-                        pivnetCache.findProductReleaseBySlugAndVersion(
-                                refineType(deployedProduct.getType()), deployedProduct.getProductVersion()
+                    ProductMetric
+                        .builder()
+                        .name(refineType(deployedProduct.getType()))
+                        .currentlyInstalledVersion(deployedProduct.getProductVersion())
+                        .currentlyInstalledReleaseDate(
+                            pivnetCache
+                                .findProductReleaseBySlugAndVersion(
+                                    refineType(deployedProduct.getType()), deployedProduct.getProductVersion()
                                 )
-                        .getReleaseDate()
+                                .getReleaseDate()
                         )
-                .latestAvailableVersion(
-                        pivnetCache.findLatestProductReleaseBySlug(
-                                refineType(deployedProduct.getType())
+                        .latestAvailableVersion(
+                            pivnetCache
+                                .findLatestProductReleaseBySlug(
+                                    refineType(deployedProduct.getType())
                                 )
-                        .getVersion()
+                                .getVersion()
                         )
-                .latestAvailableReleaseDate(
-                        pivnetCache.findLatestProductReleaseBySlug(
-                                refineType(deployedProduct.getType())
+                        .latestAvailableReleaseDate(
+                            pivnetCache
+                                .findLatestProductReleaseBySlug(
+                                    refineType(deployedProduct.getType())
                                 )
-                        .getReleaseDate()
+                                .getReleaseDate()
                         )
-                .type(ProductType.from(refineType(deployedProduct.getType())))
-                .endOfSupportDate(
-                        pivnetCache.findProductReleaseBySlugAndVersion(
-                                refineType(deployedProduct.getType()), deployedProduct.getProductVersion()
+                        .type(ProductType.from(refineType(deployedProduct.getType())))
+                        .endOfSupportDate(
+                            pivnetCache
+                                .findProductReleaseBySlugAndVersion(
+                                    refineType(deployedProduct.getType()), deployedProduct.getProductVersion()
                                 )
-                        .getEndOfSupportDate()
+                                .getEndOfSupportDate()
                         )
-                .build()
-                        )
+                        .build()
+                )
                 .filter(productExclusions());
+    }
+
+    private static final String BOSH_EXCLUDE = "p-bosh";
+
+    private static String obtainVersionFromBuildpackFilename(String filename) {
+        String rawVersion = filename.substring(filename.lastIndexOf("-") + 1);
+        return rawVersion.replaceAll(".zip", "").replaceAll("v", "");
+    }
+
+    private static Predicate<ProductMetric> productExclusions() {
+        return productMetric -> !productMetric.getName().startsWith(BOSH_EXCLUDE);
+    }
+
+    private static String refineName(String value) {
+        return value.replaceAll("_", "-").replaceAll("-offline", "");
+    }
+
+    private static String refineType(String value) {
+        String normalizedValue = value.replaceAll("_", "-");
+        if (normalizedValue.startsWith("apm")) {
+            return "apm";
+        } else if (normalizedValue.startsWith("cf")) {
+            return "elastic-runtime";
+        }
+        return normalizedValue;
     }
 
 }

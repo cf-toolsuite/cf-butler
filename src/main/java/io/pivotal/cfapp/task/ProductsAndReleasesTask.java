@@ -62,7 +62,7 @@ public class ProductsAndReleasesTask implements ApplicationRunner {
             .subscribe(
                 result -> {
                     publisher.publishEvent(
-                            new ProductsAndReleasesRetrievedEvent(this)
+                        new ProductsAndReleasesRetrievedEvent(this)
                             .products(cache.getProducts())
                             .allReleases(cache.getAllProductReleases())
                             .latestReleases(cache.getLatestProductReleases()));
