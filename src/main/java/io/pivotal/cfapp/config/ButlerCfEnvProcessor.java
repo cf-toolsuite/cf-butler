@@ -54,7 +54,7 @@ public class ButlerCfEnvProcessor implements CfEnvProcessor {
         addOrUpdatePropertyValue("cf.apiHost", "CF_API-HOST", cfCredentials, properties);
         addOrUpdatePropertyValue("cf.username", "CF_USERNAME", cfCredentials, properties);
         addOrUpdatePropertyValue("cf.password", "CF_PASSWORD", cfCredentials, properties);
-        addOrUpdatePropertyValue("cf.sslValidationSkipped", "CF_SKIP_SSL_VALIDATION", cfCredentials, properties);
+        addOrUpdatePropertyValue("cf.sslValidationSkipped", "CF_SKIP-SSL-VALIDATION", cfCredentials, properties);
         addOrUpdatePropertyValue("cf.connectionPoolSize", "CF_CONNECTION_POOLSIZE", cfCredentials, properties);
         addOrUpdatePropertyValue("cf.connectionTimeout", "CF_CONNECTION_TIMEOUT", cfCredentials, properties);
         addOrUpdatePropertyValue("cf.tokenProvider", "CF_TOKEN-PROVIDER", cfCredentials, properties);

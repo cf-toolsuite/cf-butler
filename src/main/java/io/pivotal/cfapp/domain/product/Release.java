@@ -2,6 +2,7 @@ package io.pivotal.cfapp.domain.product;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -25,6 +26,9 @@ import lombok.Getter;
     "availability",
     "description",
     "eula",
+    "end_of_support_date",
+    "end_of_guidance_date",
+    "end_of_availability_date",
     "eccn",
     "license_exception",
     "updated_at",
@@ -41,7 +45,8 @@ public class Release {
 
     public static String headers() {
         return String.join(",", "id", "slug", "version", "release_type", "release_date",
-                "release_notes_url", "availability", "description", "eccn", "license_exception", "updated_at",
+                "release_notes_url", "availability", "description", "end_of_support_date",
+                "end_of_guidance_date", "end_of_availability_date", "eccn", "license_exception", "updated_at",
                 "software_files_updated_at");
     }
 
@@ -77,6 +82,12 @@ public class Release {
     @JsonProperty("end_of_support_date")
     private LocalDate endOfSupportDate;
 
+    @JsonProperty("end_of_guidance_date")
+    private LocalDate endOfGuidanceDate;
+
+    @JsonProperty("end_of_availability_date")
+    private LocalDate endOfAvailabilityDate;
+
     @JsonProperty("eccn")
     private String eccn;
 
@@ -103,6 +114,8 @@ public class Release {
             @JsonProperty("description") String description,
             @JsonProperty("eula") Eula eula,
             @JsonProperty("end_of_support_date") LocalDate endOfSupportDate,
+            @JsonProperty("end_of_guidance_date") LocalDate endOfGuidanceDate,
+            @JsonProperty("end_of_availability_date") LocalDate endOfAvailabilityDate,
             @JsonProperty("eccn") String eccn,
             @JsonProperty("license_exception") String licenseException,
             @JsonProperty("updated_at") Instant updatedAt,
@@ -118,6 +131,8 @@ public class Release {
         this.description = description;
         this.eula = eula;
         this.endOfSupportDate = endOfSupportDate;
+        this.endOfGuidanceDate = endOfGuidanceDate;
+        this.endOfAvailabilityDate = endOfAvailabilityDate;
         this.eccn = eccn;
         this.licenseException = licenseException;
         this.updatedAt = updatedAt;
@@ -137,6 +152,9 @@ public class Release {
         return String.join(",", wrap(String.valueOf(getId())), wrap(getSlug()), wrap(getVersion()),
                 wrap(getReleaseType()), wrap(getReleaseDate() != null ? getReleaseDate().toString(): ""),
                 wrap(getReleaseNotesUrl()), wrap(getAvailability()), wrap(getDescription()),
+                wrap(getEndOfSupportDate() != null ? DateTimeFormatter.ISO_LOCAL_DATE.format(getEndOfSupportDate()): null),
+                wrap(getEndOfGuidanceDate() != null ? DateTimeFormatter.ISO_LOCAL_DATE.format(getEndOfGuidanceDate()): null),
+                wrap(getEndOfAvailabilityDate() != null ? DateTimeFormatter.ISO_LOCAL_DATE.format(getEndOfAvailabilityDate()): null),
                 wrap(getEccn()), wrap(getLicenseException()), wrap(getUpdatedAt() != null ? getUpdatedAt().toString(): ""),
                 wrap(getSoftwareFilesUpdatedAt() != null ? getSoftwareFilesUpdatedAt().toString(): ""));
     }

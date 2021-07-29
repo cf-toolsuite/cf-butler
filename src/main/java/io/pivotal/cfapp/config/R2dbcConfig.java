@@ -30,6 +30,7 @@ public class R2dbcConfig extends AbstractR2dbcConfiguration {
 
     private CfEnv cfEnv;
     private R2dbcProperties r2dbcProperties;
+    private PasSettings settings;
 
     @Autowired(required = false)
     public void setCfEnv(CfEnv cfEnv) {
@@ -39,6 +40,11 @@ public class R2dbcConfig extends AbstractR2dbcConfiguration {
     @Autowired
     public void setR2dbcProperties(R2dbcProperties r2dbcProperties) {
         this.r2dbcProperties = r2dbcProperties;
+    }
+
+    @Autowired
+    public void setSettings(PasSettings settings) {
+        this.settings = settings;
     }
 
     @Bean
@@ -66,7 +72,7 @@ public class R2dbcConfig extends AbstractR2dbcConfiguration {
         }
         if (properties.getProperties() != null) {
             properties.getProperties()
-            .forEach((key, value) -> builder
+                .forEach((key, value) -> builder
                     .option(Option.valueOf(key), value));
         }
         return ConnectionFactories.get(builder.build());
@@ -98,6 +104,11 @@ public class R2dbcConfig extends AbstractR2dbcConfiguration {
                 }
                 builder.append(uri.getPath());
                 r2dbcProperties.setUrl(builder.toString());
+                if (scheme.startsWith("mysql")) {
+                    if (settings.isSslValidationSkipped()) {
+                        r2dbcProperties.getProperties().put("sslMode", "disabled");
+                    }
+                }
                 return r2dbcProperties;
             } else {
                 throw new IllegalStateException(String.format("Could not initialize R2dbcProperties. Service instance was found with scheme {} but it is not supported. Supported schemes are {}.", uri.getScheme(), SUPPORTED_SCHEMES));

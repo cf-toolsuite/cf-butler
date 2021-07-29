@@ -14,7 +14,8 @@ import lombok.Getter;
     "id",
     "slug",
     "name",
-    "_links"
+    "_links",
+    "archived_at"
 })
 public class Eula {
 
@@ -31,16 +32,21 @@ public class Eula {
     @JsonProperty("_links")
     private EulaLinks links;
 
+    @JsonProperty
+    private String archivedAt;
+
     @JsonCreator
     public Eula(
             @JsonProperty("id") Long id,
             @JsonProperty("slug") String slug,
             @JsonProperty("name") String name,
-            @JsonProperty("_links") EulaLinks links
+            @JsonProperty("_links") EulaLinks links,
+            @JsonProperty("archived_at") String archivedAt
             ) {
         this.id = id;
         this.slug = slug;
         this.name = name;
         this.links = links;
+        this.archivedAt = archivedAt;
     }
 }
