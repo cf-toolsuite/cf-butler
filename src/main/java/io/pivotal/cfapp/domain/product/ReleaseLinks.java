@@ -15,7 +15,8 @@ import lombok.Getter;
     "eula_acceptance",
     "product_files",
     "file_groups",
-    "user_groups"
+    "user_groups",
+    "artifact_references"
 })
 public class ReleaseLinks {
 
@@ -34,18 +35,23 @@ public class ReleaseLinks {
     @JsonProperty("user_groups")
     private UserGroups userGroups;
 
+    @JsonProperty("artifact_references")
+    private ArtifactReferences artifactReferences;
+
     public ReleaseLinks(
             @JsonProperty("self") Self self,
             @JsonProperty("eula_acceptance") EulaAcceptance eulaAcceptance,
             @JsonProperty("product_files") ProductFiles productFiles,
             @JsonProperty("file_groups") FileGroups fileGroups,
-            @JsonProperty("user_groups") UserGroups userGroups
+            @JsonProperty("user_groups") UserGroups userGroups,
+            @JsonProperty("artifact_references") ArtifactReferences artifactReferences
             ) {
         this.self = self;
         this.eulaAcceptance = eulaAcceptance;
         this.productFiles = productFiles;
         this.fileGroups = fileGroups;
         this.userGroups = userGroups;
+        this.artifactReferences = artifactReferences;
     }
 
 }

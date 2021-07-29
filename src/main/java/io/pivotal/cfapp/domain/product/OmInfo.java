@@ -30,4 +30,18 @@ public class OmInfo {
     public OmInfo(@JsonProperty("info") Info info) {
         this.info = info;
     }
+
+    public Integer getMajorVersion() {
+        String[] versionParts = info.getVersion().split("v");
+        String[] buildParts = versionParts[0].split("-");
+        String[] majorMinorParts = buildParts[0].split("\\.");
+        return Integer.valueOf(majorMinorParts[0]);
+    }
+
+    public Integer getMinorVersion() {
+        String[] versionParts = info.getVersion().split("v");
+        String[] buildParts = versionParts[0].split("-");
+        String[] majorMinorParts = buildParts[0].split("\\.");
+        return Integer.valueOf(majorMinorParts[1]);
+    }
 }
