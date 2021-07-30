@@ -105,7 +105,7 @@ git clone https://github.com/pacphi/cf-butler.git
 
 ## How to configure
 
-Make a copy of then edit the contents of the `application.yml` file located in `src/main/resources`.  A best practice is to append a suffix representating the target deployment environment (e.g., `application-pws.yml`, `application-pcfone.yml`). You will need to provide administrator credentials to Apps Manager for the foundation if you want the butler to keep your entire foundation tidy.
+Make a copy of then edit the contents of the `application.yml` file located in `src/main/resources`.  A best practice is to append a suffix representing the target deployment environment (e.g., `application-pcfone.yml`). You will need to provide administrator credentials to Apps Manager for the foundation if you want the butler to keep your entire foundation tidy.
 
 > You really should not bundle configuration with the application. To take some of the sting away, you might consider externalizing and/or [encrypting](https://blog.novatec-gmbh.de/encrypted-properties-spring/) this configuration.
 
@@ -149,13 +149,13 @@ Based on choice of the authorization token provider
 
 If you copied and appended a suffix to the original `application.yml` then you would set `spring.profiles.active` to be that suffix
 
-E.g., if you had a configuration file named `application-pws.yml`
+E.g., if you had a configuration file named `application-pcfone.yml`
 
 ```
-./mvnw spring-boot:run -Dspring.profiles.active=pws
+./mvnw spring-boot:run -Dspring.profiles.active=pcfone
 ```
 
-> See the [samples](samples) directory for some examples of configuration when deploying to [VMware Tanzu Web Services](https://login.run.tanzu.vmware.com/login) or [PCF One](https://login.run.pcfone.io/login).
+> See the [samples](samples) directory for a few examples of configuration options when deploying to a foundation.
 
 For an exhaustive listing of all overridable configuration properties consult [ButlerCfEnvProcessor.java](https://github.com/pacphi/cf-butler/blob/master/src/main/java/io/pivotal/cfapp/config/ButlerCfEnvProcessor.java).
 
@@ -169,7 +169,7 @@ Before you `cf push`, stash the credentials for your database in `config/secrets
 
 ```
 {
-  "R2DBC_URL": "rdbc:postgresql://<server>:<port>/<database>",
+  "R2DBC_URL": "rdbc:<database-provider>://<server>:<port>/<database-name>",
   "R2DBC_USERNAME": "<username>",
   "R2DBC_PASSWORD": "<password>"
 }
@@ -179,9 +179,9 @@ Before you `cf push`, stash the credentials for your database in `config/secrets
 
 Or you may wish to `cf bind-service` to a database service instance. In this case you must abide by a naming convention. The name of your service instance must be `cf-butler-backend`.
 
-[DDL](https://en.wikipedia.org/wiki/Data_definition_language) scripts for each supported database are managed underneath [src/main/resources/db](src/main/resources/db). Supported databases are: [h2](src/main/resources/db/h2/schema.ddl), [mysql](src/main/resources/db/mysql/schema.ddl) and [postgresql](src/main/resources/db/postgresql/schema.ddl).
+[DDL](https://en.wikipedia.org/wiki/Data_definition_language) scripts for each supported database provider are managed underneath [src/main/resources/db](src/main/resources/db). Supported databases are: [h2](src/main/resources/db/h2/schema.ddl), [mysql](src/main/resources/db/mysql/schema.ddl) and [postgresql](src/main/resources/db/postgresql/schema.ddl).
 
-> A sample [script](scripts/deploy.postgres.sh) and [secrets](samples/secrets.pws.with-postgres.json) for deploying `cf-butler` to VMware Tanzu Web Services with an [ElephantSQL](https://www.elephantsql.com) backend exists for your perusal.  If you're rather interested in MySQL as a backend, take a look at this version of [secrets](samples/secrets.pws.with-mysql.json) and the accompanying [script](scripts/deploy.mysql.sh).
+> Review the sample scripts for deploying [postgres](scripts/deploy.postgres.sh) and [mysql](scripts/deploy.mysql.sh).  And consult the corresponding secrets samples for [postgres](samples/secrets.pws.with-postgres.json) and [mysql](samples/secrets.pws.with-mysql.json) when you intend to transact an externally hosted database.
 
 ### Managing policies
 
@@ -394,7 +394,7 @@ If `om.grantType` is set to `password`
 
 If `om.grantType` is set to `client_credentials`
 
-* `om.username` - must be set to blank 
+* `om.username` - must be set to blank
 * `om.password` - must be set to blank
 * `om.clientId` - the recipient of the token
 * `om.clientSecret` - the secret passphrase configured for the OAuth client
@@ -457,7 +457,7 @@ The below represent a collection of Maven profiles available in the Maven POM.
 ```
 ./mvnw spring-boot:run -Dspring.profiles.active={target_foundation_profile}
 ```
-where `{target_foundation_profile}` is something like `pws` or `pcfone`
+where `{target_foundation_profile}` is something like `pcfone`
 
 > You'll need to manually stop to the application with `Ctrl+C`
 
@@ -519,10 +519,10 @@ The following instructions explain how to get started when `cf.tokenProvider` is
 
 Authenticate to a foundation using the API endpoint.
 
-> E.g., login to [VMware Tanzu Web Services](https://login.run.tanzu.vmware.com)
+> E.g., login to [IBM Cloud](https://cloud.ibm.com/login)
 
 ```
-cf login -a https://api.run.tanzu.vmware.com
+cf login -a api.us-south.cf.cloud.ibm.com -u <username> -p <password>
 ```
 
 ### with SSO authorization
