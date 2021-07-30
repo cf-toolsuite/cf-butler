@@ -6,6 +6,8 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import reactor.core.publisher.Hooks;
+
 
 @EnableScheduling
 @EnableTransactionManagement
@@ -14,6 +16,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 public class AppInit {
 
     public static void main(String[] args) {
+        Hooks.onOperatorDebug();
         SpringApplication.run(AppInit.class, args);
     }
 }
