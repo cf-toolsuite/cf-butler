@@ -92,11 +92,12 @@
     <dependency>
       <groupId>com.fasterxml.jackson.datatype</groupId>
       <artifactId>jackson-datatype-jsr310</artifactId>
+      <version>2.12.4</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.dataformat</groupId>
       <artifactId>jackson-dataformat-csv</artifactId>
-      <version>2.12.3</version>
+      <version>2.12.4</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.uuid</groupId>
@@ -106,7 +107,7 @@
     <dependency>
       <groupId>io.pivotal.cfenv</groupId>
       <artifactId>java-cfenv-boot</artifactId>
-      <version>2.3.0</version>
+      <version>2.4.0</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -141,7 +142,7 @@
     <dependency>
       <groupId>com.sendgrid</groupId>
       <artifactId>sendgrid-java</artifactId>
-      <version>4.7.2</version>
+      <version>4.7.3</version>
       <exclusions>
         <exclusion>
           <artifactId>httpclient</artifactId>
@@ -181,7 +182,7 @@
     <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
-      <version>3.20.1</version>
+      <version>3.20.2</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -693,7 +694,7 @@
       <plugin>
         <groupId>com.github.spotbugs</groupId>
         <artifactId>spotbugs-maven-plugin</artifactId>
-        <version>4.2.3</version>
+        <version>4.3.0</version>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
