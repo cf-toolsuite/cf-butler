@@ -75,7 +75,7 @@ public class ResourceNotificationPolicyExecutorTask implements PolicyExecutorTas
 
     private Mono<List<String>> fetchRecipientList(ResourceNotificationPolicy resourceNotificationPolicy, String label, Integer page, Integer perPage){
         return
-            resourceMetadataService.getResources(resourceNotificationPolicy.getResourceEmailMetadata().getResource(),label,page,perPage)
+            resourceMetadataService.getResources(resourceNotificationPolicy.getResourceEmailMetadata().getResource(), label, page, perPage)
                 .flatMapMany(resources -> Flux.fromIterable(resources.getResources()))
                 .delayElements(Duration.ofMillis(250))
                 .filter(resource -> isBlacklisted(resourceNotificationPolicy, resource.getName()))
@@ -85,18 +85,18 @@ public class ResourceNotificationPolicyExecutorTask implements PolicyExecutorTas
     }
 
     private void notifyOwners(ResourceNotificationPolicy resourceNotificationPolicy, String label) {
-        resourceMetadataService.getResources(resourceNotificationPolicy.getResourceEmailMetadata().getResource(),label,null,null)
+        resourceMetadataService.getResources(resourceNotificationPolicy.getResourceEmailMetadata().getResource(), label , null , null)
             .delayElement(Duration.ofMillis(250))
             .doOnNext(resources -> {
                 for (Integer page=1; page <= resources.getPagination().getTotalPages(); page++) {
-                    fetchRecipientList(resourceNotificationPolicy,label,page,null)
+                    fetchRecipientList(resourceNotificationPolicy, label, page, null)
                         .doOnNext(
-                                recepient -> {
+                                recipient -> {
                                     publisher.publishEvent(
                                         new EmailNotificationEvent(this)
                                             .domain(settings.getAppsDomain())
                                             .from(resourceNotificationPolicy.getResourceEmailTemplate().getFrom())
-                                            .recipients(recepient)
+                                            .recipients(recipient)
                                             .subject(resourceNotificationPolicy.getResourceEmailTemplate().getSubject())
                                             .body(resourceNotificationPolicy.getResourceEmailTemplate().getBody()));
                                 })

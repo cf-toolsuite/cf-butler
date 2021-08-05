@@ -60,7 +60,7 @@ public class ResourceMetadataService {
                                             .bodyToMono(Resources.class));
     }
 
-
+    // @see https://v3-apidocs.cloudfoundry.org/version/3.102.0/index.html#labels-and-selectors
     public Mono<Resources> getResources(String type, String labelSelector, Integer page, Integer perPage) {
         ResourceType rt = ResourceType.from(type);
         final String uri =
@@ -72,7 +72,7 @@ public class ResourceMetadataService {
                     .queryParam("label_selector", labelSelector)
                     .queryParam("page", "{page}")
                     .queryParam("per_page", "{perPage}")
-                    .buildAndExpand(rt.getId(),page ==null ? 1:page ,perPage == null ? 50:perPage)
+                    .buildAndExpand(rt.getId(), page == null ? 1 : page, perPage == null ? 50 : perPage)
                     .toUriString();
         return
             getOauthToken()
