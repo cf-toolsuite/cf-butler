@@ -79,7 +79,7 @@ Cf-butler is configured and deployed as an application instance. Its capabilitie
 
 Required
 
-* Access to a foundation with VMware Tanzu Application Service 2.6 or better installed
+* Access to a foundation with VMware Tanzu Application Service 2.9 or better installed
   * and [VMware Tanzu Application Service](https://tanzu.vmware.com/platform/vmware-tanzu-application-service) admin account credentials
 
 Optional
