@@ -4,8 +4,10 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.cloudfoundry.client.v2.ClientV2Exception;
@@ -15,11 +17,15 @@ import org.cloudfoundry.client.v2.applications.InstanceStatistics;
 import org.cloudfoundry.client.v2.applications.Statistics;
 import org.cloudfoundry.client.v2.applications.SummaryApplicationRequest;
 import org.cloudfoundry.client.v2.applications.Usage;
+import org.cloudfoundry.client.v3.ClientV3Exception;
+import org.cloudfoundry.client.v3.applications.GetApplicationCurrentDropletRequest;
+import org.cloudfoundry.client.v3.applications.GetApplicationCurrentDropletResponse;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import io.pivotal.cfapp.config.PasSettings;
 import io.pivotal.cfapp.domain.AppDetail;
@@ -89,6 +95,7 @@ public class AppDetailTask implements ApplicationListener<AppDetailReadyToBeRetr
             .thenMany(Flux.fromIterable(spaces))
             .concatMap(this::listApplications)
             .flatMap(this::getSummaryInfo)
+            .flatMap(this::getBuildpackFromApplicationCurrentDroplet)
             .flatMap(this::getStatistics)
             .flatMap(this::getLastEvent)
             .flatMap(appDetailsService::save)
@@ -195,6 +202,39 @@ public class AppDetailTask implements ApplicationListener<AppDetailReadyToBeRetr
                         .build()
                 )
                 .onErrorResume(ClientV2Exception.class, e -> Mono.just(fragment));
+    }
+
+    // #getSummaryInfo() seeds an AppDetail with buildpack name and version, but sometimes the real buildpack is hidden within a meta buildpack
+    // in this case, we will make the effort to fetch the application's current droplet, then parse the buildpack name, normalize, then replace
+    // the buildpack name and version in AppDetail
+    protected Mono<AppDetail> getBuildpackFromApplicationCurrentDroplet(AppDetail fragment) {
+        if (StringUtils.isNotBlank(fragment.getBuildpack()) && fragment.getBuildpack().equals("meta")) {
+            log.trace("Fetching application current droplet buildpack for org={}, space={}, id={}, name={}", fragment.getOrganization(), fragment.getSpace(), fragment.getAppId(), fragment.getAppName());
+            return opsClient
+                    .getCloudFoundryClient()
+                    .applicationsV3()
+                    .getCurrentDroplet(GetApplicationCurrentDropletRequest.builder().applicationId(fragment.getAppId()).build())
+                    .map(acd -> refineBuildpackFromApplicationCurrentDroplet(fragment, acd))
+                    .onErrorResume(ClientV3Exception.class, e -> Mono.just(fragment));
+        }
+        return Mono.just(fragment);
+    }
+
+    private AppDetail refineBuildpackFromApplicationCurrentDroplet(AppDetail fragment, GetApplicationCurrentDropletResponse response) {
+        List<String> buildpackNameFragments = Arrays.asList(response.getBuildpacks().get(0).getBuildpackName().split(" "));
+        if (!CollectionUtils.isEmpty(buildpackNameFragments)) {
+            String buildpack = buildpackNameFragments.stream().filter(bnf -> bnf.contains("buildpack")).collect(Collectors.toList()).get(0);
+            String[] parts = buildpack.split("=");
+            if (parts.length == 2) {
+                return
+                    AppDetail
+                        .from(fragment)
+                        .buildpack(settings.getBuildpack(parts[0]))
+                        .buildpackVersion(parts[1].substring(0, parts[1].indexOf("-")))
+                        .build();
+            }
+        }
+        return fragment;
     }
 
     @Override
