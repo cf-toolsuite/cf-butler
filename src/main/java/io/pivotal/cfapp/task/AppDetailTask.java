@@ -240,7 +240,10 @@ public class AppDetailTask implements ApplicationListener<AppDetailReadyToBeRetr
             AppDetail
                 .from(fragment)
                 .buildpack(settings.getBuildpack(response.getBuildpacks().get(0).getBuildpackName()))
-                .buildpackVersion(response.getBuildpacks().get(0).getVersion())
+                .buildpackVersion(
+                    response.getBuildpacks().get(0).getVersion() != null
+                        ? response.getBuildpacks().get(0).getVersion().substring(0, response.getBuildpacks().get(0).getVersion().indexOf("-"))
+                        : null)
                 .build();
     }
 
