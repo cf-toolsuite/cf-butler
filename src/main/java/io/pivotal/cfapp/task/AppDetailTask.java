@@ -208,7 +208,7 @@ public class AppDetailTask implements ApplicationListener<AppDetailReadyToBeRetr
     // in this case, we will make the effort to fetch the application's current droplet, then parse the buildpack name, normalize, then replace
     // the buildpack name and version in AppDetail
     protected Mono<AppDetail> getBuildpackFromApplicationCurrentDroplet(AppDetail fragment) {
-        if (StringUtils.isNotBlank(fragment.getBuildpack()) && fragment.getBuildpack().equals("meta")) {
+        if (StringUtils.isNotBlank(fragment.getBuildpack())) {
             log.trace("Fetching application current droplet buildpack for org={}, space={}, id={}, name={}", fragment.getOrganization(), fragment.getSpace(), fragment.getAppId(), fragment.getAppName());
             return opsClient
                     .getCloudFoundryClient()
@@ -221,20 +221,27 @@ public class AppDetailTask implements ApplicationListener<AppDetailReadyToBeRetr
     }
 
     private AppDetail refineBuildpackFromApplicationCurrentDroplet(AppDetail fragment, GetApplicationCurrentDropletResponse response) {
-        List<String> buildpackNameFragments = Arrays.asList(response.getBuildpacks().get(0).getBuildpackName().split(" "));
-        if (!CollectionUtils.isEmpty(buildpackNameFragments)) {
-            String buildpack = buildpackNameFragments.stream().filter(bnf -> bnf.contains("buildpack")).collect(Collectors.toList()).get(0);
-            String[] parts = buildpack.split("=");
-            if (parts.length == 2) {
-                return
-                    AppDetail
-                        .from(fragment)
-                        .buildpack(settings.getBuildpack(parts[0]))
-                        .buildpackVersion(parts[1].substring(0, parts[1].indexOf("-")))
-                        .build();
+        if (fragment.getBuildpack().equals("meta")) {
+            List<String> buildpackNameFragments = Arrays.asList(response.getBuildpacks().get(0).getBuildpackName().split(" "));
+            if (!CollectionUtils.isEmpty(buildpackNameFragments)) {
+                String buildpack = buildpackNameFragments.stream().filter(bnf -> bnf.contains("buildpack")).collect(Collectors.toList()).get(0);
+                String[] parts = buildpack.split("=");
+                if (parts.length == 2) {
+                    return
+                        AppDetail
+                            .from(fragment)
+                            .buildpack(settings.getBuildpack(parts[0]))
+                            .buildpackVersion(parts[1].substring(0, parts[1].indexOf("-")))
+                            .build();
+                }
             }
         }
-        return fragment;
+        return
+            AppDetail
+                .from(fragment)
+                .buildpack(settings.getBuildpack(response.getBuildpacks().get(0).getBuildpackName()))
+                .buildpackVersion(response.getBuildpacks().get(0).getVersion())
+                .build();
     }
 
     @Override
