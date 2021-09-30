@@ -148,6 +148,16 @@ public class AppDetailTask implements ApplicationListener<AppDetailReadyToBeRetr
         return null;
     }
 
+    private String getCurrentDropletBuildpackVersion(String raw) {
+        String version = raw;
+        if (version != null) {
+            if (version.contains("-")) {
+                version = raw.substring(0, raw.indexOf("-"));
+            }
+        }
+        return version;
+    }
+
     protected Mono<AppDetail> getLastEvent(AppDetail fragment) {
         log.trace("Fetching last event for application id={}, name={} in org={}, space={}", fragment.getAppId(), fragment.getAppName(), fragment.getOrganization(), fragment.getSpace());
         return eventsService.getEvents(fragment.getAppId(), 1)
@@ -204,9 +214,6 @@ public class AppDetailTask implements ApplicationListener<AppDetailReadyToBeRetr
                 .onErrorResume(ClientV2Exception.class, e -> Mono.just(fragment));
     }
 
-    // #getSummaryInfo() seeds an AppDetail with buildpack name and version, but sometimes the real buildpack is hidden within a meta buildpack
-    // in this case, we will make the effort to fetch the application's current droplet, then parse the buildpack name, normalize, then replace
-    // the buildpack name and version in AppDetail
     protected Mono<AppDetail> getBuildpackFromApplicationCurrentDroplet(AppDetail fragment) {
         if (StringUtils.isNotBlank(fragment.getBuildpack())) {
             log.trace("Fetching application current droplet buildpack for org={}, space={}, id={}, name={}", fragment.getOrganization(), fragment.getSpace(), fragment.getAppId(), fragment.getAppName());
@@ -231,7 +238,7 @@ public class AppDetailTask implements ApplicationListener<AppDetailReadyToBeRetr
                         AppDetail
                             .from(fragment)
                             .buildpack(settings.getBuildpack(parts[0]))
-                            .buildpackVersion(parts[1].substring(0, parts[1].indexOf("-")))
+                            .buildpackVersion(getCurrentDropletBuildpackVersion(parts[1]))
                             .build();
                 }
             }
@@ -240,10 +247,7 @@ public class AppDetailTask implements ApplicationListener<AppDetailReadyToBeRetr
             AppDetail
                 .from(fragment)
                 .buildpack(settings.getBuildpack(response.getBuildpacks().get(0).getBuildpackName()))
-                .buildpackVersion(
-                    response.getBuildpacks().get(0).getVersion() != null
-                        ? response.getBuildpacks().get(0).getVersion().substring(0, response.getBuildpacks().get(0).getVersion().indexOf("-"))
-                        : null)
+                .buildpackVersion(getCurrentDropletBuildpackVersion(response.getBuildpacks().get(0).getVersion()))
                 .build();
     }
 
