@@ -182,7 +182,7 @@
     <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
-      <version>3.20.2</version>
+      <version>3.21.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -213,14 +213,14 @@
       <dependency>
         <groupId>io.pivotal.spring.cloud</groupId>
         <artifactId>spring-cloud-services-dependencies</artifactId>
-        <version>3.2.1.RELEASE</version>
+        <version>3.3.0</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
       <dependency>
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-dependencies</artifactId>
-        <version>2020.0.3</version>
+        <version>2020.0.4</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
@@ -268,7 +268,7 @@
       <plugin>
         <groupId>pl.project13.maven</groupId>
         <artifactId>git-commit-id-plugin</artifactId>
-        <version>4.0.5</version>
+        <version>4.9.10</version>
         <configuration>
           <failOnNoGitDirectory>false</failOnNoGitDirectory>
         </configuration>
@@ -694,7 +694,7 @@
       <plugin>
         <groupId>com.github.spotbugs</groupId>
         <artifactId>spotbugs-maven-plugin</artifactId>
-        <version>4.3.0</version>
+        <version>4.4.1</version>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
