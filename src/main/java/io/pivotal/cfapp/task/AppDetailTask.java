@@ -4,8 +4,10 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.cloudfoundry.client.v2.ClientV2Exception;
@@ -15,11 +17,15 @@ import org.cloudfoundry.client.v2.applications.InstanceStatistics;
 import org.cloudfoundry.client.v2.applications.Statistics;
 import org.cloudfoundry.client.v2.applications.SummaryApplicationRequest;
 import org.cloudfoundry.client.v2.applications.Usage;
+import org.cloudfoundry.client.v3.ClientV3Exception;
+import org.cloudfoundry.client.v3.applications.GetApplicationCurrentDropletRequest;
+import org.cloudfoundry.client.v3.applications.GetApplicationCurrentDropletResponse;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import io.pivotal.cfapp.config.PasSettings;
 import io.pivotal.cfapp.domain.AppDetail;
@@ -89,6 +95,7 @@ public class AppDetailTask implements ApplicationListener<AppDetailReadyToBeRetr
             .thenMany(Flux.fromIterable(spaces))
             .concatMap(this::listApplications)
             .flatMap(this::getSummaryInfo)
+            .flatMap(this::getBuildpackFromApplicationCurrentDroplet)
             .flatMap(this::getStatistics)
             .flatMap(this::getLastEvent)
             .flatMap(appDetailsService::save)
@@ -139,6 +146,16 @@ public class AppDetailTask implements ApplicationListener<AppDetailReadyToBeRetr
             return buildpack.getVersion();
         }
         return null;
+    }
+
+    private String getCurrentDropletBuildpackVersion(String raw) {
+        String version = raw;
+        if (version != null) {
+            if (version.contains("-")) {
+                version = raw.substring(0, raw.indexOf("-"));
+            }
+        }
+        return version;
     }
 
     protected Mono<AppDetail> getLastEvent(AppDetail fragment) {
@@ -195,6 +212,43 @@ public class AppDetailTask implements ApplicationListener<AppDetailReadyToBeRetr
                         .build()
                 )
                 .onErrorResume(ClientV2Exception.class, e -> Mono.just(fragment));
+    }
+
+    protected Mono<AppDetail> getBuildpackFromApplicationCurrentDroplet(AppDetail fragment) {
+        if (StringUtils.isNotBlank(fragment.getBuildpack())) {
+            log.trace("Fetching application current droplet buildpack for org={}, space={}, id={}, name={}", fragment.getOrganization(), fragment.getSpace(), fragment.getAppId(), fragment.getAppName());
+            return opsClient
+                    .getCloudFoundryClient()
+                    .applicationsV3()
+                    .getCurrentDroplet(GetApplicationCurrentDropletRequest.builder().applicationId(fragment.getAppId()).build())
+                    .map(acd -> refineBuildpackFromApplicationCurrentDroplet(fragment, acd))
+                    .onErrorResume(ClientV3Exception.class, e -> Mono.just(fragment));
+        }
+        return Mono.just(fragment);
+    }
+
+    private AppDetail refineBuildpackFromApplicationCurrentDroplet(AppDetail fragment, GetApplicationCurrentDropletResponse response) {
+        if (fragment.getBuildpack().equals("meta")) {
+            List<String> buildpackNameFragments = Arrays.asList(response.getBuildpacks().get(0).getBuildpackName().split(" "));
+            if (!CollectionUtils.isEmpty(buildpackNameFragments)) {
+                String buildpack = buildpackNameFragments.stream().filter(bnf -> bnf.contains("buildpack")).collect(Collectors.toList()).get(0);
+                String[] parts = buildpack.split("=");
+                if (parts.length == 2) {
+                    return
+                        AppDetail
+                            .from(fragment)
+                            .buildpack(settings.getBuildpack(parts[0]))
+                            .buildpackVersion(getCurrentDropletBuildpackVersion(parts[1]))
+                            .build();
+                }
+            }
+        }
+        return
+            AppDetail
+                .from(fragment)
+                .buildpack(settings.getBuildpack(response.getBuildpacks().get(0).getBuildpackName()))
+                .buildpackVersion(getCurrentDropletBuildpackVersion(response.getBuildpacks().get(0).getVersion()))
+                .build();
     }
 
     @Override
