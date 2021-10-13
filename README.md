@@ -958,6 +958,8 @@ GET /snapshot/detail
 
 > **Note**: this detail report does not take the place of an official foundation Accounting Report. However, it does provide a much more detailed snapshot of all the applications that were currently running at the time of collection.
 
+> As of [PR-391](https://github.com/pacphi/cf-butler/pull/391), buildpack name and version are based upon the current application droplet.  If you observe that both the buildpack name and version are null, then you may need to `cf restage` your application (e.g., when the last `cf push` exceeds 30 days).
+
 ```
 GET /snapshot/detail/ai
 ```

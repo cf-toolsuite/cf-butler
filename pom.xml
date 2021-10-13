@@ -52,7 +52,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>2.5.3</version>
+    <version>2.5.5</version>
     <relativePath/>
     <!-- lookup parent from repository -->
   </parent>
@@ -70,7 +70,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
-    <spring-native.version>0.10.2</spring-native.version>
+    <spring-native.version>0.10.3</spring-native.version>
   </properties>
 
   <dependencies>
@@ -142,7 +142,7 @@
     <dependency>
       <groupId>com.sendgrid</groupId>
       <artifactId>sendgrid-java</artifactId>
-      <version>4.7.3</version>
+      <version>4.7.4</version>
       <exclusions>
         <exclusion>
           <artifactId>httpclient</artifactId>
@@ -158,12 +158,12 @@
     <dependency>
       <groupId>org.cloudfoundry</groupId>
       <artifactId>cloudfoundry-client-reactor</artifactId>
-      <version>5.5.0.RELEASE</version>
+      <version>5.6.0.RELEASE</version>
     </dependency>
     <dependency>
       <groupId>org.cloudfoundry</groupId>
       <artifactId>cloudfoundry-operations</artifactId>
-      <version>5.5.0.RELEASE</version>
+      <version>5.6.0.RELEASE</version>
     </dependency>
     <dependency>
       <groupId>io.micrometer</groupId>
@@ -433,7 +433,7 @@
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
-        <version>2.5.3</version>
+        <version>2.5.5</version>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -600,7 +600,7 @@
         <dependency>
           <groupId>org.cloudfoundry</groupId>
           <artifactId>cloudfoundry-client-reactor</artifactId>
-          <version>5.5.0.RELEASE</version>
+          <version>5.6.0.RELEASE</version>
           <exclusions>
             <exclusion>
               <groupId>org.slf4j</groupId>
@@ -662,7 +662,7 @@
           <plugin>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-maven-plugin</artifactId>
-            <version>2.5.3</version>
+            <version>2.5.5</version>
             <configuration>
                 <image>
                     <builder>paketobuildpacks/builder:tiny</builder>
