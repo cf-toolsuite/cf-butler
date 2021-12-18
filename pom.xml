@@ -52,7 +52,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>2.5.6</version>
+    <version>2.6.1</version>
     <relativePath/>
     <!-- lookup parent from repository -->
   </parent>
@@ -133,7 +133,7 @@
     <dependency>
       <groupId>org.eclipse.jgit</groupId>
       <artifactId>org.eclipse.jgit</artifactId>
-      <version>5.13.0.202109080827-r</version>
+      <version>6.0.0.202111291000-r</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -142,7 +142,7 @@
     <dependency>
       <groupId>com.sendgrid</groupId>
       <artifactId>sendgrid-java</artifactId>
-      <version>4.7.4</version>
+      <version>4.8.1</version>
       <exclusions>
         <exclusion>
           <artifactId>httpclient</artifactId>
@@ -152,8 +152,8 @@
     </dependency>
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpclient</artifactId>
-      <version>4.5.13</version>
+      <artifactId>httpcore</artifactId>
+      <version>4.4.15</version>
     </dependency>
     <dependency>
       <groupId>org.cloudfoundry</groupId>
@@ -220,7 +220,7 @@
       <dependency>
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-dependencies</artifactId>
-        <version>2020.0.4</version>
+        <version>2021.0.0</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
@@ -433,7 +433,7 @@
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
-        <version>2.5.6</version>
+        <version>2.6.1</version>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -662,7 +662,7 @@
           <plugin>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-maven-plugin</artifactId>
-            <version>2.5.6</version>
+            <version>2.6.1</version>
             <configuration>
                 <image>
                     <builder>paketobuildpacks/builder:tiny</builder>
@@ -683,7 +683,7 @@
         <dependency>
           <groupId>com.wavefront</groupId>
           <artifactId>wavefront-spring-boot-starter</artifactId>
-          <version>2.2.0</version>
+          <version>2.2.2</version>
         </dependency>
       </dependencies>
     </profile>
