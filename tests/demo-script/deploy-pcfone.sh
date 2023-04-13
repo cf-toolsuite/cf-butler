@@ -71,7 +71,7 @@ do
       do
          cd $p/labs/solutions/03/cloud-native-spring
          cf push $p-$s -b java_buildpack_offline -s cflinuxfs3 -m 1G -i 1 --no-start
-         cf set-env $p-$s JBP_CONFIG_OPEN_JDK_JRE '{ jre: { version: 11.+ } }'
+         cf set-env $p-$s JBP_CONFIG_OPEN_JDK_JRE '{ jre: { version: 17.+ } }'
          cf create-service p.mysql db-small mysql-$s
          sleep $DELAY
          cf bind-service $p-$s mysql-$s
