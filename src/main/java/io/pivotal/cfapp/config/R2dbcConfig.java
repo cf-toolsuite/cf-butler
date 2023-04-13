@@ -33,11 +33,6 @@ public class R2dbcConfig extends AbstractR2dbcConfiguration {
     private R2dbcProperties r2dbcProperties;
     private PasSettings settings;
 
-    @Autowired(required = false)
-    public void setCfEnv(CfEnv cfEnv) {
-        this.cfEnv = cfEnv;
-    }
-
     @Autowired
     public void setR2dbcProperties(R2dbcProperties r2dbcProperties) {
         this.r2dbcProperties = r2dbcProperties;
@@ -118,7 +113,7 @@ public class R2dbcConfig extends AbstractR2dbcConfiguration {
             log.info("No bound service instance named {} was found. Falling back to embedded database.", VCAP_SERVICE);
             return this.r2dbcProperties;
         } catch (NullPointerException npe) {
-            log.debug("Not running on Cloud Foundry.");
+            log.info("Not running on Cloud Foundry.");
             return this.r2dbcProperties;
         }
     }
