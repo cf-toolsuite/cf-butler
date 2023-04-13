@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.r2dbc.R2dbcProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.env.Environment;
 import org.springframework.data.r2dbc.config.AbstractR2dbcConfiguration;
 import org.springframework.util.StringUtils;
 
@@ -49,8 +50,8 @@ public class R2dbcConfig extends AbstractR2dbcConfiguration {
 
     @Bean
     @Profile("cloud")
-    public CfEnv cfEnv() {
-        return new CfEnv();
+    public CfEnv cfEnv(Environment environment) {
+        return new CfEnv(environment.getProperty("VCAP_APPLICATION"), environment.getProperty("VCAP_SERVICES"));
     }
 
     @Bean
