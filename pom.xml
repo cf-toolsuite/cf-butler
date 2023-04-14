@@ -536,9 +536,9 @@
       </activation>
       <dependencies>
         <dependency>
-          <groupId>dev.miku</groupId>
+          <groupId>io.asyncer</groupId>
           <artifactId>r2dbc-mysql</artifactId>
-          <version>0.8.2.RELEASE</version>
+          <version>1.0.0</version>
           <scope>runtime</scope>
         </dependency>
         <dependency>

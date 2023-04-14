@@ -8,14 +8,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.r2dbc.R2dbcProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
 import org.springframework.data.r2dbc.config.AbstractR2dbcConfiguration;
 import org.springframework.util.StringUtils;
 
 import io.pivotal.cfapp.domain.CustomConverters;
-import io.pivotal.cfenv.core.CfEnv;
-import io.pivotal.cfenv.core.CfService;
+import io.pivotal.cfenv.jdbc.CfJdbcEnv;
+import io.pivotal.cfenv.jdbc.CfJdbcService;
 import io.r2dbc.spi.ConnectionFactories;
 import io.r2dbc.spi.ConnectionFactory;
 import io.r2dbc.spi.ConnectionFactoryOptions;
@@ -29,9 +28,14 @@ public class R2dbcConfig extends AbstractR2dbcConfiguration {
     private static final List<String> SUPPORTED_SCHEMES = Arrays.asList(new String[] { "mysql", "postgresql"});
     private static final String VCAP_SERVICE = "cf-butler-backend";
 
-    private CfEnv cfEnv;
+    private Environment environment;
     private R2dbcProperties r2dbcProperties;
     private PasSettings settings;
+
+    @Autowired
+    public void setEnvironment(Environment environment) {
+        this.environment = environment;
+    }
 
     @Autowired
     public void setR2dbcProperties(R2dbcProperties r2dbcProperties) {
@@ -44,14 +48,8 @@ public class R2dbcConfig extends AbstractR2dbcConfiguration {
     }
 
     @Bean
-    @Profile("cloud")
-    public CfEnv cfEnv(Environment environment) {
-        return new CfEnv(environment.getProperty("VCAP_APPLICATION"), environment.getProperty("VCAP_SERVICES"));
-    }
-
-    @Bean
     public ConnectionFactory connectionFactory() {
-        R2dbcProperties properties = r2dbcProperties(this.cfEnv);
+        R2dbcProperties properties = r2dbcProperties(this.environment);
         ConnectionFactoryOptions.Builder builder = ConnectionFactoryOptions
                 .parse(properties.getUrl()).mutate();
         String username = properties.getUsername();
@@ -75,9 +73,14 @@ public class R2dbcConfig extends AbstractR2dbcConfiguration {
     }
 
     // support for external R2DBC source is limited to providers that support URI scheme
-    private R2dbcProperties r2dbcProperties(CfEnv cfenv) {
-    	try {
-            CfService service = cfenv.findServiceByName(VCAP_SERVICE);
+    private R2dbcProperties r2dbcProperties(Environment environment) {
+        try {
+            CfJdbcService service = null;
+            if (Arrays.stream(environment.getActiveProfiles()).anyMatch(
+                env -> env.equalsIgnoreCase("cloud"))) {
+                    CfJdbcEnv cfJdbcEnv = new CfJdbcEnv();
+                    service = cfJdbcEnv.findJdbcServiceByName(VCAP_SERVICE);
+            }
             URI uri = service.getCredentials().getUriInfo().getUri();
             String scheme = uri.getScheme();
             log.info("Attempting to connect to a {} database instance.", scheme);
