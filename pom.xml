@@ -52,7 +52,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>2.6.1</version>
+    <version>3.0.5</version>
     <relativePath/>
     <!-- lookup parent from repository -->
   </parent>
@@ -65,7 +65,7 @@
   </licenses>
 
   <properties>
-    <java.version>11</java.version>
+    <java.version>17</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <maven.compiler.source>${java.version}</maven.compiler.source>
@@ -77,13 +77,13 @@
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
-      <version>1.18.22</version>
+      <version>1.18.26</version>
       <optional>true</optional>
     </dependency>
     <dependency>
-      <groupId>javax.validation</groupId>
-      <artifactId>validation-api</artifactId>
-      <version>2.0.1.Final</version>
+      <groupId>jakarta.validation</groupId>
+      <artifactId>jakarta.validation-api</artifactId>
+      <version>3.0.2</version>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
@@ -92,22 +92,22 @@
     <dependency>
       <groupId>com.fasterxml.jackson.datatype</groupId>
       <artifactId>jackson-datatype-jsr310</artifactId>
-      <version>2.13.0</version>
+      <version>2.14.2</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.dataformat</groupId>
       <artifactId>jackson-dataformat-csv</artifactId>
-      <version>2.13.0</version>
+      <version>2.14.2</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.uuid</groupId>
       <artifactId>java-uuid-generator</artifactId>
-      <version>4.0.1</version>
+      <version>4.1.0</version>
     </dependency>
     <dependency>
       <groupId>io.pivotal.cfenv</groupId>
       <artifactId>java-cfenv-boot</artifactId>
-      <version>2.4.0</version>
+      <version>2.4.1</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -124,7 +124,7 @@
     <dependency>
       <groupId>org.locationtech.jts</groupId>
       <artifactId>jts-core</artifactId>
-      <version>1.18.2</version>
+      <version>1.19.0</version>
     </dependency>
     <dependency>
       <groupId>io.r2dbc</groupId>
@@ -133,7 +133,7 @@
     <dependency>
       <groupId>org.eclipse.jgit</groupId>
       <artifactId>org.eclipse.jgit</artifactId>
-      <version>6.0.0.202111291000-r</version>
+      <version>6.5.0.202303070854-r</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -142,7 +142,7 @@
     <dependency>
       <groupId>com.sendgrid</groupId>
       <artifactId>sendgrid-java</artifactId>
-      <version>4.8.1</version>
+      <version>4.9.3</version>
       <exclusions>
         <exclusion>
           <artifactId>httpclient</artifactId>
@@ -158,12 +158,12 @@
     <dependency>
       <groupId>org.cloudfoundry</groupId>
       <artifactId>cloudfoundry-client-reactor</artifactId>
-      <version>5.6.0.RELEASE</version>
+      <version>5.10.0.RELEASE</version>
     </dependency>
     <dependency>
       <groupId>org.cloudfoundry</groupId>
       <artifactId>cloudfoundry-operations</artifactId>
-      <version>5.6.0.RELEASE</version>
+      <version>5.10.0.RELEASE</version>
     </dependency>
     <dependency>
       <groupId>io.micrometer</groupId>
@@ -182,7 +182,7 @@
     <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
-      <version>3.21.0</version>
+      <version>3.24.2</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -203,7 +203,7 @@
     <dependency>
       <groupId>org.pitest</groupId>
       <artifactId>pitest-junit5-plugin</artifactId>
-      <version>0.15</version>
+      <version>1.1.2</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -213,14 +213,14 @@
       <dependency>
         <groupId>io.pivotal.spring.cloud</groupId>
         <artifactId>spring-cloud-services-dependencies</artifactId>
-        <version>3.3.0</version>
+        <version>4.0.2</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
       <dependency>
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-dependencies</artifactId>
-        <version>2021.0.0</version>
+        <version>2022.0.2</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
@@ -266,6 +266,10 @@
   <build>
     <plugins>
       <plugin>
+        <groupId>org.graalvm.buildtools</groupId>
+        <artifactId>native-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
         <groupId>pl.project13.maven</groupId>
         <artifactId>git-commit-id-plugin</artifactId>
         <version>4.9.10</version>
@@ -291,12 +295,12 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.8.1</version>
+        <version>3.11.0</version>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>versions-maven-plugin</artifactId>
-        <version>2.8.1</version>
+        <version>2.15.0</version>
         <configuration>
           <generateBackupPoms>false</generateBackupPoms>
         </configuration>
@@ -304,7 +308,7 @@
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <version>0.8.7</version>
+        <version>0.8.8</version>
         <executions>
           <execution>
             <id>before-unit-test-execution</id>
@@ -409,17 +413,17 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.0.0-M5</version>
+        <version>3.0.0</version>
         <configuration>
-          <argLine> --illegal-access=permit ${surefire.jacoco.args}</argLine>
+          <argLine>${surefire.jacoco.args}</argLine>
         </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
-        <version>3.0.0-M5</version>
+        <version>3.0.0</version>
         <configuration>
-          <argLine> --illegal-access=permit ${failsafe.jacoco.args}</argLine>
+          <argLine>${failsafe.jacoco.args}</argLine>
         </configuration>
         <executions>
           <execution>
@@ -433,30 +437,38 @@
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
-        <version>2.6.1</version>
+        <version>3.0.5</version>
       </plugin>
       <plugin>
-        <groupId>org.codehaus.mojo</groupId>
+        <groupId>com.mycila</groupId>
         <artifactId>license-maven-plugin</artifactId>
-        <version>2.0.0</version>
-        <executions>
-          <execution>
-            <id>aggregate-download-licenses</id>
-            <goals>
-              <goal>aggregate-download-licenses</goal>
-            </goals>
-          </execution>
-        </executions>
+        <version>4.2</version>
+        <configuration>
+          <properties>
+            <owner>io.pivotal.cf-butler</owner>
+            <email>cphillipson@pivotal.io</email>
+          </properties>
+          <licenseSets>
+            <licenseSet>
+              <header>com/mycila/maven/plugin/license/templates/APACHE-2.txt</header>
+              <excludes>
+                <exclude>**/README</exclude>
+                <exclude>src/test/resources/**</exclude>
+                <exclude>src/main/resources/**</exclude>
+              </excludes>
+            </licenseSet>
+          </licenseSets>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-site-plugin</artifactId>
-        <version>3.9.1</version>
+        <version>4.0.0-M6</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-project-info-reports-plugin</artifactId>
-        <version>3.1.1</version>
+        <version>3.4.2</version>
       </plugin>
     </plugins>
   </build>
@@ -487,7 +499,7 @@
       </activation>
       <dependencies>
         <dependency>
-          <groupId>io.r2dbc</groupId>
+          <groupId>org.postgresql</groupId>
           <artifactId>r2dbc-postgresql</artifactId>
           <scope>runtime</scope>
         </dependency>
@@ -503,7 +515,7 @@
             <plugin>
               <groupId>org.apache.maven.plugins</groupId>
               <artifactId>maven-compiler-plugin</artifactId>
-              <version>3.8.1</version>
+              <version>3.11.0</version>
               <configuration>
                 <excludes>
                   <exclude>**/H2ConsoleConfig*</exclude>
@@ -524,9 +536,9 @@
       </activation>
       <dependencies>
         <dependency>
-          <groupId>dev.miku</groupId>
+          <groupId>io.asyncer</groupId>
           <artifactId>r2dbc-mysql</artifactId>
-          <version>0.8.2.RELEASE</version>
+          <version>1.0.0</version>
           <scope>runtime</scope>
         </dependency>
         <dependency>
@@ -541,7 +553,7 @@
             <plugin>
               <groupId>org.apache.maven.plugins</groupId>
               <artifactId>maven-compiler-plugin</artifactId>
-              <version>3.8.1</version>
+              <version>3.11.0</version>
               <configuration>
                 <excludes>
                   <exclude>**/H2ConsoleConfig*</exclude>
@@ -590,100 +602,12 @@
     </profile>
 
     <profile>
-      <id>native</id>
-      <dependencies>
-	      <dependency>
-          <groupId>org.springframework.experimental</groupId>
-          <artifactId>spring-native</artifactId>
-          <version>${spring-native.version}</version>
-        </dependency>
-        <dependency>
-          <groupId>org.cloudfoundry</groupId>
-          <artifactId>cloudfoundry-client-reactor</artifactId>
-          <version>5.6.0.RELEASE</version>
-          <exclusions>
-            <exclusion>
-              <groupId>org.slf4j</groupId>
-              <artifactId>jcl-over-slf4j</artifactId>
-            </exclusion>
-          </exclusions>
-        </dependency>
-      </dependencies>
-      <build>
-        <resources>
-          <resource>
-            <directory>src/main/resources</directory>
-            <excludes>
-              <exclude>logback-spring.xml</exclude>
-              <exclude>log4j2-spring.xml</exclude>
-              <exclude>log4j2.component.properties</exclude>
-            </excludes>
-            <filtering>false</filtering>
-          </resource>
-        </resources>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-surefire-plugin</artifactId>
-            <version>3.0.0-M5</version>
-            <configuration>
-              <argLine>-DspringAot=true -agentlib:native-image-agent=access-filter-file=src/test/resources/access-filter.json,config-merge-dir=target/classes/META-INF/native-image --illegal-access=permit ${surefire.jacoco.args}</argLine>
-            </configuration>
-          </plugin>
-          <plugin>
-            <groupId>org.springframework.experimental</groupId>
-            <artifactId>spring-aot-maven-plugin</artifactId>
-            <version>${spring-native.version}</version>
-            <configuration>
-              <mode>native-agent</mode>
-            </configuration>
-            <dependencies>
-              <dependency>
-                <groupId>io.pivotal</groupId>
-                <artifactId>cf-butler-hints</artifactId>
-                <version>${project.version}</version>
-              </dependency>
-            </dependencies>
-            <executions>
-                <execution>
-                    <id>test-generate</id>
-                    <goals>
-                        <goal>test-generate</goal>
-                    </goals>
-                </execution>
-                <execution>
-                    <id>generate</id>
-                    <goals>
-                        <goal>generate</goal>
-                    </goals>
-                </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-maven-plugin</artifactId>
-            <version>2.6.1</version>
-            <configuration>
-                <image>
-                    <builder>paketobuildpacks/builder:tiny</builder>
-                    <env>
-                        <BP_NATIVE_IMAGE>true</BP_NATIVE_IMAGE>
-                        <BP_NATIVE_IMAGE_BUILD_ARGUMENTS>-H:+ReportExceptionStackTraces --initialize-at-build-time=sun.instrument.InstrumentationImpl</BP_NATIVE_IMAGE_BUILD_ARGUMENTS>
-                    </env>
-                </image>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-
-    <profile>
       <id>wavefront</id>
       <dependencies>
         <dependency>
           <groupId>com.wavefront</groupId>
           <artifactId>wavefront-spring-boot-starter</artifactId>
-          <version>2.2.2</version>
+          <version>3.0.1</version>
         </dependency>
       </dependencies>
     </profile>
@@ -694,12 +618,12 @@
       <plugin>
         <groupId>com.github.spotbugs</groupId>
         <artifactId>spotbugs-maven-plugin</artifactId>
-        <version>4.4.1</version>
+        <version>4.7.3.3</version>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>versions-maven-plugin</artifactId>
-        <version>2.8.1</version>
+        <version>2.15.0</version>
         <reportSets>
           <reportSet>
             <reports>
