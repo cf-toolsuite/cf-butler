@@ -151,7 +151,7 @@ public class QueryPolicyExecutorTask implements PolicyExecutorTask {
     }
 
     private static Mono<Tuple2<Collection<String>, String>> toCommaSeparatedValue(Tuple2<Row, RowMetadata> tuple) {
-        Collection<String> columnNames = tuple.getT2().getColumnNames();
+        Collection<String> columnNames = tuple.getT2().getColumnMetadatas().stream().map(columnName -> columnName.getName()).toList();
         List<String> rawValueList =
             columnNames
                 .stream()

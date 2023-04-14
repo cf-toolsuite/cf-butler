@@ -79,7 +79,7 @@ Cf-butler is configured and deployed as an application instance. Its capabilitie
 
 Required
 
-* Access to a foundation with VMware Tanzu Application Service 2.9 or better installed
+* Access to a foundation with VMware Tanzu Application Service 2.11 or better installed
   * and [VMware Tanzu Application Service](https://tanzu.vmware.com/platform/vmware-tanzu-application-service) admin account credentials
 
 Optional
@@ -90,10 +90,10 @@ Optional
 
 ## Tools
 
-* [git](https://git-scm.com/downloads) 2.20.1 or better
-* [JDK](http://openjdk.java.net/install/) 11 or better
-* [cf](https://docs.cloudfoundry.org/cf-cli/install-go-cli.html) CLI 6.41.0 or better
-* [uaac](https://github.com/cloudfoundry/cf-uaac) 4.1.0 or better
+* [git](https://git-scm.com/downloads) 2.40.0 or better
+* [JDK](http://openjdk.java.net/install/) 17 or better
+* [cf](https://docs.cloudfoundry.org/cf-cli/install-go-cli.html) CLI 8.6.1 or better
+* [uaac](https://github.com/cloudfoundry/cf-uaac) 4.14.0 or better
 
 
 ## Clone
@@ -422,7 +422,7 @@ Add entries in your `config/secrets.json` like
 The below represent a collection of Maven profiles available in the Maven POM.
 
 * MySQL (mysql)
-  * adds a dependency on [r2dbc-mysql](https://github.com/mirromutth/r2dbc-mysql)
+  * adds a dependency on [r2dbc-mysql](https://github.com/asyncer-io/r2dbc-mysql)
 * Postgres (postgres)
   * adds a dependency on [r2dbc-postrgesql](https://github.com/pgjdbc/r2dbc-postgresql)
 * Log4J2 logging (log4j2)
@@ -463,7 +463,7 @@ where `{target_foundation_profile}` is something like `pcfone`
 
 ## How to Run with Docker
 
-You might choose this option when experimenting with an external database provider image like [postgres](https://github.com/docker-library/postgres/blob/6c3b27f1433ad81675afb386a182098dc867e3e8/11/alpine/Dockerfile) or [mysql](https://github.com/docker-library/mysql/blob/26380f33a0fcd07dda35e37516eb24eaf962845c/5.7/Dockerfile)
+You might choose this option when experimenting with an external database provider image like [postgres](https://github.com/docker-library/postgres/blob/master/15/alpine/Dockerfile) or [mysql](https://github.com/docker-library/mysql/blob/master/8.0/Dockerfile.debian)
 
 Build
 
@@ -476,14 +476,14 @@ Run
 Start database
 
 ```
-docker run --name butler-mysql -e MYSQL_DATABASE=butler -e MYSQL_ROOT_PASSWORD=p@ssw0rd! -e MYSQL_USER=butler -e MYSQL_PASSWORD=p@ssw0rd -p 3306:3306 -d mysql:5.7.26
+docker run --name butler-mysql -e MYSQL_DATABASE=butler -e MYSQL_ROOT_PASSWORD=p@ssw0rd! -e MYSQL_USER=butler -e MYSQL_PASSWORD=p@ssw0rd -p 3306:3306 -d mysql:8.0.32
 ```
 > MySQL
 
 or
 
 ```
-docker run --name butler-postgres -e POSTGRES_DB=butler -e POSTGRES_USER=butler -e POSTGRES_PASSWORD=p@ssw0rd -p 5432:5432 -d postgres:11.4
+docker run --name butler-postgres -e POSTGRES_DB=butler -e POSTGRES_USER=butler -e POSTGRES_PASSWORD=p@ssw0rd -p 5432:5432 -d postgres:15.2
 ```
 > PostgreSQL
 
