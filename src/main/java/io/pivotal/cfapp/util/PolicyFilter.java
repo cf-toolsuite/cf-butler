@@ -12,7 +12,7 @@ import io.pivotal.cfapp.domain.HasOrganizationWhiteList;
 
 @Component
 public class PolicyFilter {
-    
+
     private PasSettings settings;
 
     @Autowired
