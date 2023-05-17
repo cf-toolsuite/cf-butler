@@ -41,32 +41,42 @@ public class DatabaseCreator implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-        String line; String provider = ""; String ddl = ""; String location = "";
+        String path = "";
         try {
-            provider = settings.getProvider().toLowerCase().replaceAll("\\s","");
-            location = String.join("/", "classpath:db", provider, "schema.ddl");
-            Resource schema = resourceLoader.getResource(location);
-            InputStream is = schema.getInputStream();
-            BufferedReader br = new BufferedReader(new InputStreamReader(is));
-            while ((line = br.readLine()) != null) {
-                if (!line.isBlank()) {
-                    ddl = line.strip().replace(";","");
-                    client
-                    .getDatabaseClient()
-                    .sql(ddl)
-                    .then()
-                    .doOnError(e -> {
-                        log.error(e.getMessage());
-                        System.exit(1);
-                    }).subscribe();
-                }
-            }
-            br.close();
+            path = obtainPathToSchemaFile("schema.ddl");
+            createTablesAndViews(path);
             publisher.publishEvent(new DatabaseCreatedEvent(this));
         } catch (IOException ioe) {
-            log.error(String.format("Failed trying to read %s\n", location), ioe);
+            log.error(String.format("Failed trying to read %s\n", path), ioe);
             System.exit(1);
         }
+    }
+
+    private String obtainPathToSchemaFile(String filename) {
+        String provider = settings.getProvider().toLowerCase().replaceAll("\\s","");
+        String path = String.join("/", "classpath:db", provider, filename);
+        return path;
+    }
+
+    private void createTablesAndViews(String path) throws IOException {
+        String line = ""; String ddl = "";
+        Resource schema = resourceLoader.getResource(path);
+        InputStream is = schema.getInputStream();
+        BufferedReader br = new BufferedReader(new InputStreamReader(is));
+        while ((line = br.readLine()) != null) {
+            if (!line.isBlank()) {
+                ddl = line.strip().replace(";","");
+                client
+                .getDatabaseClient()
+                .sql(ddl)
+                .then()
+                .doOnError(e -> {
+                    log.error(e.getMessage());
+                    System.exit(1);
+                }).subscribe();
+            }
+        }
+        br.close();
     }
 
 }
