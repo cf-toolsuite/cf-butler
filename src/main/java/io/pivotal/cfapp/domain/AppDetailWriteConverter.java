@@ -27,6 +27,8 @@ public class AppDetailWriteConverter implements Converter<AppDetail, OutboundRow
         row.put("total_instances", Parameter.fromOrEmpty(source.getTotalInstances(), Integer.class));
         row.put("memory_used", Parameter.fromOrEmpty(source.getMemoryUsed(), Long.class));
         row.put("disk_used", Parameter.fromOrEmpty(source.getDiskUsed(), Long.class));
+        row.put("memory_quota", Parameter.fromOrEmpty(source.getMemoryQuota(), Long.class));
+        row.put("disk_quota", Parameter.fromOrEmpty(source.getDiskQuota(), Long.class));
         row.put("image", Parameter.fromOrEmpty(source.getImage(), String.class));
         row.put("stack", Parameter.fromOrEmpty(source.getStack(), String.class));
         row.put("urls", Parameter.fromOrEmpty(source.getUrls().stream().filter(StringUtils::isNotBlank).collect(Collectors.joining(",")), String.class));
