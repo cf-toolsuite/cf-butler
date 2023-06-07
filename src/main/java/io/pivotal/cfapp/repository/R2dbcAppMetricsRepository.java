@@ -105,8 +105,8 @@ public class R2dbcAppMetricsRepository {
                 .defaultIfEmpty(0L);
     }
 
-    private Double toGigabytes(BigDecimal input) {
-        return Double.valueOf(input.doubleValue() / Math.pow(1024, 3));
+    private Double toMegabytes(BigDecimal input) {
+        return Double.valueOf(input.doubleValue() / Math.pow(1024, 2));
     }
 
     public Mono<Long> totalApplicationInstances() {
@@ -153,7 +153,7 @@ public class R2dbcAppMetricsRepository {
                 .sql(sql)
                 .map((row, metadata) -> Defaults.getColumnValueOrDefault(row, "tot", BigDecimal.class, BigDecimal.valueOf(0L)))
                 .one()
-                .map(this::toGigabytes)
+                .map(this::toMegabytes)
                 .defaultIfEmpty(0.0);
     }
 
@@ -165,7 +165,7 @@ public class R2dbcAppMetricsRepository {
                 .sql(sql)
                 .map((row, metadata) -> Defaults.getColumnValueOrDefault(row, "tot", BigDecimal.class, BigDecimal.valueOf(0L)))
                 .one()
-                .map(this::toGigabytes)
+                .map(this::toMegabytes)
                 .defaultIfEmpty(0.0);
     }
 

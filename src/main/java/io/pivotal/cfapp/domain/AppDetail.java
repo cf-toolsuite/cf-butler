@@ -85,7 +85,7 @@ public class AppDetail {
 
     public static String headers() {
         return String.join(",", "organization", "space", "application id", "application name", "buildpack", "buildpack version", "image",
-                "stack", "running instances", "total instances", "memory used (in gb)", "memory quota (in gb)", "disk used (in gb)", "disk quota (in gb)", "urls", "last pushed", "last event",
+                "stack", "running instances", "total instances", "memory used (in mb)", "memory quota (in mb)", "disk used (in mb)", "disk quota (in mb)", "urls", "last pushed", "last event",
                 "last event actor", "last event time", "requested state",
                 "latest buildpack release type", "latest buildpack release date", "latest buildpack version", "latest buildpack Url" );
     }
@@ -97,8 +97,8 @@ public class AppDetail {
     public String toCsv() {
         return String.join(",", wrap(getOrganization()), wrap(getSpace()), wrap(getAppId()), wrap(getAppName()),
                 wrap(getBuildpack()), wrap(getBuildpackVersion()), wrap(getImage()), wrap(getStack()), wrap(String.valueOf(getRunningInstances())),
-                wrap(String.valueOf(getTotalInstances())), wrap(Double.toString(toGigabytes(getMemoryUsed()))), wrap(Double.toString(toGigabytes(getMemoryQuota()))),
-                wrap(Double.toString(toGigabytes(getDiskUsed()))), wrap(Double.toString(toGigabytes(getDiskQuota()))),
+                wrap(String.valueOf(getTotalInstances())), wrap(Double.toString(toMegabytes(getMemoryUsed()))), wrap(Double.toString(toMegabytes(getMemoryQuota()))),
+                wrap(Double.toString(toMegabytes(getDiskUsed()))), wrap(Double.toString(toMegabytes(getDiskQuota()))),
                 (wrap(String.join(",", getUrls() != null ? getUrls(): Collections.emptyList()))),
                 wrap(getLastPushed() != null ? getLastPushed().toString() : ""), wrap(getLastEvent()),
                 wrap(getLastEventActor()), wrap(getLastEventTime() != null ? getLastEventTime().toString() : ""),
@@ -109,7 +109,7 @@ public class AppDetail {
                 wrap(getBuildpackLatestUrl()));
     }
 
-    private Double toGigabytes(Long input) {
-        return Double.valueOf(input / Math.pow(1024, 3));
+    private Double toMegabytes(Long input) {
+        return Double.valueOf(input / Math.pow(1024, 2));
     }
 }
