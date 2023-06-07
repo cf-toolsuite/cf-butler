@@ -28,6 +28,8 @@ public class AppDetailReadConverter implements Converter<Row, AppDetail> {
                 .totalInstances(Defaults.getColumnValueOrDefault(source, "total_instances", Integer.class, 0))
                 .memoryUsed(Defaults.getColumnValueOrDefault(source, "memory_used", Long.class, 0L))
                 .diskUsed(Defaults.getColumnValueOrDefault(source, "disk_used", Long.class, 0L))
+                .memoryQuota(Defaults.getColumnValueOrDefault(source, "memory_quota", Long.class, 0L))
+                .diskQuota(Defaults.getColumnValueOrDefault(source, "disk_quota", Long.class, 0L))
                 .image(Defaults.getColumnValue(source, "image", String.class))
                 .stack(Defaults.getColumnValue(source, "stack", String.class))
                 .urls(Defaults.getColumnListOfStringValue(source, "urls"))

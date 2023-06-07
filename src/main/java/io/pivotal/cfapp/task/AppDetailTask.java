@@ -20,6 +20,7 @@ import org.cloudfoundry.client.v2.applications.Usage;
 import org.cloudfoundry.client.v3.ClientV3Exception;
 import org.cloudfoundry.client.v3.applications.GetApplicationCurrentDropletRequest;
 import org.cloudfoundry.client.v3.applications.GetApplicationCurrentDropletResponse;
+import org.cloudfoundry.client.v3.applications.GetApplicationProcessStatisticsRequest;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -96,6 +97,7 @@ public class AppDetailTask implements ApplicationListener<AppDetailReadyToBeRetr
             .concatMap(this::listApplications)
             .flatMap(this::getSummaryInfo)
             .flatMap(this::getBuildpackFromApplicationCurrentDroplet)
+            .flatMap(this::getQuotas)
             .flatMap(this::getStatistics)
             .flatMap(this::getLastEvent)
             .flatMap(appDetailsService::save)
@@ -174,6 +176,22 @@ public class AppDetailTask implements ApplicationListener<AppDetailReadyToBeRetr
                 .defaultIfEmpty(fragment);
     }
 
+    protected Mono<AppDetail> getQuotas(AppDetail fragment) {
+        log.trace("Fetching application quotas for org={}, space={}, id={}, name={}", fragment.getOrganization(), fragment.getSpace(), fragment.getAppId(), fragment.getAppName());
+        return buildClient(buildSpace(fragment.getOrganization(), fragment.getSpace()))
+                .getCloudFoundryClient()
+                .applicationsV3()
+                .getProcessStatistics(GetApplicationProcessStatisticsRequest.builder().applicationId(fragment.getAppId()).type("web").build())
+                .map(stats ->
+                    AppDetail
+                        .from(fragment)
+                        .diskQuota(stats.getResources().get(0).getDiskQuota())
+                        .memoryQuota(stats.getResources().get(0).getMemoryQuota())
+                        .build()
+                )
+                .onErrorResume(ClientV2Exception.class, e -> Mono.just(fragment));
+    }
+
     protected Mono<AppDetail> getStatistics(AppDetail fragment) {
         log.trace("Fetching application statistics for org={}, space={}, id={}, name={}", fragment.getOrganization(), fragment.getSpace(), fragment.getAppId(), fragment.getAppName());
         return buildClient(buildSpace(fragment.getOrganization(), fragment.getSpace()))
@@ -188,7 +206,6 @@ public class AppDetailTask implements ApplicationListener<AppDetailReadyToBeRetr
                         .build()
                 )
                 .onErrorResume(ClientV2Exception.class, e -> Mono.just(fragment));
-
     }
 
     protected Mono<AppDetail> getSummaryInfo(AppDetail fragment) {

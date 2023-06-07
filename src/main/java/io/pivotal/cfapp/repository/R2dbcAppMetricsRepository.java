@@ -106,7 +106,7 @@ public class R2dbcAppMetricsRepository {
     }
 
     private Double toGigabytes(BigDecimal input) {
-        return Double.valueOf(input.doubleValue() / 1000000000.0);
+        return Double.valueOf(input.doubleValue() / Math.pow(1024, 3));
     }
 
     public Mono<Long> totalApplicationInstances() {

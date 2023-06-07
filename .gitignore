@@ -1,6 +1,7 @@
 ### Gradle ###
 .gradle
 bin/
+tmp/
 
 ### Maven ###
 target/

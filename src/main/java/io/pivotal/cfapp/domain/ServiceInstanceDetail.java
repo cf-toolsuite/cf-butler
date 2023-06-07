@@ -73,7 +73,7 @@ public class ServiceInstanceDetail {
         return String.join(",", "organization", "space", "service instance id",
                 "name", "service", "description", "plan", "type", "bound applications", "last operation", "last updated", "dashboard url", "requested state");
     }
-    
+
     private static String wrap(String value) {
         return value != null ? StringUtils.wrap(value, '"') : StringUtils.wrap("", '"');
     }
