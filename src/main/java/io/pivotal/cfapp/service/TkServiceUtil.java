@@ -8,7 +8,7 @@ import reactor.core.publisher.Mono;
 
 public class TkServiceUtil {
 
-    private static final String LAST_TIME_COLLECTED = "Last-Time-Collected";
+    private static final String LAST_TIME_COLLECTED = "X-DateTime-Collected";
 
     private final TimeKeeperService tkService;
 
@@ -18,7 +18,7 @@ public class TkServiceUtil {
 
     public Mono<HttpHeaders> getHeaders() {
         return
-                tkService
+            tkService
                 .findOne()
                 .map(lc -> {
                     HttpHeaders headers = new HttpHeaders();
@@ -29,7 +29,7 @@ public class TkServiceUtil {
 
     public Mono<LocalDateTime> getTimeCollected() {
         return
-                tkService
+            tkService
                 .findOne();
     }
 
