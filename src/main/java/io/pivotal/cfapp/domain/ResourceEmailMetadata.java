@@ -11,7 +11,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import io.jsonwebtoken.lang.Collections;
 import lombok.Builder;
 import lombok.Builder.Default;
 import lombok.Getter;
@@ -47,10 +46,10 @@ public class ResourceEmailMetadata {
     @JsonIgnore
     public boolean isValid() {
         return isValidResource(resource)
-                && !Collections.isEmpty(labels)
+                && !ObjectUtils.isEmpty(labels)
                 && StringUtils.isNotBlank(emailDomain);
     }
-    
+
     private static boolean isValidResource(String resource) {
         ResourceType[] resourceTypes = ResourceType.values();
         for (ResourceType resourceType : resourceTypes)

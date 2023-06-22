@@ -11,7 +11,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import io.jsonwebtoken.lang.Collections;
 import lombok.Builder;
 import lombok.Builder.Default;
 import lombok.Getter;
@@ -24,7 +23,7 @@ public class EmailNotificationTemplate {
 
     private static boolean areRecipientsValid(List<String> recipients) {
         boolean result = true;
-        if (!Collections.isEmpty(recipients)) {
+        if (!ObjectUtils.isEmpty(recipients)) {
             for (String recipient: recipients) {
                 if (!EmailValidator.isValid(recipient)) {
                     result = false;
