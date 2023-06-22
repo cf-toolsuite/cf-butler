@@ -71,13 +71,13 @@
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
     <spring-native.version>0.10.5</spring-native.version>
+    <lombok.version>1.18.28</lombok.version>
   </properties>
 
   <dependencies>
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
-      <version>1.18.28</version>
       <optional>true</optional>
     </dependency>
     <dependency>

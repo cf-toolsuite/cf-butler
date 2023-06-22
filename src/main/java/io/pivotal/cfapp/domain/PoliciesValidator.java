@@ -9,7 +9,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import io.jsonwebtoken.lang.Collections;
 import io.pivotal.cfapp.service.StacksCache;
 import lombok.extern.slf4j.Slf4j;
 @Slf4j
@@ -100,7 +99,7 @@ public class PoliciesValidator {
         boolean hasEmailNotificationTemplate = Optional.ofNullable(policy.getEmailNotificationTemplate()).isPresent();
         boolean valid = !hasId && hasEndpoints && hasEmailNotificationTemplate;
         if (hasEndpoints) {
-            if (Collections.isEmpty(policy.getEndpoints())) {
+            if (ObjectUtils.isEmpty(policy.getEndpoints())) {
                 valid = false;
             } else {
                 for (String e: policy.getEndpoints()) {
@@ -219,7 +218,7 @@ public class PoliciesValidator {
         boolean hasEmailNotificationTemplate = Optional.ofNullable(policy.getEmailNotificationTemplate()).isPresent();
         boolean valid = !hasId && hasQueries && hasEmailNotificationTemplate;
         if (hasQueries) {
-            if (Collections.isEmpty(policy.getQueries())) {
+            if (ObjectUtils.isEmpty(policy.getQueries())) {
                 valid = false;
             } else {
                 for (Query q: policy.getQueries()) {
