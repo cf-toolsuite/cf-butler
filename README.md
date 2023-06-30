@@ -792,6 +792,16 @@ GET /snapshot/organizations/count
 > Counts the number of organizations on a foundation
 
 ```
+GET /snapshot/spaces
+```
+> Lists spaces
+
+```
+GET /snapshot/spaces/count
+```
+> Counts the number of spaces on a foundation
+
+```
 GET /snapshot/spaces/users
 ```
 > Provides details and light metrics for users by role within all organizations and spaces on a foundation
