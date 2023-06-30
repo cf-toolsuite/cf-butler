@@ -1,7 +1,7 @@
 package io.pivotal.cfapp.domain;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.PersistenceConstructor;
+import org.springframework.data.annotation.PersistenceCreator;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
@@ -30,7 +30,7 @@ public class Organization {
 
 
     @JsonCreator
-    @PersistenceConstructor
+    @PersistenceCreator
     public Organization(
             @JsonProperty("id") String id,
             @JsonProperty("name") String name) {
