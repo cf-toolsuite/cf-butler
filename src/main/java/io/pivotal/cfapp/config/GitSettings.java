@@ -5,7 +5,6 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.bind.ConstructorBinding;
-import org.springframework.boot.context.properties.bind.DefaultValue;
 
 import lombok.Builder;
 import lombok.Builder.Default;
@@ -36,4 +35,17 @@ public class GitSettings {
         return StringUtils.isNotBlank(uri);
     }
 
+    @ConstructorBinding
+    GitSettings(
+        String uri,
+        String username,
+        String password,
+        String commit,
+        Set<String> filePaths) {
+            this.uri = uri;
+            this.username = username;
+            this.password = password;
+            this.commit = commit;
+            this.filePaths = filePaths;
+    }
 }
