@@ -46,6 +46,7 @@ public class ButlerCfEnvProcessor implements CfEnvProcessor {
         addOrUpdatePropertyValue("spring.mail.password", "MAIL_PASSWORD", cfCredentials, properties);
         addOrUpdatePropertyValue("spring.mail.properties.mail.smtp.auth", "MAIL_SMTP_AUTH_ENABLED", cfCredentials, properties);
         addOrUpdatePropertyValue("spring.mail.properties.mail.smtp.starttls.enable", "MAIL_SMTP_STARTTLS_ENABLED", cfCredentials, properties);
+        addOrUpdatePropertyValue("spring.mail.properties.mail.smtp.ssl.enable", "MAIL_SMTP_SSL_ENABLED", cfCredentials, properties);
         addOrUpdatePropertyValue("spring.sendgrid.api-key", "SENDGRID_API-KEY", cfCredentials, properties);
         addOrUpdatePropertyValue("spring.r2dbc.url", "R2DBC_URL", cfCredentials, properties);
         addOrUpdatePropertyValue("spring.r2dbc.username", "R2DBC_USERNAME", cfCredentials, properties);
