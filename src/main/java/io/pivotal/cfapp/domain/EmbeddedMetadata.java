@@ -19,7 +19,7 @@ import lombok.Singular;
 @Builder
 @Getter
 @JsonPropertyOrder({ "labels", "annotations" })
-// @see https://docs.pivotal.io/pivotalcf/2-5/adminguide/metadata.html
+// @see https://docs.vmware.com/en/VMware-Tanzu-Application-Service/3.0/tas-for-vms/metadata.html
 public class EmbeddedMetadata {
 
     private static final String ALPHANUMERIC_REGEX = "^[a-zA-Z0-9.-]*$";

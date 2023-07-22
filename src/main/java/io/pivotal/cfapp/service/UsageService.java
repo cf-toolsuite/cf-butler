@@ -16,7 +16,7 @@ import io.pivotal.cfapp.domain.accounting.service.ServiceUsageReport;
 import io.pivotal.cfapp.domain.accounting.task.TaskUsageReport;
 import reactor.core.publisher.Mono;
 
-// @see https://docs.pivotal.io/pivotalcf/2-4/opsguide/accounting-report.html
+// @see https://docs.vmware.com/en/VMware-Tanzu-Application-Service/3.0/tas-for-vms/accounting-report.html#obtain-system-usage-information-1
 
 @Service
 public class UsageService {
