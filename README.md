@@ -68,7 +68,7 @@ Cf-butler exposes a number of self-service endpoints that perform house-keeping 
 
 ### And what about VMware Tanzu Telemetry Collector?
 
-[VMware Tanzu Telemetry Collector](https://docs.pivotal.io/telemetry-collector/1-1/index.html) supports collection of configuration data from Operations Manager, certificate data from Credhub, and usage data from VMware Tanzu Application Service.  Customers download and install a [CLI](https://network.pivotal.io/products/pivotal-telemetry-collector/) from VMware Tanzu Network.  Typically, a [Concourse](https://concourse-ci.org) [pipeline](https://docs.pivotal.io/telemetry-collector/1-1/using-concourse.html) is configured to automate collection.  The result of collection is a foundation details [tarball](https://docs.pivotal.io/telemetry-collector/1-1/data.html#collected). Customers may opt to transmit this data to VMware Tanzu.
+[VMware Tanzu Telemetry Collector](https://docs.vmware.com/en/Tanzu-Telemetry-for-Ops-Manager/1.2/telemetry-documentation/GUID-index.html) supports collection of configuration data from Operations Manager, certificate data from Credhub, and usage data from VMware Tanzu Application Service.  Customers download and install a [CLI](https://network.pivotal.io/products/pivotal-telemetry-collector/) from VMware Tanzu Network.  Typically, a [Concourse](https://concourse-ci.org) [pipeline](https://docs.pivotal.io/platform-automation/v5.1/inputs-outputs.html#telemetry) is configured to automate collection.  The result of collection is a foundation details [tarball](https://docs.vmware.com/en/Tanzu-Telemetry-for-Ops-Manager/1.2/telemetry-cli-documentation/GUID-data.html#data-collected-2). Customers may opt to transmit this data to VMware Tanzu.
 
 > Note: [Pivotal Telemetry](https://tanzu.vmware.com/legal/telemetry) and [VMware's Customer Experience Improvement Program](https://www.vmware.com/solutions/trustvmware/ceip.html) are opt-in.
 
@@ -122,7 +122,7 @@ Place secrets in `config/secrets.json`, e.g.,
 }
 ```
 
-We'll use this file later as input configuration for the creation of either a [credhub](https://docs.pivotal.io/credhub-service-broker/using.html) or [user-provided](https://docs.cloudfoundry.org/devguide/services/user-provided.html#credentials) service instance.
+We'll use this file later as input configuration for the creation of either a [credhub](https://docs.vmware.com/en/CredHub-Service-Broker/services/credhub/GUID-using.html) or [user-provided](https://docs.cloudfoundry.org/devguide/services/user-provided.html#credentials) service instance.
 
 > Replace occurrences of `xxxxx` above with appropriate values
 
@@ -1101,41 +1101,41 @@ Sample output
 
 ### Accounting
 
-> Note: `/accounting/**` endpoints below require a user with `cloud_controller.admin` or `usage_service.audit` scope.  See [Creating and Managing Users with the UAA CLI (UAAC)](https://docs.pivotal.io/vmware-tanzucf/2-5/uaa/uaa-user-management.html).
+> Note: `/accounting/**` endpoints below require a user with `cloud_controller.admin` or `usage_service.audit` scope.  See [Creating and Managing Users with the UAA CLI (UAAC)](https://docs.vmware.com/en/VMware-Tanzu-Application-Service/4.0/tas-for-vms/uaa-user-management.html).
 
 ```
 GET /accounting/applications
 ```
-> Produces a system-wide account report of [application usage](https://docs.pivotal.io/vmware-tanzucf/2-6/opsguide/accounting-report.html#app-usage)
+> Produces a system-wide account report of [application usage](https://docs.vmware.com/en/VMware-Tanzu-Application-Service/3.0/tas-for-vms/accounting-report.html#app-usage)
 
 > **Note**: Report excludes application instances in the `system` org
 
 ```
 GET /accounting/services
 ```
-> Produces a system-wide account report of [service usage](https://docs.pivotal.io/vmware-tanzucf/2-6/opsguide/accounting-report.html#service-usage)
+> Produces a system-wide account report of [service usage](https://docs.vmware.com/en/VMware-Tanzu-Application-Service/3.0/tas-for-vms/accounting-report.html#service-usage)
 
 > **Note**: Report excludes user-provided service instances
 
 ```
 GET /accounting/tasks
 ```
-> Produces a system-wide account report of [task usage](https://docs.pivotal.io/vmware-tanzucf/2-6/opsguide/accounting-report.html#task-usage)
+> Produces a system-wide account report of [task usage](https://docs.vmware.com/en/VMware-Tanzu-Application-Service/3.0/tas-for-vms/accounting-report.html#task-usage)
 
 ```
 GET /accounting/applications/{orgName}/{startDate}/{endDate}
 ```
-> Produces an [application usage](https://docs.pivotal.io/vmware-tanzucf/2-6/opsguide/accounting-report.html#org-app-usage) constrained to single organization and time period
+> Produces an [application usage](https://docs.vmware.com/en/VMware-Tanzu-Application-Service/3.0/tas-for-vms/accounting-report.html#org-app-usage) constrained to single organization and time period
 
 ```
 GET /accounting/services/{orgName}/{startDate}/{endDate}
 ```
-> Produces a [service usage](https://docs.pivotal.io/vmware-tanzucf/2-6/opsguide/accounting-report.html#org-service-usage) constrained to single organization and time period
+> Produces a [service usage](https://docs.vmware.com/en/VMware-Tanzu-Application-Service/3.0/tas-for-vms/accounting-report.html#service-usage-9) constrained to single organization and time period
 
 ```
 GET /accounting/tasks/{orgName}/{startDate}/{endDate}
 ```
-> Produces a [task usage](https://docs.pivotal.io/vmware-tanzucf/2-6/opsguide/accounting-report.html#org-task-usage) constrained to single organization and time period
+> Produces a [task usage](https://docs.vmware.com/en/VMware-Tanzu-Application-Service/3.0/tas-for-vms/accounting-report.html#task-usage-8) constrained to single organization and time period
 
 
 ### Policies
