@@ -163,7 +163,7 @@ For an exhaustive listing of all overridable configuration properties consult [B
 
 By default `cf-butler` employs an in-memory [H2](http://www.h2database.com) instance.
 
-If you wish to configure an external database you must set set `spring.r2dbc.*` properties as described [here](https://github.com/spring-projects-experimental/spring-boot-r2dbc).
+If you wish to configure an external database you must set set `spring.r2dbc.*` properties as described [here](https://docs.spring.io/spring-boot/docs/current/api/org/springframework/boot/autoconfigure/r2dbc/R2dbcProperties.html).
 
 Before you `cf push`, stash the credentials for your database in `config/secrets.json` like so
 
