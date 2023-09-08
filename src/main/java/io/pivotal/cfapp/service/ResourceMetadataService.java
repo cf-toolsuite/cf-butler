@@ -35,10 +35,12 @@ public class ResourceMetadataService {
         this.tokenProvider = tokenProvider;
         this.settings = settings;
     }
+
     private Mono<String> getOauthToken() {
         tokenProvider.invalidate(connectionContext);
         return tokenProvider.getToken(connectionContext);
     }
+
     public Mono<Resources> getResources(String type) {
         ResourceType rt = ResourceType.from(type);
         final String uri =

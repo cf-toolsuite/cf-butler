@@ -15,7 +15,8 @@ import lombok.Builder.Default;
 @Builder
 @Getter
 @JsonPropertyOrder({ "resources"})
-public class Resources {    
+public class Resources {
+
     @Default
     @JsonProperty("resources")
     private List<Resource> resources = new ArrayList<>();
@@ -24,8 +25,8 @@ public class Resources {
     private Pagination pagination;
 
     @JsonCreator
-    public Resources(@JsonProperty("resources") List<Resource> resources,
-    @JsonProperty("pagination") Pagination pagination
+    public Resources(   @JsonProperty("resources") List<Resource> resources,
+                        @JsonProperty("pagination") Pagination pagination
     ) {
         this.resources = resources;
         this.pagination = pagination;

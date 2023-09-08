@@ -74,13 +74,14 @@ public class ResourceNotificationPolicyExecutorTask implements PolicyExecutorTas
                 .flatMapMany(policy -> Flux.fromIterable(policy.getResourceNotificationPolicies()));
     }
 
-    private Mono<List<Resource>> fetchRecipientList(ResourceNotificationPolicy resourceNotificationPolicy, String label, Integer page, Integer perPage){
+    private Mono<List<String>> fetchRecipientList(ResourceNotificationPolicy resourceNotificationPolicy, String label, Integer page, Integer perPage){
         return
             resourceMetadataService.getResources(resourceNotificationPolicy.getResourceEmailMetadata().getResource(), label, page, perPage)
                 .flatMapMany(resources -> Flux.fromIterable(resources.getResources()))
                 .delayElements(Duration.ofMillis(250))
                 .filter(resource -> isBlacklisted(resourceNotificationPolicy, resource.getName()))
                 .filter(resource -> isWhitelisted(resourceNotificationPolicy, resource.getName()))
+                .map(resource -> new String(resource.getMetadata().getLabels().get(label) + "@" + resourceNotificationPolicy.getResourceEmailMetadata().getEmailDomain()))
                 .collectList();
     }
 
