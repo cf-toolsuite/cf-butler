@@ -459,6 +459,24 @@
         <artifactId>maven-project-info-reports-plugin</artifactId>
         <version>3.4.2</version>
       </plugin>
+      <plugin>
+				<groupId>com.github.spotbugs</groupId>
+				<artifactId>spotbugs-maven-plugin</artifactId>
+				<version>4.7.3.4</version>
+				<configuration>
+				<xmlOutput>true</xmlOutput>
+				</configuration>
+			</plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-pmd-plugin</artifactId>
+        <version>3.21.0</version>
+        <configuration>
+          <includeTests>true</includeTests>
+          <failOnViolation>false</failOnViolation>
+          <skipEmptyReport>false</skipEmptyReport>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 
