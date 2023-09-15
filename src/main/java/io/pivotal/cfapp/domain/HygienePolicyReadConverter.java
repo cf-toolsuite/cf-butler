@@ -10,6 +10,7 @@ import org.springframework.stereotype.Indexed;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.pivotal.cfapp.util.CsvUtil;
 import io.r2dbc.spi.Row;
 
 @Indexed
@@ -28,7 +29,7 @@ public class HygienePolicyReadConverter implements Converter<Row, HygienePolicy>
                 .daysSinceLastUpdate(source.get("days_since_last_update", Integer.class))
                 .operatorTemplate(readEmailNotificationTemplate(source.get("operator_email_template", String.class) == null ? "{}": source.get("operator_email_template", String.class)))
                 .notifyeeTemplate(readEmailNotificationTemplate(source.get("notifyee_email_template", String.class) == null ? "{}": source.get("notifyee_email_template", String.class)))
-                .organizationWhiteList(source.get("organization_whitelist", String.class) != null ? new HashSet<String>(Arrays.asList(source.get("organization_whitelist", String.class).split("\\s*,\\s*"))): new HashSet<>())
+                .organizationWhiteList(CsvUtil.parse(source.get("organization_whitelist", String.class)))
                 .build();
     }
 

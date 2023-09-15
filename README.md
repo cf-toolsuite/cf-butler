@@ -41,6 +41,7 @@ This is where `cf-butler` has your back.
       * [Alternatives](#alternatives)
   * [How to Run with Maven](#how-to-run-with-maven)
   * [How to Run with Docker](#how-to-run-with-docker)
+  * [How to check code quality with Sonarqube](#how-to-check-code-quality-with-sonarqube)
   * [How to deploy to VMware Tanzu Application Service](#how-to-deploy-to-vmware-tanzu-application-service)
       * [with Username and password authorization](#with-username-and-password-authorization)
       * [with SSO authorization](#with-sso-authorization)
@@ -375,7 +376,7 @@ Add an entry in your `config/secrets.json` like
   "CF_SPACE-BLACK-LIST": [ "orgA:spaceA", "orgB:spaceB" ]
 ```
 
-> All spaces you define in the blacklist are excluded from consideration by policies. 
+> All spaces you define in the blacklist are excluded from consideration by policies.
 
 ### Integration w/ Operations Manager
 
@@ -509,6 +510,23 @@ Cleanup
 docker rm {pid}
 ```
 > where `{pid}` is the Docker process id
+
+
+## How to check code quality with Sonarqube
+
+Launch an instance of Sonarqube on your workstation with Docker
+
+```
+docker run -d --name sonarqube -p 9000:9000 -p 9092:9092 sonarqube
+```
+
+Then make sure to add goal and required arguments when building with Maven. For example:
+
+```
+mvn clean package sonar:sonar -Dsonar.token=cf-butler -Dsonar.login=admin -Dsonar.password=admin
+```
+
+Then visit `http://localhost:9000` in your favorite browser to inspect results of scan.
 
 
 ## How to deploy to VMware Tanzu Application Service

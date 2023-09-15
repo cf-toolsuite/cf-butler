@@ -10,6 +10,7 @@ import org.springframework.stereotype.Indexed;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.pivotal.cfapp.util.CsvUtil;
 import io.r2dbc.spi.Row;
 
 @Indexed
@@ -27,8 +28,8 @@ public class ResourceNotificationPolicyReadConverter implements Converter<Row, R
                 .id(source.get("id", String.class))
                 .resourceEmailTemplate(readEmailNotificationTemplate(source.get("resource_email_template", String.class) == null ? "{}": source.get("resource_email_template", String.class)))
                 .resourceEmailMetadata(readResourceEmailMetadata(source.get("resource_email_metadata", String.class) == null ? "{}": source.get("resource_email_metadata", String.class)))
-                .resourceWhiteList(source.get("resource_whitelist", String.class) != null ? new HashSet<String>(Arrays.asList(source.get("resource_whitelist", String.class).split("\\s*,\\s*"))): new HashSet<>())
-                .resourceBlackList(source.get("resource_blacklist", String.class) != null ? new HashSet<String>(Arrays.asList(source.get("resource_blacklist", String.class).split("\\s*,\\s*"))): new HashSet<>())
+                .resourceWhiteList(CsvUtil.parse(source.get("resource_whitelist", String.class)))
+                .resourceBlackList(CsvUtil.parse(source.get("resource_blacklist", String.class)))
                 .build();
     }
 

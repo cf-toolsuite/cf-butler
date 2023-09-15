@@ -122,7 +122,7 @@ public class EndpointPolicyExecutorTask implements PolicyExecutorTask {
             String filename = t.getT1();
             String content = t.getT2().getBody();
             String mimeType = t.getT2().getHeaders().getFirst(HttpHeaders.CONTENT_TYPE);
-            if (StringUtils.isNotBlank(content)) {
+            if (StringUtils.isNotBlank(content) && StringUtils.isNotBlank(mimeType)) {
                 if (mimeType.startsWith(MediaType.APPLICATION_JSON_VALUE)) {
                     result.add(
                             EmailAttachment

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Indexed;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.pivotal.cfapp.util.CsvUtil;
 import io.r2dbc.spi.Row;
 
 @Indexed
@@ -21,16 +22,16 @@ public class LegacyPolicyReadConverter implements Converter<Row, LegacyPolicy> {
     @Override
     public LegacyPolicy convert(Row source) {
         return
-                LegacyPolicy
+            LegacyPolicy
                 .builder()
-                .pk(source.get("pk", Long.class))
-                .id(source.get("id", String.class))
-                .stacks(source.get("stacks", String.class) != null ? new HashSet<String>(Arrays.asList(source.get("stacks", String.class).split("\\s*,\\s*"))): new HashSet<>())
-                .serviceOfferings(source.get("service_offerings", String.class) != null ? new HashSet<String>(Arrays.asList(source.get("service_offerings", String.class).split("\\s*,\\s*"))): new HashSet<>())
-                .operatorTemplate(readEmailNotificationTemplate(source.get("operator_email_template", String.class) == null ? "{}": source.get("operator_email_template", String.class)))
-                .notifyeeTemplate(readEmailNotificationTemplate(source.get("notifyee_email_template", String.class) == null ? "{}": source.get("notifyee_email_template", String.class)))
-                .organizationWhiteList(source.get("organization_whitelist", String.class) != null ? new HashSet<String>(Arrays.asList(source.get("organization_whitelist", String.class).split("\\s*,\\s*"))): new HashSet<>())
-                .build();
+                    .pk(source.get("pk", Long.class))
+                    .id(source.get("id", String.class))
+                    .stacks(CsvUtil.parse(source.get("stacks", String.class)))
+                    .serviceOfferings(CsvUtil.parse(source.get("service_offerings", String.class)))
+                    .operatorTemplate(readEmailNotificationTemplate(source.get("operator_email_template", String.class) == null ? "{}": source.get("operator_email_template", String.class)))
+                    .notifyeeTemplate(readEmailNotificationTemplate(source.get("notifyee_email_template", String.class) == null ? "{}": source.get("notifyee_email_template", String.class)))
+                    .organizationWhiteList(CsvUtil.parse(source.get("organization_whitelist", String.class)))
+                    .build();
     }
 
     private EmailNotificationTemplate readEmailNotificationTemplate(String value) {

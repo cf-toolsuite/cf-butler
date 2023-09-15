@@ -1,8 +1,6 @@
 package io.pivotal.cfapp.domain;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Map;
 
 import org.springframework.core.convert.converter.Converter;
@@ -12,6 +10,7 @@ import org.springframework.stereotype.Indexed;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.pivotal.cfapp.util.CsvUtil;
 import io.r2dbc.spi.Row;
 
 @Indexed
@@ -23,15 +22,15 @@ public class ServiceInstancePolicyReadConverter implements Converter<Row, Servic
     @Override
     public ServiceInstancePolicy convert(Row source) {
         return
-                ServiceInstancePolicy
+            ServiceInstancePolicy
                 .builder()
-                .pk(source.get("pk", Long.class))
-                .id(source.get("id", String.class))
-                .operation(source.get("operation", String.class))
-                .description(source.get("description", String.class))
-                .options(readOptions(source.get("options", String.class) == null ? "{}" : source.get("options", String.class)))
-                .organizationWhiteList(source.get("organization_whitelist", String.class) != null ? new HashSet<String>(Arrays.asList(source.get("organization_whitelist", String.class).split("\\s*,\\s*"))): new HashSet<>())
-                .build();
+                    .pk(source.get("pk", Long.class))
+                    .id(source.get("id", String.class))
+                    .operation(source.get("operation", String.class))
+                    .description(source.get("description", String.class))
+                    .options(readOptions(source.get("options", String.class) == null ? "{}" : source.get("options", String.class)))
+                    .organizationWhiteList(CsvUtil.parse(source.get("organization_whitelist", String.class)))
+                    .build();
     }
 
     private Map<String, Object> readOptions(String value) {

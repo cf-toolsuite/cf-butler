@@ -16,6 +16,7 @@ import io.pivotal.cfapp.domain.WorkloadsFilter;
 import io.pivotal.cfapp.service.LegacyWorkloadsService;
 import io.pivotal.cfapp.service.TimeKeeperService;
 import io.pivotal.cfapp.service.TkServiceUtil;
+import io.pivotal.cfapp.util.CsvUtil;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -39,8 +40,8 @@ public class LegacyWorkloadsController {
             ) {
         final WorkloadsBuilder builder = Workloads.builder();
         final WorkloadsFilter workloadsFilters = WorkloadsFilter.builder()
-                .stacks(Set.copyOf(Arrays.asList(stacks.split("\\s*,\\s*"))))
-                .serviceOfferings(Set.copyOf(Arrays.asList(serviceOfferings.split("\\s*,\\s*"))))
+                .stacks(CsvUtil.parse(stacks))
+                .serviceOfferings(CsvUtil.parse(serviceOfferings))
                 .build();
         return service
                 .getLegacyApplications(workloadsFilters)
