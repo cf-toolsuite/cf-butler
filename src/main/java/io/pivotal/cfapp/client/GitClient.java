@@ -71,26 +71,26 @@ public class GitClient {
                 .map(Path::toFile)
                 .forEach(File::delete);
             }
-            p.toFile().delete();
+            Files.delete(p);
             if (settings.isAuthenticated()) {
                 String username = settings.getUsername();
                 String password = settings.getPassword();
                 Git
-                .cloneRepository()
-                .setURI(uri)
-                .setCredentialsProvider(new UsernamePasswordCredentialsProvider(username, password))
-                .setDirectory(directory)
-                .setCloneAllBranches(true)
-                .call()
-                .close();
+                    .cloneRepository()
+                    .setURI(uri)
+                    .setCredentialsProvider(new UsernamePasswordCredentialsProvider(username, password))
+                    .setDirectory(directory)
+                    .setCloneAllBranches(true)
+                    .call()
+                    .close();
             } else {
                 Git
-                .cloneRepository()
-                .setURI(uri)
-                .setDirectory(directory)
-                .setCloneAllBranches(true)
-                .call()
-                .close();
+                    .cloneRepository()
+                    .setURI(uri)
+                    .setDirectory(directory)
+                    .setCloneAllBranches(true)
+                    .call()
+                    .close();
             }
             result = Git.open(directory).getRepository();
         } catch (GitAPIException | IOException e) {

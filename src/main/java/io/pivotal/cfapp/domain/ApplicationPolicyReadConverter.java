@@ -12,6 +12,7 @@ import org.springframework.stereotype.Indexed;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.pivotal.cfapp.util.CsvUtil;
 import io.r2dbc.spi.Row;
 
 @Indexed
@@ -30,7 +31,7 @@ public class ApplicationPolicyReadConverter implements Converter<Row, Applicatio
                 .operation(source.get("operation", String.class))
                 .description(source.get("description", String.class))
                 .options(readOptions(source.get("options", String.class) == null ? "{}" : source.get("options", String.class)))
-                .organizationWhiteList(source.get("organization_whitelist", String.class) != null ? new HashSet<String>(Arrays.asList(source.get("organization_whitelist", String.class).split("\\s*,\\s*"))): new HashSet<>())
+                .organizationWhiteList(CsvUtil.parse(source.get("organization_whitelist", String.class)))
                 .state(source.get("state", String.class))
                 .build();
     }
