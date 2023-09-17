@@ -14,15 +14,23 @@ fi
 case "$1" in
 
 	--with-credhub | -c)
-	cf push -f manifest.cf4k8s.yml --no-start 
+	cf push -f manifest.cf4k8s.yml --no-start
 	cf create-service credhub default $APP_NAME-secrets -c "$2"
+	while [[ $(cf service $APP_NAME-secrets) != *"succeeded"* ]]; do
+      echo "$APP_NAME-secrets is not ready yet..."
+	  sleep 5s
+    done
 	cf bind-service $APP_NAME $APP_NAME-secrets
 	cf start $APP_NAME
 	;;
 
 	_ | *)
-	cf push -f manifest.cf4k8s.yml --no-start 
+	cf push -f manifest.cf4k8s.yml --no-start
 	cf create-user-provided-service $APP_NAME-secrets -p "$2"
+	while [[ $(cf service $APP_NAME-secrets) != *"succeeded"* ]]; do
+      echo "$APP_NAME-secrets is not ready yet..."
+	  sleep 5s
+    done
 	cf bind-service $APP_NAME $APP_NAME-secrets
 	cf start $APP_NAME
 	;;

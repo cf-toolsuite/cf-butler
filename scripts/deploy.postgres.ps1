@@ -18,20 +18,34 @@ $AppName=cf-butler
 switch ($Provider) {
 
 	"--with-credhub" {
-		cf push --no-start 
+		cf push --no-start
 		cf create-service credhub default $AppName-secrets -c config\secrets.json
-		cf bind-service $AppName $AppName-secrets
         cf create-service elephantsql panda $AppName-backend
-        cf bind-service $AppName $AppName-backend
+		while (cf service $AppName-secrets -notcontains "succeeded") {
+			Write-Host "$APP_NAME-secrets is not ready yet..."
+			Start-Sleep -Seconds 5
+		}
+		cf bind-service $AppName $AppName-secrets
+		while (cf service $AppName-backend -notcontains "succeeded") {
+			Write-Host "$APP_NAME-backend is not ready yet..."
+			Start-Sleep -Seconds 5
+		}
 		cf start $AppName
 	}
 
 	"--with-user-provided-service" {
-		cf push --no-start 
+		cf push --no-start
 		cf create-user-provided-service $AppName-secrets -p config\secrets.json
-		cf bind-service $AppName $AppName-secrets
         cf create-service elephantsql panda $AppName-backend
-        cf bind-service $AppName $AppName-backend
+		while (cf service $AppName-secrets -notcontains "succeeded") {
+			Write-Host "$APP_NAME-secrets is not ready yet..."
+			Start-Sleep -Seconds 5
+		}
+		cf bind-service $AppName $AppName-secrets
+		while (cf service $AppName-backend -notcontains "succeeded") {
+			Write-Host "$APP_NAME-backend is not ready yet..."
+			Start-Sleep -Seconds 5
+		}
 		cf start $AppName
 	}
 
