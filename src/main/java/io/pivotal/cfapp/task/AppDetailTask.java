@@ -189,7 +189,7 @@ public class AppDetailTask implements ApplicationListener<AppDetailReadyToBeRetr
                         .memoryQuota(stats.getResources().get(0).getMemoryQuota())
                         .build()
                 )
-                .onErrorResume(ClientV2Exception.class, e -> Mono.just(fragment));
+                .onErrorResume(ClientV3Exception.class, e -> Mono.just(fragment));
     }
 
     protected Mono<AppDetail> getStatistics(AppDetail fragment) {
