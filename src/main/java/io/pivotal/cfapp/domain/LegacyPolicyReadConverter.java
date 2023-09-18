@@ -1,8 +1,6 @@
 package io.pivotal.cfapp.domain;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashSet;
 
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.convert.ReadingConverter;
