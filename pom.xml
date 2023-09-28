@@ -247,10 +247,6 @@
       <name>Spring snapshots</name>
       <url>https://repo.spring.io/snapshot</url>
     </repository>
-    <repository>
-      <id>projectlombok.org</id>
-      <url>https://projectlombok.org/edge-releases</url>
-    </repository>
   </repositories>
 
   <pluginRepositories>
@@ -273,14 +269,14 @@
 
   <build>
     <pluginManagement>
-			<plugins>
-				<plugin>
-					<groupId>org.sonarsource.scanner.maven</groupId>
-					<artifactId>sonar-maven-plugin</artifactId>
-					<version>3.9.1.2184</version>
-				</plugin>
-			</plugins>
-		</pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.sonarsource.scanner.maven</groupId>
+          <artifactId>sonar-maven-plugin</artifactId>
+          <version>3.9.1.2184</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
     <plugins>
       <plugin>
         <groupId>org.projectlombok</groupId>
@@ -288,9 +284,9 @@
         <version>1.18.20.0</version>
         <dependencies>
           <dependency>
-              <groupId>org.projectlombok</groupId>
-              <artifactId>lombok</artifactId>
-              <version>${lombok.version}</version>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
           </dependency>
         </dependencies>
         <executions>
@@ -494,11 +490,11 @@
         <version>3.2.0-SNAPSHOT</version>
         <configuration>
           <image>
-              <builder>paketobuildpacks/builder-jammy-tiny</builder>
-              <env>
-                <BP_JVM_VERSION>21.0.0</BP_JVM_VERSION>
-                <BP_NATIVE_IMAGE>true</BP_NATIVE_IMAGE>
-              </env>
+            <builder>paketobuildpacks/builder-jammy-tiny</builder>
+            <env>
+              <BP_JVM_VERSION>21.0.0</BP_JVM_VERSION>
+              <BP_NATIVE_IMAGE>true</BP_NATIVE_IMAGE>
+            </env>
           </image>
         </configuration>
       </plugin>
@@ -534,13 +530,13 @@
         <version>3.4.2</version>
       </plugin>
       <plugin>
-				<groupId>com.github.spotbugs</groupId>
-				<artifactId>spotbugs-maven-plugin</artifactId>
-				<version>4.7.3.4</version>
-				<configuration>
-				<xmlOutput>true</xmlOutput>
-				</configuration>
-			</plugin>
+        <groupId>com.github.spotbugs</groupId>
+        <artifactId>spotbugs-maven-plugin</artifactId>
+        <version>4.7.3.4</version>
+        <configuration>
+          <xmlOutput>true</xmlOutput>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-pmd-plugin</artifactId>
@@ -593,16 +589,16 @@
       <build>
         <finalName>${project.artifactId}-postgres-${project.version}</finalName>
         <plugins>
-            <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-compiler-plugin</artifactId>
-              <version>3.11.0</version>
-              <configuration>
-                <excludes>
-                  <exclude>**/H2ConsoleConfig*</exclude>
-                </excludes>
-              </configuration>
-            </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.11.0</version>
+            <configuration>
+              <excludes>
+                <exclude>**/H2ConsoleConfig*</exclude>
+              </excludes>
+            </configuration>
+          </plugin>
         </plugins>
       </build>
     </profile>
@@ -631,16 +627,16 @@
       <build>
         <finalName>${project.artifactId}-mysql-${project.version}</finalName>
         <plugins>
-            <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-compiler-plugin</artifactId>
-              <version>3.11.0</version>
-              <configuration>
-                <excludes>
-                  <exclude>**/H2ConsoleConfig*</exclude>
-                </excludes>
-              </configuration>
-            </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.11.0</version>
+            <configuration>
+              <excludes>
+                <exclude>**/H2ConsoleConfig*</exclude>
+              </excludes>
+            </configuration>
+          </plugin>
         </plugins>
       </build>
     </profile>
