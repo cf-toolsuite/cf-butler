@@ -11,10 +11,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Set up Java
-        uses: oracle-actions/setup-java@v1
+        uses: actions/setup-java@v3
         with:
-          website: oracle.com
-          release: 21
+          distribution: liberica
+          java-version: 17
       - name: Publish package capable of targeting H2 in-memory backend
         run: ./mvnw versions:set -DnewVersion=${{ github.event.release.tag_name }} && ./mvnw --batch-mode --update-snapshots -Plog4j2 clean deploy
         env:
