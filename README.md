@@ -449,9 +449,13 @@ The below represent a collection of Maven profiles available in the Maven POM.
 
 
 ```
-./mvnw clean spring-boot:build-image -Pnative
+# Using Cloud Native Buildpacks image
+./mvnw spring-boot:build-image -Pnative
+
+# Using pre-installed Graal CE
+./mvnw native:compile -Pnative -DskipTests
 ```
-> Compiles a native executable and produces a container image.  You will need Docker.  And you will need to clone and install [cf-butler-hints](https://github.com/pacphi/cf-butler-hints) into a Maven repository.  (This packaging option is currently under development).
+
 
 ## How to Run with Maven
 
@@ -523,7 +527,7 @@ docker run -d --name sonarqube -p 9000:9000 -p 9092:9092 sonarqube
 Then make sure to add goal and required arguments when building with Maven. For example:
 
 ```
-mvn clean package sonar:sonar -Dsonar.token=cf-butler -Dsonar.login=admin -Dsonar.password=admin
+mvn sonar:sonar -Dsonar.token=cf-butler -Dsonar.login=admin -Dsonar.password=admin
 ```
 
 Then visit `http://localhost:9000` in your favorite browser to inspect results of scan.
