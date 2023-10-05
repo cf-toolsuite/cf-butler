@@ -69,6 +69,8 @@
     <commons-lang3.version>3.13.0</commons-lang3.version>
     <jackson.version>2.15.2</jackson.version>
     <mockito.version>5.5.0</mockito.version>
+    <netty.version>4.1.99.Final</netty.version>
+    <snakeyaml.version>2.2</snakeyaml.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <maven.compiler.source>${java.version}</maven.compiler.source>
@@ -108,6 +110,11 @@
       <groupId>io.pivotal.cfenv</groupId>
       <artifactId>java-cfenv-boot</artifactId>
       <version>3.1.1</version>
+    </dependency>
+    <dependency>
+      <groupId>com.cedarsoftware</groupId>
+      <artifactId>json-io</artifactId>
+      <version>4.14.1</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
