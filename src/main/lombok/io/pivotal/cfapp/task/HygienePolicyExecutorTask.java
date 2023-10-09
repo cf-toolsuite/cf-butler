@@ -154,34 +154,38 @@ public class HygienePolicyExecutorTask implements PolicyExecutorTask {
         List<EmailAttachment> result = new ArrayList<>();
         StringBuilder applications = new StringBuilder();
         StringBuilder serviceInstances = new StringBuilder();
-        tuple
-            .getT2()
-            .getApplications()
-            .forEach(app -> applications.append(app.toCsv()).append(cr));
-        tuple
-            .getT2()
-            .getServiceInstances()
-            .forEach(sid -> serviceInstances.append(sid.toCsv()).append(cr));
-        result.add(
-            EmailAttachment
-                .builder()
-                .filename(getFileNamePrefix(tuple.getT1()) + "applications")
-                .extension(".csv")
-                .mimeType("text/plain;charset=UTF-8")
-                .content(applications.toString())
-                .headers(AppDetail.headers())
-                .build()
-        );
-        result.add(
-            EmailAttachment
-                .builder()
-                .filename(getFileNamePrefix(tuple.getT1()) + "service-instances")
-                .extension(".csv")
-                .mimeType("text/plain;charset=UTF-8")
-                .content(serviceInstances.toString())
-                .headers(ServiceInstanceDetail.headers())
-                .build()
-        );
+        if (tuple.getT1().isIncludeApplications()) {
+            tuple
+                .getT2()
+                .getApplications()
+                .forEach(app -> applications.append(app.toCsv()).append(cr));
+            result.add(
+                EmailAttachment
+                    .builder()
+                    .filename(getFileNamePrefix(tuple.getT1()) + "applications")
+                    .extension(".csv")
+                    .mimeType("text/plain;charset=UTF-8")
+                    .content(applications.toString())
+                    .headers(AppDetail.headers())
+                    .build()
+            );
+        }
+        if (tuple.getT1().isIncludeServiceInstances()) {
+            tuple
+                .getT2()
+                .getServiceInstances()
+                .forEach(sid -> serviceInstances.append(sid.toCsv()).append(cr));
+            result.add(
+                EmailAttachment
+                    .builder()
+                    .filename(getFileNamePrefix(tuple.getT1()) + "service-instances")
+                    .extension(".csv")
+                    .mimeType("text/plain;charset=UTF-8")
+                    .content(serviceInstances.toString())
+                    .headers(ServiceInstanceDetail.headers())
+                    .build()
+            );
+        }
         return result;
     }
 
