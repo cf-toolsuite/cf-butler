@@ -509,7 +509,7 @@
       <plugin>
         <groupId>com.mycila</groupId>
         <artifactId>license-maven-plugin</artifactId>
-        <version>4.2</version>
+        <version>4.3</version>
         <configuration>
           <properties>
             <owner>io.pivotal.cf-butler</owner>
@@ -555,6 +555,28 @@
           <skipEmptyReport>false</skipEmptyReport>
         </configuration>
       </plugin>
+      <plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<configuration>
+					<breakiterator>true</breakiterator>
+					<header>${project.name}</header>
+					<source>${source.level}</source>
+					<quiet>true</quiet>
+					<javadocDirectory>${shared.resources}/javadoc</javadocDirectory>
+					<overview>${shared.resources}/javadoc/overview.html</overview>
+					<stylesheetfile>${shared.resources}/javadoc/spring-javadoc.css</stylesheetfile>
+					<!-- copies doc-files subdirectory which contains image resources -->
+					<docfilessubdirs>true</docfilessubdirs>
+					<additionalparam>-Xdoclint:none</additionalparam>
+					<sourcepath>target/generated-sources/delombok</sourcepath>
+					<links>
+						<link>https://docs.spring.io/spring/docs/5.0.x/javadoc-api/</link>
+						<link>https://docs.spring.io/spring-data/commons/docs/current/api/</link>
+						<link>https://docs.oracle.com/javase/${java.version}/docs/api/</link>
+					</links>
+				</configuration>
+			</plugin>
     </plugins>
   </build>
 
