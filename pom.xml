@@ -309,6 +309,10 @@
                 <javaLangAsFQN>skip</javaLangAsFQN>
               </formatPreferences>
               <verbose>true</verbose>
+              <sourceDirectory>src/main/java</sourceDirectory>
+              <outputDirectory>${project.build.directory}/delombok-sources</outputDirectory>
+              <addOutputDirectory>false</addOutputDirectory>
+              <encoding>UTF-8</encoding>
             </configuration>
           </execution>
           <execution>
@@ -319,6 +323,80 @@
             </goals>
             <configuration>
               <verbose>true</verbose>
+              <sourceDirectory>src/test/java</sourceDirectory>
+              <outputDirectory>${project.build.directory}/delombok-test-sources</outputDirectory>
+              <addOutputDirectory>false</addOutputDirectory>
+              <encoding>UTF-8</encoding>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>3.1.0</version>
+        <executions>
+          <execution>
+            <id>generate-delomboked-sources-jar</id>
+            <phase>package</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <jar destfile="${project.build.directory}/${project.build.finalName}-sources.jar" basedir="${project.build.directory}/delombok-sources"/>
+              </target>
+            </configuration>
+          </execution>
+          <execution>
+            <id>generate-delomboked-test-sources-jar</id>
+            <phase>package</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <jar destfile="${project.build.directory}/${project.build.finalName}-tests.jar" basedir="${project.build.directory}/delombok-test-sources"/>
+              </target>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>3.4.0</version>
+        <executions>
+          <execution>
+            <id>attach-delomboked-sources-jar</id>
+            <phase>package</phase>
+            <goals>
+              <goal>attach-artifact</goal>
+            </goals>
+            <configuration>
+              <artifacts>
+                <artifact>
+                  <file>${project.build.directory}/${project.build.finalName}-sources.jar</file>
+                  <type>jar</type>
+                  <classifier>sources</classifier>
+                </artifact>
+              </artifacts>
+            </configuration>
+          </execution>
+          <execution>
+            <id>attach-delomboked-test-sources-jar</id>
+            <phase>package</phase>
+            <goals>
+              <goal>attach-artifact</goal>
+            </goals>
+            <configuration>
+              <artifacts>
+                <artifact>
+                  <file>${project.build.directory}/${project.build.finalName}-tests.jar</file>
+                  <type>test-jar</type>
+                  <classifier>tests</classifier>
+                </artifact>
+              </artifacts>
             </configuration>
           </execution>
         </executions>
@@ -556,27 +634,21 @@
         </configuration>
       </plugin>
       <plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<configuration>
-					<breakiterator>true</breakiterator>
-					<header>${project.name}</header>
-					<source>${source.level}</source>
-					<quiet>true</quiet>
-					<javadocDirectory>${shared.resources}/javadoc</javadocDirectory>
-					<overview>${shared.resources}/javadoc/overview.html</overview>
-					<stylesheetfile>${shared.resources}/javadoc/spring-javadoc.css</stylesheetfile>
-					<!-- copies doc-files subdirectory which contains image resources -->
-					<docfilessubdirs>true</docfilessubdirs>
-					<additionalparam>-Xdoclint:none</additionalparam>
-					<sourcepath>target/generated-sources/delombok</sourcepath>
-					<links>
-						<link>https://docs.spring.io/spring/docs/5.0.x/javadoc-api/</link>
-						<link>https://docs.spring.io/spring-data/commons/docs/current/api/</link>
-						<link>https://docs.oracle.com/javase/${java.version}/docs/api/</link>
-					</links>
-				</configuration>
-			</plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <breakiterator>true</breakiterator>
+          <header>${project.name}</header>
+          <source>${source.level}</source>
+          <quiet>true</quiet>
+          <sourcepath>${project.build.directory}/delombok-sources</sourcepath>
+          <links>
+            <link>https://docs.spring.io/spring/docs/5.0.x/javadoc-api/</link>
+            <link>https://docs.spring.io/spring-data/commons/docs/current/api/</link>
+            <link>https://docs.oracle.com/javase/${java.version}/docs/api/</link>
+          </links>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 
