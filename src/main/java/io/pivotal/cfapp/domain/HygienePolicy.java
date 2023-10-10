@@ -22,7 +22,9 @@ import lombok.Getter;
 
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({ "id", "days-since-last-update", "operator-email-template", "notifyee-email-template", "organization-whitelist" })
+@JsonPropertyOrder({
+    "id", "days-since-last-update", "operator-email-template", "notifyee-email-template", "organization-whitelist", "include-applications", "include-service-instances"
+})
 @Getter
 @Table("hygiene_policy")
 public class HygienePolicy implements HasOrganizationWhiteList {
@@ -34,6 +36,8 @@ public class HygienePolicy implements HasOrganizationWhiteList {
                 .operatorTemplate(policy.getOperatorTemplate())
                 .notifyeeTemplate(policy.getNotifyeeTemplate())
                 .organizationWhiteList(policy.getOrganizationWhiteList())
+                .includeApplications(policy.isIncludeApplications())
+                .includeServiceInstances(policy.isIncludeServiceInstances())
                 .build();
     }
 
@@ -45,6 +49,8 @@ public class HygienePolicy implements HasOrganizationWhiteList {
                 .operatorTemplate(policy.getOperatorTemplate())
                 .notifyeeTemplate(policy.getNotifyeeTemplate())
                 .organizationWhiteList(policy.getOrganizationWhiteList())
+                .includeApplications(policy.isIncludeApplications())
+                .includeServiceInstances(policy.isIncludeServiceInstances())
                 .build();
     }
 
@@ -73,6 +79,16 @@ public class HygienePolicy implements HasOrganizationWhiteList {
     @Column("organization_whitelist")
     private Set<String> organizationWhiteList = new HashSet<>();
 
+    @Default
+    @JsonProperty("include-applications")
+    @Column("include_applications")
+    private boolean includeApplications = true;
+
+    @Default
+    @JsonProperty("include-service-instances")
+    @Column("include_service_instances")
+    private boolean includeServiceInstances = true;
+
     @JsonCreator
     public HygienePolicy(
             @JsonProperty("pk") Long pk,
@@ -80,7 +96,9 @@ public class HygienePolicy implements HasOrganizationWhiteList {
             @JsonProperty("days-since-last-update") Integer daysSinceLastUpdate,
             @JsonProperty("operator-email-template") EmailNotificationTemplate operatorTemplate,
             @JsonProperty("notifyee-email-template") EmailNotificationTemplate notifyeeTemplate,
-            @JsonProperty("organization-whitelist") Set<String> organizationWhiteList
+            @JsonProperty("organization-whitelist") Set<String> organizationWhiteList,
+            @JsonProperty("include-applications") boolean includeApplications,
+            @JsonProperty("include-service-instances") boolean includeServiceInstances
             ) {
         this.pk = pk;
         this.id = id;
@@ -88,6 +106,8 @@ public class HygienePolicy implements HasOrganizationWhiteList {
         this.operatorTemplate = operatorTemplate;
         this.notifyeeTemplate = notifyeeTemplate;
         this.organizationWhiteList = organizationWhiteList;
+        this.includeApplications = includeApplications;
+        this.includeServiceInstances = includeServiceInstances;
     }
 
     public Set<String> getOrganizationWhiteList() {

@@ -222,7 +222,7 @@ As mentioned previously the policy file must adhere to a naming convention
 
 * a filename ending with `-HP.json` encapsulates an individual [HygienePolicy](src/main/java/io/pivotal/cfapp/domain/HygienePolicy.java)
 
-See additional property requirements in Query policies and the aforementioned sample Github repository.
+See additional property requirements in this sample Github [repository](https://github.com/pacphi/cf-butler-sample-config).
 
 
 #### Legacy Policies
@@ -233,7 +233,7 @@ As mentioned previously the policy file must adhere to a naming convention
 
 * a filename ending with `-LP.json` encapsulates an individual [LegacyPolicy](src/main/java/io/pivotal/cfapp/domain/LegacyPolicy.java)
 
-See additional property requirements in Query policies and the aforementioned sample Github repository.
+See additional property requirements in this sample Github [repository](https://github.com/pacphi/cf-butler-sample-config).
 
 
 #### Resource Notification Policies
@@ -246,7 +246,7 @@ As mentioned previously the policy file must adhere to a naming convention
 
 * a filename ending with `-RNP.json` encapsulates an individual [ResourceNotificationPolicy](src/main/java/io/pivotal/cfapp/domain/ResourceNotificationPolicy.java)
 
-See additional property requirements in Resource Notification policies and the aforementioned sample Github repository.
+See additional property requirements in this sample Github [repository](https://github.com/pacphi/cf-butler-sample-config).
 
 #### Endpoint Policies
 
@@ -256,7 +256,7 @@ As mentioned previously the policy file must adhere to a naming convention
 
 * a filename ending with `-EP.json` encapsulates an individual [EndpointPolicy](src/main/java/io/pivotal/cfapp/domain/EndpointPolicy.java)
 
-See additional property requirements in Query policies and the aforementioned sample Github repository.
+See additional property requirements in this sample Github [repository](https://github.com/pacphi/cf-butler-sample-config).
 
 
 #### Query policies
@@ -1261,6 +1261,8 @@ POST /policies
   "hygiene-policies": [
     {
       "days-since-last-update": 14,
+      "include-applications": true,
+      "include-service-instances": true,
       "operator-email-template": {
         "from": "admin@nowhere.me",
         "to": [
