@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import io.pivotal.cfapp.config.PasSettings;
-import io.pivotal.cfapp.domain.Resource;
 import io.pivotal.cfapp.domain.ResourceNotificationPolicy;
 import io.pivotal.cfapp.event.EmailNotificationEvent;
 import io.pivotal.cfapp.service.PoliciesService;
