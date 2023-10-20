@@ -52,7 +52,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.1.4</version>
+    <version>3.1.5</version>
     <relativePath/>
     <!-- lookup parent from repository -->
   </parent>
@@ -114,7 +114,7 @@
     <dependency>
       <groupId>com.cedarsoftware</groupId>
       <artifactId>json-io</artifactId>
-      <version>4.14.1</version>
+      <version>4.14.2</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -281,7 +281,7 @@
         <plugin>
           <groupId>org.sonarsource.scanner.maven</groupId>
           <artifactId>sonar-maven-plugin</artifactId>
-          <version>3.9.1.2184</version>
+          <version>3.10.0.2594</version>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -444,7 +444,7 @@
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <version>0.8.10</version>
+        <version>0.8.11</version>
         <executions>
           <execution>
             <id>before-unit-test-execution</id>
@@ -573,7 +573,7 @@
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
-        <version>3.1.4</version>
+        <version>3.1.5</version>
         <configuration>
           <image>
             <builder>paketobuildpacks/builder-jammy-tiny</builder>
@@ -608,7 +608,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-site-plugin</artifactId>
-        <version>4.0.0-M8</version>
+        <version>4.0.0-M11</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -763,7 +763,7 @@
         <dependency>
           <groupId>com.lmax</groupId>
           <artifactId>disruptor</artifactId>
-          <version>3.4.4</version>
+          <version>4.0.0</version>
           <scope>runtime</scope>
         </dependency>
       </dependencies>
