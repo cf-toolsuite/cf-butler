@@ -114,7 +114,7 @@
     <dependency>
       <groupId>com.cedarsoftware</groupId>
       <artifactId>json-io</artifactId>
-      <version>4.14.2</version>
+      <version>4.15.0</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -215,7 +215,7 @@
     <dependency>
       <groupId>org.pitest</groupId>
       <artifactId>pitest-junit5-plugin</artifactId>
-      <version>1.2.0</version>
+      <version>1.2.1</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -549,7 +549,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.1.2</version>
+        <version>3.2.1</version>
         <configuration>
           <argLine>${surefire.jacoco.args}</argLine>
         </configuration>
@@ -557,7 +557,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
-        <version>3.1.2</version>
+        <version>3.2.1</version>
         <configuration>
           <argLine>${failsafe.jacoco.args}</argLine>
         </configuration>
@@ -626,7 +626,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-pmd-plugin</artifactId>
-        <version>3.21.0</version>
+        <version>3.21.2</version>
         <configuration>
           <includeTests>true</includeTests>
           <failOnViolation>false</failOnViolation>
