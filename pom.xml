@@ -154,7 +154,7 @@
     <dependency>
       <groupId>com.sanctionco.jmail</groupId>
       <artifactId>jmail</artifactId>
-      <version>1.6.0</version>
+      <version>1.6.1</version>
     </dependency>
     <dependency>
       <groupId>com.sendgrid</groupId>
