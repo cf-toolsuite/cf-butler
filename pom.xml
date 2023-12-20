@@ -68,6 +68,7 @@
     <java.version>17</java.version>
     <commons-lang3.version>3.13.0</commons-lang3.version>
     <jackson.version>2.16.0</jackson.version>
+    <logback.version>1.4.12</logback.version>
     <mockito.version>5.8.0</mockito.version>
     <snakeyaml.version>2.2</snakeyaml.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
