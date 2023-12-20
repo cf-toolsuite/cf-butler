@@ -2,8 +2,7 @@
 applications:
 - name: cf-butler
   memory: 1G
-  random-route: true
-  stack: cflinuxfs3
+  stack: cflinuxfs4
   path: target/cf-butler-1.0-SNAPSHOT.jar
   instances: 1
   env:
