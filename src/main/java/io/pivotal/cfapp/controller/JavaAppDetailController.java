@@ -80,7 +80,7 @@ public class JavaAppDetailController {
                 }
                 tarOs.finish();
 
-                File tarball = new File(outputFileName);
+                File tarball = Files.createTempFile("", outputFileName).toFile();
 
                 try (FileInputStream fis = new FileInputStream(tarball);
                     ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
