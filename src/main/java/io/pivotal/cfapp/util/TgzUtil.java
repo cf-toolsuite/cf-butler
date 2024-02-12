@@ -1,18 +1,16 @@
 package io.pivotal.cfapp.util;
 
-import java.io.BufferedReader;
+import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.stream.Collectors;
-import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
@@ -26,7 +24,7 @@ public class TgzUtil {
         return DataBufferUtils.join(dataBufferFlux)
             .flatMap(dataBuffer -> {
                 try {
-                    InputStream is = dataBuffer.asInputStream(true); // true for releasing the buffer
+                    InputStream is = new BufferedInputStream(dataBuffer.asInputStream(true)); // true for releasing the buffer
                     return extractFromTarGz(is, filename);
                 } finally {
                     DataBufferUtils.release(dataBuffer);
@@ -35,16 +33,18 @@ public class TgzUtil {
     }
 
     private static Mono<String> extractFromTarGz(InputStream inputStream, String filename) {
-        try (GZIPInputStream gzipInputStream = new GZIPInputStream(inputStream);
+        try (GzipCompressorInputStream gzipInputStream = new GzipCompressorInputStream(inputStream);
             TarArchiveInputStream tarArchiveInputStream = new TarArchiveInputStream(gzipInputStream)) {
-
             TarArchiveEntry entry;
-            String content;
             while ((entry = (TarArchiveEntry) tarArchiveInputStream.getNextEntry()) != null) {
                 if (entry.getName().endsWith(filename)) {
-                    content = new BufferedReader(new InputStreamReader(tarArchiveInputStream, StandardCharsets.UTF_8))
-                            .lines().collect(Collectors.joining("\n"));
-                    return Mono.just(content);
+                    StringBuilder contentBuilder = new StringBuilder();
+                    byte[] buffer = new byte[1024];
+                    int len;
+                    while ((len = tarArchiveInputStream.read(buffer)) != -1) {
+                        contentBuilder.append(new String(buffer, 0, len, StandardCharsets.UTF_8));
+                    }
+                    return Mono.just(contentBuilder.toString());
                 }
             }
         } catch (IOException e) {
