@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -45,7 +45,7 @@ public class JavaAppDetailController {
     @GetMapping("/download/pomfiles")
     public ResponseEntity<Flux<DataBuffer>> downloadDependenciesTarball() {
         String filename =
-            String.format("%s-%s.tgz", "java-application-maven-pom-files", DateTimeFormatter.ofPattern("yyyy-MM-dd").format(LocalDate.now()));
+            String.format("%s-%s.tar.gz", "java-application-maven-pom-files", DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss").format(LocalDateTime.now()));
         Flux<DataBuffer> tarball =
             service
                 .findAll()
@@ -67,19 +67,20 @@ public class JavaAppDetailController {
                 new TarArchiveOutputStream(
                     new GzipCompressorOutputStream(new BufferedOutputStream(new FileOutputStream(tarFilePath.toFile()))))) {
                 for (JavaAppDetail appDetail : appDetails) {
-                    String dirPath = String.format("%s/%s/%s", appDetail.getOrganization(), appDetail.getSpace(), appDetail.getAppName());
-                    Path entryPath = Paths.get(dirPath, "pom.xml");
-                    TarArchiveEntry entry = new TarArchiveEntry(entryPath.toString());
-                    byte[] contentBytes = appDetail.getPomContents().getBytes();
-                    entry.setSize(contentBytes.length);
-                    tarOs.putArchiveEntry(entry);
-                    tarOs.write(contentBytes);
-                    tarOs.closeArchiveEntry();
+                    if (appDetail.getPomContents() != null && !appDetail.getPomContents().isEmpty()) {
+                        String dirPath = String.format("%s/%s/%s", appDetail.getOrganization(), appDetail.getSpace(), appDetail.getAppName());
+                        Path entryPath = Paths.get(dirPath, "pom.xml");
+                        TarArchiveEntry entry = new TarArchiveEntry(entryPath.toString());
+                        byte[] contentBytes = appDetail.getPomContents().getBytes();
+                        entry.setSize(contentBytes.length);
+                        tarOs.putArchiveEntry(entry);
+                        tarOs.write(contentBytes);
+                        tarOs.closeArchiveEntry();
+                    }
                 }
                 tarOs.finish();
 
                 File tarball = new File(outputFileName);
-                Files.move(tarFilePath, tarball.toPath());
 
                 try (FileInputStream fis = new FileInputStream(tarball);
                     ByteArrayOutputStream baos = new ByteArrayOutputStream()) {

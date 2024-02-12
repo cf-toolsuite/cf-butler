@@ -71,8 +71,8 @@ public class PomFileExtractorTask implements ApplicationListener<AppDetailRetrie
                     .flatMapMany(response -> Flux.fromIterable(response.getResources()))
                     .filter(resource -> resource.getState().equals(DropletState.STAGED))
                     .next()
-                    .map(dr -> JavaAppDetail.from(detail).dropletId(dr.getId()).build());
-                    //.flatMap(jad -> getPomXmlContents(jad));
+                    .map(dr -> JavaAppDetail.from(detail).dropletId(dr.getId()).build())
+                    .flatMap(jad -> getPomXmlContents(jad));
     }
 
     private Mono<JavaAppDetail> getPomXmlContents(JavaAppDetail detail) {
