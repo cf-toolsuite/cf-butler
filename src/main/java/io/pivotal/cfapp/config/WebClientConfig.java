@@ -33,7 +33,8 @@ public class WebClientConfig {
         HttpClient httpClient =
             HttpClient
                 .create()
-                .secure(t -> t.sslContext(context));
+                .secure(t -> t.sslContext(context))
+                .followRedirect(true);
         return
             builder
                 .exchangeStrategies(
@@ -56,6 +57,10 @@ public class WebClientConfig {
     public WebClient secureWebClient(
         WebClient.Builder builder,
         @Value("${spring.codec.max-in-memory-size}") Integer maxInMemorySize) {
+        HttpClient httpClient =
+            HttpClient
+                .create()
+                .followRedirect(true);
         return
             builder
                 .exchangeStrategies(
@@ -68,6 +73,9 @@ public class WebClientConfig {
                                     .maxInMemorySize(maxInMemorySize)
                         )
                         .build()
+                )
+                .clientConnector(
+                    new ReactorClientHttpConnector(httpClient)
                 )
                 .build();
     }

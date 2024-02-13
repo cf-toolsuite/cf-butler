@@ -38,7 +38,7 @@ class OpsmanAccessTokenProvider {
         Mono<String> response = null;
         switch(settings.getGrantType()) {
             case PASSWORD:
-                response = 
+                response =
                     client
                         .post()
                         .uri(get)
@@ -48,7 +48,7 @@ class OpsmanAccessTokenProvider {
                         .map(GetTokenByPasswordResponse::getAccessToken);
                 break;
             case CLIENT_CREDENTIALS:
-                response = 
+                response =
                     client
                         .post()
                         .uri(get)
@@ -57,8 +57,8 @@ class OpsmanAccessTokenProvider {
                         .bodyToMono(GetTokenByClientCredentialsResponse.class)
                         .map(GetTokenByClientCredentialsResponse::getAccessToken);
                 break;
-            default: 
-                response = 
+            default:
+                response =
                     client
                         .post()
                         .uri(get)

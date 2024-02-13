@@ -1120,6 +1120,15 @@ Sample output
 }
 ```
 
+#### Java Applications
+
+```
+GET /download/pomfiles
+```
+> Downloads a .tar.gz file that contains pom.xml files for all Java applications that had had their artifacts built and packaged by Maven.
+
+The tarball contents will be structured as follows: `{organization}/{space}/{application-name}/pom.xml`.  A stakeholder interested in understanding the health and well-being of the subset of their applications leveraging the Spring Framework and/or Spring Boot, could unpack the tarball, visit each directory and execute `mvn depdendencies:tree | grep -E '(org.springframework|io.micrometer)' > spring-dependencies.txt`, then submit each dependencies file to the online [Spring Health Assessment](https://tanzu.vmware.com/spring-health-assessment) reporting service.
+
 
 ### Accounting
 

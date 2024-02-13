@@ -1,12 +1,12 @@
 ---
 applications:
 - name: cf-butler
-  memory: 1G
+  memory: 2G
   stack: cflinuxfs4
   path: target/cf-butler-1.0-SNAPSHOT.jar
   instances: 1
   env:
-    JAVA_OPTS: -Djava.security.egd=file:///dev/urandom
+    JAVA_OPTS: -Djava.security.egd=file:///dev/urandom -XX:MaxDirectMemorySize=1G
     SPRING_PROFILES_ACTIVE: on-demand,cloud
-    JBP_CONFIG_OPEN_JDK_JRE: '{ jre: { version: 17.+ } }'
+    JBP_CONFIG_OPEN_JDK_JRE: '{ jre: { version: 21.+ } }'
     JBP_CONFIG_SPRING_AUTO_RECONFIGURATION: '{ enabled: false }'
