@@ -2,6 +2,7 @@ package io.pivotal.cfapp.service;
 
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,6 +39,7 @@ public class R2dbcJavaAppDetailService implements JavaAppDetailService {
     public Flux<Map<String, String>> findSpringApplications() {
         return repo
                 .findAll()
+                .filter(jad -> StringUtils.isNotBlank(jad.getSpringDependencies()))
                 .map(jad ->
                     Map.of("organization", jad.getOrganization(),
                         "space", jad.getSpace(),
