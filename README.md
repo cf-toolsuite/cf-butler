@@ -1132,6 +1132,27 @@ The tarball contents will be structured as follows: `{organization}/{space}/{app
 You can use this companion [script](scripts/process-java-app-dependencies-tarball.sh) to consume the .tar.gz file.  It will unpack the .tar.gz file, visit each directory where a pom.xml file resides and generate a spring-dependencies.txt file.  Certainly useful when you have a large number of applications to obtain dependencies for.
 
 
+```
+GET /snapshot/detail/ai/spring
+```
+> Return a filtered list of applications that are utilizing Spring dependencies
+
+Sample output
+
+```
+[
+    {
+        "appId": "f381a7dd-42df-4c57-9d30-37f8ade12012",
+        "appName": "cf-butler",
+        "dropletId": "797b9bfd-0de2-48a9-b22e-90d7a61fd988",
+        "organization": "observability",
+        "space": "demo",
+        "springDependencies": "org.springframework.boot:spring-boot-starter-parent:3.2.2, org.springframework.cloud:spring-cloud-dependencies:2023.0.0"
+    }
+]
+```
+
+
 ### Accounting
 
 > Note: `/accounting/**` endpoints below require a user with `cloud_controller.admin` or `usage_service.audit` scope.  See [Creating and Managing Users with the UAA CLI (UAAC)](https://docs.vmware.com/en/VMware-Tanzu-Application-Service/4.0/tas-for-vms/uaa-user-management.html).

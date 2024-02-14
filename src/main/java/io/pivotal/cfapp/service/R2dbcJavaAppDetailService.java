@@ -1,5 +1,7 @@
 package io.pivotal.cfapp.service;
 
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +32,21 @@ public class R2dbcJavaAppDetailService implements JavaAppDetailService {
     @Override
     public Flux<JavaAppDetail> findAll() {
         return repo.findAll();
+    }
+
+    @Override
+    public Flux<Map<String, String>> findSpringApplications() {
+        return repo
+                .findAll()
+                .map(jad ->
+                    Map.of("organization", jad.getOrganization(),
+                        "space", jad.getSpace(),
+                        "appId", jad.getAppId(),
+                        "appName", jad.getAppName(),
+                        "dropletId", jad.getDropletId(),
+                        "springDependencies", jad.getSpringDependencies().replace("\n", ", ")
+                    )
+                );
     }
 
     @Override

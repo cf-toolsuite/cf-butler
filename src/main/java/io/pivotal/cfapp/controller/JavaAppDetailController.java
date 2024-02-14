@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
@@ -51,6 +52,14 @@ public class JavaAppDetailController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .body(tarball);
+    }
+
+    @GetMapping("/snapshot/detail/ai/spring")
+    public ResponseEntity<Flux<Map<String, String>>> getSpringApplications() {
+        return
+            ResponseEntity
+                .ok()
+                .body(service.findSpringApplications());
     }
 
     private static Flux<DataBuffer> createTarGz(List<JavaAppDetail> appDetails) {
