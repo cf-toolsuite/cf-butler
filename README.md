@@ -1129,6 +1129,8 @@ GET /download/pomfiles
 
 The tarball contents will be structured as follows: `{organization}/{space}/{application-name}/pom.xml`.  A stakeholder interested in understanding the health and well-being of the subset of their applications leveraging the Spring Framework and/or Spring Boot, could unpack the tarball, visit each directory and execute `mvn depdendencies:tree | grep -E '(org.springframework|io.micrometer)' > spring-dependencies.txt`, then submit each dependencies file to the online [Spring Health Assessment](https://tanzu.vmware.com/spring-health-assessment) reporting service.
 
+You can use this companion [script](scripts/process-java-app-dependencies-tarball.sh) to consume the .tar.gz file.  It will unpack the .tar.gz file, visit each directory where a pom.xml file resides and generate a spring-dependencies.txt file.  Certainly useful when you have a large number of applications to obtain dependencies for.
+
 
 ### Accounting
 
