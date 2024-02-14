@@ -1,6 +1,11 @@
 package io.pivotal.cfapp.task;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.cloudfoundry.client.v3.droplets.DropletState;
 import org.cloudfoundry.client.v3.droplets.ListDropletsRequest;
@@ -8,12 +13,15 @@ import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
+import org.xml.sax.SAXException;
 
+import io.micrometer.common.util.StringUtils;
 import io.pivotal.cfapp.domain.AppDetail;
 import io.pivotal.cfapp.domain.JavaAppDetail;
 import io.pivotal.cfapp.event.AppDetailRetrievedEvent;
 import io.pivotal.cfapp.service.DropletsService;
 import io.pivotal.cfapp.service.JavaAppDetailService;
+import io.pivotal.cfapp.util.MavenPomReader;
 import io.pivotal.cfapp.util.TgzUtil;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
@@ -26,16 +34,19 @@ public class PomFileExtractorTask implements ApplicationListener<AppDetailRetrie
     private DefaultCloudFoundryOperations opsClient;
     private DropletsService dropletsService;
     private JavaAppDetailService jadService;
+    private MavenPomReader reader;
 
     @Autowired
     public PomFileExtractorTask(
             DefaultCloudFoundryOperations opsClient,
             DropletsService dropletsService,
-            JavaAppDetailService jadService
+            JavaAppDetailService jadService,
+            MavenPomReader reader
             ) {
         this.opsClient = opsClient;
         this.dropletsService = dropletsService;
         this.jadService = jadService;
+        this.reader = reader;
     }
 
     public void collect(List<AppDetail> detail) {
@@ -72,13 +83,27 @@ public class PomFileExtractorTask implements ApplicationListener<AppDetailRetrie
                     .filter(resource -> resource.getState().equals(DropletState.STAGED))
                     .next()
                     .map(dr -> JavaAppDetail.from(detail).dropletId(dr.getId()).build())
-                    .flatMap(jad -> getPomXmlContents(jad));
+                    .flatMap(jad -> getPomXmlContents(jad))
+                    .flatMap(jad -> ascertainSpringDependencies(jad));
     }
 
     private Mono<JavaAppDetail> getPomXmlContents(JavaAppDetail detail) {
         return TgzUtil
                 .extractFileContent(dropletsService.downloadDroplet(detail.getDropletId()), "pom.xml")
                 .map(contents -> JavaAppDetail.from(detail).pomContents(contents).build());
+    }
+
+    private Mono<JavaAppDetail> ascertainSpringDependencies(JavaAppDetail detail) {
+        String pomContents = detail.getPomContents();
+        String springDependencies;
+        try {
+            Set<String> dependencySet = reader.readPOM(pomContents);
+            springDependencies = StringUtils.isNotBlank(pomContents) && !dependencySet.isEmpty() ? dependencySet.stream().collect(Collectors.joining("\n")): null;
+            return Mono.just(JavaAppDetail.from(detail).springDependencies(springDependencies).build());
+        } catch (ParserConfigurationException | SAXException | IOException e) {
+            log.warn("Could not determine Spring dependencies", e);
+            return Mono.just(detail);
+        }
     }
 
     @Override

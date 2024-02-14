@@ -27,6 +27,7 @@ public class JavaAppDetail {
     private String appName;
     private String dropletId;
     private String pomContents;
+    private String springDependencies;
 
     public static JavaAppDetailBuilder from(JavaAppDetail detail) {
         return JavaAppDetail
@@ -37,7 +38,8 @@ public class JavaAppDetail {
                 .appId(detail.getAppId())
                 .appName(detail.getAppName())
                 .dropletId(detail.getDropletId())
-                .pomContents(detail.getPomContents());
+                .pomContents(detail.getPomContents())
+                .springDependencies(detail.getSpringDependencies());
     }
 
     public static JavaAppDetailBuilder from(AppDetail detail) {
@@ -51,7 +53,7 @@ public class JavaAppDetail {
     }
 
     public static String headers() {
-        return String.join(",", "organization", "space", "application id", "application name", "droplet id", "pomContents" );
+        return String.join(",", "organization", "space", "application id", "application name", "droplet id", "pom contents", "spring dependencies" );
     }
 
     private static String wrap(String value) {
@@ -60,7 +62,7 @@ public class JavaAppDetail {
 
     public String toCsv() {
         return String.join(",", wrap(getOrganization()), wrap(getSpace()), wrap(getAppId()), wrap(getAppName()),
-                wrap(getDropletId()), wrap(getPomContents()));
+                wrap(getDropletId()), wrap(getPomContents()), wrap(getSpringDependencies()));
     }
 
 }
