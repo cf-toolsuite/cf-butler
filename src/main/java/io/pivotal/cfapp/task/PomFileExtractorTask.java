@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.cloudfoundry.client.v3.droplets.DropletState;
 import org.cloudfoundry.client.v3.droplets.ListDropletsRequest;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
@@ -15,7 +16,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 import org.xml.sax.SAXException;
 
-import io.micrometer.common.util.StringUtils;
+
 import io.pivotal.cfapp.domain.AppDetail;
 import io.pivotal.cfapp.domain.JavaAppDetail;
 import io.pivotal.cfapp.event.AppDetailRetrievedEvent;
@@ -54,7 +55,7 @@ public class PomFileExtractorTask implements ApplicationListener<AppDetailRetrie
         jadService
             .deleteAll()
             .thenMany(Flux.fromIterable(detail))
-            .filter(ad -> ad.getBuildpack().contains("java"))
+            .filter(ad -> StringUtils.isNotBlank(ad.getBuildpack()) && ad.getBuildpack().contains("java"))
             .flatMap(ad -> seedJavaAppDetail(ad))
             .flatMap(jadService::save)
             .thenMany(jadService.findAll())
