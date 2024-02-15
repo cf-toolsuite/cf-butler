@@ -14,6 +14,8 @@ public interface JavaAppDetailService {
 
     public Flux<Map<String, String>> findSpringApplications();
 
+    Mono<Map<String, Integer>> calculateSpringDependencyFrequency();
+
     Mono<JavaAppDetail> findByAppId(String appId);
 
     Mono<JavaAppDetail> save(JavaAppDetail entity);

@@ -1,6 +1,9 @@
 package io.pivotal.cfapp.service;
 
+import java.util.Arrays;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +52,12 @@ public class R2dbcJavaAppDetailService implements JavaAppDetailService {
                         "springDependencies", jad.getSpringDependencies().replace("\n", ", ")
                     )
                 );
+    }
+
+    public Mono<Map<String, Integer>> calculateSpringDependencyFrequency() {
+        return findSpringApplications()
+                .flatMapIterable(map -> Arrays.asList(map.get("springDependencies").split(",\\s*")))
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.reducing(0, e -> 1, Integer::sum)));
     }
 
     @Override

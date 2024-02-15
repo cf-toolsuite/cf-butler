@@ -1152,6 +1152,20 @@ Sample output
 ]
 ```
 
+```
+GET /snapshot/summary/ai/spring
+```
+> Calculates the frequency of occurrence for each Spring dependency found
+
+Sample output
+
+```
+{
+    "org.springframework.boot:spring-boot-starter-parent:3.2.2": 10,
+    "org.springframework.cloud:spring-cloud-dependencies:2023.0.0": 7
+}
+```
+
 
 ### Accounting
 
