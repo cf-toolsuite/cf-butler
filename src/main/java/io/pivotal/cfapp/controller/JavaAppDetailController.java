@@ -24,6 +24,7 @@ import io.pivotal.cfapp.domain.JavaAppDetail;
 import io.pivotal.cfapp.service.JavaAppDetailService;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 
 @Slf4j
@@ -60,6 +61,14 @@ public class JavaAppDetailController {
             ResponseEntity
                 .ok()
                 .body(service.findSpringApplications());
+    }
+
+    @GetMapping("/snapshot/summary/ai/spring")
+    public ResponseEntity<Mono<Map<String, Integer>>> calculateSpringDependencyFrequency() {
+        return
+            ResponseEntity
+                .ok()
+                .body(service.calculateSpringDependencyFrequency());
     }
 
     private static Flux<DataBuffer> createTarGz(List<JavaAppDetail> appDetails) {
