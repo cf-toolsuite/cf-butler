@@ -71,7 +71,7 @@ public class GitClient {
                 .map(Path::toFile)
                 .forEach(File::delete);
             }
-            Files.delete(p);
+            Files.deleteIfExists(p);
             if (settings.isAuthenticated()) {
                 String username = settings.getUsername();
                 String password = settings.getPassword();
