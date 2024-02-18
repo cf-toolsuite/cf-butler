@@ -21,15 +21,17 @@ import reactor.core.publisher.Mono;
 public class TgzUtil {
 
     public static Mono<String> extractFileContent(Flux<DataBuffer> dataBufferFlux, String filename) {
-        return DataBufferUtils.join(dataBufferFlux)
-            .flatMap(dataBuffer -> {
-                try {
-                    InputStream is = new BufferedInputStream(dataBuffer.asInputStream(true)); // true for releasing the buffer
-                    return extractFromTarGz(is, filename);
-                } finally {
-                    DataBufferUtils.release(dataBuffer);
-                }
-            });
+        return
+            DataBufferUtils
+                .join(dataBufferFlux)
+                .flatMap(dataBuffer -> {
+                    try {
+                        InputStream is = new BufferedInputStream(dataBuffer.asInputStream(true)); // true for releasing the buffer
+                        return extractFromTarGz(is, filename);
+                    } finally {
+                        DataBufferUtils.release(dataBuffer);
+                    }
+                });
     }
 
     private static Mono<String> extractFromTarGz(InputStream inputStream, String filename) {
