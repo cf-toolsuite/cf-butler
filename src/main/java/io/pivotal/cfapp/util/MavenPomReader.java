@@ -1,30 +1,36 @@
 package io.pivotal.cfapp.util;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Optional;
+import java.util.Set;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Element;
-import java.io.File;
-import java.io.StringReader;
 import javax.xml.parsers.ParserConfigurationException;
+
+import org.apache.commons.lang3.StringUtils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
 
 public class MavenPomReader {
 
-    private String group;
+    private Set<String> groups = new HashSet<>();
     private boolean omitInheritedVersions;
 
-    public MavenPomReader(String group) {
-        this.group = group;
+    public MavenPomReader(Set<String> groups) {
+        this.groups = groups;
     }
 
-    public MavenPomReader(String group, boolean omitInheritedVersions) {
-        this.group = group;
+    public MavenPomReader(Set<String> groups, boolean omitInheritedVersions) {
+        this.groups = groups;
         this.omitInheritedVersions = omitInheritedVersions;
     }
 
@@ -43,12 +49,16 @@ public class MavenPomReader {
     }
 
     private Set<String> processDocument(Document document) {
-        Set<String> dependenciesInfo = new HashSet<>();
+        Set<String> dependenciesInfo = new LinkedHashSet<>();
         document.getDocumentElement().normalize();
 
         // Check for parent artifact
         NodeList parents = document.getElementsByTagName("parent");
         extractDependencyInfo(parents, dependenciesInfo);
+
+        // Check for managed dependencies
+        NodeList managedDependencies = document.getElementsByTagName("dependencyManagement");
+        extractDependencyInfo(managedDependencies, dependenciesInfo);
 
         // Check for dependencies
         NodeList dependencies = document.getElementsByTagName("dependency");
@@ -60,35 +70,87 @@ public class MavenPomReader {
     private void extractDependencyInfo(NodeList nodes, Set<String> dependenciesInfo) {
         for (int i = 0; i < nodes.getLength(); i++) {
             Element element = (Element) nodes.item(i);
+
             String artifactId = getTagValue("artifactId", element);
             String groupId = getTagValue("groupId", element);
+
             if (containsDependency(groupId)) {
                 String version = getTagValue("version", element);
-                if (omitInheritedVersions) {
-                    if ((version != null && !version.isEmpty())) {
-                        dependenciesInfo.add(groupId + ":" + artifactId + ":" + version);
-                    }
-                } else {
-                    dependenciesInfo.add(groupId + ":" + artifactId + ":" + version);
+
+                if (omitInheritedVersions && StringUtils.isNotBlank(version)) {
+                    addDependencyInfo(dependenciesInfo, groupId, artifactId, version);
+                } else if (!omitInheritedVersions) {
+                    version = StringUtils.isBlank(version) ? getManagedVersion(dependenciesInfo, groupId) : version;
+                    addDependencyInfo(dependenciesInfo, groupId, artifactId, version);
                 }
             }
         }
     }
 
+    private void addDependencyInfo(Set<String> dependenciesInfo, String groupId, String artifactId, String version) {
+        dependenciesInfo.add(String.format("%s:%s:%s", groupId, artifactId, version));
+    }
+
+    private String getManagedVersion(Set<String> dependenciesInfo, String groupId) {
+        return dependenciesInfo.stream()
+            .filter(d -> d.startsWith(groupId))
+            .filter(d -> d.split(":").length == 3)
+            .findFirst()
+            .map(d -> d.split(":")[2])
+            .orElse("");
+    }
+
     private String getTagValue(String tag, Element element) {
         NodeList nodes = element.getElementsByTagName(tag);
-        if (nodes.getLength() > 0) {
-            return nodes.item(0).getTextContent();
+        if (nodes.getLength() == 0) {
+            return "";
+        }
+
+        Node targetNode = nodes.item(0);
+        String value = targetNode.getTextContent();
+
+        String parentName = getNodeName(targetNode.getParentNode());
+        String grandParentName = getNodeName(getParentNode(targetNode, 2));
+        String greatGrandParentName = getNodeName(getParentNode(targetNode, 3));
+
+        if (isValidHierarchy(parentName, grandParentName, greatGrandParentName)) {
+            return value;
         }
         return "";
     }
 
+    private String getNodeName(Node node) {
+        return Optional.ofNullable(node).map(Node::getNodeName).orElse("");
+    }
+
+    private Node getParentNode(Node node, int level) {
+        Node parentNode = node;
+        for (int i = 0; i < level && parentNode != null; i++) {
+            parentNode = parentNode.getParentNode();
+        }
+        return parentNode;
+    }
+
+    private boolean isValidHierarchy(String parentName, String grandParentName, String greatGrandParentName) {
+        if ("parent".equals(parentName)) {
+            return "project".equals(grandParentName);
+        } else if ("dependency".equals(parentName)) {
+            return ("dependencies".equals(grandParentName) && "project".equals(greatGrandParentName)) ||
+                ("dependencies".equals(grandParentName) && "dependencyManagement".equals(greatGrandParentName));
+        }
+        return false;
+    }
+
     private boolean containsDependency(String groupId) {
-        return groupId.contains(this.group);
+        boolean exactlyOneMatch = groups.stream().anyMatch(group -> groupId.startsWith(group)) &&
+                          groups.stream().noneMatch(group ->
+                              !group.equals(groups.stream().filter(g -> groupId.startsWith(g)).findFirst().orElse(null)) &&
+                              groupId.startsWith(group));
+        return exactlyOneMatch;
     }
 
     public static void main(String[] args) {
-        MavenPomReader reader = new MavenPomReader("org.springframework", true);
+        MavenPomReader reader = new MavenPomReader(Set.of("org.springframework", "io.pivotal.spring.cloud"), true);
         try {
             //Set<String> dependenciesInfo = reader.readPOM(new File("/home/cphillipson/Documents/development/pivotal/cf/cf-butler/pom.xml")); // or reader.readPOM(pomString);
             Set<String> dependenciesInfo = reader.readPOM(new File(args[0]));
