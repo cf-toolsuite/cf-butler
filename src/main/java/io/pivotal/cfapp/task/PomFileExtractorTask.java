@@ -8,6 +8,9 @@ import java.util.stream.Collectors;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.lang3.StringUtils;
+import org.cloudfoundry.client.v3.applications.GetApplicationCurrentDropletRequest;
+import org.cloudfoundry.client.v3.applications.GetApplicationCurrentDropletResponse;
+import org.cloudfoundry.client.v3.droplets.DropletResource;
 import org.cloudfoundry.client.v3.droplets.DropletState;
 import org.cloudfoundry.client.v3.droplets.ListDropletsRequest;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
@@ -15,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 import org.xml.sax.SAXException;
-
 
 import io.pivotal.cfapp.domain.AppDetail;
 import io.pivotal.cfapp.domain.JavaAppDetail;
@@ -71,21 +73,42 @@ public class PomFileExtractorTask implements ApplicationListener<AppDetailRetrie
     }
 
     private Mono<JavaAppDetail> seedJavaAppDetail(AppDetail detail) {
-        log.info("Attempting to fetch droplet id for {}", detail.getAppName());
-        return DefaultCloudFoundryOperations.builder()
-                .from(opsClient)
-                    .organization(detail.getOrganization())
-                    .space(detail.getSpace())
-                    .build()
-                    .getCloudFoundryClient()
-                    .droplets()
-                    .list(ListDropletsRequest.builder().applicationId(detail.getAppId()).build())
-                    .flatMapMany(response -> Flux.fromIterable(response.getResources()))
-                    .filter(resource -> resource.getState().equals(DropletState.STAGED))
-                    .next()
+        log.info("Attempting to fetch droplet id for {} whose state is {}", detail.getAppName(), detail.getRequestedState());
+        if (detail.getRequestedState().equalsIgnoreCase("started")) {
+            Mono<GetApplicationCurrentDropletResponse> currentResponse =
+                DefaultCloudFoundryOperations.builder()
+                    .from(opsClient)
+                        .organization(detail.getOrganization())
+                        .space(detail.getSpace())
+                        .build()
+                        .getCloudFoundryClient()
+                        .applicationsV3()
+                        .getCurrentDroplet(GetApplicationCurrentDropletRequest.builder().applicationId(detail.getAppId()).build());
+            return currentResponse
                     .map(dr -> JavaAppDetail.from(detail).dropletId(dr.getId()).build())
                     .flatMap(jad -> getPomXmlContents(jad))
                     .flatMap(jad -> ascertainSpringDependencies(jad));
+        } else if (detail.getRequestedState().equalsIgnoreCase("stopped")) {
+            Mono<DropletResource> stagedResponse =
+                DefaultCloudFoundryOperations.builder()
+                    .from(opsClient)
+                        .organization(detail.getOrganization())
+                        .space(detail.getSpace())
+                        .build()
+                        .getCloudFoundryClient()
+                        .droplets()
+                        .list(ListDropletsRequest.builder().applicationId(detail.getAppId()).build())
+                        .flatMapMany(response -> Flux.fromIterable(response.getResources()))
+                        .filter(resource -> resource.getState().equals(DropletState.STAGED))
+                        .next();
+                return stagedResponse
+                        .map(dr -> JavaAppDetail.from(detail).dropletId(dr.getId()).build())
+                        .flatMap(jad -> getPomXmlContents(jad))
+                        .flatMap(jad -> ascertainSpringDependencies(jad));
+        } else {
+            log.info("No droplet found for {}", detail.getAppName());
+            return Mono.just(JavaAppDetail.from(detail).build());
+        }
     }
 
     private Mono<JavaAppDetail> getPomXmlContents(JavaAppDetail detail) {
