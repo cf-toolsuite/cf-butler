@@ -3,6 +3,7 @@ package io.pivotal.cfapp.util;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Optional;
@@ -13,6 +14,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -20,7 +23,9 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-public class MavenPomReader {
+public class MavenPomReader implements JavaArtifactReader {
+
+    private Logger log = LoggerFactory.getLogger(MavenPomReader.class);
 
     private Set<String> groups = new HashSet<>();
     private boolean omitInheritedVersions;
@@ -32,6 +37,15 @@ public class MavenPomReader {
     public MavenPomReader(Set<String> groups, boolean omitInheritedVersions) {
         this.groups = groups;
         this.omitInheritedVersions = omitInheritedVersions;
+    }
+
+    public Set<String> read(String pomFile) {
+        try {
+            return readPOM(pomFile);
+        } catch (ParserConfigurationException | SAXException | IOException e) {
+            log.warn("Could not determine Spring dependencies", e);
+            return Collections.emptySet();
+        }
     }
 
     public Set<String> readPOM(File pomFile) throws ParserConfigurationException, SAXException, IOException {
@@ -147,6 +161,10 @@ public class MavenPomReader {
                               !group.equals(groups.stream().filter(g -> groupId.startsWith(g)).findFirst().orElse(null)) &&
                               groupId.startsWith(group));
         return exactlyOneMatch;
+    }
+
+    public String type() {
+        return "pom";
     }
 
     public static void main(String[] args) {
