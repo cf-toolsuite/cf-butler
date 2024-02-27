@@ -147,6 +147,10 @@
       <artifactId>commons-csv</artifactId>
       <version>1.10.0</version>
     </dependency>
+    <!--
+      While it may be tempting to upgrade to address CVEs, DO NOT upgrade until CRC errors and corrupt TAR read requests are fixed
+      @see https://issues.apache.org/jira/browse/COMPRESS-666
+    -->
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-compress</artifactId>
