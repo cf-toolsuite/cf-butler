@@ -46,7 +46,8 @@ public class ApplicationCurrentDropletService {
                 .encode()
                 .toUriString();
         return
-            getOauthToken()
+            tokenProvider
+                .getToken(connectionContext)
                 .flatMap(t ->
                     webClient
                         .get()
@@ -55,11 +56,6 @@ public class ApplicationCurrentDropletService {
                         .retrieve()
                         .bodyToMono(String.class)
                 );
-    }
-
-    private Mono<String> getOauthToken() {
-        tokenProvider.invalidate(connectionContext);
-        return tokenProvider.getToken(connectionContext);
     }
 
 }

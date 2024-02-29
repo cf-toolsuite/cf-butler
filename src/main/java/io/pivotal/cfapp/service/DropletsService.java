@@ -50,7 +50,8 @@ public class DropletsService {
                 .toUriString();
         log.info("Attempting to download droplet with GET {}", uri);
         return
-            getOauthToken()
+            tokenProvider
+                .getToken(connectionContext)
                 .flatMapMany(
                     t -> webClient
                         .get()
@@ -58,11 +59,6 @@ public class DropletsService {
                         .header(HttpHeaders.AUTHORIZATION, t)
                         .retrieve()
                         .bodyToFlux(DataBuffer.class));
-    }
-
-    private Mono<String> getOauthToken() {
-        tokenProvider.invalidate(connectionContext);
-        return tokenProvider.getToken(connectionContext);
     }
 
 }

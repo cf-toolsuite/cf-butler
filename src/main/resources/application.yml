@@ -18,8 +18,8 @@ cf:
   username: replace_me
   password: replace_me
   sslValidationSkipped: false
-  connectionPoolSize: 250
-  connectionTimeout: PT10M
+  connectionPoolSize: 24
+  connectionTimeout: PT5S
   organizationBlackList:
     - system
     - credhub-service-broker-org
