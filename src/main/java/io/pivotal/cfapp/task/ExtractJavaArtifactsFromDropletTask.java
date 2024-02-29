@@ -62,7 +62,7 @@ public class ExtractJavaArtifactsFromDropletTask implements ApplicationListener<
             .collectList()
             .subscribe(
                 result -> {
-                    log.info("ExtractJavaArtifactsFromDropletTask completed");
+                    log.info("ExtractJavaArtifactsFromDropletTask completed. {} droplets processed.", result.size());
                 },
                 error -> {
                     log.error("ExtractJavaArtifactsFromDropletTask terminated with error", error);
@@ -71,7 +71,7 @@ public class ExtractJavaArtifactsFromDropletTask implements ApplicationListener<
     }
 
     private Mono<JavaAppDetail> seedJavaAppDetail(AppDetail detail) {
-        log.info("Attempting to fetch droplet id for {}/{}/{} whose state is {}", detail.getOrganization(), detail.getSpace(), detail.getAppName(), detail.getRequestedState());
+        log.trace("Attempting to fetch droplet id for {}/{}/{} whose state is {}", detail.getOrganization(), detail.getSpace(), detail.getAppName(), detail.getRequestedState());
         if (detail.getRequestedState().equalsIgnoreCase("started")) {
             Mono<GetApplicationCurrentDropletResponse> currentResponse =
                 DefaultCloudFoundryOperations.builder()
@@ -102,7 +102,7 @@ public class ExtractJavaArtifactsFromDropletTask implements ApplicationListener<
                         .map(dr -> JavaAppDetail.from(detail).dropletId(dr.getId()).build())
                         .flatMap(jad -> ascertainSpringDependencies(jad));
         } else {
-            log.info("No droplet found for {}/{}/{}", detail.getOrganization(), detail.getSpace(), detail.getAppName());
+            log.trace("No droplet found for {}/{}/{}", detail.getOrganization(), detail.getSpace(), detail.getAppName());
             return Mono.just(JavaAppDetail.from(detail).build());
         }
     }

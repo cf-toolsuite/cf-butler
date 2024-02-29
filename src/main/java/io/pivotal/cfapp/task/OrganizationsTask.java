@@ -44,8 +44,7 @@ public class OrganizationsTask implements ApplicationListener<TkRetrievedEvent> 
             .subscribe(
                 result -> {
                     publisher.publishEvent(new OrganizationsRetrievedEvent(this).organizations(result));
-                    log.info("OrganizationTask completed");
-                    log.trace("Retrieved {} organizations", result.size());
+                    log.info("OrganizationTask completed. {} organizations found.", result.size());
                 },
                 error -> {
                     log.error("OrganizationTask terminated with error", error);

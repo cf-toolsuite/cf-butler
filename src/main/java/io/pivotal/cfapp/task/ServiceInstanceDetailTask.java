@@ -62,7 +62,7 @@ public class ServiceInstanceDetailTask implements ApplicationListener<SpacesRetr
             .subscribe(
                 result -> {
                     publisher.publishEvent(new ServiceInstanceDetailRetrievedEvent(this).detail(result));
-                    log.info("ServiceInstanceDetailTask completed");
+                    log.info("ServiceInstanceDetailTask completed. {} service instances found.", result.size());
                 },
                 error -> {
                     log.error("ServiceInstanceDetailTask terminated with error", error);

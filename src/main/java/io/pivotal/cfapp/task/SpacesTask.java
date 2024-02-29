@@ -48,8 +48,7 @@ public class SpacesTask implements ApplicationListener<OrganizationsRetrievedEve
             .subscribe(
                 result -> {
                     publisher.publishEvent(new SpacesRetrievedEvent(this).spaces(result));
-                    log.info("SpacesTask completed");
-                    log.trace("Retrieved {} spaces", result.size());
+                    log.info("SpacesTask completed. {} spaces found.", result.size());
                 },
                 error -> {
                     log.error("SpacesTask terminated with error", error);

@@ -40,8 +40,7 @@ public class BuildpacksTask implements ApplicationListener<TkRetrievedEvent> {
             result -> {
                 publisher.publishEvent(new BuildpacksRetrievedEvent(this));
                 log.trace("Buildpack cache contains {}", result);
-                log.info("BuildpacksTask completed");
-                log.trace("Retrieved {} buildpacks", result.size());
+                log.info("BuildpacksTask completed. {} buildpacks found.", result.size());
             },
             error -> {
                 log.error("BuildpacksTask terminated with error", error);

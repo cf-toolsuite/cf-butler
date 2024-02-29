@@ -48,7 +48,7 @@ public class DropletsService {
                 .buildAndExpand(id)
                 .encode()
                 .toUriString();
-        log.info("Attempting to download droplet with GET {}", uri);
+        log.trace("Attempting to download droplet with GET {}", uri);
         return
             tokenProvider
                 .getToken(connectionContext)
