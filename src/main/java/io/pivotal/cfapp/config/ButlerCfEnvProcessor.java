@@ -81,5 +81,6 @@ public class ButlerCfEnvProcessor implements CfEnvProcessor {
         addOrUpdatePropertyValue("cron.collection", "CRON_COLLECTION", cfCredentials, properties);
         addOrUpdatePropertyValue("cron.execution", "CRON_EXECUTION", cfCredentials, properties);
         addOrUpdatePropertyValue("management.endpoints.web.exposure.include", "EXPOSED_ACTUATOR_ENDPOINTS", cfCredentials, properties);
+        addOrUpdatePropertyValue("java.artifact.reader.impl", "JAVA_ARTIFACT_READER_IMPL", cfCredentials, properties);
     }
 }
