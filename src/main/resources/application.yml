@@ -66,6 +66,10 @@ cron:
   # at 5:30am on Mondays weekly
   execution: "0 30 5 * * MON"
 
+logging:
+  level:
+    io.r2dbc.h2.H2Connection: ERROR
+
 management:
   endpoints:
     web:
