@@ -36,7 +36,8 @@ public class TgzUtil {
         );
         return inputStreamMono.flatMapMany(is -> findMatchingFiles(is, extension))
                 .collectList()
-                .map(list -> String.join(System.getProperty("line.separator"), list));
+                .map(list -> String.join(System.getProperty("line.separator"), list))
+                .doOnDiscard(DataBuffer.class, DataBufferUtils::release);
     }
 
     private static Flux<String> findMatchingFiles(InputStream is, String extension) {
@@ -82,7 +83,8 @@ public class TgzUtil {
         );
         return inputStreamMono.flatMapMany(is -> extractFileContent(is, filename))
                 .collectList()
-                .map(list -> String.join(" ", list));
+                .map(list -> String.join(" ", list))
+                .doOnDiscard(DataBuffer.class, DataBufferUtils::release);
     }
 
     private static Flux<String> extractFileContent(InputStream is, String filename) {
@@ -124,8 +126,8 @@ public class TgzUtil {
     }
 
     public static void main(String[] args) {
-        //File droplet = new File("/tmp/droplet_48a064f7-0de8-4c07-aacc-76c299c12509.tgz");
-        File droplet = new File(args[0]);
+        File droplet = new File("/tmp/droplet_48a064f7-0de8-4c07-aacc-76c299c12509.tgz");
+        //File droplet = new File(args[0]);
         if (droplet.exists()) {
             try (FileInputStream fis = new FileInputStream(droplet);
                 ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
