@@ -16,7 +16,6 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.commons.compress.compressors.CompressorInputStream;
 import org.apache.commons.compress.compressors.CompressorStreamFactory;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -30,79 +29,98 @@ public class TgzUtil {
 
     private static Logger log = LoggerFactory.getLogger(TgzUtil.class);
 
-    public static Mono<String> findMatchingFiles(Flux<DataBuffer> dataBufferFlux, String fileExtension) {
-        StringBuilder contentBuilder = new StringBuilder();
-        return
-            DataBufferUtils
-                .join(dataBufferFlux)
-                .flatMap(dataBuffer -> {
-                    Mono<String> result = Mono.empty();
-                    try (
-                        InputStream is = dataBuffer.asInputStream(true); // true for releasing the buffer
-                        CompressorInputStream cIs = new CompressorStreamFactory(true).createCompressorInputStream(is);
-                        TarArchiveInputStream tarIs = new ArchiveStreamFactory(StandardCharsets.UTF_8.name()).createArchiveInputStream("tar", cIs);
-                        )
-                    {
-                        TarArchiveEntry entry;
-                        while ((entry = (TarArchiveEntry) tarIs.getNextEntry()) != null) {
-                            if (!tarIs.canReadEntryData(entry)) {
-                                continue;
-                            }
-                            if (entry.getName().endsWith(fileExtension)) {
-                                Path tarEntryFilePath = Paths.get(entry.getName()).getFileName();
-                                String tarEntryFilename = tarEntryFilePath != null ? tarEntryFilePath.toString(): "";
-                                if (StringUtils.isNotBlank(tarEntryFilename)) {
-                                    contentBuilder.append(tarEntryFilename + "\n");
-                                }
-                            }
-                        }
-                        result = Mono.just(contentBuilder.toString());
-                    } catch (ArchiveException | CompressorException | IOException e) {
-                        log.warn(String.format("Could not find embedded files matching %s", fileExtension), e);
-                        result = Mono.empty();
-                    } finally {
-                        DataBufferUtils.release(dataBuffer);
-                    }
-                    return result;
-                });
+    public static Mono<String> findMatchingFiles(Flux<DataBuffer> incoming, String extension) {
+        Mono<DataBuffer> fullContent = DataBufferUtils.join(incoming);
+        Mono<InputStream> inputStreamMono = fullContent.map(dataBuffer ->
+            dataBuffer.asInputStream(true)
+        );
+        return inputStreamMono.flatMapMany(is -> findMatchingFiles(is, extension))
+                .collectList()
+                .map(list -> String.join(System.getProperty("line.separator"), list));
     }
 
-    public static Mono<String> extractFileContent(Flux<DataBuffer> dataBufferFlux, String filename) {
-        return
-            DataBufferUtils
-                .join(dataBufferFlux)
-                .flatMap(dataBuffer -> {
-                    Mono<String> result = Mono.empty();
-                    try (
-                        InputStream is = dataBuffer.asInputStream(true); // true for releasing the buffer
-                        CompressorInputStream cIs = new CompressorStreamFactory(true).createCompressorInputStream(is);
-                        TarArchiveInputStream tarIs = new ArchiveStreamFactory(StandardCharsets.UTF_8.name()).createArchiveInputStream("tar", cIs);
-                        )
-                    {
-                        TarArchiveEntry entry;
-                        while ((entry = (TarArchiveEntry) tarIs.getNextEntry()) != null) {
-                            if (!tarIs.canReadEntryData(entry)) {
-                                continue;
-                            }
-                            if (entry.getName().endsWith(filename)) {
-                                StringBuilder contentBuilder = new StringBuilder();
-                                byte[] buffer = new byte[1024];
-                                int len;
-                                while ((len = tarIs.read(buffer)) != -1) {
-                                    contentBuilder.append(new String(buffer, 0, len, StandardCharsets.UTF_8));
-                                }
-                                result = Mono.just(contentBuilder.toString());
-                                break;
+    private static Flux<String> findMatchingFiles(InputStream is, String extension) {
+        try {
+            CompressorInputStream cis = new CompressorStreamFactory().createCompressorInputStream(is);
+            TarArchiveInputStream tarIs = new ArchiveStreamFactory().createArchiveInputStream("tar", cis);
+            return Flux.create(sink -> {
+                try {
+                    TarArchiveEntry entry;
+                    while ((entry = (TarArchiveEntry) tarIs.getNextEntry()) != null) {
+                        if (!tarIs.canReadEntryData(entry)) {
+                            continue;
+                        }
+                        if (!entry.isDirectory() && entry.getName().endsWith(extension)) {
+                            Path tarEntryFilePath = Paths.get(entry.getName()).getFileName();
+                            String tarEntryFilename = tarEntryFilePath != null ? tarEntryFilePath.toString() : "";
+                            log.trace("Found {}", tarEntryFilename);
+                            sink.next(tarEntryFilename);
+                        }
+                    }
+                    sink.complete();
+                } catch (IOException e) {
+                    log.error(String.format("Could not process entry in TarArchiveInputStream with extension %s", extension), e);
+                    sink.error(e);
+                } finally {
+                    try {
+                        tarIs.close();
+                    } catch (IOException e) {
+                        log.error("Problem closing TarArchiveInputStream", e);
+                    }
+                }
+            });
+        } catch (ArchiveException | CompressorException e) {
+            log.error("Problem creating TarArchiveInputStream", e);
+            return Flux.error(e);
+        }
+    }
+
+    public static Mono<String> extractFileContent(Flux<DataBuffer> incoming, String filename) {
+        Mono<DataBuffer> fullContent = DataBufferUtils.join(incoming);
+        Mono<InputStream> inputStreamMono = fullContent.map(dataBuffer ->
+            dataBuffer.asInputStream(true)
+        );
+        return inputStreamMono.flatMapMany(is -> extractFileContent(is, filename))
+                .collectList()
+                .map(list -> String.join(" ", list));
+    }
+
+    private static Flux<String> extractFileContent(InputStream is, String filename) {
+        try {
+            CompressorInputStream cis = new CompressorStreamFactory().createCompressorInputStream(is);
+            TarArchiveInputStream tarIs = new ArchiveStreamFactory().createArchiveInputStream("tar", cis);
+            return Flux.create(sink -> {
+                try {
+                    TarArchiveEntry entry;
+                    while ((entry = (TarArchiveEntry) tarIs.getNextEntry()) != null) {
+                        if (!tarIs.canReadEntryData(entry)) {
+                            continue;
+                        }
+                        if (!entry.isDirectory() && entry.getName().endsWith(filename)) {
+                            log.trace("Found {}", filename);
+                            byte[] buffer = new byte[1024];
+                            int len;
+                            while ((len = tarIs.read(buffer)) != -1) {
+                                sink.next(new String(buffer, 0, len, StandardCharsets.UTF_8));
                             }
                         }
-                    } catch (ArchiveException | CompressorException | IOException e) {
-                        log.warn(String.format("Could not extract %s file contents", filename), e);
-                        result = Mono.empty();
-                    } finally {
-                        DataBufferUtils.release(dataBuffer);
                     }
-                    return result;
-                });
+                    sink.complete();
+                } catch (IOException e) {
+                    log.error(String.format("Could not find entry in TarArchiveInputStream with filename %s", filename), e);
+                    sink.error(e);
+                } finally {
+                    try {
+                        tarIs.close();
+                    } catch (IOException e) {
+                        log.error("Problem closing TarArchiveInputStream", e);
+                    }
+                }
+            });
+        } catch (ArchiveException | CompressorException e) {
+            log.error("Problem creating TarArchiveInputStream", e);
+            return Flux.error(e);
+        }
     }
 
     public static void main(String[] args) {
@@ -118,13 +136,14 @@ public class TgzUtil {
                 }
                 byte[] bytes = baos.toByteArray();
                 DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
-                DataBuffer db = factory.wrap(bytes);
+                DataBuffer db1 = factory.wrap(bytes);
+                DataBuffer db2 = factory.wrap(bytes);
                 TgzUtil
-                    .extractFileContent(Flux.just(db), "pom.xml")
+                    .extractFileContent(Flux.just(db1), "pom.xml")
                     .log()
                     .subscribe();
                 TgzUtil
-                    .findMatchingFiles(Flux.just(db), ".jar")
+                    .findMatchingFiles(Flux.just(db2), ".jar")
                     .log()
                     .subscribe();
             } catch (IOException e) {

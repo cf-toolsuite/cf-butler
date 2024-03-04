@@ -56,7 +56,8 @@ public class ExtractJavaArtifactsFromDropletTask implements ApplicationListener<
             .deleteAll()
             .thenMany(Flux.fromIterable(detail))
             .filter(ad -> StringUtils.isNotBlank(ad.getBuildpack()) && ad.getBuildpack().contains("java"))
-            .flatMap(ad -> seedJavaAppDetail(ad))
+            .flatMap(jad -> associateDropletWithApplication(jad))
+            .flatMapSequential(sd -> ascertainSpringDependencies(sd))
             .flatMap(jadService::save)
             .thenMany(jadService.findAll())
             .collectList()
@@ -70,7 +71,7 @@ public class ExtractJavaArtifactsFromDropletTask implements ApplicationListener<
             );
     }
 
-    private Mono<JavaAppDetail> seedJavaAppDetail(AppDetail detail) {
+    private Mono<JavaAppDetail> associateDropletWithApplication(AppDetail detail) {
         log.trace("Attempting to fetch droplet id for {}/{}/{} whose state is {}", detail.getOrganization(), detail.getSpace(), detail.getAppName(), detail.getRequestedState());
         if (detail.getRequestedState().equalsIgnoreCase("started")) {
             Mono<GetApplicationCurrentDropletResponse> currentResponse =
@@ -83,8 +84,7 @@ public class ExtractJavaArtifactsFromDropletTask implements ApplicationListener<
                         .applicationsV3()
                         .getCurrentDroplet(GetApplicationCurrentDropletRequest.builder().applicationId(detail.getAppId()).build());
             return currentResponse
-                    .map(dr -> JavaAppDetail.from(detail).dropletId(dr.getId()).build())
-                    .flatMap(jad -> ascertainSpringDependencies(jad));
+                    .map(dr -> JavaAppDetail.from(detail).dropletId(dr.getId()).build());
         } else if (detail.getRequestedState().equalsIgnoreCase("stopped")) {
             Mono<DropletResource> stagedResponse =
                 DefaultCloudFoundryOperations.builder()
@@ -99,8 +99,7 @@ public class ExtractJavaArtifactsFromDropletTask implements ApplicationListener<
                         .filter(resource -> resource.getState().equals(DropletState.STAGED))
                         .next();
                 return stagedResponse
-                        .map(dr -> JavaAppDetail.from(detail).dropletId(dr.getId()).build())
-                        .flatMap(jad -> ascertainSpringDependencies(jad));
+                        .map(dr -> JavaAppDetail.from(detail).dropletId(dr.getId()).build());
         } else {
             log.trace("No droplet found for {}/{}/{}", detail.getOrganization(), detail.getSpace(), detail.getAppName());
             return Mono.just(JavaAppDetail.from(detail).build());
@@ -119,7 +118,11 @@ public class ExtractJavaArtifactsFromDropletTask implements ApplicationListener<
                                     .jars(s)
                                     .springDependencies(javaArtifactReader.read(s).stream().collect(Collectors.joining("\n")))
                                     .build()
-                                : detail);
+                                : detail)
+                    .onErrorResume(e -> {
+                        log.error(String.format("Trouble ascertaining Spring dependencies for %s/%s/%s", detail.getOrganization(), detail.getSpace(), detail.getAppName()), e);
+                        return Mono.just(detail);
+                    });
         } else if (javaArtifactReader.type().equalsIgnoreCase("pom")) {
             return
                 TgzUtil
@@ -130,9 +133,13 @@ public class ExtractJavaArtifactsFromDropletTask implements ApplicationListener<
                                     .pomContents(s)
                                     .springDependencies(javaArtifactReader.read(s).stream().collect(Collectors.joining("\n")))
                                     .build()
-                                : detail);
+                                : detail)
+                    .onErrorResume(e -> {
+                        log.error(String.format("Trouble ascertaining Spring dependencies for %s/%s/%s", detail.getOrganization(), detail.getSpace(), detail.getAppName()), e);
+                        return Mono.just(detail);
+                    });
         } else {
-            log.warn("Could not determine Spring dependencies");
+            log.warn("Not configured to ascertain Spring dependencies");
             return Mono.just(detail);
         }
     }

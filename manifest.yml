@@ -2,12 +2,12 @@
 applications:
 - name: cf-butler
   random-route: true
-  memory: 3G
+  memory: 6G
   stack: cflinuxfs4
   path: target/cf-butler-1.0-SNAPSHOT.jar
   instances: 1
   env:
-    JAVA_OPTS: -Djava.security.egd=file:///dev/urandom -XX:MaxDirectMemorySize=2G
+    JAVA_OPTS: -Djava.security.egd=file:///dev/urandom -XX:+UseG1GC -XX:+UseStringDeduplication -XX:MaxDirectMemorySize=4G
     SPRING_PROFILES_ACTIVE: on-demand,cloud
     JBP_CONFIG_OPEN_JDK_JRE: '{ jre: { version: 21.+ } }'
     JBP_CONFIG_SPRING_AUTO_RECONFIGURATION: '{ enabled: false }'
