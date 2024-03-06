@@ -1,13 +1,13 @@
 package io.pivotal.cfapp.util;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.stream.IntStream;
 
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
@@ -30,14 +30,15 @@ public class TgzUtil {
     private static Logger log = LoggerFactory.getLogger(TgzUtil.class);
 
     public static Mono<String> findMatchingFiles(Flux<DataBuffer> incoming, String extension) {
-        Mono<DataBuffer> fullContent = DataBufferUtils.join(incoming);
+        Mono<DataBuffer> fullContent =
+            DataBufferUtils
+                .join(incoming);
         Mono<InputStream> inputStreamMono = fullContent.map(dataBuffer ->
             dataBuffer.asInputStream(true)
         );
         return inputStreamMono.flatMapMany(is -> findMatchingFiles(is, extension))
                 .collectList()
-                .map(list -> String.join(System.getProperty("line.separator"), list))
-                .doOnDiscard(DataBuffer.class, DataBufferUtils::release);
+                .map(list -> String.join(System.getProperty("line.separator"), list));
     }
 
     private static Flux<String> findMatchingFiles(InputStream is, String extension) {
@@ -77,14 +78,15 @@ public class TgzUtil {
     }
 
     public static Mono<String> extractFileContent(Flux<DataBuffer> incoming, String filename) {
-        Mono<DataBuffer> fullContent = DataBufferUtils.join(incoming);
+        Mono<DataBuffer> fullContent =
+            DataBufferUtils
+                .join(incoming);
         Mono<InputStream> inputStreamMono = fullContent.map(dataBuffer ->
             dataBuffer.asInputStream(true)
         );
         return inputStreamMono.flatMapMany(is -> extractFileContent(is, filename))
                 .collectList()
-                .map(list -> String.join(" ", list))
-                .doOnDiscard(DataBuffer.class, DataBufferUtils::release);
+                .map(list -> String.join(" ", list));
     }
 
     private static Flux<String> extractFileContent(InputStream is, String filename) {
@@ -126,31 +128,27 @@ public class TgzUtil {
     }
 
     public static void main(String[] args) {
-        File droplet = new File("/tmp/droplet_48a064f7-0de8-4c07-aacc-76c299c12509.tgz");
-        //File droplet = new File(args[0]);
-        if (droplet.exists()) {
-            try (FileInputStream fis = new FileInputStream(droplet);
-                ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-                byte[] buffer = new byte[1024];
-                int bytesRead;
-                while ((bytesRead = fis.read(buffer)) != -1) {
-                    baos.write(buffer, 0, bytesRead);
+        //File droplet = new File("/tmp/droplet_2be29bc3-0e2c-40f9-b454-db89c15c723f.tgz");
+        File droplet = new File(args[0]);
+        IntStream.rangeClosed(1, 30).forEach(i -> {
+            if (droplet.exists()) {
+                try {
+                    byte[] bytes = Files.readAllBytes(droplet.toPath());
+                    DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
+                    DataBuffer db1 = factory.wrap(bytes);
+                    DataBuffer db2 = factory.wrap(bytes);
+                    TgzUtil
+                        .extractFileContent(Flux.just(db1), "pom.xml")
+                        .log()
+                        .subscribe();
+                    TgzUtil
+                        .findMatchingFiles(Flux.just(db2), ".jar")
+                        .log()
+                        .subscribe();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-                byte[] bytes = baos.toByteArray();
-                DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
-                DataBuffer db1 = factory.wrap(bytes);
-                DataBuffer db2 = factory.wrap(bytes);
-                TgzUtil
-                    .extractFileContent(Flux.just(db1), "pom.xml")
-                    .log()
-                    .subscribe();
-                TgzUtil
-                    .findMatchingFiles(Flux.just(db2), ".jar")
-                    .log()
-                    .subscribe();
-            } catch (IOException e) {
-                e.printStackTrace();
             }
-        }
+        });
     }
 }

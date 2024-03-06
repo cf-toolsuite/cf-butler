@@ -57,7 +57,7 @@ public class ExtractJavaArtifactsFromDropletTask implements ApplicationListener<
             .thenMany(Flux.fromIterable(detail))
             .filter(ad -> StringUtils.isNotBlank(ad.getBuildpack()) && ad.getBuildpack().contains("java"))
             .flatMap(jad -> associateDropletWithApplication(jad))
-            .flatMapSequential(sd -> ascertainSpringDependencies(sd))
+            .flatMap(sd -> ascertainSpringDependencies(sd))
             .flatMap(jadService::save)
             .thenMany(jadService.findAll())
             .collectList()
