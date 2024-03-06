@@ -9,7 +9,9 @@ import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
+import io.pivotal.cfapp.deser.RelaxedLocalDateDeserializer;
 import lombok.Builder;
 import lombok.Builder.Default;
 import lombok.Getter;
@@ -64,6 +66,7 @@ public class Release {
     @JsonProperty("release_type")
     private String releaseType;
 
+    @JsonDeserialize(using = RelaxedLocalDateDeserializer.class)
     @JsonProperty("release_date")
     private LocalDate releaseDate;
 
@@ -79,12 +82,15 @@ public class Release {
     @JsonProperty("eula")
     private Eula eula;
 
+    @JsonDeserialize(using = RelaxedLocalDateDeserializer.class)
     @JsonProperty("end_of_support_date")
     private LocalDate endOfSupportDate;
 
+    @JsonDeserialize(using = RelaxedLocalDateDeserializer.class)
     @JsonProperty("end_of_guidance_date")
     private LocalDate endOfGuidanceDate;
 
+    @JsonDeserialize(using = RelaxedLocalDateDeserializer.class)
     @JsonProperty("end_of_availability_date")
     private LocalDate endOfAvailabilityDate;
 
