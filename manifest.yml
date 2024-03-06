@@ -7,7 +7,7 @@ applications:
   path: target/cf-butler-1.0-SNAPSHOT.jar
   instances: 1
   env:
-    JAVA_OPTS: -Djava.security.egd=file:///dev/urandom -XX:+UseG1GC -XX:+UseStringDeduplication -XX:MaxDirectMemorySize=4G
+    JAVA_OPTS: -Djava.security.egd=file:///dev/urandom -XX:+UseG1GC -XX:SoftRefLRUPolicyMSPerMB=1 -XX:+UseStringDeduplication -XX:MaxDirectMemorySize=4G
     SPRING_PROFILES_ACTIVE: on-demand,cloud
     JBP_CONFIG_OPEN_JDK_JRE: '{ jre: { version: 21.+ } }'
     JBP_CONFIG_SPRING_AUTO_RECONFIGURATION: '{ enabled: false }'
