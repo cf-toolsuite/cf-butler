@@ -39,7 +39,7 @@ import lombok.Getter;
 })
 public class Release {
 
-    private static final String BASE_URL = "https://network.pivotal.io/api/v2/products/";
+    private static final String BASE_URL = "https://network.tanzu.vmware.com/api/v2/products/";
 
     public static Release empty() {
         return Release.builder().build();
