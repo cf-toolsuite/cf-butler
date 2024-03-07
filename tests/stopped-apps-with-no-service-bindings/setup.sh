@@ -15,7 +15,7 @@ cf target -o $ORG -s $SPACE
 
 for i in "${repos[@]}"
 do
-   git clone https://github.com/pacphi/$i
+   git clone https://github.com/cf-toolsuite/$i
    cd $i
    gradle clean build
    cf push $i -b java_buildpack_offline -s cflinuxfs3 -m 1G --random-route

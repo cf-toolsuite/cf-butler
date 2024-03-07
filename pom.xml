@@ -11,9 +11,9 @@
   <description>My purpose in life is to cleanup stale apps and services on a Cloud Foundry foundation. I can be configured to report on and remove orphaned services and stopped app instances older than a configurable duration. I do many other useful things too.</description>
 
   <scm>
-    <connection>scm:git:git://github.com/pacphi/cf-butler.git</connection>
-    <developerConnection>scm:git:ssh://github.com/pacphi/cf-butler.git</developerConnection>
-    <url>https://github.com/pacphi/cf-butler</url>
+    <connection>scm:git:git://github.com/cf-toolsuite/cf-butler.git</connection>
+    <developerConnection>scm:git:ssh://github.com/cf-toolsuite/cf-butler.git</developerConnection>
+    <url>https://github.com/cf-toolsuite/cf-butler</url>
   </scm>
 
   <developers>
@@ -35,17 +35,17 @@
     <site>
       <id>github</id>
       <name>Deployment through Maven's SCM Publish Plugin</name>
-      <url>scm:git:git@github.com:pacphi/cf-butler.git</url>
+      <url>scm:git:git@github.com:cf-toolsuite/cf-butler.git</url>
     </site>
     <repository>
       <id>github</id>
       <name>GitHub Packages</name>
-      <url>https://maven.pkg.github.com/pacphi/cf-butler</url>
+      <url>https://maven.pkg.github.com/cf-toolsuite/cf-butler</url>
     </repository>
   </distributionManagement>
 
   <issueManagement>
-    <url>https://github.com/pacphi/cf-butler/issues</url>
+    <url>https://github.com/cf-toolsuite/cf-butler/issues</url>
     <system>GitHub Issues</system>
   </issueManagement>
 
