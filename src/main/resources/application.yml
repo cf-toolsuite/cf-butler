@@ -71,6 +71,17 @@ logging:
     io.r2dbc.h2.H2Connection: ERROR
 
 management:
+  info:
+    build:
+      enabled: true
+    env:
+      enabled: true
+    git:
+      mode: full
+    java:
+      enabled: true
+    os:
+      enabled: true
   endpoints:
     web:
       exposure:
