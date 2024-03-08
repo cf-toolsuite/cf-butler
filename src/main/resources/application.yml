@@ -74,6 +74,8 @@ management:
   info:
     build:
       enabled: true
+    dependencies:
+      enabled: true
     env:
       enabled: true
     git:
@@ -81,6 +83,8 @@ management:
     java:
       enabled: true
     os:
+      enabled: true
+    sbom:
       enabled: true
   endpoints:
     web:
