@@ -1,7 +1,11 @@
 package io.pivotal.cfapp.service;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -50,7 +54,8 @@ public class JavaArtifactRuntimeMetadataRetrievalService {
                 .onStatus(
                     status -> status.isError(),
                     response -> Mono.error(new RuntimeException("Client or Server error")))
-                .bodyToMono(String.class)
+                .bodyToMono(new ParameterizedTypeReference<Set<String>>(){})
+                .map(set -> set.stream().collect(Collectors.joining(System.getProperty("line.separator"))))
                 .map(jars -> JavaAppDetail.from(detail).jars(jars).build())
                 .onErrorResume(e -> {
                     log.error("Error fetching runtime metadata for {}/{}/{}: {}", detail.getOrganization(), detail.getSpace(), detail.getAppName(), e.getMessage());
