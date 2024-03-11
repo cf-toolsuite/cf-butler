@@ -106,7 +106,7 @@ public class AppDetailTask implements ApplicationListener<AppDetailReadyToBeRetr
             .subscribe(
                 result -> {
                     publisher.publishEvent(new AppDetailRetrievedEvent(this).detail(result));
-                    log.info("AppDetailTask completed");
+                    log.info("AppDetailTask completed. {} applications found.", result.size());
                 },
                 error -> {
                     log.error("AppDetailTask terminated with error", error);

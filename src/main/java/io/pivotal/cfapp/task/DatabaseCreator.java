@@ -61,22 +61,29 @@ public class DatabaseCreator implements ApplicationRunner {
     private void createTablesAndViews(String path) throws IOException {
         String line = ""; String ddl = "";
         Resource schema = resourceLoader.getResource(path);
-        InputStream is = schema.getInputStream();
-        BufferedReader br = new BufferedReader(new InputStreamReader(is));
-        while ((line = br.readLine()) != null) {
-            if (!line.isBlank()) {
-                ddl = line.strip().replace(";","");
-                client
-                .getDatabaseClient()
-                .sql(ddl)
-                .then()
-                .doOnError(e -> {
-                    log.error(e.getMessage());
-                    System.exit(1);
-                }).subscribe();
-            }
+        log.info("DatabaseCreator started");
+        try (
+            InputStream is = schema.getInputStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(is))
+            ) {
+                while ((line = br.readLine()) != null) {
+                    if (!line.isBlank()) {
+                        ddl = line.strip().replace(";","");
+                        log.info("-- Executed [ {} ]", ddl);
+                        client
+                            .getDatabaseClient()
+                            .sql(ddl)
+                            .then()
+                            .doOnError(
+                                error -> {
+                                    log.error("DatabaseCreator terminated with error", error);
+                                    System.exit(1);
+                                }
+                            )
+                            .subscribe();
+                    }
+                }
         }
-        br.close();
     }
 
 }

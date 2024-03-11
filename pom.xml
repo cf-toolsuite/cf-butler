@@ -11,9 +11,9 @@
   <description>My purpose in life is to cleanup stale apps and services on a Cloud Foundry foundation. I can be configured to report on and remove orphaned services and stopped app instances older than a configurable duration. I do many other useful things too.</description>
 
   <scm>
-    <connection>scm:git:git://github.com/pacphi/cf-butler.git</connection>
-    <developerConnection>scm:git:ssh://github.com/pacphi/cf-butler.git</developerConnection>
-    <url>https://github.com/pacphi/cf-butler</url>
+    <connection>scm:git:git://github.com/cf-toolsuite/cf-butler.git</connection>
+    <developerConnection>scm:git:ssh://github.com/cf-toolsuite/cf-butler.git</developerConnection>
+    <url>https://github.com/cf-toolsuite/cf-butler</url>
   </scm>
 
   <developers>
@@ -35,17 +35,17 @@
     <site>
       <id>github</id>
       <name>Deployment through Maven's SCM Publish Plugin</name>
-      <url>scm:git:git@github.com:pacphi/cf-butler.git</url>
+      <url>scm:git:git@github.com:cf-toolsuite/cf-butler.git</url>
     </site>
     <repository>
       <id>github</id>
       <name>GitHub Packages</name>
-      <url>https://maven.pkg.github.com/pacphi/cf-butler</url>
+      <url>https://maven.pkg.github.com/cf-toolsuite/cf-butler</url>
     </repository>
   </distributionManagement>
 
   <issueManagement>
-    <url>https://github.com/pacphi/cf-butler/issues</url>
+    <url>https://github.com/cf-toolsuite/cf-butler/issues</url>
     <system>GitHub Issues</system>
   </issueManagement>
 
@@ -65,11 +65,11 @@
   </licenses>
 
   <properties>
-    <java.version>17</java.version>
+    <java.version>21</java.version>
     <commons-lang3.version>3.14.0</commons-lang3.version>
     <jackson-bom.version>2.16.1</jackson-bom.version>
     <logback.version>1.4.14</logback.version>
-    <mockito.version>5.10.0</mockito.version>
+    <mockito.version>5.11.0</mockito.version>
     <snakeyaml.version>2.2</snakeyaml.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -104,7 +104,7 @@
     <dependency>
       <groupId>com.fasterxml.uuid</groupId>
       <artifactId>java-uuid-generator</artifactId>
-      <version>4.3.0</version>
+      <version>5.0.0</version>
     </dependency>
     <dependency>
       <groupId>io.pivotal.cfenv</groupId>
@@ -154,7 +154,7 @@
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-compress</artifactId>
-      <version>1.25.0</version>
+      <version>1.26.1</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -179,12 +179,12 @@
     <dependency>
       <groupId>org.cloudfoundry</groupId>
       <artifactId>cloudfoundry-client-reactor</artifactId>
-      <version>5.10.0.RELEASE</version>
+      <version>5.12.0.RELEASE</version>
     </dependency>
     <dependency>
       <groupId>org.cloudfoundry</groupId>
       <artifactId>cloudfoundry-operations</artifactId>
-      <version>5.10.0.RELEASE</version>
+      <version>5.12.0.RELEASE</version>
     </dependency>
     <dependency>
       <groupId>io.micrometer</groupId>
@@ -264,6 +264,11 @@
       <name>Spring snapshots</name>
       <url>https://repo.spring.io/snapshot</url>
     </repository>
+    <repository>
+      <id>apache-snapshots</id>
+      <name>Apache snapshots</name>
+      <url> https://repository.apache.org/content/repositories/snapshots</url>
+    </repository>
   </repositories>
 
   <pluginRepositories>
@@ -295,6 +300,23 @@
       </plugins>
     </pluginManagement>
     <plugins>
+      <plugin>
+        <groupId>org.cyclonedx</groupId>
+        <artifactId>cyclonedx-maven-plugin</artifactId>
+        <version>2.7.11</version>
+        <executions>
+          <execution>
+            <phase>validate</phase>
+            <goals>
+              <goal>makeAggregateBom</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <outputFormat>json</outputFormat>
+          <outputName>classes/bom</outputName>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>org.projectlombok</groupId>
         <artifactId>lombok-maven-plugin</artifactId>
@@ -417,7 +439,7 @@
       <plugin>
         <groupId>io.github.git-commit-id</groupId>
         <artifactId>git-commit-id-maven-plugin</artifactId>
-        <version>7.0.0</version>
+        <version>8.0.0</version>
         <executions>
           <execution>
             <id>get-the-git-infos</id>
@@ -724,7 +746,7 @@
         <dependency>
           <groupId>io.asyncer</groupId>
           <artifactId>r2dbc-mysql</artifactId>
-          <version>1.1.1</version>
+          <version>1.1.2</version>
           <scope>runtime</scope>
         </dependency>
         <dependency>
@@ -785,6 +807,17 @@
           </resource>
         </resources>
       </build>
+    </profile>
+
+    <profile>
+      <id>expose-runtime-metadata</id>
+      <dependencies>
+        <dependency>
+          <groupId>io.pivotal.app.actuator</groupId>
+          <artifactId>spring-boot-starter-runtime-metadata</artifactId>
+          <version>0.1.0</version>
+        </dependency>
+      </dependencies>
     </profile>
 
     <profile>

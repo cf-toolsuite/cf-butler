@@ -50,7 +50,7 @@ public class JarSetFilterReader implements JavaArtifactReader {
         return "";
     }
 
-    public String type() {
-        return "jar";
+    public String mode() {
+        return "list-jars";
     }
 }

@@ -27,7 +27,7 @@ export REPOS4=( spring-boot-gzip-compression-example )
 ## Create app not bound to any services, leave it running
 for r in "${REPOS2[@]}"
 do
-   git clone https://github.com/pacphi/$r
+   git clone https://github.com/cf-toolsuite/$r
    cd $r
    gradle clean build
    cd ..
@@ -36,7 +36,7 @@ done
 ## Create app not bound to any services, then stop it
 for x in "${REPOS4[@]}"
 do
-   git clone https://github.com/pacphi/$x
+   git clone https://github.com/cf-toolsuite/$x
    cd $x
    gradle clean build
    cd ..
@@ -45,7 +45,7 @@ done
 ## Create apps and bind to services, then stop apps
 for q in "${REPOS3[@]}"
 do
-   git clone https://github.com/pacphi/$q
+   git clone https://github.com/cf-toolsuite/$q
    cd $q
    gradle clean build
    cd ..
@@ -62,21 +62,21 @@ done
 
 
 ## cf-butler
-git clone https://github.com/pacphi/cf-butler
+git clone https://github.com/cf-toolsuite/cf-butler
 cd cf-butler
 gradle clean build
 cd ..
 
 
 ## cf-app-inventory-report
-git clone https://github.com/pacphi/cf-app-inventory-report
+git clone https://github.com/cf-toolsuite/cf-app-inventory-report
 cd cf-app-inventory-report
 gradle clean build
 cd ..
 
 
 ## cf-app-inventory-report
-git clone https://github.com/pacphi/cf-service-inventory-report
+git clone https://github.com/cf-toolsuite/cf-service-inventory-report
 cd cf-service-inventory-report
 gradle clean build
 cd ..

@@ -56,7 +56,7 @@ public class AppRelationshipTask implements ApplicationListener<ServiceInstanceD
             .subscribe(
                 result -> {
                     publisher.publishEvent(new AppRelationshipRetrievedEvent(this).relations(result));
-                    log.info("AppRelationshipTask completed");
+                    log.info("AppRelationshipTask completed. {} application to service instance binding relationships found.", result.size());
                 },
                 error -> {
                     log.error("AppRelationshipTask terminated with error", error);

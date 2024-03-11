@@ -36,11 +36,6 @@ public class ResourceMetadataService {
         this.settings = settings;
     }
 
-    private Mono<String> getOauthToken() {
-        tokenProvider.invalidate(connectionContext);
-        return tokenProvider.getToken(connectionContext);
-    }
-
     public Mono<Resources> getResources(String type) {
         ResourceType rt = ResourceType.from(type);
         final String uri =
@@ -53,7 +48,8 @@ public class ResourceMetadataService {
                     .encode()
                     .toUriString();
         return
-            getOauthToken()
+            tokenProvider
+                .getToken(connectionContext)
                 .flatMap(t -> webClient
                                 .get()
                                     .uri(uri)
@@ -77,7 +73,8 @@ public class ResourceMetadataService {
                     .buildAndExpand(rt.getId(), page == null ? 1 : page, perPage == null ? 50 : perPage)
                     .toUriString();
         return
-            getOauthToken()
+            tokenProvider
+                .getToken(connectionContext)
                 .flatMap(t -> webClient
                                 .get()
                                     .uri(uri)
@@ -99,7 +96,8 @@ public class ResourceMetadataService {
                         .encode()
                         .toUriString();
                 return
-                        getOauthToken()
+                    tokenProvider
+                        .getToken(connectionContext)
                         .flatMap(t -> webClient
                                 .get()
                                 .uri(uri)
@@ -121,7 +119,8 @@ public class ResourceMetadataService {
                     .encode()
                     .toUriString();
             return
-                    getOauthToken()
+                tokenProvider
+                    .getToken(connectionContext)
                     .flatMap(t -> webClient
                             .patch()
                             .uri(uri)

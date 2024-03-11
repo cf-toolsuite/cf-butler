@@ -12,6 +12,7 @@ import org.cloudfoundry.client.v3.droplets.ListDropletsRequest;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.stereotype.Component;
@@ -22,6 +23,7 @@ import io.pivotal.cfapp.event.AppDetailRetrievedEvent;
 import io.pivotal.cfapp.service.DropletsService;
 import io.pivotal.cfapp.service.JavaAppDetailService;
 import io.pivotal.cfapp.util.JavaArtifactReader;
+import io.pivotal.cfapp.util.DropletProcessingCondition;
 import io.pivotal.cfapp.util.TgzUtil;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
@@ -29,6 +31,7 @@ import reactor.core.publisher.Mono;
 
 @Slf4j
 @Component
+@Conditional(DropletProcessingCondition.class)
 public class ExtractJavaArtifactsFromDropletTask implements ApplicationListener<AppDetailRetrievedEvent> {
 
     private DefaultCloudFoundryOperations opsClient;
@@ -56,13 +59,14 @@ public class ExtractJavaArtifactsFromDropletTask implements ApplicationListener<
             .deleteAll()
             .thenMany(Flux.fromIterable(detail))
             .filter(ad -> StringUtils.isNotBlank(ad.getBuildpack()) && ad.getBuildpack().contains("java"))
-            .flatMap(ad -> seedJavaAppDetail(ad))
+            .flatMap(jad -> associateDropletWithApplication(jad))
+            .flatMap(sd -> ascertainSpringDependencies(sd))
             .flatMap(jadService::save)
             .thenMany(jadService.findAll())
             .collectList()
             .subscribe(
                 result -> {
-                    log.info("ExtractJavaArtifactsFromDropletTask completed");
+                    log.info("ExtractJavaArtifactsFromDropletTask completed. {} droplets processed.", result.size());
                 },
                 error -> {
                     log.error("ExtractJavaArtifactsFromDropletTask terminated with error", error);
@@ -70,8 +74,8 @@ public class ExtractJavaArtifactsFromDropletTask implements ApplicationListener<
             );
     }
 
-    private Mono<JavaAppDetail> seedJavaAppDetail(AppDetail detail) {
-        log.info("Attempting to fetch droplet id for {}/{}/{} whose state is {}", detail.getOrganization(), detail.getSpace(), detail.getAppName(), detail.getRequestedState());
+    private Mono<JavaAppDetail> associateDropletWithApplication(AppDetail detail) {
+        log.trace("Attempting to fetch droplet id for {}/{}/{} whose state is {}", detail.getOrganization(), detail.getSpace(), detail.getAppName(), detail.getRequestedState());
         if (detail.getRequestedState().equalsIgnoreCase("started")) {
             Mono<GetApplicationCurrentDropletResponse> currentResponse =
                 DefaultCloudFoundryOperations.builder()
@@ -83,8 +87,7 @@ public class ExtractJavaArtifactsFromDropletTask implements ApplicationListener<
                         .applicationsV3()
                         .getCurrentDroplet(GetApplicationCurrentDropletRequest.builder().applicationId(detail.getAppId()).build());
             return currentResponse
-                    .map(dr -> JavaAppDetail.from(detail).dropletId(dr.getId()).build())
-                    .flatMap(jad -> ascertainSpringDependencies(jad));
+                    .map(dr -> JavaAppDetail.from(detail).dropletId(dr.getId()).build());
         } else if (detail.getRequestedState().equalsIgnoreCase("stopped")) {
             Mono<DropletResource> stagedResponse =
                 DefaultCloudFoundryOperations.builder()
@@ -99,17 +102,16 @@ public class ExtractJavaArtifactsFromDropletTask implements ApplicationListener<
                         .filter(resource -> resource.getState().equals(DropletState.STAGED))
                         .next();
                 return stagedResponse
-                        .map(dr -> JavaAppDetail.from(detail).dropletId(dr.getId()).build())
-                        .flatMap(jad -> ascertainSpringDependencies(jad));
+                        .map(dr -> JavaAppDetail.from(detail).dropletId(dr.getId()).build());
         } else {
-            log.info("No droplet found for {}/{}/{}", detail.getOrganization(), detail.getSpace(), detail.getAppName());
+            log.trace("No droplet found for {}/{}/{}", detail.getOrganization(), detail.getSpace(), detail.getAppName());
             return Mono.just(JavaAppDetail.from(detail).build());
         }
     }
 
     private Mono<JavaAppDetail> ascertainSpringDependencies(JavaAppDetail detail) {
         Flux<DataBuffer> fdb = dropletsService.downloadDroplet(detail.getDropletId());
-        if (javaArtifactReader.type().equalsIgnoreCase("jar")) {
+        if (javaArtifactReader.mode().equalsIgnoreCase("list-jars")) {
             return
                 TgzUtil
                     .findMatchingFiles(fdb, ".jar")
@@ -119,8 +121,12 @@ public class ExtractJavaArtifactsFromDropletTask implements ApplicationListener<
                                     .jars(s)
                                     .springDependencies(javaArtifactReader.read(s).stream().collect(Collectors.joining("\n")))
                                     .build()
-                                : detail);
-        } else if (javaArtifactReader.type().equalsIgnoreCase("pom")) {
+                                : detail)
+                    .onErrorResume(e -> {
+                        log.error(String.format("Trouble ascertaining Spring dependencies for %s/%s/%s", detail.getOrganization(), detail.getSpace(), detail.getAppName()), e);
+                        return Mono.just(detail);
+                    });
+        } else if (javaArtifactReader.mode().equalsIgnoreCase("unpack-pom-contents-in-droplet")) {
             return
                 TgzUtil
                     .extractFileContent(fdb, "pom.xml")
@@ -130,9 +136,13 @@ public class ExtractJavaArtifactsFromDropletTask implements ApplicationListener<
                                     .pomContents(s)
                                     .springDependencies(javaArtifactReader.read(s).stream().collect(Collectors.joining("\n")))
                                     .build()
-                                : detail);
+                                : detail)
+                    .onErrorResume(e -> {
+                        log.error(String.format("Trouble ascertaining Spring dependencies for %s/%s/%s", detail.getOrganization(), detail.getSpace(), detail.getAppName()), e);
+                        return Mono.just(detail);
+                    });
         } else {
-            log.warn("Could not determine Spring dependencies");
+            log.warn("Not configured to ascertain Spring dependencies");
             return Mono.just(detail);
         }
     }

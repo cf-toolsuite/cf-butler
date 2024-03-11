@@ -12,6 +12,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import io.pivotal.cfapp.config.PasSettings;
@@ -21,36 +22,21 @@ import io.pivotal.cfapp.domain.ServiceInstanceDetail;
 import io.pivotal.cfapp.domain.event.EventType;
 import io.pivotal.cfapp.domain.event.Events;
 import io.pivotal.cfapp.domain.event.Resource;
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+@Slf4j
 @Service
 // @see https://apidocs.cloudfoundry.org/287/events/list_all_events.html
 public class EventsService {
 
     private static final int EVENTS_PER_PAGE = 10;
-    private static Integer getPageSize(Integer numberOfEvents) {
-        int maxNumberOfEvents = 250;
-        Integer result = EVENTS_PER_PAGE;
-        if (numberOfEvents != null) {
-            result = numberOfEvents;
-        }
-        Assert.isTrue(result > 0, "Number of events requested must be greater than zero!");
-        Assert.isTrue(result <= maxNumberOfEvents, String.format("The maximum number of events that may be requested is %d!", maxNumberOfEvents));
-        return result;
-    }
-    private static Mono<Boolean> isDormant(LocalDateTime dateTime, int daysSinceLastUpdate) {
-        Mono<Boolean> result = Mono.just(Boolean.TRUE);
-        if (dateTime != null) {
-            result = Mono.just(ChronoUnit.DAYS.between(dateTime, LocalDateTime.now()) >= daysSinceLastUpdate);
-        }
-        return result;
-    }
+    private static final int MAX_NUMBER_OF_EVENTS = 250;
+
     private final WebClient webClient;
     private final DefaultConnectionContext connectionContext;
-
     private final TokenProvider tokenProvider;
-
     private final PasSettings settings;
 
     @Autowired
@@ -65,7 +51,7 @@ public class EventsService {
         this.settings = settings;
     }
 
-    public Mono<Events> getEvent(String id, String type) {
+    public Mono<Events> getEvents(String id, String type) {
         Assert.hasText(id, "Global unique identifier for application or service instance must not be blank or null!");
         EventType eventType = EventType.from(type);
         final String uri = UriComponentsBuilder
@@ -83,13 +69,22 @@ public class EventsService {
                 .encode()
                 .toUriString();
         return
-                getOauthToken()
+            tokenProvider
+                .getToken(connectionContext)
                 .flatMap(t -> webClient
                         .get()
                         .uri(uri)
                         .header(HttpHeaders.AUTHORIZATION, t)
                         .retrieve()
-                        .bodyToMono(Events.class));
+                        .bodyToMono(Events.class))
+                        .timeout(settings.getTimeout(), Mono.just(Events.builder().build()))
+                        .onErrorResume(
+                            WebClientResponseException.class,
+                            e -> {
+                                log.warn(String.format("Could not obtain events from GET %s", uri), e);
+                                return Mono.just(Events.builder().build());
+                            }
+                        );
     }
 
     public Mono<Events> getEvents(String id, Integer numberOfEvents) {
@@ -109,25 +104,30 @@ public class EventsService {
                 .encode()
                 .toUriString();
         return
-                getOauthToken()
+            tokenProvider
+                .getToken(connectionContext)
                 .flatMap(t -> webClient
                         .get()
                         .uri(uri)
                         .header(HttpHeaders.AUTHORIZATION, t)
                         .retrieve()
-                        .bodyToMono(Events.class));
+                        .bodyToMono(Events.class))
+                        .timeout(settings.getTimeout(), Mono.just(Events.builder().build()))
+                        .onErrorResume(
+                            WebClientResponseException.class,
+                            e -> {
+                                log.warn(String.format("Could not obtain events from GET %s", uri), e);
+                                return Mono.just(Events.builder().build());
+                            }
+                        );
     }
 
     public Flux<Event> getEvents(String id, String[] types) {
         return Flux
                 .fromArray(types)
-                .concatMap(type -> getEvent(id, type))
-                .flatMap(this::toFlux);
-    }
-
-    private Mono<String> getOauthToken() {
-        tokenProvider.invalidate(connectionContext);
-        return tokenProvider.getToken(connectionContext);
+                .concatMap(type -> getEvents(id, type))
+                .flatMap(this::toFlux)
+                .onBackpressureBuffer();
     }
 
     public Mono<Boolean> isDormantApplication(AppDetail detail, int daysSinceLastUpdate) {
@@ -178,6 +178,24 @@ public class EventsService {
                                         : null)
                         .build()
                         );
+    }
+
+    private Integer getPageSize(Integer numberOfEvents) {
+        Integer result = EVENTS_PER_PAGE;
+        if (numberOfEvents != null) {
+            result = numberOfEvents;
+        }
+        Assert.isTrue(result > 0, "Number of events requested must be greater than zero!");
+        Assert.isTrue(result <= MAX_NUMBER_OF_EVENTS, String.format("The maximum number of events that may be requested is %d!", MAX_NUMBER_OF_EVENTS));
+        return result;
+    }
+
+    private Mono<Boolean> isDormant(LocalDateTime dateTime, int daysSinceLastUpdate) {
+        Mono<Boolean> result = Mono.just(Boolean.TRUE);
+        if (dateTime != null) {
+            result = Mono.just(ChronoUnit.DAYS.between(dateTime, LocalDateTime.now()) >= daysSinceLastUpdate);
+        }
+        return result;
     }
 
 }

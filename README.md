@@ -1,6 +1,6 @@
 # VMware Tanzu Application Service > Butler
 
-[![GA](https://img.shields.io/badge/Release-GA-darkgreen)](https://img.shields.io/badge/Release-GA-darkgreen) ![Github Action CI Workflow Status](https://github.com/pacphi/cf-butler/actions/workflows/ci.yml/badge.svg) [![Known Vulnerabilities](https://snyk.io/test/github/pacphi/cf-butler/badge.svg?style=plastic)](https://snyk.io/test/github/pacphi/cf-butler) [![Release](https://jitpack.io/v/pacphi/cf-butler.svg)](https://jitpack.io/#pacphi/cf-butler/master-SNAPSHOT) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![GA](https://img.shields.io/badge/Release-GA-darkgreen)](https://img.shields.io/badge/Release-GA-darkgreen) ![Github Action CI Workflow Status](https://github.com/cf-toolsuite/cf-butler/actions/workflows/ci.yml/badge.svg) [![Known Vulnerabilities](https://snyk.io/test/github/cf-toolsuite/cf-butler/badge.svg?style=plastic)](https://snyk.io/test/github/cf-toolsuite/cf-butler) [![Release](https://jitpack.io/v/cf-toolsuite/cf-butler.svg)](https://jitpack.io/#cf-toolsuite/cf-butler/master-SNAPSHOT) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 
 You are a platform operator working for a Fortune 500 enterprise.  You've witnessed first-hand how the product development teams your team supports are super productive; happily invoking `cf push`, `cf create-service` and `cf bind-service` many times per day to deploy applications, create services and bind them to those applications.
@@ -65,7 +65,7 @@ Please take 5-10 mintues to view this short video demonstration to get a sense o
 
 ### Tell me, don't show me
 
-Cf-butler exposes a number of self-service endpoints that perform house-keeping for your foundation.  You define policies and an execution schedule.  E.g., applications and service instances could be removed based on policy crtieria.  Cf-butler also provides detail and summary snapshot reporting on all applications, service instances, user accounts, organizations and spaces.  Lastly, cf-butler [aspires](https://github.com/pacphi/cf-butler/issues/62) to provide operators insight into the "freshness" of installed tiles, stemcells and buildpacks.
+Cf-butler exposes a number of self-service endpoints that perform house-keeping for your foundation.  You define policies and an execution schedule.  E.g., applications and service instances could be removed based on policy crtieria.  Cf-butler also provides detail and summary snapshot reporting on all applications, service instances, user accounts, organizations and spaces.  Lastly, cf-butler [aspires](https://github.com/cf-toolsuite/cf-butler/issues/62) to provide operators insight into the "freshness" of installed tiles, stemcells and buildpacks.
 
 ### And what about VMware Tanzu Telemetry Collector?
 
@@ -92,7 +92,7 @@ Optional
 ## Tools
 
 * [git](https://git-scm.com/downloads) 2.40.0 or better
-* [JDK](http://openjdk.java.net/install/) 17 or better
+* [JDK](http://openjdk.java.net/install/) 21 or better
 * [cf](https://docs.cloudfoundry.org/cf-cli/install-go-cli.html) CLI 8.6.1 or better
 * [uaac](https://github.com/cloudfoundry/cf-uaac) 4.14.0 or better
 
@@ -100,7 +100,7 @@ Optional
 ## Clone
 
 ```
-git clone https://github.com/pacphi/cf-butler.git
+git clone https://github.com/cf-toolsuite/cf-butler.git
 ```
 
 
@@ -158,7 +158,7 @@ E.g., if you had a configuration file named `application-pcfone.yml`
 
 > See the [samples](samples) directory for a few examples of configuration options when deploying to a foundation.
 
-For an exhaustive listing of all overridable configuration properties consult [ButlerCfEnvProcessor.java](https://github.com/pacphi/cf-butler/blob/master/src/main/java/io/pivotal/cfapp/config/ButlerCfEnvProcessor.java).
+For an exhaustive listing of all overridable configuration properties consult [ButlerCfEnvProcessor.java](https://github.com/cf-toolsuite/cf-butler/blob/master/src/main/java/io/pivotal/cfapp/config/ButlerCfEnvProcessor.java).
 
 ### Using an external database
 
@@ -206,7 +206,7 @@ Policy files must adhere to a naming convention where:
 * a filename ending with `-AP.json` encapsulates an individual [ApplicationPolicy](src/main/java/io/pivotal/cfapp/domain/ApplicationPolicy.java)
 * a filename ending with `-SIP.json` encapsulates an individual [ServiceInstancePolicy](src/main/java/io/pivotal/cfapp/domain/ServiceInstancePolicy.java)
 
-A sample Github repository exists [here](https://github.com/pacphi/cf-butler-sample-config).
+A sample Github repository exists [here](https://github.com/cf-toolsuite/cf-butler-sample-config).
 
 Have a look at [secrets.pws.json](samples/secrets.pws.json) for an example of how to configure secrets for deployment of `cf-butler` to PAS integrating with the aforementioned sample Github repository.
 
@@ -222,7 +222,7 @@ As mentioned previously the policy file must adhere to a naming convention
 
 * a filename ending with `-HP.json` encapsulates an individual [HygienePolicy](src/main/java/io/pivotal/cfapp/domain/HygienePolicy.java)
 
-See additional property requirements in this sample Github [repository](https://github.com/pacphi/cf-butler-sample-config).
+See additional property requirements in this sample Github [repository](https://github.com/cf-toolsuite/cf-butler-sample-config).
 
 
 #### Legacy Policies
@@ -233,7 +233,7 @@ As mentioned previously the policy file must adhere to a naming convention
 
 * a filename ending with `-LP.json` encapsulates an individual [LegacyPolicy](src/main/java/io/pivotal/cfapp/domain/LegacyPolicy.java)
 
-See additional property requirements in this sample Github [repository](https://github.com/pacphi/cf-butler-sample-config).
+See additional property requirements in this sample Github [repository](https://github.com/cf-toolsuite/cf-butler-sample-config).
 
 
 #### Resource Notification Policies
@@ -246,7 +246,7 @@ As mentioned previously the policy file must adhere to a naming convention
 
 * a filename ending with `-RNP.json` encapsulates an individual [ResourceNotificationPolicy](src/main/java/io/pivotal/cfapp/domain/ResourceNotificationPolicy.java)
 
-See additional property requirements in this sample Github [repository](https://github.com/pacphi/cf-butler-sample-config).
+See additional property requirements in this sample Github [repository](https://github.com/cf-toolsuite/cf-butler-sample-config).
 
 #### Endpoint Policies
 
@@ -256,12 +256,12 @@ As mentioned previously the policy file must adhere to a naming convention
 
 * a filename ending with `-EP.json` encapsulates an individual [EndpointPolicy](src/main/java/io/pivotal/cfapp/domain/EndpointPolicy.java)
 
-See additional property requirements in this sample Github [repository](https://github.com/pacphi/cf-butler-sample-config).
+See additional property requirements in this sample Github [repository](https://github.com/cf-toolsuite/cf-butler-sample-config).
 
 
 #### Query policies
 
-Query policies are useful when you want to step out side the canned snapshot reporting capabilties and leverage the underlying [schema](https://github.com/pacphi/cf-butler/tree/master/src/main/resources/db) to author one or more of your own queries and have the results delivered as comma-separated value attachments using a defined email notification [template](https://github.com/pacphi/cf-butler/blob/master/src/main/java/io/pivotal/cfapp/domain/EmailNotificationTemplate.java).
+Query policies are useful when you want to step out side the canned snapshot reporting capabilties and leverage the underlying [schema](https://github.com/cf-toolsuite/cf-butler/tree/master/src/main/resources/db) to author one or more of your own queries and have the results delivered as comma-separated value attachments using a defined email notification [template](https://github.com/cf-toolsuite/cf-butler/blob/master/src/main/java/io/pivotal/cfapp/domain/EmailNotificationTemplate.java).
 
 As mentioned previously the policy file must adhere to a naming convention
 
@@ -286,7 +286,7 @@ secrets-{env}.json
 
 > Replace `<engine>` above with one of either `java-mail`, or `sendgrid`
 
-Furthermore, you will need to define additional properties depending on which engine you chose.  Checkout [application.yml](https://github.com/pacphi/cf-butler/blob/master/src/main/resources/application.yml) to get to know what they are.
+Furthermore, you will need to define additional properties depending on which engine you chose.  Checkout [application.yml](https://github.com/cf-toolsuite/cf-butler/blob/master/src/main/resources/application.yml) to get to know what they are.
 
 E.g, if you intended to use [sendgrid](https://www.sendgrid.com) as your email notification engine then your secrets-{env}.yml might contain
 
@@ -303,7 +303,7 @@ Update the value of the `cron` properties in `application.yml`.  Consult this [a
 
 ### To discriminate user from service accounts
 
-Consult [PasSettings.java](https://github.com/pacphi/cf-butler/blob/master/src/main/java/io/pivotal/cfapp/config/PasSettings.java#L25) for the default pattern value used to discriminate between user and service accounts.  You may override the default by adding to
+Consult [PasSettings.java](https://github.com/cf-toolsuite/cf-butler/blob/master/src/main/java/io/pivotal/cfapp/config/PasSettings.java#L25) for the default pattern value used to discriminate between user and service accounts.  You may override the default by adding to
 
 * application.yml
 
@@ -346,7 +346,7 @@ Add an entry in your `config/secrets.json` like
 
 #### Whitelist
 
-Within each [ApplicationPolicy](https://github.com/pacphi/cf-butler/blob/master/src/main/java/io/pivotal/cfapp/domain/ApplicationPolicy.java), [ServiceInstancePolicy](https://github.com/pacphi/cf-butler/blob/master/src/main/java/io/pivotal/cfapp/domain/ServiceInstancePolicy.java), or [HygienePolicy](https://github.com/pacphi/cf-butler/blob/master/src/main/java/io/pivotal/cfapp/domain/HygienePolicy.java) you may optionally specify a list of organizations that will be whitelisted.  Policy execution will be restricted to just these organizations in the whitelist.
+Within each [ApplicationPolicy](https://github.com/cf-toolsuite/cf-butler/blob/master/src/main/java/io/pivotal/cfapp/domain/ApplicationPolicy.java), [ServiceInstancePolicy](https://github.com/cf-toolsuite/cf-butler/blob/master/src/main/java/io/pivotal/cfapp/domain/ServiceInstancePolicy.java), or [HygienePolicy](https://github.com/cf-toolsuite/cf-butler/blob/master/src/main/java/io/pivotal/cfapp/domain/HygienePolicy.java) you may optionally specify a list of organizations that will be whitelisted.  Policy execution will be restricted to just these organizations in the whitelist.
 
 > If the organization whitelist is not specified in a policy then that policy's execution applies to all organizations on the foundation (except for those in the organization blacklist).
 
@@ -779,7 +779,7 @@ Metadata is comprised of [labels](https://v3-apidocs.cloudfoundry.org/version/3.
 ```
 GET /metadata/{type}/{id}
 ```
-> Return resource with id, created date, last updated date, and associated metadata; where `{type}` is the id field of a [ResourceType](https://github.com/pacphi/cf-butler/blob/master/src/main/java/io/pivotal/cfapp/domain/ResourceType.java) enum and `{id}` is the guid of a resource.
+> Return resource with id, created date, last updated date, and associated metadata; where `{type}` is the id field of a [ResourceType](https://github.com/cf-toolsuite/cf-butler/blob/master/src/main/java/io/pivotal/cfapp/domain/ResourceType.java) enum and `{id}` is the guid of a resource.
 
 ```
 PATCH /metadata/{type}/{id}
@@ -990,7 +990,7 @@ GET /snapshot/detail
 
 > **Note**: this detail report does not take the place of an official foundation Accounting Report. However, it does provide a much more detailed snapshot of all the applications that were currently running at the time of collection.
 
-> As of [PR-391](https://github.com/pacphi/cf-butler/pull/391), buildpack name and version are based upon the current application droplet.  If you observe that both the buildpack name and version are null, then you may need to `cf restage` your application (e.g., when the last `cf push` exceeds 30 days).
+> As of [PR-391](https://github.com/cf-toolsuite/cf-butler/pull/391), buildpack name and version are based upon the current application droplet.  If you observe that both the buildpack name and version are null, then you may need to `cf restage` your application (e.g., when the last `cf push` exceeds 30 days).
 
 ```
 GET /snapshot/detail/ai
@@ -1122,10 +1122,32 @@ Sample output
 
 #### Java Applications
 
+You will need to add a runtime property to collect additional detail that will then be exposed by the endpoints mentioned below
+
+e.g.,
+
+```
+-Djava.artifacts.fetch.mode=obtain-jars-from-runtime-metadata
+```
+
+or
+
+```
+cf set-env cf-butler JAVA_ARTIFACTS_FETCH_MODE obtain-jars-from-runtime-metadata
+```
+
+There are three fetch modes:
+
+  * `unpack-pom-contents-in-droplet` - unpacks and filters application droplets in-memory for a pom.xml file, return the contents
+    * only returns results if applicaiton was built with Maven
+  * `list-jars-in-droplet` - unpacks and filters application droplets in-memory returning list of embedded .jar files
+  * `obtain-jars-from-runtime-metadata` - expects applications to expose /actuator/jars endpoint from which .jar files are obtained
+    * @see https://github.com/cf-toolsuite/spring-boot-starter-runtime-metadata
+
 ```
 GET /download/pomfiles
 ```
-> Downloads a .tar.gz file that contains pom.xml files for all Java applications that had had their artifacts built and packaged by Maven. Note: this endpoint is only available when the `java.artifact.reader.impl` property is set to `pom`
+> Downloads a .tar.gz file that contains pom.xml files for all Java applications that had had their artifacts built and packaged by Maven. Note: this endpoint is only available when the `java.artifacts.fetch.mode` property is set to `unpack-pom-contents-in-droplet`
 
 The tarball contents will be structured as follows: `{organization}/{space}/{application-name}/pom.xml`.  A stakeholder interested in understanding the health and well-being of the subset of their applications leveraging the Spring Framework and/or Spring Boot, could unpack the tarball, visit each directory and execute `mvn depdendencies:tree | grep -E '(org.springframework|io.micrometer)' > spring-dependencies.txt`, then submit each dependencies file to the online [Spring Health Assessment](https://tanzu.vmware.com/spring-health-assessment) reporting service.
 

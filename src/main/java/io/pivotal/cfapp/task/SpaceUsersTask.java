@@ -42,8 +42,7 @@ public class SpaceUsersTask implements ApplicationListener<SpacesRetrievedEvent>
             .collectList()
             .subscribe(
                 result -> {
-                    log.info("SpaceUsersTask completed");
-                    log.trace("Retrieved {} space user records", result.size());
+                    log.info("SpaceUsersTask completed. {} space users found.", result.size());
                 },
                 error -> {
                     log.error("SpaceUsersTask terminated with error", error);
