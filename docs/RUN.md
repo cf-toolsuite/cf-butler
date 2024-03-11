@@ -9,6 +9,16 @@ where `{target_foundation_profile}` is something like `pcfone`
 
 > You'll need to manually stop to the application with `Ctrl+C`
 
+
+## How to run at command-line
+
+```
+SPRING_PROFILES_ACTIVE=on-demand,cloud java -jar target/cf-butler-1.0-SNAPSHOT.jar -Djava.security.egd=file:///dev/urandom -Dspring.h2.console.enabled=true -Djava.artifacts.fetch.mode=obtain-jars-from-runtime-metadata -XX:+UseG1GC -XX:SoftRefLRUPolicyMSPerMB=1 -XX:+UseStringDeduplication -Xmx3G -XX:MaxDirectMemorySize=1G --spring.config.location=classpath:/application.yml,file:./config/application-dhaka.yml
+```
+
+In the example above we have target specific configuration maintained in a `config` folder which would be a sibling of the `target` folder where the executable jar file is expected to be found.  We're setting an environment variable as well as supplying JVM arguments.
+
+
 ## How to Run with Docker
 
 You might choose this option when experimenting with an external database provider image like [postgres](https://github.com/docker-library/postgres/blob/master/15/alpine/Dockerfile) or [mysql](https://github.com/docker-library/mysql/blob/master/8.0/Dockerfile.debian)
