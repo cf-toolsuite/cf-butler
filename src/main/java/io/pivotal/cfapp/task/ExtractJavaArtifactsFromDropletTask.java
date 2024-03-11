@@ -12,6 +12,7 @@ import org.cloudfoundry.client.v3.droplets.ListDropletsRequest;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.stereotype.Component;
@@ -22,6 +23,7 @@ import io.pivotal.cfapp.event.AppDetailRetrievedEvent;
 import io.pivotal.cfapp.service.DropletsService;
 import io.pivotal.cfapp.service.JavaAppDetailService;
 import io.pivotal.cfapp.util.JavaArtifactReader;
+import io.pivotal.cfapp.util.DropletProcessingCondition;
 import io.pivotal.cfapp.util.TgzUtil;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
@@ -29,6 +31,7 @@ import reactor.core.publisher.Mono;
 
 @Slf4j
 @Component
+@Conditional(DropletProcessingCondition.class)
 public class ExtractJavaArtifactsFromDropletTask implements ApplicationListener<AppDetailRetrievedEvent> {
 
     private DefaultCloudFoundryOperations opsClient;
@@ -108,7 +111,7 @@ public class ExtractJavaArtifactsFromDropletTask implements ApplicationListener<
 
     private Mono<JavaAppDetail> ascertainSpringDependencies(JavaAppDetail detail) {
         Flux<DataBuffer> fdb = dropletsService.downloadDroplet(detail.getDropletId());
-        if (javaArtifactReader.type().equalsIgnoreCase("jar")) {
+        if (javaArtifactReader.mode().equalsIgnoreCase("list-jars")) {
             return
                 TgzUtil
                     .findMatchingFiles(fdb, ".jar")
@@ -123,7 +126,7 @@ public class ExtractJavaArtifactsFromDropletTask implements ApplicationListener<
                         log.error(String.format("Trouble ascertaining Spring dependencies for %s/%s/%s", detail.getOrganization(), detail.getSpace(), detail.getAppName()), e);
                         return Mono.just(detail);
                     });
-        } else if (javaArtifactReader.type().equalsIgnoreCase("pom")) {
+        } else if (javaArtifactReader.mode().equalsIgnoreCase("unpack-pom-contents-in-droplet")) {
             return
                 TgzUtil
                     .extractFileContent(fdb, "pom.xml")

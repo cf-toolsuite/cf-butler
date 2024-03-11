@@ -3,6 +3,7 @@ package io.pivotal.cfapp.service;
 import org.cloudfoundry.reactor.DefaultConnectionContext;
 import org.cloudfoundry.reactor.TokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
@@ -11,12 +12,13 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import io.pivotal.cfapp.config.PasSettings;
+import io.pivotal.cfapp.util.DropletProcessingCondition;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
-@Service
 @Slf4j
+@Service
+@Conditional(DropletProcessingCondition.class)
 // @see https://v3-apidocs.cloudfoundry.org/version/3.118.0/index.html#download-droplet-bits
 public class DropletsService {
 
