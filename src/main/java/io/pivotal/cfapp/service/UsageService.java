@@ -42,11 +42,11 @@ public class UsageService {
         this.settings = settings;
     }
 
-    // FIXME Refactor Mono<String> JSON-like output to domain objects so we can start to drive aggregate calculations
-
     public Mono<AppUsageReport> getApplicationReport() {
         String uri = settings.getUsageDomain() + "/system_report/app_usages";
-        return getOauthToken()
+        return
+            tokenProvider
+                .getToken(connectionContext)
                 .flatMap(t -> webClient
                         .get()
                         .uri(uri)
@@ -54,6 +54,35 @@ public class UsageService {
                         .retrieve()
                         .bodyToMono(AppUsageReport.class));
     }
+
+    public Mono<ServiceUsageReport> getServiceReport() {
+        String uri = settings.getUsageDomain() + "/system_report/service_usages";
+        return
+            tokenProvider
+                .getToken(connectionContext)
+                .flatMap(t -> webClient
+                        .get()
+                        .uri(uri)
+                        .header(HttpHeaders.AUTHORIZATION, t)
+                        .retrieve()
+                        .bodyToMono(ServiceUsageReport.class));
+    }
+
+    public Mono<TaskUsageReport> getTaskReport() {
+        String uri = settings.getUsageDomain() + "/system_report/task_usages";
+        return
+            tokenProvider
+                .getToken(connectionContext)
+                .flatMap(t -> webClient
+                        .get()
+                        .uri(uri)
+                        .header(HttpHeaders.AUTHORIZATION, t)
+                        .retrieve()
+                        .bodyToMono(TaskUsageReport.class));
+    }
+
+
+    // FIXME Refactor Mono<String> JSON-like output to domain objects so we can start to drive aggregate calculations
 
     public Mono<String> getApplicationUsage(String orgName, LocalDate start, LocalDate end) {
         return
@@ -64,24 +93,6 @@ public class UsageService {
                 .flatMap(org -> getUsage("app_usages", org.getId(), start, end));
     }
 
-    private Mono<String> getOauthToken() {
-        tokenProvider.invalidate(connectionContext);
-        return tokenProvider.getToken(connectionContext);
-    }
-
-    public Mono<ServiceUsageReport> getServiceReport() {
-        String uri = settings.getUsageDomain() + "/system_report/service_usages";
-        return getOauthToken()
-                .flatMap(t -> webClient
-                        .get()
-                        .uri(uri)
-                        .header(HttpHeaders.AUTHORIZATION, t)
-                        .retrieve()
-                        .bodyToMono(ServiceUsageReport.class));
-    }
-
-    //----------
-
     public Mono<String> getServiceUsage(String orgName, LocalDate start, LocalDate end) {
         return
                 orgService
@@ -89,17 +100,6 @@ public class UsageService {
                 .filter(org -> org.getName().equalsIgnoreCase(orgName))
                 .single()
                 .flatMap(org -> getUsage("service_usages", org.getId(), start, end));
-    }
-
-    public Mono<TaskUsageReport> getTaskReport() {
-        String uri = settings.getUsageDomain() + "/system_report/task_usages";
-        return getOauthToken()
-                .flatMap(t -> webClient
-                        .get()
-                        .uri(uri)
-                        .header(HttpHeaders.AUTHORIZATION, t)
-                        .retrieve()
-                        .bodyToMono(TaskUsageReport.class));
     }
 
     public Mono<String> getTaskUsage(String orgName, LocalDate start, LocalDate end) {
@@ -117,7 +117,9 @@ public class UsageService {
         Assert.notNull(end, "End of date range must be specified!");
         Assert.isTrue(end.isAfter(start), "Date range is invalid!");
         String uri = settings.getUsageDomain() + "/organizations/{orgGuid}/{usageType}?start={start}&end={end}";
-        return getOauthToken()
+        return
+            tokenProvider
+                .getToken(connectionContext)
                 .flatMap(t -> webClient
                         .get()
                         .uri(uri, orgGuid, usageType, start.toString(), end.toString())
@@ -125,4 +127,6 @@ public class UsageService {
                         .retrieve()
                         .bodyToMono(String.class));
     }
+
+    //----------
 }

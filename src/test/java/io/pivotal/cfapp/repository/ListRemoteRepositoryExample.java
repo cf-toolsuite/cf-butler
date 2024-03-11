@@ -8,7 +8,7 @@ import io.pivotal.cfapp.config.GitSettings;
 public class ListRemoteRepositoryExample {
 
     private static final String REMOTE_URL_1 = "https://github.com/github/testrepo.git";
-    private static final String REMOTE_URL_2 = "https://github.com/pacphi/test-repo.git";
+    private static final String REMOTE_URL_2 = "https://github.com/cf-toolsuite/test-repo.git";
     public static void main(String[] args) throws Exception {
         GitClient helper = new GitClient();
         Repository repo = helper.getRepository(GitSettings.builder().uri(REMOTE_URL_1).build());

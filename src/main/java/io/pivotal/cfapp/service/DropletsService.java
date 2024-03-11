@@ -3,6 +3,7 @@ package io.pivotal.cfapp.service;
 import org.cloudfoundry.reactor.DefaultConnectionContext;
 import org.cloudfoundry.reactor.TokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
@@ -11,12 +12,13 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import io.pivotal.cfapp.config.PasSettings;
+import io.pivotal.cfapp.util.DropletProcessingCondition;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
-@Service
 @Slf4j
+@Service
+@Conditional(DropletProcessingCondition.class)
 // @see https://v3-apidocs.cloudfoundry.org/version/3.118.0/index.html#download-droplet-bits
 public class DropletsService {
 
@@ -48,9 +50,10 @@ public class DropletsService {
                 .buildAndExpand(id)
                 .encode()
                 .toUriString();
-        log.info("Attempting to download droplet with GET {}", uri);
+        log.trace("Attempting to download droplet with GET {}", uri);
         return
-            getOauthToken()
+            tokenProvider
+                .getToken(connectionContext)
                 .flatMapMany(
                     t -> webClient
                         .get()
@@ -58,11 +61,6 @@ public class DropletsService {
                         .header(HttpHeaders.AUTHORIZATION, t)
                         .retrieve()
                         .bodyToFlux(DataBuffer.class));
-    }
-
-    private Mono<String> getOauthToken() {
-        tokenProvider.invalidate(connectionContext);
-        return tokenProvider.getToken(connectionContext);
     }
 
 }

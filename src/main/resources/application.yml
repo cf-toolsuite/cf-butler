@@ -18,8 +18,8 @@ cf:
   username: replace_me
   password: replace_me
   sslValidationSkipped: false
-  connectionPoolSize: 250
-  connectionTimeout: PT10M
+  connectionPoolSize: 24
+  connectionTimeout: PT5S
   organizationBlackList:
     - system
     - credhub-service-broker-org
@@ -66,7 +66,26 @@ cron:
   # at 5:30am on Mondays weekly
   execution: "0 30 5 * * MON"
 
+logging:
+  level:
+    io.r2dbc.h2.H2Connection: ERROR
+
 management:
+  info:
+    build:
+      enabled: true
+    dependencies:
+      enabled: true
+    env:
+      enabled: true
+    git:
+      mode: full
+    java:
+      enabled: true
+    os:
+      enabled: true
+    sbom:
+      enabled: true
   endpoints:
     web:
       exposure:

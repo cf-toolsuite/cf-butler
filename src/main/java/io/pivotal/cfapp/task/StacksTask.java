@@ -41,8 +41,7 @@ public class StacksTask implements ApplicationListener<TkRetrievedEvent> {
             result -> {
                 publisher.publishEvent(new StacksRetrievedEvent(this));
                 log.trace("Stacks cache contains {}", result);
-                log.info("StacksTask completed");
-                log.trace("Retrieved {} stacks", result.size());
+                log.info("StacksTask completed. {} stacks found.", result.size());
             },
             error -> {
                 log.error("StacksTask terminated with error", error);

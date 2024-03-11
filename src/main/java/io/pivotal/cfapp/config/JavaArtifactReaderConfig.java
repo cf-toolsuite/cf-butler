@@ -5,17 +5,19 @@ import java.util.Set;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 
 import io.pivotal.cfapp.util.JarSetFilterReader;
+import io.pivotal.cfapp.util.JarSetFilterReaderCondition;
 import io.pivotal.cfapp.util.JavaArtifactReader;
 import io.pivotal.cfapp.util.MavenPomReader;
 
 @Configuration
-public class ReaderConfig {
+public class JavaArtifactReaderConfig {
 
     @Configuration
-    @ConditionalOnProperty(prefix = "java.artifact.reader", name= "impl", havingValue="pom")
+    @ConditionalOnProperty(prefix = "java.artifacts.fetch", name= "mode", havingValue="unpack-pom-contents-in-droplet")
     static class MavenPomReaderConfig {
 
         @Bean
@@ -31,7 +33,7 @@ public class ReaderConfig {
     }
 
     @Configuration
-    @ConditionalOnProperty(prefix = "java.artifact.reader", name = "impl", havingValue="jar", matchIfMissing=true)
+    @Conditional(JarSetFilterReaderCondition.class)
     static class JarSetFilterReaderConfig {
 
         @Bean

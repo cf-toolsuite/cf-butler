@@ -1,5 +1,6 @@
 package io.pivotal.cfapp.config;
 
+import java.time.Duration;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
@@ -38,6 +39,7 @@ public class PasSettings {
     private String accountRegex;
     private Set<String> organizationBlackList = DEFAULT_ORG_BLACKLIST;
     private Set<String> spaceBlackList = DEFAULT_SPACE_BLACKLIST;
+    private Duration timeout = Duration.ofSeconds(10);
 
 
     public String getAccountRegex() {

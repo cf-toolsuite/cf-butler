@@ -19,7 +19,7 @@ import reactor.core.publisher.Mono;
 @ConditionalOnProperty(name = "pivnet.enabled", havingValue = "true")
 public class PivnetClient {
 
-    private static final String BASE_URL = "https://network.pivotal.io/api";
+    private static final String BASE_URL = "https://network.tanzu.vmware.com/api";
     private final PivnetSettings settings;
     private final WebClient client;
 

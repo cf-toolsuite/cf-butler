@@ -163,8 +163,8 @@ public class MavenPomReader implements JavaArtifactReader {
         return exactlyOneMatch;
     }
 
-    public String type() {
-        return "pom";
+    public String mode() {
+        return "unpack-pom-contents-in-droplet";
     }
 
     public static void main(String[] args) {
