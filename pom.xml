@@ -154,7 +154,7 @@
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-compress</artifactId>
-      <version>1.26.1-SNAPSHOT</version>
+      <version>1.26.1</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -807,6 +807,17 @@
           </resource>
         </resources>
       </build>
+    </profile>
+
+    <profile>
+      <id>expose-runtime-metadata</id>
+      <dependencies>
+        <dependency>
+          <groupId>io.pivotal.app.actuator</groupId>
+          <artifactId>spring-boot-starter-runtime-metadata</artifactId>
+          <version>0.1.0</version>
+        </dependency>
+      </dependencies>
     </profile>
 
     <profile>
