@@ -1138,20 +1138,20 @@ cf set-env cf-butler JAVA_ARTIFACTS_FETCH_MODE obtain-jars-from-runtime-metadata
 
 There are three fetch modes:
 
-  * `unpack-pom-contents-in-droplet` - unpacks and filters application droplets in-memory for a pom.xml file, return the contents
-    * only returns results if applicaiton was built with Maven
-  * `list-jars-in-droplet` - unpacks and filters application droplets in-memory returning list of embedded .jar files
-  * `obtain-jars-from-runtime-metadata` - expects applications to expose /actuator/jars endpoint from which .jar files are obtained
+  * `unpack-pom-contents-in-droplet` - unpacks and filters application droplets in-memory for a `pom.xml` file, return the contents
+    * only returns results if application was built with Maven
+  * `list-jars-in-droplet` - unpacks and filters application droplets in-memory returning list of embedded `.jar` files
+  * `obtain-jars-from-runtime-metadata` - expects applications to expose `/actuator/jars` endpoint from which `.jar` files are obtained
     * @see https://github.com/cf-toolsuite/spring-boot-starter-runtime-metadata
 
 ```
 GET /download/pomfiles
 ```
-> Downloads a .tar.gz file that contains pom.xml files for all Java applications that had had their artifacts built and packaged by Maven. Note: this endpoint is only available when the `java.artifacts.fetch.mode` property is set to `unpack-pom-contents-in-droplet`
+> Downloads a `.tar.gz` file that contains `pom.xml` files for all Java applications that had had their artifacts built and packaged by Maven. Note: this endpoint is only available when the `java.artifacts.fetch.mode` property is set to `unpack-pom-contents-in-droplet`
 
 The tarball contents will be structured as follows: `{organization}/{space}/{application-name}/pom.xml`.  A stakeholder interested in understanding the health and well-being of the subset of their applications leveraging the Spring Framework and/or Spring Boot, could unpack the tarball, visit each directory and execute `mvn depdendencies:tree | grep -E '(org.springframework|io.micrometer)' > spring-dependencies.txt`, then submit each dependencies file to the online [Spring Health Assessment](https://tanzu.vmware.com/spring-health-assessment) reporting service.
 
-You can use this companion [script](scripts/process-java-app-dependencies-tarball.sh) to consume the .tar.gz file.  It will unpack the .tar.gz file, visit each directory where a pom.xml file resides and generate a spring-dependencies.txt file.  Certainly useful when you have a large number of applications to obtain dependencies for.
+You can use this companion [script](scripts/process-java-app-dependencies-tarball.sh) to consume the `.tar.gz` file.  It will unpack the `.tar.gz` file, visit each directory where a `pom.xml` file resides and generate a `spring-dependencies.txt` file.  Certainly useful when you have a large number of applications to obtain dependencies for.
 
 
 ```
