@@ -1122,6 +1122,28 @@ Sample output
 
 #### Java Applications
 
+You will need to add a runtime property to collect additional detail that will then be exposed by the endpoints mentioned below
+
+e.g.,
+
+```
+-Djava.artifacts.fetch.mode=obtain-jars-from-runtime-metadata
+```
+
+or
+
+```
+cf set-env cf-butler JAVA_ARTIFACTS_FETCH_MODE obtain-jars-from-runtime-metadata
+```
+
+There are three fetch modes:
+
+  * `unpack-pom-contents-in-droplet` - unpacks and filters application droplets in-memory for a pom.xml file, return the contents
+    * only returns results if applicaiton was built with Maven
+  * `list-jars-in-droplet` - unpacks and filters application droplets in-memory returning list of embedded .jar files
+  * `obtain-jars-from-runtime-metadata` - expects applications to expose /actuator/jars endpoint from which .jar files are obtained
+    * @see https://github.com/cf-toolsuite/spring-boot-starter-runtime-metadata
+
 ```
 GET /download/pomfiles
 ```
