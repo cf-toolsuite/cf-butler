@@ -24,7 +24,7 @@ Policy files must adhere to a naming convention where:
 
 A sample Github repository exists [here](https://github.com/cf-toolsuite/cf-butler-sample-config).
 
-Have a look at [secrets.pws.json](../samples/secrets.pws.json) for an example of how to configure secrets for deployment of `cf-butler` to PAS integrating with the aforementioned sample Github repository.
+Have a look at [secrets.pws.json](../samples/secrets.pws.json) for an example of how to configure secrets for deployment of `cf-butler` to TAS integrating with the aforementioned sample Github repository.
 
 On startup `cf-butler` will read files from the repo and cache in a database.  Each policy's id will be set to the commit id.
 
