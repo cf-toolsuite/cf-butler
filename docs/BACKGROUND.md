@@ -13,3 +13,5 @@ This is where `cf-butler` has your back.
 Cf-butler exposes a number of self-service endpoints that perform house-keeping for your foundation.  You define policies and an execution schedule.  E.g., applications and service instances could be removed based on policy criteria.  Cf-butler also provides detail and summary snapshot reporting on all applications, service instances, user accounts, organizations and spaces.  Lastly, cf-butler [aspires](https://github.com/cf-toolsuite/cf-butler/issues/62) to provide operators insight into the "freshness" of installed tiles, stemcells and buildpacks.
 
 Cf-butler is configured and deployed as an application instance. Its capabilities overlap only on [accounting](https://docs.vmware.com/en/VMware-Tanzu-Application-Service/5.0/tas-for-vms/accounting-report.html) data collection from VMware Tanzu Application Service.  However, cf-butler performs other useful duties like a) snapshot usage reporting and b) policy registration and execution.
+
+![cf-butler diagram](cf-butler-2024.png)
