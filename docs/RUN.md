@@ -10,7 +10,7 @@ where `{target_foundation_profile}` is something like `pcfone`
 > You'll need to manually stop to the application with `Ctrl+C`
 
 
-## How to run at command-line
+## How to run w/ Java
 
 ```
 SPRING_PROFILES_ACTIVE=on-demand,cloud java -jar target/cf-butler-1.0-SNAPSHOT.jar -Djava.security.egd=file:///dev/urandom -Dspring.h2.console.enabled=true -Djava.artifacts.fetch.mode=obtain-jars-from-runtime-metadata -XX:+UseG1GC -XX:SoftRefLRUPolicyMSPerMB=1 -XX:+UseStringDeduplication -Xmx3G -XX:MaxDirectMemorySize=1G --spring.config.location=classpath:/application.yml,file:./config/application-dhaka.yml
