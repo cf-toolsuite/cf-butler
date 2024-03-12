@@ -106,7 +106,7 @@ public class ScaleAppInstancesPolicyExecutorTask implements PolicyExecutorTask {
                 .distinct()
                 .filter(wl -> filter.isWhitelisted(wl.getT2(), wl.getT1().getOrganization()))
                 .filter(bl -> filter.isBlacklisted(bl.getT1().getOrganization(), bl.getT1().getSpace()))
-                .filter(from -> from.getT1().getRunningInstances().equals(from.getT2().getOption("instances-from", Integer.class)))
+                .filter(from -> from.getT1().getRunningInstances() >= from.getT2().getOption("instances-from", Integer.class))
                 .flatMap(ad -> scaleApplication(ad.getT2(), ad.getT1()))
                 .flatMap(historicalRecordService::save)
                 .collectList();
