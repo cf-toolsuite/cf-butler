@@ -1,5 +1,19 @@
 # VMware Tanzu Application Service > Butler
 
+* [Endpoints](#endpoints)
+  * [Operations Manager](#operations-manager)
+  * [VMware Tanzu Network](#vmware-tanzu-network)
+  * [Events](#events)
+  * [Metadata](#metadata)
+  * [Snapshot](#snapshot)
+    * [Detail](#detail)
+    * [Summary](#summary)
+    * [Java Applications](#java-applications)
+  * [Accounting](#accounting)
+  * [Policies](#policies)
+  * [Collection and Execution](#collection-and-execution)
+
+
 ## Endpoints
 
 These REST endpoints have been exposed for reporting and administrative purposes.
@@ -204,6 +218,8 @@ Sample body
 
 ### Snapshot
 
+#### Demographics
+
 ```
 GET /snapshot/organizations
 ```
@@ -288,6 +304,9 @@ GET /snapshot/users
 GET /snapshot/users/count
 ```
 > Counts the number of user accounts on a foundation
+
+
+#### Summary
 
 ```
 GET /snapshot/summary
@@ -383,6 +402,8 @@ Sample output
   }
 }
 ```
+
+#### Detail
 
 ```
 GET /snapshot/detail
