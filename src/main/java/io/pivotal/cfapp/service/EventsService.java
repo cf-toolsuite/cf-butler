@@ -22,6 +22,7 @@ import io.pivotal.cfapp.domain.ServiceInstanceDetail;
 import io.pivotal.cfapp.domain.event.EventType;
 import io.pivotal.cfapp.domain.event.Events;
 import io.pivotal.cfapp.domain.event.Resource;
+import io.pivotal.cfapp.util.RetryableTokenProvider;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -69,8 +70,8 @@ public class EventsService {
                 .encode()
                 .toUriString();
         return
-            tokenProvider
-                .getToken(connectionContext)
+            RetryableTokenProvider
+                .getToken(tokenProvider, connectionContext)
                 .flatMap(t -> webClient
                         .get()
                         .uri(uri)
@@ -104,8 +105,8 @@ public class EventsService {
                 .encode()
                 .toUriString();
         return
-            tokenProvider
-                .getToken(connectionContext)
+            RetryableTokenProvider
+                .getToken(tokenProvider, connectionContext)
                 .flatMap(t -> webClient
                         .get()
                         .uri(uri)
