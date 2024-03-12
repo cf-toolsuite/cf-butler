@@ -12,8 +12,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 import io.pivotal.cfapp.config.PasSettings;
 import io.pivotal.cfapp.domain.Metadata;
 import io.pivotal.cfapp.domain.Resource;
-import io.pivotal.cfapp.domain.Resources;
 import io.pivotal.cfapp.domain.ResourceType;
+import io.pivotal.cfapp.domain.Resources;
+import io.pivotal.cfapp.util.RetryableTokenProvider;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -48,8 +49,8 @@ public class ResourceMetadataService {
                     .encode()
                     .toUriString();
         return
-            tokenProvider
-                .getToken(connectionContext)
+            RetryableTokenProvider
+                .getToken(tokenProvider, connectionContext)
                 .flatMap(t -> webClient
                                 .get()
                                     .uri(uri)
@@ -73,8 +74,8 @@ public class ResourceMetadataService {
                     .buildAndExpand(rt.getId(), page == null ? 1 : page, perPage == null ? 50 : perPage)
                     .toUriString();
         return
-            tokenProvider
-                .getToken(connectionContext)
+            RetryableTokenProvider
+                .getToken(tokenProvider, connectionContext)
                 .flatMap(t -> webClient
                                 .get()
                                     .uri(uri)
@@ -96,8 +97,8 @@ public class ResourceMetadataService {
                         .encode()
                         .toUriString();
                 return
-                    tokenProvider
-                        .getToken(connectionContext)
+                    RetryableTokenProvider
+                        .getToken(tokenProvider, connectionContext)
                         .flatMap(t -> webClient
                                 .get()
                                 .uri(uri)
@@ -119,8 +120,8 @@ public class ResourceMetadataService {
                     .encode()
                     .toUriString();
             return
-                tokenProvider
-                    .getToken(connectionContext)
+                RetryableTokenProvider
+                    .getToken(tokenProvider, connectionContext)
                     .flatMap(t -> webClient
                             .patch()
                             .uri(uri)

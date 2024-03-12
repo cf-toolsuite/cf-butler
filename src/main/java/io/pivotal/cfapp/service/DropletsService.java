@@ -13,6 +13,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import io.pivotal.cfapp.config.PasSettings;
 import io.pivotal.cfapp.util.DropletProcessingCondition;
+import io.pivotal.cfapp.util.RetryableTokenProvider;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 
@@ -52,8 +53,8 @@ public class DropletsService {
                 .toUriString();
         log.trace("Attempting to download droplet with GET {}", uri);
         return
-            tokenProvider
-                .getToken(connectionContext)
+            RetryableTokenProvider
+                .getToken(tokenProvider, connectionContext)
                 .flatMapMany(
                     t -> webClient
                         .get()

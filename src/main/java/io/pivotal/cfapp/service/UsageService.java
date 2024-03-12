@@ -14,6 +14,7 @@ import io.pivotal.cfapp.config.PasSettings;
 import io.pivotal.cfapp.domain.accounting.application.AppUsageReport;
 import io.pivotal.cfapp.domain.accounting.service.ServiceUsageReport;
 import io.pivotal.cfapp.domain.accounting.task.TaskUsageReport;
+import io.pivotal.cfapp.util.RetryableTokenProvider;
 import reactor.core.publisher.Mono;
 
 // @see https://docs.vmware.com/en/VMware-Tanzu-Application-Service/3.0/tas-for-vms/accounting-report.html#obtain-system-usage-information-1
@@ -45,8 +46,8 @@ public class UsageService {
     public Mono<AppUsageReport> getApplicationReport() {
         String uri = settings.getUsageDomain() + "/system_report/app_usages";
         return
-            tokenProvider
-                .getToken(connectionContext)
+            RetryableTokenProvider
+                .getToken(tokenProvider, connectionContext)
                 .flatMap(t -> webClient
                         .get()
                         .uri(uri)
@@ -58,8 +59,8 @@ public class UsageService {
     public Mono<ServiceUsageReport> getServiceReport() {
         String uri = settings.getUsageDomain() + "/system_report/service_usages";
         return
-            tokenProvider
-                .getToken(connectionContext)
+            RetryableTokenProvider
+                .getToken(tokenProvider, connectionContext)
                 .flatMap(t -> webClient
                         .get()
                         .uri(uri)
@@ -71,8 +72,8 @@ public class UsageService {
     public Mono<TaskUsageReport> getTaskReport() {
         String uri = settings.getUsageDomain() + "/system_report/task_usages";
         return
-            tokenProvider
-                .getToken(connectionContext)
+            RetryableTokenProvider
+                .getToken(tokenProvider, connectionContext)
                 .flatMap(t -> webClient
                         .get()
                         .uri(uri)
@@ -118,8 +119,8 @@ public class UsageService {
         Assert.isTrue(end.isAfter(start), "Date range is invalid!");
         String uri = settings.getUsageDomain() + "/organizations/{orgGuid}/{usageType}?start={start}&end={end}";
         return
-            tokenProvider
-                .getToken(connectionContext)
+            RetryableTokenProvider
+                .getToken(tokenProvider, connectionContext)
                 .flatMap(t -> webClient
                         .get()
                         .uri(uri, orgGuid, usageType, start.toString(), end.toString())
