@@ -4,7 +4,7 @@
 
 Required
 
-* Access to a foundation with VMware Tanzu Application Service 2.11 or better installed
+* Access to a foundation with VMware Tanzu Application Service 4.0.19+LTS-T or better installed
   * and [VMware Tanzu Application Service](https://tanzu.vmware.com/platform/vmware-tanzu-application-service) admin account credentials
 
 Optional
