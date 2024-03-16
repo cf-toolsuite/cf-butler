@@ -3,7 +3,7 @@ on:
   release:
     types: [created]
 jobs:
-  publish:
+  publish-jars:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -16,14 +16,14 @@ jobs:
           distribution: liberica
           java-version: 21
       - name: Publish package capable of targeting H2 in-memory backend
-        run: ./mvnw versions:set -DnewVersion=${{ github.event.release.tag_name }} && ./mvnw --batch-mode --update-snapshots -Plog4j2 clean deploy
+        run: ./mvnw versions:set -DnewVersion=${{ github.event.release.tag_name }} && ./mvnw --batch-mode --update-snapshots -Pexpose-runtime-metadata clean deploy
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish package capable of targeting MySQL backend
-        run: ./mvnw versions:set -DnewVersion=mysql-${{ github.event.release.tag_name }} && ./mvnw --batch-mode --update-snapshots -Ddbms=mysql -Plog4j2 clean deploy
+        run: ./mvnw versions:set -DnewVersion=mysql-${{ github.event.release.tag_name }} && ./mvnw --batch-mode --update-snapshots -Pmysql,expose-runtime-metadata clean deploy
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish package capable of targeting Postgresql backend
-        run: ./mvnw versions:set -DnewVersion=postgres-${{ github.event.release.tag_name }} && ./mvnw --batch-mode --update-snapshots -Drdbms=postgres -Plog4j2 clean deploy
+        run: ./mvnw versions:set -DnewVersion=postgres-${{ github.event.release.tag_name }} && ./mvnw --batch-mode --update-snapshots -Ppostgres,expose-runtime-metadata clean deploy
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
