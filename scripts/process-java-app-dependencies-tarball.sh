@@ -2,7 +2,7 @@
 
 # Function to check if Maven is installed
 check_maven() {
-  if [ ! command -v mvn &> /dev/null ]; then
+  if ! command -v mvn &> /dev/null; then
     echo "Maven is required but not installed. Please install Maven and re-run this script."
     exit 1
   fi
@@ -19,15 +19,15 @@ fi
 TAR_FILE=$1
 
 # Unpack the tar.gz file
-tar -xvf $TAR_FILE
+tar -xvf "$TAR_FILE"
 
 # Find all directories containing a pom.xml file and run the command in them
-find . -type f -name "pom.xml" | while read pom; do
+find . -type f -name "pom.xml" | while read -r pom; do
   DIR=$(dirname "$pom")
-  pushd "$DIR" > /dev/null
+  pushd "$DIR" > /dev/null || exit
   echo "Gathering dependencies within $DIR"
   mvn dependency:tree | grep -E '(org.springframework|io.micrometer)' > spring-dependencies.txt
-  popd > /dev/null
+  popd > /dev/null || exit
 done
 
 echo "Processing complete."
