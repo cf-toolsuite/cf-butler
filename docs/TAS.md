@@ -65,4 +65,6 @@ Shutdown and destroy the app and service instances
 ./scripts/destroy.sh
 ```
 
-> Note: If you are seeing [OutOfMemory exceptions](https://dzone.com/articles/troubleshooting-problems-with-native-off-heap-memo) shortly after startup you may need to [cf scale](https://docs.run.tanzu.vmware.com/devguide/deploy-apps/cf-scale.html#vertical) the available memory for large foundations.
+> Note: If you are seeing [OutOfMemory exceptions](https://dzone.com/articles/troubleshooting-problems-with-native-off-heap-memo) shortly after startup you may need to [cf scale](https://docs.run.tanzu.vmware.com/devguide/deploy-apps/cf-scale.html#vertical) the available memory for large foundations.  You may also need to adjust `JAVA_OPTS` environment variable and increase the amount of direct memory available via `-XX:MaxDirectMemorySize`.
+
+
