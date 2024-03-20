@@ -3,7 +3,7 @@
 ## How to Run with Maven
 
 ```
-./mvnw spring-boot:run -Dspring.profiles.active={target_foundation_profile}
+./mvnw spring-boot:run -Dspring-boot.run.profiles={target_foundation_profile}
 ```
 where `{target_foundation_profile}` is something like `pcfone`
 

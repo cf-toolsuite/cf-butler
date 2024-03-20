@@ -49,7 +49,7 @@ If you copied and appended a suffix to the original `application.yml` then you w
 E.g., if you had a configuration file named `application-pcfone.yml`
 
 ```
-./mvnw spring-boot:run -Dspring.profiles.active=pcfone
+./mvnw spring-boot:run -Dspring-boot.run.profiles=pcfone
 ```
 
 > See the [samples](../samples) directory for a few examples of configuration options when deploying to a foundation.
