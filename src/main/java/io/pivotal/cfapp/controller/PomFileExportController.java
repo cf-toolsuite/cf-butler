@@ -28,7 +28,7 @@ import reactor.core.publisher.Flux;
 
 @Slf4j
 @RestController
-@ConditionalOnProperty(prefix = "java.artifact.reader", name= "impl", havingValue="pom")
+@ConditionalOnProperty(prefix = "java.artifacts.fetch", name= "mode", havingValue="unpack-pom-contents-in-droplet")
 public class PomFileExportController {
 
     private JavaAppDetailService service;

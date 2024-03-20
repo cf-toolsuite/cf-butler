@@ -4,7 +4,7 @@
 
 Make a copy of then edit the contents of the `application.yml` file located in `src/main/resources`.  A best practice is to append a suffix representing the target deployment environment (e.g., `application-pcfone.yml`). You will need to provide administrator credentials to Apps Manager for the foundation if you want the butler to keep your entire foundation tidy.
 
-> You really should not bundle configuration with the application. To take some of the sting away, you might consider externalizing and/or [encrypting](https://blog.novatec-gmbh.de/encrypted-properties-spring/) this configuration.
+> You really should not bundle configuration with the application. To take some of the sting away, you might consider externalizing and/or [encrypting](https://docs.spring.io/spring-cloud-config/docs/current/reference/html/#_encryption_and_decryption) this configuration.
 
 ### Managing secrets
 
