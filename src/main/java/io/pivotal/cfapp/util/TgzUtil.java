@@ -86,7 +86,7 @@ public class TgzUtil {
         );
         return inputStreamMono.flatMapMany(is -> extractFileContent(is, filename))
                 .collectList()
-                .map(list -> String.join(" ", list));
+                .map(list -> String.join("", list));
     }
 
     private static Flux<String> extractFileContent(InputStream is, String filename) {
