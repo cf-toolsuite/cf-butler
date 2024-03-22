@@ -435,6 +435,12 @@
       <plugin>
         <groupId>org.graalvm.buildtools</groupId>
         <artifactId>native-maven-plugin</artifactId>
+        <configuration>
+          <buildArgs>
+              <buildArg>--no-fallback</buildArg>
+              <buildArg>-H:IncludeResources=.*\.(html|txt|yml|factories|xml|ddl|properties)</buildArg>
+          </buildArgs>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>io.github.git-commit-id</groupId>
