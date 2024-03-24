@@ -13,6 +13,8 @@
   * [Policies](#policies)
   * [Collection and Execution](#collection-and-execution)
 
+Note: _Accounting_, _Operations Manager_ and _VMware Tanzu Network_ endpoints are only available when the target foundation hosts Tanzu Application Service.
+
 
 ## Endpoints
 
@@ -618,36 +620,36 @@ Sample output
 ```
 GET /accounting/applications
 ```
-> Produces a system-wide account report of [application usage](https://docs.vmware.com/en/VMware-Tanzu-Application-Service/3.0/tas-for-vms/accounting-report.html#app-usage)
+> Produces a system-wide account report of [application usage](https://docs.vmware.com/en/VMware-Tanzu-Application-Service/4.0/tas-for-vms/accounting-report.html#app-usage)
 
 > **Note**: Report excludes application instances in the `system` org
 
 ```
 GET /accounting/services
 ```
-> Produces a system-wide account report of [service usage](https://docs.vmware.com/en/VMware-Tanzu-Application-Service/3.0/tas-for-vms/accounting-report.html#service-usage)
+> Produces a system-wide account report of [service usage](https://docs.vmware.com/en/VMware-Tanzu-Application-Service/4.0/tas-for-vms/accounting-report.html#service-usage)
 
 > **Note**: Report excludes user-provided service instances
 
 ```
 GET /accounting/tasks
 ```
-> Produces a system-wide account report of [task usage](https://docs.vmware.com/en/VMware-Tanzu-Application-Service/3.0/tas-for-vms/accounting-report.html#task-usage)
+> Produces a system-wide account report of [task usage](https://docs.vmware.com/en/VMware-Tanzu-Application-Service/4.0/tas-for-vms/accounting-report.html#task-usage)
 
 ```
 GET /accounting/applications/{orgName}/{startDate}/{endDate}
 ```
-> Produces an [application usage](https://docs.vmware.com/en/VMware-Tanzu-Application-Service/3.0/tas-for-vms/accounting-report.html#org-app-usage) constrained to single organization and time period
+> Produces an [application usage](https://docs.vmware.com/en/VMware-Tanzu-Application-Service/4.0/tas-for-vms/accounting-report.html#org-app-usage) constrained to single organization and time period
 
 ```
 GET /accounting/services/{orgName}/{startDate}/{endDate}
 ```
-> Produces a [service usage](https://docs.vmware.com/en/VMware-Tanzu-Application-Service/3.0/tas-for-vms/accounting-report.html#service-usage-9) constrained to single organization and time period
+> Produces a [service usage](https://docs.vmware.com/en/VMware-Tanzu-Application-Service/4.0/tas-for-vms/accounting-report.html#org-service-usage) constrained to single organization and time period
 
 ```
 GET /accounting/tasks/{orgName}/{startDate}/{endDate}
 ```
-> Produces a [task usage](https://docs.vmware.com/en/VMware-Tanzu-Application-Service/3.0/tas-for-vms/accounting-report.html#task-usage-8) constrained to single organization and time period
+> Produces a [task usage](https://docs.vmware.com/en/VMware-Tanzu-Application-Service/4.0/tas-for-vms/accounting-report.html#org-task-usage) constrained to single organization and time period
 
 
 ### Policies
