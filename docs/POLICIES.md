@@ -1,5 +1,14 @@
 # VMware Tanzu Application Service > Butler
 
+* [Managing Policies](#managing-policies)
+  * [Application and Service Instance](#application-and-service-instance-policies)
+  * [Hygiene](#hygiene-policies)
+  * [Legacy](#legacy-policies)
+  * [Resource Notification](#resource-notification-policies)
+  * [Endpoint](#endpoint-policies)
+  * [Query](#query-policies)
+
+
 ## Managing policies
 
 Creation and deletion of policies are managed via API endpoints by default. When an audit trail is important to you, you may opt to set `cf.policies.git.uri` -- this property specifies the location of the repository that contains policy files in JSON format.
@@ -17,16 +26,20 @@ If you want to work with a private repository, then you will have to specify
 
 one or both are used to authenticate.  In the case where you may have configured a personal access token, set `cf.policies.git.username` equal to the value of the token.
 
-Policy files must adhere to a naming convention where:
-
-* a filename ending with `-AP.json` encapsulates an individual [ApplicationPolicy](src/main/java/io/pivotal/cfapp/domain/ApplicationPolicy.java)
-* a filename ending with `-SIP.json` encapsulates an individual [ServiceInstancePolicy](src/main/java/io/pivotal/cfapp/domain/ServiceInstancePolicy.java)
-
 A sample Github repository exists [here](https://github.com/cf-toolsuite/cf-butler-sample-config).
 
 Have a look at [secrets.pws.json](../samples/secrets.pws.json) for an example of how to configure secrets for deployment of `cf-butler` to TAS integrating with the aforementioned sample Github repository.
 
 On startup `cf-butler` will read files from the repo and cache in a database.  Each policy's id will be set to the commit id.
+
+### Application and Service Instance Policies
+
+Policy files must adhere to a naming convention where:
+
+* a filename ending with `-AP.json` encapsulates an individual [ApplicationPolicy](src/main/java/io/pivotal/cfapp/domain/ApplicationPolicy.java)
+* a filename ending with `-SIP.json` encapsulates an individual [ServiceInstancePolicy](src/main/java/io/pivotal/cfapp/domain/ServiceInstancePolicy.java)
+
+See additional property requirements in this sample Github [repository](https://github.com/cf-toolsuite/cf-butler-sample-config).
 
 ### Hygiene Policies
 
@@ -39,7 +52,6 @@ As mentioned previously the policy file must adhere to a naming convention
 * a filename ending with `-HP.json` encapsulates an individual [HygienePolicy](src/main/java/io/pivotal/cfapp/domain/HygienePolicy.java)
 
 See additional property requirements in this sample Github [repository](https://github.com/cf-toolsuite/cf-butler-sample-config).
-
 
 ### Legacy Policies
 
