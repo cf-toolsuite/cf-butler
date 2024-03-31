@@ -819,9 +819,9 @@
       <id>expose-runtime-metadata</id>
       <dependencies>
         <dependency>
-          <groupId>io.pivotal.app.actuator</groupId>
+          <groupId>org.cftoolsuite.actuator</groupId>
           <artifactId>spring-boot-starter-runtime-metadata</artifactId>
-          <version>0.1.2</version>
+          <version>0.2.0</version>
         </dependency>
       </dependencies>
     </profile>
