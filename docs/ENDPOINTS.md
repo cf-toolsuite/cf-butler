@@ -593,7 +593,7 @@ Sample output
         "dropletId": "797b9bfd-0de2-48a9-b22e-90d7a61fd988",
         "organization": "observability",
         "space": "demo",
-        "springDependencies": "org.springframework.boot:spring-boot-starter-parent:3.2.2, org.springframework.cloud:spring-cloud-dependencies:2023.0.0"
+        "springDependencies": "org.springframework.boot:spring-boot-starter-parent:3.2.2, org.springframework.cloud:spring-cloud-dependencies:2023.0.1"
     }
 ]
 ```
@@ -608,7 +608,7 @@ Sample output
 ```
 {
     "org.springframework.boot:spring-boot-starter-parent:3.2.2": 10,
-    "org.springframework.cloud:spring-cloud-dependencies:2023.0.0": 7
+    "org.springframework.cloud:spring-cloud-dependencies:2023.0.1": 7
 }
 ```
 

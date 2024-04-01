@@ -1,1 +1,0 @@
-io.pivotal.cfenv.spring.boot.CfEnvProcessor=io.pivotal.cfapp.config.ButlerCfEnvProcessor
