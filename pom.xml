@@ -16,20 +16,20 @@
     <url>https://github.com/cf-toolsuite/cf-butler</url>
   </scm>
 
-	<developers>
-		<developer>
-			<id>cphillipson</id>
-			<name>Chris Phillipson</name>
-			<email>cphillipson@cftoolsuite.org</email>
-			<roles>
-				<role>architect</role>
-				<role>developer</role>
-			</roles>
-			<organization>Cloud Foundry Tool Suite</organization>
-			<organizationUrl>https://github.com/cf-toolsuite</organizationUrl>
-			<timezone>America/Seattle</timezone>
-		</developer>
-	</developers>
+  <developers>
+    <developer>
+      <id>cphillipson</id>
+      <name>Chris Phillipson</name>
+      <email>cphillipson@cftoolsuite.org</email>
+      <roles>
+        <role>architect</role>
+        <role>developer</role>
+      </roles>
+      <organization>Cloud Foundry Tool Suite</organization>
+      <organizationUrl>https://github.com/cf-toolsuite</organizationUrl>
+      <timezone>America/Seattle</timezone>
+    </developer>
+  </developers>
 
   <distributionManagement>
     <!-- publish to GitHub gh-pages -->
@@ -626,8 +626,8 @@
         <version>4.3</version>
         <configuration>
           <properties>
-            <owner>io.pivotal.cf-butler</owner>
-            <email>cphillipson@pivotal.io</email>
+            <owner>org.cftoolsuite.cfapp.cf-butler</owner>
+            <email>cphillipson@cftoolsuite.org</email>
           </properties>
           <licenseSets>
             <licenseSet>
@@ -683,6 +683,23 @@
             <link>https://docs.spring.io/spring-data/commons/docs/current/api/</link>
             <link>https://docs.oracle.com/javase/${java.version}/docs/api/</link>
           </links>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>ch.acanda.maven</groupId>
+        <artifactId>spring-banner-plugin</artifactId>
+        <version>1.6.0</version>
+        <executions>
+          <execution>
+            <id>generate-spring-banner</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <info>Commit: ${git.commit.id.abbrev}, Version: ${project.version}, Active Profiles: ${spring.profiles.active:default}</info>
         </configuration>
       </plugin>
     </plugins>
