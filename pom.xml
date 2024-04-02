@@ -3,7 +3,7 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>io.pivotal</groupId>
+  <groupId>org.cftoolsuite.cfapp</groupId>
   <artifactId>cf-butler</artifactId>
   <version>1.0-SNAPSHOT</version>
 
@@ -20,12 +20,13 @@
     <developer>
       <id>cphillipson</id>
       <name>Chris Phillipson</name>
-      <email>cphillipson@pivotal.io</email>
-      <url>https://pivotal.io</url>
+      <email>cphillipson@cftoolsuite.org</email>
       <roles>
         <role>architect</role>
         <role>developer</role>
       </roles>
+      <organization>Cloud Foundry Tool Suite</organization>
+      <organizationUrl>https://github.com/cf-toolsuite</organizationUrl>
       <timezone>America/Seattle</timezone>
     </developer>
   </developers>
@@ -114,7 +115,7 @@
     <dependency>
       <groupId>com.cedarsoftware</groupId>
       <artifactId>json-io</artifactId>
-      <version>4.19.11</version>
+      <version>4.19.13</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -241,7 +242,7 @@
       <dependency>
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-dependencies</artifactId>
-        <version>2023.0.0</version>
+        <version>2023.0.1</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
@@ -437,8 +438,8 @@
         <artifactId>native-maven-plugin</artifactId>
         <configuration>
           <buildArgs>
-              <buildArg>--no-fallback</buildArg>
-              <buildArg>-H:IncludeResources=.*\.(html|txt|yml|factories|xml|ddl|properties)</buildArg>
+            <buildArg>--no-fallback</buildArg>
+            <buildArg>-H:IncludeResources=.*\.(html|txt|yml|factories|xml|ddl|properties)</buildArg>
           </buildArgs>
         </configuration>
       </plugin>
@@ -625,8 +626,8 @@
         <version>4.3</version>
         <configuration>
           <properties>
-            <owner>io.pivotal.cf-butler</owner>
-            <email>cphillipson@pivotal.io</email>
+            <owner>org.cftoolsuite.cfapp.cf-butler</owner>
+            <email>cphillipson@cftoolsuite.org</email>
           </properties>
           <licenseSets>
             <licenseSet>
@@ -682,6 +683,23 @@
             <link>https://docs.spring.io/spring-data/commons/docs/current/api/</link>
             <link>https://docs.oracle.com/javase/${java.version}/docs/api/</link>
           </links>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>ch.acanda.maven</groupId>
+        <artifactId>spring-banner-plugin</artifactId>
+        <version>1.6.0</version>
+        <executions>
+          <execution>
+            <id>generate-spring-banner</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <info>Commit: ${git.commit.id.abbrev}, Version: ${project.version}, Active Profiles: ${spring.profiles.active:default}</info>
         </configuration>
       </plugin>
     </plugins>
@@ -819,9 +837,9 @@
       <id>expose-runtime-metadata</id>
       <dependencies>
         <dependency>
-          <groupId>io.pivotal.app.actuator</groupId>
+          <groupId>org.cftoolsuite.actuator</groupId>
           <artifactId>spring-boot-starter-runtime-metadata</artifactId>
-          <version>0.1.2</version>
+          <version>0.2.0</version>
         </dependency>
       </dependencies>
     </profile>
