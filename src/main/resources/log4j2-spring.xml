@@ -31,7 +31,7 @@
 
         <!--
         <Logger name="org.springframework" level="debug"/>
-        <Logger name="io.pivotal.cfapp.task" level="trace" />
+        <Logger name="org.cftoolsuite.cfapp.task" level="trace" />
         <Logger name="reactor.netty" level="trace" />
         <Logger name="reactor.core" level="debug" />
         <Logger name="io.r2dbc" level="debug" />
