@@ -19,7 +19,7 @@ case "$1" in
     cf create-service credhub default $APP_NAME-secrets -c "$2"
     while [[ $(cf service $APP_NAME-secrets) != *"succeeded"* ]]; do
       echo "$APP_NAME-secrets is not ready yet..."
-      sleep 5s
+      sleep 5
     done
   fi
   cf bind-service $APP_NAME $APP_NAME-secrets
@@ -32,7 +32,7 @@ case "$1" in
     cf create-user-provided-service $APP_NAME-secrets -p "$2"
     while [[ $(cf service $APP_NAME-secrets) != *"succeeded"* ]]; do
       echo "$APP_NAME-secrets is not ready yet..."
-      sleep 5s
+      sleep 5
     done
   fi
   cf bind-service $APP_NAME $APP_NAME-secrets
