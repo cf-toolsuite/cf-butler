@@ -15,5 +15,6 @@
   * [Define and manage policies](docs/POLICIES.md)
   * [Deploy to Tanzu Application Service](docs/TAS.md)
   * [Consume endpoints](docs/ENDPOINTS.md)
+  * [Troubleshooting](docs/TROUBLESHOOTING.md)
 * Videos (coming soon)
 * [Credits](docs/CREDITS.md)
