@@ -5,7 +5,7 @@ set -e
 export APP_NAME=cf-butler
 
 if [ -z "$1" ] && [ -z "$2" ]; then
-  echo "Usage: deploy.alt.sh {credential_store_provider_option} {path_to_secrets_file}"
+  echo "Usage: deploy.cf4k8s.sh {credential_store_provider_option} {path_to_secrets_file}"
   exit 1
 fi
 
