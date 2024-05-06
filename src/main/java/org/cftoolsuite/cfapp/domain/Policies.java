@@ -97,6 +97,14 @@ public class Policies {
         return policies;
     }
 
+    public Policy getById(String policyId) {
+        return all()
+                .stream()
+                .filter(policy -> policy.getId().equals(policyId))
+                .findFirst()
+                .orElse(null);
+    }
+
     @JsonIgnore
     public boolean isEmpty() {
         return getApplicationPolicies().isEmpty()

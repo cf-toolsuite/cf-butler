@@ -1,13 +1,30 @@
 package org.cftoolsuite.cfapp.service;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.cftoolsuite.cfapp.config.GitSettings;
 import org.cftoolsuite.cfapp.domain.ApplicationOperation;
+import org.cftoolsuite.cfapp.domain.ApplicationPolicy;
+import org.cftoolsuite.cfapp.domain.EndpointPolicy;
+import org.cftoolsuite.cfapp.domain.HygienePolicy;
+import org.cftoolsuite.cfapp.domain.LegacyPolicy;
 import org.cftoolsuite.cfapp.domain.Policies;
+import org.cftoolsuite.cfapp.domain.QueryPolicy;
+import org.cftoolsuite.cfapp.domain.ResourceNotificationPolicy;
 import org.cftoolsuite.cfapp.domain.ServiceInstanceOperation;
+import org.cftoolsuite.cfapp.domain.ServiceInstancePolicy;
 import org.cftoolsuite.cfapp.repository.R2dbcPoliciesRepository;
+import org.cftoolsuite.cfapp.task.EndpointPolicyExecutorTask;
+import org.cftoolsuite.cfapp.task.HygienePolicyExecutorTask;
+import org.cftoolsuite.cfapp.task.LegacyWorkloadReportingTask;
+import org.cftoolsuite.cfapp.task.PolicyExecutorTask;
+import org.cftoolsuite.cfapp.task.QueryPolicyExecutorTask;
+import org.cftoolsuite.cfapp.task.ResourceNotificationPolicyExecutorTask;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -173,6 +190,42 @@ public class R2dbcPoliciesService implements PoliciesService {
     @Transactional
     public Mono<Policies> save(Policies entity) {
         return repo.save(entity);
+    }
+
+    @Override
+    public Mono<Map<String, Class<? extends PolicyExecutorTask>>> getTaskMap() {
+        Mono<Policies> policiesMono = repo.findAll();
+        Flux<Map<String, Class<? extends PolicyExecutorTask>>> mapsFlux = Flux.merge(
+            policiesMono
+                .flatMapMany(p -> Flux.fromIterable(p.getApplicationPolicies()))
+                .collectMap(ApplicationPolicy::getId, ap -> ApplicationOperation.getTaskType(ap.getOperation())),
+            policiesMono
+                .flatMapMany(p -> Flux.fromIterable(p.getEndpointPolicies()))
+                .collectMap(EndpointPolicy::getId, ep -> EndpointPolicyExecutorTask.class),
+            policiesMono
+                .flatMapMany(p -> Flux.fromIterable(p.getHygienePolicies()))
+                .collectMap(HygienePolicy::getId, hp -> HygienePolicyExecutorTask.class),
+            policiesMono
+                .flatMapMany(p -> Flux.fromIterable(p.getLegacyPolicies()))
+                .collectMap(LegacyPolicy::getId, lp -> LegacyWorkloadReportingTask.class),
+            policiesMono
+                .flatMapMany(p -> Flux.fromIterable(p.getQueryPolicies()))
+                .collectMap(QueryPolicy::getId, qp -> QueryPolicyExecutorTask.class),
+            policiesMono
+                .flatMapMany(p -> Flux.fromIterable(p.getResourceNotificationPolicies()))
+                .collectMap(ResourceNotificationPolicy::getId, rnp -> ResourceNotificationPolicyExecutorTask.class),
+            policiesMono
+                .flatMapMany(p -> Flux.fromIterable(p.getServiceInstancePolicies()))
+                .collectMap(ServiceInstancePolicy::getId, sip -> ServiceInstanceOperation.getTaskType(sip.getOperation()))
+        );
+        return
+            mapsFlux
+                .reduce(
+                    new HashMap<String, Class<? extends PolicyExecutorTask>>(), (acc, map) -> {
+                        acc.putAll(map);
+                        return acc;
+                    }
+                );
     }
 
 }
