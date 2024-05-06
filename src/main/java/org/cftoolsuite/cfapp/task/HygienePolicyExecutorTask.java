@@ -24,7 +24,6 @@ import org.cftoolsuite.cfapp.service.SpaceUsersService;
 import org.cftoolsuite.cfapp.service.UserSpacesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
@@ -62,9 +61,9 @@ public class HygienePolicyExecutorTask implements PolicyExecutorTask {
     }
 
     @Override
-    public void execute() {
-        log.info("HygienePolicyExecutorTask started");
-        fetchHygienePolicies()
+    public void execute(String id) {
+        log.info("HygienePolicyExecutorTask with id={} started", id);
+        fetchHygienePolicy(id)
         .concatMap(hp -> executeHygienePolicy(hp).map(result -> Tuples.of(hp, result)))
         .collectList()
         .subscribe(
@@ -73,11 +72,10 @@ public class HygienePolicyExecutorTask implements PolicyExecutorTask {
                     notifyOperator(tuple);
                     notifyUsers(tuple);
                 });
-                log.info("HygienePolicyExecutorTask completed");
-                log.info("-- {} hygiene policies executed.", results.size());
+                log.info("HygienePolicyExecutorTask with id={} completed", id);
             },
             error -> {
-                log.error("HygienePolicyExecutorTask terminated with error", error);
+                log.error(String.format("HygienePolicyExecutorTask with id=%s terminated with error", id), error);
             }
         );
     }
@@ -91,10 +89,10 @@ public class HygienePolicyExecutorTask implements PolicyExecutorTask {
                 .map(list -> builder.serviceInstances(list).build());
     }
 
-    protected Flux<HygienePolicy> fetchHygienePolicies() {
+    protected Flux<HygienePolicy> fetchHygienePolicy(String id) {
         return
             policiesService
-                .findAllHygienePolicies()
+                .findHygienePolicyById(id)
                 .flatMapMany(policy -> Flux.fromIterable(policy.getHygienePolicies()));
     }
 
@@ -142,11 +140,6 @@ public class HygienePolicyExecutorTask implements PolicyExecutorTask {
             )
             .subscribe();
         }
-    }
-
-    @Scheduled(cron = "${cron.execution}")
-    protected void runTask() {
-        execute();
     }
 
     private static List<EmailAttachment> buildAttachments(Tuple2<HygienePolicy, Workloads> tuple) {

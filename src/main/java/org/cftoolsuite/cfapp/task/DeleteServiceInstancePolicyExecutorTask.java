@@ -12,7 +12,6 @@ import org.cftoolsuite.cfapp.util.PolicyFilter;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.operations.services.DeleteServiceInstanceRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
@@ -69,12 +68,13 @@ public class DeleteServiceInstancePolicyExecutorTask implements PolicyExecutorTa
     }
 
     @Override
-    public void execute() {
-        log.info("DeleteServiceInstancePolicyExecutorTask started");
+    public void execute(String id) {
+        log.info("DeleteServiceInstancePolicyExecutorTask with id={} started", id);
         policiesService
             .findByServiceInstanceOperation(ServiceInstanceOperation.DELETE)
             .flux()
             .flatMap(p -> Flux.fromIterable(p.getServiceInstancePolicies()))
+            .filter(sp -> sp.getId().equals(id))
             .flatMap(sp -> serviceInfoService.findByServiceInstancePolicy(sp))
             .filter(wl -> filter.isWhitelisted(wl.getT2(), wl.getT1().getOrganization()))
             .filter(bl -> filter.isBlacklisted(bl.getT1().getOrganization(), bl.getT1().getSpace()))
@@ -83,17 +83,13 @@ public class DeleteServiceInstancePolicyExecutorTask implements PolicyExecutorTa
             .collectList()
             .subscribe(
                 result -> {
-                    log.info("DeleteServiceInstancePolicyExecutorTask completed");
+                    log.info("DeleteServiceInstancePolicyExecutorTask with id={} completed", id);
                     log.info("-- {} service instances deleted.", result.size());
                 },
                 error -> {
-                    log.error("DeleteServiceInstancePolicyExecutorTask terminated with error", error);
+                    log.error(String.format("DeleteServiceInstancePolicyExecutorTask with id=%s terminated with error", id), error);
                 }
             );
     }
 
-    @Scheduled(cron = "${cron.execution}")
-    protected void runTask() {
-        execute();
-    }
 }

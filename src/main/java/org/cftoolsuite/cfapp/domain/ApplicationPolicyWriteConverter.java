@@ -23,10 +23,12 @@ public class ApplicationPolicyWriteConverter implements Converter<ApplicationPol
     public OutboundRow convert(ApplicationPolicy source) {
         OutboundRow row = new OutboundRow();
         row.put("id", Parameter.fromOrEmpty(source.getId(), String.class));
+        row.put("git_commit", Parameter.fromOrEmpty(source.getGitCommit(), String.class));
         row.put("operation", Parameter.fromOrEmpty(source.getOperation(), String.class));
         row.put("description", Parameter.fromOrEmpty(source.getDescription(), String.class));
         row.put("state", Parameter.fromOrEmpty(source.getState(), String.class));
         row.put("organization_whitelist", Parameter.fromOrEmpty(source.getOrganizationWhiteList().stream().filter(StringUtils::isNotBlank).collect(Collectors.joining(",")), String.class));
+        row.put("cron_expression", Parameter.fromOrEmpty(source.getCronExpression(), String.class));
         row.put("options", Parameter.fromOrEmpty(CollectionUtils.isEmpty(source.getOptions()) ? null : writeOptions(source.getOptions()), String.class));
         return row;
     }

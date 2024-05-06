@@ -16,7 +16,6 @@ import org.cloudfoundry.operations.applications.DeleteApplicationRequest;
 import org.cloudfoundry.operations.services.DeleteServiceInstanceRequest;
 import org.cloudfoundry.operations.services.UnbindServiceInstanceRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
@@ -81,13 +80,14 @@ public class DeleteAppPolicyExecutorTask implements PolicyExecutorTask {
                 );
     }
 
-    protected Flux<HistoricalRecord> deleteApplicationsWithNoServiceBindings() {
+    protected Flux<HistoricalRecord> deleteApplicationsWithNoServiceBindings(String id) {
         // these are the applications with no service bindings
         // we can delete each one without having to first unbind it from one or more service instances
         return policiesService
                 .findByApplicationOperation(ApplicationOperation.DELETE)
                 .flux()
                 .flatMap(p -> Flux.fromIterable(p.getApplicationPolicies()))
+                .filter(ap -> ap.getId().equals(id))
                 .flatMap(ap -> appInfoService.findByApplicationPolicy(ap, false))
                 .filter(wl -> filter.isWhitelisted(wl.getT2(), wl.getT1().getOrganization()))
                 .filter(bl -> filter.isBlacklisted(bl.getT1().getOrganization(), bl.getT1().getSpace()))
@@ -95,7 +95,7 @@ public class DeleteAppPolicyExecutorTask implements PolicyExecutorTask {
                 .flatMap(historicalRecordService::save);
     }
 
-    protected Flux<HistoricalRecord> deleteApplicationsWithServiceBindingsAndDeleteBoundServiceInstances() {
+    protected Flux<HistoricalRecord> deleteApplicationsWithServiceBindingsAndDeleteBoundServiceInstances(String id) {
         // these are the applications with service bindings
         // in this case the application policy has been configured with delete-services = true
         // so we:  a) unbind one or more service instances from each application, b) delete each application,
@@ -104,6 +104,7 @@ public class DeleteAppPolicyExecutorTask implements PolicyExecutorTask {
                 .findByApplicationOperation(ApplicationOperation.DELETE)
                 .flux()
                 .flatMap(p -> Flux.fromIterable(p.getApplicationPolicies()))
+                .filter(ap -> ap.getId().equals(id))
                 .filter(f -> f.getOption("delete-services", Boolean.class) == true)
                 .flatMap(ap -> appInfoService.findByApplicationPolicy(ap, true))
                 .filter(wl -> filter.isWhitelisted(wl.getT2(), wl.getT1().getOrganization()))
@@ -120,7 +121,7 @@ public class DeleteAppPolicyExecutorTask implements PolicyExecutorTask {
                 .flatMap(historicalRecordService::save);
     }
 
-    protected Flux<HistoricalRecord> deleteApplicationsWithServiceBindingsButDoNotDeleteBoundServiceInstances() {
+    protected Flux<HistoricalRecord> deleteApplicationsWithServiceBindingsButDoNotDeleteBoundServiceInstances(String id) {
         // these are the applications with service bindings
         // in this case the application policy has been configured with delete-services = false
         // so we:  a) unbind one or more service instances from each application, b) delete each application
@@ -128,6 +129,7 @@ public class DeleteAppPolicyExecutorTask implements PolicyExecutorTask {
                 .findByApplicationOperation(ApplicationOperation.DELETE)
                 .flux()
                 .flatMap(p -> Flux.fromIterable(p.getApplicationPolicies()))
+                .filter(ap -> ap.getId().equals(id))
                 .filter(f -> f.getOption("delete-services", Boolean.class) == false)
                 .flatMap(ap -> appInfoService.findByApplicationPolicy(ap, true))
                 .filter(wl -> filter.isWhitelisted(wl.getT2(), wl.getT1().getOrganization()))
@@ -167,28 +169,23 @@ public class DeleteAppPolicyExecutorTask implements PolicyExecutorTask {
     }
 
     @Override
-    public void execute() {
-        log.info("DeleteAppPolicyExecutorTask started");
+    public void execute(String id) {
+        log.info("DeleteAppPolicyExecutorTask with id={} started", id);
         Flux.concat(
-            deleteApplicationsWithNoServiceBindings(),
-            deleteApplicationsWithServiceBindingsButDoNotDeleteBoundServiceInstances(),
-            deleteApplicationsWithServiceBindingsAndDeleteBoundServiceInstances()
+            deleteApplicationsWithNoServiceBindings(id),
+            deleteApplicationsWithServiceBindingsButDoNotDeleteBoundServiceInstances(id),
+            deleteApplicationsWithServiceBindingsAndDeleteBoundServiceInstances(id)
         )
         .collectList()
         .subscribe(
             result -> {
-                log.info("DeleteAppPolicyExecutorTask completed");
+                log.info("DeleteAppPolicyExecutorTask with id={} completed", id);
                 log.info("-- {} applications deleted.", result.size());
             },
             error -> {
-                log.error("DeleteAppPolicyExecutorTask terminated with error", error);
+                log.error(String.format("DeleteAppPolicyExecutorTask with id=%s terminated with error", id), error);
             }
         );
-    }
-
-    @Scheduled(cron = "${cron.execution}")
-    protected void runTask() {
-        execute();
     }
 
     private String serviceInstanceName(AppRelationship relationship) {

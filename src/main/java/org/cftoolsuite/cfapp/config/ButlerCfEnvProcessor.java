@@ -79,7 +79,6 @@ public class ButlerCfEnvProcessor implements CfEnvProcessor {
         addOrUpdatePropertyValue("pivnet.apiToken", "PIVNET_API-TOKEN", cfCredentials, properties);
         addOrUpdatePropertyValue("pivnet.enabled", "PIVNET_ENABLED", cfCredentials, properties);
         addOrUpdatePropertyValue("cron.collection", "CRON_COLLECTION", cfCredentials, properties);
-        addOrUpdatePropertyValue("cron.execution", "CRON_EXECUTION", cfCredentials, properties);
         addOrUpdatePropertyValue("management.endpoints.web.exposure.include", "EXPOSED_ACTUATOR_ENDPOINTS", cfCredentials, properties);
         addOrUpdatePropertyValue("java.artifacts.fetch.mode", "JAVA_ARTIFACTS_FETCH_MODE", cfCredentials, properties);
     }

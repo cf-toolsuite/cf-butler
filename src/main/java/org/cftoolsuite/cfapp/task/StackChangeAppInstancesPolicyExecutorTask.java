@@ -36,7 +36,6 @@ import org.cloudfoundry.util.DelayTimeoutException;
 import org.cloudfoundry.util.DelayUtils;
 import org.cloudfoundry.util.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import lombok.Builder;
@@ -112,16 +111,16 @@ public class StackChangeAppInstancesPolicyExecutorTask implements PolicyExecutor
     }
 
     @Override
-    public void execute() {
-        log.info("StackChangeAppInstancesPolicyExecutorTask started");
-        stackChangeApplications()
+    public void execute(String id) {
+        log.info("StackChangeAppInstancesPolicyExecutorTask with id={} started", id);
+        stackChangeApplications(id)
             .subscribe(
                 result -> {
-                    log.info("StackChangeAppInstancesPolicyExecutorTask completed");
+                    log.info("StackChangeAppInstancesPolicyExecutorTask with id={} completed", id);
                     log.info("-- {} applications updated.", result.size());
                 },
                 error -> {
-                    log.error("StackChangeAppInstancesPolicyExecutorTask terminated with error", error);
+                    log.error(String.format("StackChangeAppInstancesPolicyExecutorTask with id=%s terminated with error", id), error);
                 }
             );
     }
@@ -162,11 +161,6 @@ public class StackChangeAppInstancesPolicyExecutorTask implements PolicyExecutor
                 .restart(RestartApplicationRequest.builder().name(detail.getAppName()).build());
     }
 
-    @Scheduled(cron = "${cron.execution}")
-    protected void runTask() {
-        execute();
-    }
-
     private Mono<SetApplicationCurrentDropletResponse> setDroplet(GetBuildResponse build, AppDetail detail) {
         Relationship data = Relationship.builder().id(build.getDroplet().getId()).build();
         return DefaultCloudFoundryOperations.builder()
@@ -203,12 +197,13 @@ public class StackChangeAppInstancesPolicyExecutorTask implements PolicyExecutor
     }
 
     // FIXME current implementation has no recoverability and is not capable of zero-downtime deployment
-    protected Mono<List<HistoricalRecord>> stackChangeApplications() {
+    protected Mono<List<HistoricalRecord>> stackChangeApplications(String id) {
         return
             policiesService
                 .findByApplicationOperation(ApplicationOperation.CHANGE_STACK)
                 .flux()
                 .flatMap(p -> Flux.fromIterable(p.getApplicationPolicies()))
+                .filter(ap -> ap.getId().equals(id))
                 .flatMap(ap -> Flux.concat(appInfoService.findByApplicationPolicy(ap, false), appInfoService.findByApplicationPolicy(ap, true)))
                 .distinct()
                 .filter(wl -> filter.isWhitelisted(wl.getT2(), wl.getT1().getOrganization()))

@@ -22,10 +22,12 @@ public class HygienePolicyWriteConverter implements Converter<HygienePolicy, Out
     public OutboundRow convert(HygienePolicy source) {
         OutboundRow row = new OutboundRow();
         row.put("id", Parameter.fromOrEmpty(source.getId(), String.class));
+        row.put("git_commit", Parameter.fromOrEmpty(source.getGitCommit(), String.class));
         row.put("days_since_last_update", Parameter.fromOrEmpty(source.getDaysSinceLastUpdate(), Integer.class));
         row.put("operator_email_template", Parameter.fromOrEmpty(source.getOperatorTemplate() != null ? writeEmailNotificationTemplate(source.getOperatorTemplate()) : null, String.class));
         row.put("notifyee_email_template", Parameter.fromOrEmpty(source.getNotifyeeTemplate() != null ? writeEmailNotificationTemplate(source.getNotifyeeTemplate()) : null, String.class));
         row.put("organization_whitelist", Parameter.fromOrEmpty(source.getOrganizationWhiteList().stream().filter(StringUtils::isNotBlank).collect(Collectors.joining(",")), String.class));
+        row.put("cron_expression", Parameter.fromOrEmpty(source.getCronExpression(), String.class));
         return row;
     }
 

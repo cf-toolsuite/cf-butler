@@ -15,7 +15,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -61,9 +60,9 @@ public class EndpointPolicyExecutorTask implements PolicyExecutorTask {
     }
 
     @Override
-    public void execute() {
-        log.info("EndpointPolicyExecutorTask started");
-        fetchEndpointPolicies()
+    public void execute(String id) {
+        log.info("EndpointPolicyExecutorTask with id={} started", id);
+        fetchEndpointPolicy(id)
         .concatMap(ep -> exerciseEndpoints(ep).collectList().map(result -> Tuples.of(ep, result)))
         .collectList()
         .subscribe(
@@ -80,11 +79,10 @@ public class EndpointPolicyExecutorTask implements PolicyExecutorTask {
                                 .attachments(buildAttachments(result.getT2()))
                         )
                 );
-                log.info("EndpointPolicyExecutorTask completed");
-                log.info("-- {} endpoint policies executed.", results.size());
+                log.info("EndpointPolicyExecutorTask with id={} completed", id);
             },
             error -> {
-                log.error("EndpointPolicyExecutorTask terminated with error", error);
+                log.error(String.format("EndpointPolicyExecutorTask with id=%s terminated with error", id), error);
             }
         );
     }
@@ -104,16 +102,11 @@ public class EndpointPolicyExecutorTask implements PolicyExecutorTask {
                 .concatMap(e -> exerciseEndpoint(e).map(result -> Tuples.of(determineName(e), result)));
     }
 
-    protected Flux<EndpointPolicy> fetchEndpointPolicies() {
+    protected Flux<EndpointPolicy> fetchEndpointPolicy(String id) {
         return
-                policiesService
-                .findAllEndpointPolicies()
+            policiesService
+                .findEndpointPolicyById(id)
                 .flatMapMany(policy -> Flux.fromIterable(policy.getEndpointPolicies()));
-    }
-
-    @Scheduled(cron = "${cron.execution}")
-    protected void runTask() {
-        execute();
     }
 
     private static List<EmailAttachment> buildAttachments(List<Tuple2<String, ResponseEntity<String>>> tuples) {

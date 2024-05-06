@@ -22,11 +22,13 @@ public class LegacyPolicyWriteConverter implements Converter<LegacyPolicy, Outbo
     public OutboundRow convert(LegacyPolicy source) {
         OutboundRow row = new OutboundRow();
         row.put("id", Parameter.fromOrEmpty(source.getId(), String.class));
+        row.put("git_commit", Parameter.fromOrEmpty(source.getGitCommit(), String.class));
         row.put("stacks", Parameter.fromOrEmpty(source.getStacks().stream().filter(StringUtils::isNotBlank).collect(Collectors.joining(",")), String.class));
         row.put("service_offerings", Parameter.fromOrEmpty(source.getServiceOfferings().stream().filter(StringUtils::isNotBlank).collect(Collectors.joining(",")), String.class));
         row.put("operator_email_template", Parameter.fromOrEmpty(source.getOperatorTemplate() != null ? writeEmailNotificationTemplate(source.getOperatorTemplate()) : null, String.class));
         row.put("notifyee_email_template", Parameter.fromOrEmpty(source.getNotifyeeTemplate() != null ? writeEmailNotificationTemplate(source.getNotifyeeTemplate()) : null, String.class));
         row.put("organization_whitelist", Parameter.fromOrEmpty(source.getOrganizationWhiteList().stream().filter(StringUtils::isNotBlank).collect(Collectors.joining(",")), String.class));
+        row.put("cron_expression", Parameter.fromOrEmpty(source.getCronExpression(), String.class));
         return row;
     }
 
