@@ -22,9 +22,11 @@ public class QueryPolicyWriteConverter implements Converter<QueryPolicy, Outboun
     public OutboundRow convert(QueryPolicy source) {
         OutboundRow row = new OutboundRow();
         row.put("id", Parameter.fromOrEmpty(source.getId(), String.class));
+        row.put("git_commit", Parameter.fromOrEmpty(source.getGitCommit(), String.class));
         row.put("description", Parameter.fromOrEmpty(source.getDescription(), String.class));
         row.put("queries", Parameter.fromOrEmpty(CollectionUtils.isEmpty(source.getQueries()) ? null : writeQueries(source.getQueries()), String.class));
         row.put("email_notification_template", Parameter.fromOrEmpty(source.getEmailNotificationTemplate() != null ? writeEmailNotificationTemplate(source.getEmailNotificationTemplate()) : null, String.class));
+        row.put("cron_expression", Parameter.fromOrEmpty(source.getCronExpression(), String.class));
         return row;
     }
 

@@ -4,7 +4,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.util.CollectionUtils;
 
@@ -22,11 +24,11 @@ import lombok.ToString;
 
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({ "id", "description", "queries", "email-notification-template" })
+@JsonPropertyOrder({ "id", "git-commit", "description", "queries", "email-notification-template", "cron-expression" })
 @Getter
 @ToString
 @Table("query_policy")
-public class QueryPolicy {
+public class QueryPolicy implements Policy {
 
     public static QueryPolicy seed(QueryPolicy policy) {
         return QueryPolicy
@@ -34,16 +36,18 @@ public class QueryPolicy {
                 .description(policy.getDescription())
                 .queries(policy.getQueries())
                 .emailNotificationTemplate(policy.getEmailNotificationTemplate())
+                .cronExpression(policy.getCronExpression())
                 .build();
     }
 
-    public static QueryPolicy seedWith(QueryPolicy policy, String id) {
+    public static QueryPolicy seedWith(QueryPolicy policy, String gitCommit) {
         return QueryPolicy
                 .builder()
-                .id(id)
+                .gitCommit(gitCommit)
                 .description(policy.getDescription())
                 .queries(policy.getQueries())
                 .emailNotificationTemplate(policy.getEmailNotificationTemplate())
+                .cronExpression(policy.getCronExpression())
                 .build();
     }
 
@@ -55,6 +59,10 @@ public class QueryPolicy {
     @JsonProperty("id")
     private String id = Generators.timeBasedGenerator().generate().toString();
 
+    @JsonProperty("git-commit")
+    @Column("git_commit")
+    private String gitCommit;
+
     @JsonProperty("description")
     private String description;
 
@@ -65,18 +73,30 @@ public class QueryPolicy {
     @JsonProperty("email-notification-template")
     private EmailNotificationTemplate emailNotificationTemplate;
 
+    @JsonProperty("cron-expression")
+    @Column("cron_expression")
+    private String cronExpression;
+
     @JsonCreator
     QueryPolicy(
             @JsonProperty("pk") Long pk,
             @JsonProperty("id") String id,
+            @JsonProperty("git-commit") String gitCommit,
             @JsonProperty("description") String description,
             @JsonProperty("queries") Set<Query> queries,
-            @JsonProperty("email-notification-template") EmailNotificationTemplate emailNotificationTemplate) {
+            @JsonProperty("email-notification-template") EmailNotificationTemplate emailNotificationTemplate,
+            @JsonProperty("cron-expression") String cronExpression) {
         this.pk = pk;
         this.id = id;
+        this.gitCommit = gitCommit;
         this.description = description;
         this.queries = queries;
         this.emailNotificationTemplate = emailNotificationTemplate;
+        this.cronExpression = cronExpression;
+    }
+
+    public String getCronExpression() {
+        return StringUtils.isBlank(cronExpression) ? defaultCronExpression(): cronExpression;
     }
 
     @JsonIgnore

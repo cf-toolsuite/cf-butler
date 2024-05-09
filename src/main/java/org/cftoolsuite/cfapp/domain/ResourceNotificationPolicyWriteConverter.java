@@ -22,10 +22,12 @@ public class ResourceNotificationPolicyWriteConverter implements Converter<Resou
     public OutboundRow convert(ResourceNotificationPolicy source) {
         OutboundRow row = new OutboundRow();
         row.put("id", Parameter.fromOrEmpty(source.getId(), String.class));
+        row.put("git_commit", Parameter.fromOrEmpty(source.getGitCommit(), String.class));
         row.put("resource_email_template", Parameter.fromOrEmpty(source.getResourceEmailTemplate() != null ? writeEmailNotificationTemplate(source.getResourceEmailTemplate()) : null, String.class));
         row.put("resource_email_metadata", Parameter.fromOrEmpty(source.getResourceEmailMetadata() != null ? writeResourceEmailMetadata(source.getResourceEmailMetadata()) : null, String.class));
         row.put("resource_whitelist", Parameter.fromOrEmpty(source.getResourceWhiteList().stream().filter(StringUtils::isNotBlank).collect(Collectors.joining(",")), String.class));
         row.put("resource_blacklist", Parameter.fromOrEmpty(source.getResourceBlackList().stream().filter(StringUtils::isNotBlank).collect(Collectors.joining(",")), String.class));
+        row.put("cron_expression", Parameter.fromOrEmpty(source.getCronExpression(), String.class));
         return row;
     }
 

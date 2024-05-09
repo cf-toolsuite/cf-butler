@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
@@ -25,17 +26,10 @@ import lombok.ToString;
 
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({ "id", "operation", "description", "options", "organization-whitelist" })
+@JsonPropertyOrder({ "id", "git-commit", "operation", "description", "options", "organization-whitelist", "cron-expression" })
 @Getter
 @ToString
-public class ServiceInstancePolicy implements HasOrganizationWhiteList {
-
-    public static String[] columnNames() {
-        return
-                new String[] {
-                        "pk", "id", "operation", "description", "options", "organization_whitelist"
-        };
-    }
+public class ServiceInstancePolicy implements HasOrganizationWhiteList, Policy {
 
     public static ServiceInstancePolicy seed(ServiceInstancePolicy policy) {
         return ServiceInstancePolicy
@@ -44,17 +38,19 @@ public class ServiceInstancePolicy implements HasOrganizationWhiteList {
                 .operation(policy.getOperation())
                 .options(policy.getOptions())
                 .organizationWhiteList(policy.getOrganizationWhiteList())
+                .cronExpression(policy.getCronExpression())
                 .build();
     }
 
-    public static ServiceInstancePolicy seedWith(ServiceInstancePolicy policy, String id) {
+    public static ServiceInstancePolicy seedWith(ServiceInstancePolicy policy, String gitCommit) {
         return ServiceInstancePolicy
                 .builder()
-                .id(id)
+                .gitCommit(gitCommit)
                 .description(policy.getDescription())
                 .operation(policy.getOperation())
                 .options(policy.getOptions())
                 .organizationWhiteList(policy.getOrganizationWhiteList())
+                .cronExpression(policy.getCronExpression())
                 .build();
     }
 
@@ -70,6 +66,10 @@ public class ServiceInstancePolicy implements HasOrganizationWhiteList {
     @JsonProperty("id")
     private String id = Generators.timeBasedGenerator().generate().toString();
 
+    @JsonProperty("git-commit")
+    @Column("git_commit")
+    private String gitCommit;
+
     @JsonProperty("operation")
     private String operation;
 
@@ -84,20 +84,32 @@ public class ServiceInstancePolicy implements HasOrganizationWhiteList {
     @JsonProperty("organization-whitelist")
     private Set<String> organizationWhiteList = new HashSet<>();
 
+    @JsonProperty("cron-expression")
+    @Column("cron_expression")
+    private String cronExpression;
+
     @JsonCreator
     ServiceInstancePolicy(
             @JsonProperty("pk") Long pk,
             @JsonProperty("id") String id,
+            @JsonProperty("git-commit") String gitCommit,
             @JsonProperty("operation") String operation,
             @JsonProperty("description") String description,
             @JsonProperty("options") Map<String, Object> options,
-            @JsonProperty("organization-whitelist") Set<String> organizationWhiteList) {
+            @JsonProperty("organization-whitelist") Set<String> organizationWhiteList,
+            @JsonProperty("cron-expression") String cronExpression) {
         this.pk = pk;
         this.id = id;
+        this.gitCommit = gitCommit;
         this.operation = operation;
         this.description = description;
         this.options = options;
         this.organizationWhiteList = organizationWhiteList;
+        this.cronExpression = cronExpression;
+    }
+
+    public String getCronExpression() {
+        return StringUtils.isBlank(cronExpression) ? defaultCronExpression(): cronExpression;
     }
 
     @JsonIgnore
