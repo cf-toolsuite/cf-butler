@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
@@ -22,10 +23,10 @@ import lombok.Getter;
 
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({ "id", "resource-email-template", "resource-email-metadata", "resource-whitelist", "resource-blacklist" })
+@JsonPropertyOrder({ "id", "git-commit", "resource-email-template", "resource-email-metadata", "resource-whitelist", "resource-blacklist", "cron-expression" })
 @Getter
 @Table("resource_notification_policy")
-public class ResourceNotificationPolicy {
+public class ResourceNotificationPolicy implements Policy {
 
     public static ResourceNotificationPolicy seed(ResourceNotificationPolicy policy) {
         return ResourceNotificationPolicy
@@ -34,17 +35,19 @@ public class ResourceNotificationPolicy {
                 .resourceEmailMetadata(policy.getResourceEmailMetadata())
                 .resourceWhiteList(policy.getResourceWhiteList())
                 .resourceBlackList(policy.getResourceBlackList())
+                .cronExpression(policy.getCronExpression())
                 .build();
     }
 
-    public static ResourceNotificationPolicy seedWith(ResourceNotificationPolicy policy, String id) {
+    public static ResourceNotificationPolicy seedWith(ResourceNotificationPolicy policy, String gitCommit) {
         return ResourceNotificationPolicy
                 .builder()
-                .id(id)
+                .gitCommit(gitCommit)
                 .resourceEmailTemplate(policy.getResourceEmailTemplate())
                 .resourceEmailMetadata(policy.getResourceEmailMetadata())
                 .resourceWhiteList(policy.getResourceWhiteList())
                 .resourceBlackList(policy.getResourceBlackList())
+                .cronExpression(policy.getCronExpression())
                 .build();
     }
 
@@ -55,6 +58,10 @@ public class ResourceNotificationPolicy {
     @Default
     @JsonProperty("id")
     private String id = Generators.timeBasedGenerator().generate().toString();
+
+    @JsonProperty("git-commit")
+    @Column("git_commit")
+    private String gitCommit;
 
     @JsonProperty("resource-email-template")
     @Column("resource_email_template")
@@ -75,21 +82,38 @@ public class ResourceNotificationPolicy {
     @Column("resource_blacklist")
     private Set<String> resourceBlackList = new HashSet<>();
 
+    @JsonProperty("cron-expression")
+    @Column("cron_expression")
+    private String cronExpression;
+
     @JsonCreator
     public ResourceNotificationPolicy(
             @JsonProperty("pk") Long pk,
             @JsonProperty("id") String id,
+            @JsonProperty("git-commit") String gitCommit,
             @JsonProperty("resource-email-template") EmailNotificationTemplate resourceEmailTemplate,
             @JsonProperty("resource-email-metadata") ResourceEmailMetadata resourceEmailMetadata,
             @JsonProperty("resource-whitelist") Set<String> resourceWhiteList,
-            @JsonProperty("resource-blacklist") Set<String> resourceBlackList
+            @JsonProperty("resource-blacklist") Set<String> resourceBlackList,
+            @JsonProperty("cron-expression") String cronExpression
             ) {
         this.pk = pk;
         this.id = id;
+        this.gitCommit = gitCommit;
         this.resourceEmailTemplate = resourceEmailTemplate;
         this.resourceEmailMetadata = resourceEmailMetadata;
         this.resourceWhiteList = resourceWhiteList;
         this.resourceBlackList = resourceBlackList;
+        this.cronExpression = cronExpression;
+    }
+
+    public String getCronExpression() {
+        return StringUtils.isBlank(cronExpression) ? defaultCronExpression(): cronExpression;
+    }
+
+    @JsonIgnore
+    public Long getPk() {
+        return pk;
     }
 
     public Set<String> getResourceWhiteList() {
@@ -100,8 +124,4 @@ public class ResourceNotificationPolicy {
         return CollectionUtils.isEmpty(resourceBlackList) ? new HashSet<>() : Collections.unmodifiableSet(resourceBlackList);
     }
 
-    @JsonIgnore
-    public Long getPk() {
-        return pk;
-    }
 }

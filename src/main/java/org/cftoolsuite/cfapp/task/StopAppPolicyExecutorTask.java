@@ -12,7 +12,6 @@ import org.cftoolsuite.cfapp.util.PolicyFilter;
 import org.cloudfoundry.client.v3.applications.StopApplicationRequest;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
@@ -45,24 +44,19 @@ public class StopAppPolicyExecutorTask implements PolicyExecutorTask {
     }
 
     @Override
-    public void execute() {
-        log.info("StopAppPolicyExecutorTask started");
-        stopApplications()
+    public void execute(String id) {
+        log.info("StopAppPolicyExecutorTask with id={} started", id);
+        stopApplications(id)
         .collectList()
         .subscribe(
             result -> {
-                log.info("StopAppPolicyExecutorTask completed");
+                log.info("StopAppPolicyExecutorTask with id={} completed", id);
                 log.info("-- {} applications stopped.", result.size());
             },
             error -> {
-                log.error("StopAppPolicyExecutorTask terminated with error", error);
+                log.error(String.format("StopAppPolicyExecutorTask with id=%s terminated with error", id), error);
             }
         );
-    }
-
-    @Scheduled(cron = "${cron.execution}")
-    protected void runTask() {
-        execute();
     }
 
     protected Mono<HistoricalRecord> stopApplication(AppDetail detail) {
@@ -95,11 +89,12 @@ public class StopAppPolicyExecutorTask implements PolicyExecutorTask {
                 );
     }
 
-    protected Flux<HistoricalRecord> stopApplications() {
+    protected Flux<HistoricalRecord> stopApplications(String id) {
         return policiesService
                 .findByApplicationOperation(ApplicationOperation.STOP)
                 .flux()
                 .flatMap(p -> Flux.fromIterable(p.getApplicationPolicies()))
+                .filter(ap -> ap.equals(id))
                 .flatMap(ap -> Flux.concat(appInfoService.findByApplicationPolicy(ap, false), appInfoService.findByApplicationPolicy(ap, true)))
                 .distinct()
                 .filter(wl -> filter.isWhitelisted(wl.getT2(), wl.getT1().getOrganization()))

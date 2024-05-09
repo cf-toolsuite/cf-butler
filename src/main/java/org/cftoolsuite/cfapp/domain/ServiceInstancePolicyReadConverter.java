@@ -26,10 +26,12 @@ public class ServiceInstancePolicyReadConverter implements Converter<Row, Servic
                 .builder()
                     .pk(source.get("pk", Long.class))
                     .id(source.get("id", String.class))
+                    .gitCommit(source.get("git_commit", String.class))
                     .operation(source.get("operation", String.class))
                     .description(source.get("description", String.class))
                     .options(readOptions(source.get("options", String.class) == null ? "{}" : source.get("options", String.class)))
                     .organizationWhiteList(CsvUtil.parse(source.get("organization_whitelist", String.class)))
+                    .cronExpression(source.get("cron_expression", String.class))
                     .build();
     }
 

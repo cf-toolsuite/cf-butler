@@ -24,7 +24,6 @@ import org.cftoolsuite.cfapp.service.SpaceUsersService;
 import org.cftoolsuite.cfapp.service.UserSpacesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
@@ -62,9 +61,9 @@ public class LegacyWorkloadReportingTask implements PolicyExecutorTask {
     }
 
     @Override
-    public void execute() {
-        log.info("LegacyWorkloadReportingTask started");
-        fetchLegacyPolicies()
+    public void execute(String id) {
+        log.info("LegacyWorkloadReportingTask with id={} started", id);
+        fetchLegacyPolicy(id)
         .concatMap(hp -> executePolicy(hp).map(result -> Tuples.of(hp, result)))
         .collectList()
         .subscribe(
@@ -73,11 +72,10 @@ public class LegacyWorkloadReportingTask implements PolicyExecutorTask {
                     notifyOperator(tuple);
                     notifyUsers(tuple);
                 });
-                log.info("LegacyWorkloadReportingTask completed");
-                log.info("-- {} legacy workload policies executed.", results.size());
+                log.info("LegacyWorkloadReportingTask with id={} completed", id);
             },
             error -> {
-                log.error("LegacyWorkloadReportingTask terminated with error", error);
+                log.error(String.format("LegacyWorkloadReportingTask with id=%s terminated with error", id), error);
             }
         );
     }
@@ -91,10 +89,10 @@ public class LegacyWorkloadReportingTask implements PolicyExecutorTask {
                 .map(list -> builder.appRelationships(list).build());
     }
 
-    protected Flux<LegacyPolicy> fetchLegacyPolicies() {
+    protected Flux<LegacyPolicy> fetchLegacyPolicy(String id) {
         return
             policiesService
-                .findAllLegacyPolicies()
+                .findLegacyPolicyById(id)
                 .flatMapMany(policy -> Flux.fromIterable(policy.getLegacyPolicies()));
     }
 
@@ -142,11 +140,6 @@ public class LegacyWorkloadReportingTask implements PolicyExecutorTask {
             )
             .subscribe();
         }
-    }
-
-    @Scheduled(cron = "${cron.execution}")
-    protected void runTask() {
-        execute();
     }
 
     private static List<EmailAttachment> buildAttachments(Tuple2<LegacyPolicy, Workloads> tuple) {

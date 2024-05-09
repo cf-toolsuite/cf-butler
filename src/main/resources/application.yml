@@ -63,8 +63,6 @@ cf:
 cron:
   # the top of every hour daily
   collection: "0 0 * * * *"
-  # at 5:30am on Mondays weekly
-  execution: "0 30 5 * * MON"
 
 logging:
   level:
@@ -117,6 +115,10 @@ spring:
   sql:
     init:
       enabled: false
+  task:
+    scheduling:
+      pool:
+        size: 5
 
 # Java Mail
 # Reset the values for spring.mail.username, spring.mail.password

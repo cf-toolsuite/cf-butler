@@ -24,10 +24,12 @@ public class ResourceNotificationPolicyReadConverter implements Converter<Row, R
                 .builder()
                 .pk(source.get("pk", Long.class))
                 .id(source.get("id", String.class))
+                .gitCommit(source.get("git_commit", String.class))
                 .resourceEmailTemplate(readEmailNotificationTemplate(source.get("resource_email_template", String.class) == null ? "{}": source.get("resource_email_template", String.class)))
                 .resourceEmailMetadata(readResourceEmailMetadata(source.get("resource_email_metadata", String.class) == null ? "{}": source.get("resource_email_metadata", String.class)))
                 .resourceWhiteList(CsvUtil.parse(source.get("resource_whitelist", String.class)))
                 .resourceBlackList(CsvUtil.parse(source.get("resource_blacklist", String.class)))
+                .cronExpression(source.get("cron_expression", String.class))
                 .build();
     }
 

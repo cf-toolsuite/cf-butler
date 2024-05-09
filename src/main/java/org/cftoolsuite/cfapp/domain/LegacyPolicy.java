@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
@@ -22,10 +23,10 @@ import lombok.Getter;
 
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({ "id", "stacks", "service-offerings", "operator-email-template", "notifyee-email-template", "organization-whitelist" })
+@JsonPropertyOrder({ "id", "git-commit", "stacks", "service-offerings", "operator-email-template", "notifyee-email-template", "organization-whitelist", "cron-expression" })
 @Getter
 @Table("legacy_policy")
-public class LegacyPolicy implements HasOrganizationWhiteList {
+public class LegacyPolicy implements HasOrganizationWhiteList, Policy {
 
     public static LegacyPolicy seed(LegacyPolicy policy) {
         return LegacyPolicy
@@ -35,18 +36,20 @@ public class LegacyPolicy implements HasOrganizationWhiteList {
                 .operatorTemplate(policy.getOperatorTemplate())
                 .notifyeeTemplate(policy.getNotifyeeTemplate())
                 .organizationWhiteList(policy.getOrganizationWhiteList())
+                .cronExpression(policy.getCronExpression())
                 .build();
     }
 
-    public static LegacyPolicy seedWith(LegacyPolicy policy, String id) {
+    public static LegacyPolicy seedWith(LegacyPolicy policy, String gitCommit) {
         return LegacyPolicy
                 .builder()
-                .id(id)
+                .gitCommit(gitCommit)
                 .stacks(policy.getStacks())
                 .serviceOfferings(policy.getServiceOfferings())
                 .operatorTemplate(policy.getOperatorTemplate())
                 .notifyeeTemplate(policy.getNotifyeeTemplate())
                 .organizationWhiteList(policy.getOrganizationWhiteList())
+                .cronExpression(policy.getCronExpression())
                 .build();
     }
 
@@ -57,6 +60,10 @@ public class LegacyPolicy implements HasOrganizationWhiteList {
     @Default
     @JsonProperty("id")
     private String id = Generators.timeBasedGenerator().generate().toString();
+
+    @JsonProperty("git-commit")
+    @Column("git_commit")
+    private String gitCommit;
 
     @Default
     @JsonProperty("stacks")
@@ -79,23 +86,35 @@ public class LegacyPolicy implements HasOrganizationWhiteList {
     @Column("organization_whitelist")
     private Set<String> organizationWhiteList = new HashSet<>();
 
+    @JsonProperty("cron-expression")
+    @Column("cron_expression")
+    private String cronExpression;
+
     @JsonCreator
     public LegacyPolicy(
             @JsonProperty("pk") Long pk,
             @JsonProperty("id") String id,
+            @JsonProperty("git-commit") String gitCommit,
             @JsonProperty("stacks") Set<String> stacks,
             @JsonProperty("service-offerings") Set<String> serviceOfferings,
             @JsonProperty("operator-email-template") EmailNotificationTemplate operatorTemplate,
             @JsonProperty("notifyee-email-template") EmailNotificationTemplate notifyeeTemplate,
-            @JsonProperty("organization-whitelist") Set<String> organizationWhiteList
+            @JsonProperty("organization-whitelist") Set<String> organizationWhiteList,
+            @JsonProperty("cron-expression") String cronExpression
             ) {
         this.pk = pk;
         this.id = id;
+        this.gitCommit = gitCommit;
         this.stacks = stacks;
         this.serviceOfferings = serviceOfferings;
         this.operatorTemplate = operatorTemplate;
         this.notifyeeTemplate = notifyeeTemplate;
         this.organizationWhiteList = organizationWhiteList;
+        this.cronExpression = cronExpression;
+    }
+
+    public String getCronExpression() {
+        return StringUtils.isBlank(cronExpression) ? defaultCronExpression(): cronExpression;
     }
 
     public Set<String> getOrganizationWhiteList() {

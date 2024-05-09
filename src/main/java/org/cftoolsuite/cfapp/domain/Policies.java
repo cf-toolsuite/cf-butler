@@ -1,5 +1,6 @@
 package org.cftoolsuite.cfapp.domain;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -82,6 +83,26 @@ public class Policies {
 
     public List<ResourceNotificationPolicy> getResourceNotificationPolicies() {
         return resourceNotificationPolicies != null ? resourceNotificationPolicies: Collections.emptyList();
+    }
+
+    public List<Policy> all() {
+        List<Policy> policies = new ArrayList<>();
+        policies.addAll(getApplicationPolicies());
+        policies.addAll(getEndpointPolicies());
+        policies.addAll(getHygienePolicies());
+        policies.addAll(getLegacyPolicies());
+        policies.addAll(getQueryPolicies());
+        policies.addAll(getResourceNotificationPolicies());
+        policies.addAll(getServiceInstancePolicies());
+        return policies;
+    }
+
+    public Policy getById(String policyId) {
+        return all()
+                .stream()
+                .filter(policy -> policy.getId().equals(policyId))
+                .findFirst()
+                .orElse(null);
     }
 
     @JsonIgnore

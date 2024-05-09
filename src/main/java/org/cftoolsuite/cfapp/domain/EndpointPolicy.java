@@ -4,7 +4,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.util.CollectionUtils;
 
@@ -22,25 +24,27 @@ import lombok.ToString;
 
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({ "id", "description", "endpoints", "email-notification-template" })
+@JsonPropertyOrder({ "id", "git-commit", "description", "endpoints", "email-notification-template", "cron-expression" })
 @Getter
 @ToString
 @Table("endpoint_policy")
-public class EndpointPolicy {
+public class EndpointPolicy implements Policy {
 
     public static EndpointPolicy seed(EndpointPolicy policy) {
         return EndpointPolicy
                 .builder()
+                .cronExpression(policy.getCronExpression())
                 .description(policy.getDescription())
                 .endpoints(policy.getEndpoints())
                 .emailNotificationTemplate(policy.getEmailNotificationTemplate())
                 .build();
     }
 
-    public static EndpointPolicy seedWith(EndpointPolicy policy, String id) {
+    public static EndpointPolicy seedWith(EndpointPolicy policy, String gitCommit) {
         return EndpointPolicy
                 .builder()
-                .id(id)
+                .gitCommit(gitCommit)
+                .cronExpression(policy.getCronExpression())
                 .description(policy.getDescription())
                 .endpoints(policy.getEndpoints())
                 .emailNotificationTemplate(policy.getEmailNotificationTemplate())
@@ -55,6 +59,10 @@ public class EndpointPolicy {
     @JsonProperty("id")
     private String id = Generators.timeBasedGenerator().generate().toString();
 
+    @JsonProperty("git-commit")
+    @Column("git_commit")
+    private String gitCommit;
+
     @JsonProperty("description")
     private String description;
 
@@ -65,18 +73,30 @@ public class EndpointPolicy {
     @JsonProperty("email-notification-template")
     private EmailNotificationTemplate emailNotificationTemplate;
 
+    @JsonProperty("cron-expression")
+    @Column("cron_expression")
+    private String cronExpression;
+
     @JsonCreator
     EndpointPolicy(
             @JsonProperty("pk") Long pk,
             @JsonProperty("id") String id,
+            @JsonProperty("git-commit") String gitCommit,
             @JsonProperty("description") String description,
             @JsonProperty("endpoints") Set<String> endpoints,
-            @JsonProperty("email-notification-template") EmailNotificationTemplate emailNotificationTemplate) {
+            @JsonProperty("email-notification-template") EmailNotificationTemplate emailNotificationTemplate,
+            @JsonProperty("cron-expression") String cronExpression) {
         this.pk = pk;
         this.id = id;
+        this.gitCommit = gitCommit;
         this.description = description;
         this.endpoints = endpoints;
         this.emailNotificationTemplate = emailNotificationTemplate;
+        this.cronExpression = cronExpression;
+    }
+
+    public String getCronExpression() {
+        return StringUtils.isBlank(cronExpression) ? defaultCronExpression(): cronExpression;
     }
 
     public Set<String> getEndpoints() {
@@ -87,5 +107,4 @@ public class EndpointPolicy {
     public Long getPk() {
         return pk;
     }
-
 }

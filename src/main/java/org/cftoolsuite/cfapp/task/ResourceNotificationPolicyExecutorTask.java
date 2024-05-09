@@ -12,7 +12,6 @@ import org.cftoolsuite.cfapp.service.PoliciesService;
 import org.cftoolsuite.cfapp.service.ResourceMetadataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -46,9 +45,9 @@ public class ResourceNotificationPolicyExecutorTask implements PolicyExecutorTas
         }
 
     @Override
-    public void execute() {
-        log.info("ResourceNotificationPolicyExecutorTask started");
-        fetchResourceNotificationPolicies()
+    public void execute(String id) {
+        log.info("ResourceNotificationPolicyExecutorTask with id={} started", id);
+        fetchResourceNotificationPolicy(id)
             .collectList()
             .subscribe(
                 results -> {
@@ -57,19 +56,18 @@ public class ResourceNotificationPolicyExecutorTask implements PolicyExecutorTas
                             notifyOwners(mp,label);
                         });
                     });
-                    log.info("ResourceNotificationPolicyExecutorTask completed");
-                    log.info("-- {} resource notification policies executed.", results.size());
+                    log.info("ResourceNotificationPolicyExecutorTask with id={} completed", id);
                 },
                 error -> {
-                    log.error("ResourceNotificationPolicyExecutorTask terminated with error", error);
+                    log.error(String.format("ResourceNotificationPolicyExecutorTask with id=%s terminated with error", id), error);
                 }
             );
     }
 
-    protected Flux<ResourceNotificationPolicy> fetchResourceNotificationPolicies() {
+    protected Flux<ResourceNotificationPolicy> fetchResourceNotificationPolicy(String id) {
         return
             policiesService
-                .findAllResourceNotificationPolicies()
+                .findResourceNotificationPolicyById(id)
                 .flatMapMany(policy -> Flux.fromIterable(policy.getResourceNotificationPolicies()));
     }
 
@@ -119,11 +117,6 @@ public class ResourceNotificationPolicyExecutorTask implements PolicyExecutorTas
                         prunedSet: policy.getResourceWhiteList();
         return
                 whitelist.isEmpty() ? true: policy.getResourceWhiteList().contains(resource);
-    }
-
-    @Scheduled(cron = "${cron.execution}")
-    protected void runTask() {
-        execute();
     }
 
 }

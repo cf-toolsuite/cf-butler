@@ -14,7 +14,6 @@ import org.cftoolsuite.cfapp.util.PolicyFilter;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.operations.applications.ScaleApplicationRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
@@ -47,23 +46,18 @@ public class ScaleAppInstancesPolicyExecutorTask implements PolicyExecutorTask {
     }
 
     @Override
-    public void execute() {
-        log.info("ScaleAppInstancesPolicyExecutorTask started");
-        scaleApplications()
+    public void execute(String id) {
+        log.info("ScaleAppInstancesPolicyExecutorTask with id={} started", id);
+        scaleApplications(id)
             .subscribe(
                 result -> {
-                    log.info("ScaleAppInstancesPolicyExecutorTask completed");
+                    log.info("ScaleAppInstancesPolicyExecutorTask with id={} completed", id);
                     log.info("-- {} applications scaled.", result.size());
                 },
                 error -> {
-                    log.error("ScaleAppInstancesPolicyExecutorTask terminated with error", error);
+                    log.error(String.format("ScaleAppInstancesPolicyExecutorTask with id=%s terminated with error", id), error);
                 }
             );
-    }
-
-    @Scheduled(cron = "${cron.execution}")
-    protected void runTask() {
-        execute();
     }
 
     protected Mono<HistoricalRecord> scaleApplication(ApplicationPolicy policy, AppDetail detail) {
@@ -96,12 +90,13 @@ public class ScaleAppInstancesPolicyExecutorTask implements PolicyExecutorTask {
                 );
     }
 
-    protected Mono<List<HistoricalRecord>> scaleApplications() {
+    protected Mono<List<HistoricalRecord>> scaleApplications(String id) {
         return
             policiesService
                 .findByApplicationOperation(ApplicationOperation.SCALE_INSTANCES)
                 .flux()
                 .flatMap(p -> Flux.fromIterable(p.getApplicationPolicies()))
+                .filter(ap -> ap.getId().equals(id))
                 .flatMap(ap -> Flux.concat(appInfoService.findByApplicationPolicy(ap, false), appInfoService.findByApplicationPolicy(ap, true)))
                 .distinct()
                 .filter(wl -> filter.isWhitelisted(wl.getT2(), wl.getT1().getOrganization()))

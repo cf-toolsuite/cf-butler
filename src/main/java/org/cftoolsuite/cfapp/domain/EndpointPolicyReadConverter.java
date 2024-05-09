@@ -32,6 +32,7 @@ public class EndpointPolicyReadConverter implements Converter<Row, EndpointPolic
                                 source.get("email_notification_template", String.class) == null
                                 ? "{}"
                                         : source.get("email_notification_template", String.class)))
+                .cronExpression(source.get("cron_expression", String.class))
                 .build();
     }
 

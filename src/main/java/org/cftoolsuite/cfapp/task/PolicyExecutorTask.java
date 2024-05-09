@@ -1,5 +1,5 @@
 package org.cftoolsuite.cfapp.task;
 
 public interface PolicyExecutorTask {
-    void execute();
+    void execute(String policyId);
 }

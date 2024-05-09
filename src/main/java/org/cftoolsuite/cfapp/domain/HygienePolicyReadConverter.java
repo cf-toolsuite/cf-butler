@@ -24,10 +24,12 @@ public class HygienePolicyReadConverter implements Converter<Row, HygienePolicy>
                 .builder()
                 .pk(source.get("pk", Long.class))
                 .id(source.get("id", String.class))
+                .gitCommit(source.get("git_commit", String.class))
                 .daysSinceLastUpdate(source.get("days_since_last_update", Integer.class))
                 .operatorTemplate(readEmailNotificationTemplate(source.get("operator_email_template", String.class) == null ? "{}": source.get("operator_email_template", String.class)))
                 .notifyeeTemplate(readEmailNotificationTemplate(source.get("notifyee_email_template", String.class) == null ? "{}": source.get("notifyee_email_template", String.class)))
                 .organizationWhiteList(CsvUtil.parse(source.get("organization_whitelist", String.class)))
+                .cronExpression(source.get("cron_expression", String.class))
                 .build();
     }
 

@@ -15,11 +15,13 @@ import org.cftoolsuite.cfapp.domain.PoliciesValidator;
 import org.cftoolsuite.cfapp.domain.QueryPolicy;
 import org.cftoolsuite.cfapp.domain.ResourceNotificationPolicy;
 import org.cftoolsuite.cfapp.domain.ServiceInstancePolicy;
+import org.cftoolsuite.cfapp.event.PoliciesLoadedEvent;
 import org.cftoolsuite.cfapp.event.StacksRetrievedEvent;
 import org.cftoolsuite.cfapp.service.PoliciesService;
 import org.eclipse.jgit.lib.Repository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
@@ -47,20 +49,23 @@ public class PoliciesLoader implements ApplicationListener<StacksRetrievedEvent>
     private final GitSettings settings;
     private final PoliciesValidator validator;
     private final ObjectMapper mapper;
+    private ApplicationEventPublisher publisher;
 
     @Autowired
     public PoliciesLoader(
-            GitClient client,
-            PoliciesService service,
-            GitSettings settings,
-            PoliciesValidator validator,
-            ObjectMapper mapper
-            ) {
+        GitClient client,
+        PoliciesService service,
+        GitSettings settings,
+        PoliciesValidator validator,
+        ObjectMapper mapper,
+        ApplicationEventPublisher publisher
+    ) {
         this.client = client;
         this.service = service;
         this.settings = settings;
         this.validator = validator;
         this.mapper = mapper;
+        this.publisher = publisher;
     }
 
     public void load() {
@@ -143,8 +148,10 @@ public class PoliciesLoader implements ApplicationListener<StacksRetrievedEvent>
                     .legacyPolicies(legacyPolicies)
                     .build()
                     ))
+            .then(service.findAll())
             .subscribe(
                     result -> {
+                        publisher.publishEvent(new PoliciesLoadedEvent(this).policies(result));
                         log.info("PoliciesLoader completed");
                         log.info(
                                 String.format("-- Loaded %d application policies, %d service instance policies, %d endpoint policies, %d query policies, %d hygiene policies, %d resource notification policies, and %d legacy policies.",

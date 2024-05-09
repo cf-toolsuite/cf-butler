@@ -25,6 +25,7 @@ public class QueryPolicyReadConverter implements Converter<Row, QueryPolicy> {
                 .builder()
                 .pk(source.get("pk", Long.class))
                 .id(source.get("id", String.class))
+                .gitCommit(source.get("git_commit", String.class))
                 .description(source.get("description", String.class))
                 .queries(readQueries(source.get("queries", String.class) == null ? "[]" : source.get("queries", String.class)))
                 .emailNotificationTemplate(
@@ -32,6 +33,7 @@ public class QueryPolicyReadConverter implements Converter<Row, QueryPolicy> {
                                 source.get("email_notification_template", String.class) == null
                                 ? "{}"
                                         : source.get("email_notification_template", String.class)))
+                .cronExpression(source.get("cron_expression", String.class))
                 .build();
     }
 
