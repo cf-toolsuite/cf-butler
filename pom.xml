@@ -53,7 +53,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.2.5</version>
+    <version>3.3.0</version>
     <relativePath/>
     <!-- lookup parent from repository -->
   </parent>
@@ -67,16 +67,10 @@
 
   <properties>
     <java.version>21</java.version>
-    <commons-lang3.version>3.14.0</commons-lang3.version>
-    <jackson-bom.version>2.17.0</jackson-bom.version>
-    <logback.version>1.4.14</logback.version>
-    <mockito.version>5.11.0</mockito.version>
-    <snakeyaml.version>2.2</snakeyaml.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
-    <lombok.version>1.18.32</lombok.version>
   </properties>
 
   <dependencies>
@@ -148,14 +142,10 @@
       <artifactId>commons-csv</artifactId>
       <version>1.10.0</version>
     </dependency>
-    <!--
-      While it may be tempting to upgrade to address CVEs, DO NOT upgrade until CRC errors and corrupt TAR read requests are fixed
-      @see https://issues.apache.org/jira/browse/COMPRESS-666
-    -->
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-compress</artifactId>
-      <version>1.26.1</version>
+      <version>1.26.2</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -164,12 +154,11 @@
     <dependency>
       <groupId>com.sanctionco.jmail</groupId>
       <artifactId>jmail</artifactId>
-      <version>1.6.2</version>
+      <version>1.6.3</version>
     </dependency>
     <dependency>
       <groupId>com.sendgrid</groupId>
       <artifactId>sendgrid-java</artifactId>
-      <version>4.10.2</version>
       <exclusions>
         <exclusion>
           <groupId>commons-logging</groupId>
@@ -204,7 +193,6 @@
     <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
-      <version>3.25.3</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -304,19 +292,6 @@
       <plugin>
         <groupId>org.cyclonedx</groupId>
         <artifactId>cyclonedx-maven-plugin</artifactId>
-        <version>2.8.0</version>
-        <executions>
-          <execution>
-            <phase>validate</phase>
-            <goals>
-              <goal>makeAggregateBom</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <outputFormat>json</outputFormat>
-          <outputName>classes/bom</outputName>
-        </configuration>
       </plugin>
       <plugin>
         <groupId>org.projectlombok</groupId>
@@ -366,7 +341,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-antrun-plugin</artifactId>
-        <version>3.1.0</version>
         <executions>
           <execution>
             <id>generate-delomboked-sources-jar</id>
@@ -446,7 +420,6 @@
       <plugin>
         <groupId>io.github.git-commit-id</groupId>
         <artifactId>git-commit-id-maven-plugin</artifactId>
-        <version>8.0.2</version>
         <executions>
           <execution>
             <id>get-the-git-infos</id>
@@ -467,12 +440,10 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.13.0</version>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>versions-maven-plugin</artifactId>
-        <version>2.16.2</version>
         <configuration>
           <generateBackupPoms>false</generateBackupPoms>
         </configuration>
@@ -585,7 +556,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.2.5</version>
         <configuration>
           <argLine>${surefire.jacoco.args}</argLine>
         </configuration>
@@ -593,7 +563,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
-        <version>3.2.5</version>
         <configuration>
           <argLine>${failsafe.jacoco.args}</argLine>
         </configuration>
@@ -609,7 +578,6 @@
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
-        <version>3.2.5</version>
         <configuration>
           <image>
             <builder>paketobuildpacks/builder-jammy-tiny</builder>
@@ -747,7 +715,6 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-compiler-plugin</artifactId>
-            <version>3.13.0</version>
             <configuration>
               <excludes>
                 <exclude>**/H2ConsoleConfig*</exclude>
@@ -785,7 +752,6 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-compiler-plugin</artifactId>
-            <version>3.13.0</version>
             <configuration>
               <excludes>
                 <exclude>**/H2ConsoleConfig*</exclude>
@@ -839,7 +805,7 @@
         <dependency>
           <groupId>org.cftoolsuite.actuator</groupId>
           <artifactId>spring-boot-starter-runtime-metadata</artifactId>
-          <version>0.3.0</version>
+          <version>0.4.0</version>
         </dependency>
       </dependencies>
     </profile>
@@ -866,7 +832,6 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>versions-maven-plugin</artifactId>
-        <version>2.16.2</version>
         <reportSets>
           <reportSet>
             <reports>
