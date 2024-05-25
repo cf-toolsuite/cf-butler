@@ -87,7 +87,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: info,health,metrics,scheduledtasks,loggers,prometheus
+        include: info,health,metrics,scheduledtasks,loggers,prometheus,sbom
   endpoint:
     health:
       show-details: always
@@ -140,3 +140,7 @@ spring:
 # SendGrid API key (alternative to username/password).
   sendgrid:
     api-key: replace_me
+
+  threads:
+    virtual:
+      enabled: true
