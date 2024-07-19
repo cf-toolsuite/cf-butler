@@ -26,6 +26,7 @@ public class JavaAppDetail {
     private String appId;
     private String appName;
     private String dropletId;
+    private Integer buildJdkSpec;
     private String pomContents;
     private String jars;
     private String springDependencies;
@@ -39,6 +40,7 @@ public class JavaAppDetail {
                 .appId(detail.getAppId())
                 .appName(detail.getAppName())
                 .dropletId(detail.getDropletId())
+                .buildJdkSpec(detail.getBuildJdkSpec())
                 .pomContents(detail.getPomContents())
                 .jars(detail.getJars())
                 .springDependencies(detail.getSpringDependencies());
@@ -55,16 +57,20 @@ public class JavaAppDetail {
     }
 
     public static String headers() {
-        return String.join(",", "organization", "space", "application id", "application name", "droplet id", "pom contents", "jars", "spring dependencies" );
+        return String.join(",", "organization", "space", "application id", "application name", "droplet id", "build jdk spec", "pom contents", "jars", "spring dependencies" );
     }
 
     private static String wrap(String value) {
         return value != null ? StringUtils.wrap(value, '"') : StringUtils.wrap("", '"');
     }
 
+    private static String wrap(Integer value) {
+        return value != null ? StringUtils.wrap(String.valueOf(value), '"') : StringUtils.wrap("", '"');
+    }
+
     public String toCsv() {
         return String.join(",", wrap(getOrganization()), wrap(getSpace()), wrap(getAppId()), wrap(getAppName()),
-                wrap(getDropletId()), wrap(getPomContents()), wrap(getJars()), wrap(getSpringDependencies()));
+                wrap(getDropletId()), wrap(getBuildJdkSpec()), wrap(getPomContents()), wrap(getJars()), wrap(getSpringDependencies()));
     }
 
 }
