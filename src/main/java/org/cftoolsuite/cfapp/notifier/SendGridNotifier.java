@@ -40,8 +40,8 @@ public class SendGridNotifier extends EmailNotifier {
 
     private SendGrid sendGrid;
 
-    public SendGridNotifier(SendGrid sendGrid) {
-        super();
+    public SendGridNotifier(String customTemplatePath, SendGrid sendGrid) {
+        super(customTemplatePath);
         this.sendGrid = sendGrid;
     }
 

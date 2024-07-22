@@ -3,16 +3,15 @@ package org.cftoolsuite.cfapp.notifier;
 import java.io.IOException;
 import java.util.List;
 
-import jakarta.activation.DataSource;
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
-import jakarta.mail.util.ByteArrayDataSource;
-
 import org.cftoolsuite.cfapp.domain.EmailAttachment;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 
+import jakarta.activation.DataSource;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
+import jakarta.mail.util.ByteArrayDataSource;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -29,8 +28,8 @@ public class JavaMailNotifier extends EmailNotifier {
 
     private final JavaMailSender javaMailSender;
 
-    public JavaMailNotifier(JavaMailSender javaMailSender) {
-        super();
+    public JavaMailNotifier(String customTemplatePath, JavaMailSender javaMailSender) {
+        super(customTemplatePath);
         this.javaMailSender = javaMailSender;
     }
 

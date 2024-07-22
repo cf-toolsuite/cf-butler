@@ -22,7 +22,13 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public abstract class EmailNotifier implements ApplicationListener<EmailNotificationEvent> {
 
-    private final String template = getEmailTemplate();
+    private String customTemplatePath;
+    private String template;
+
+    public EmailNotifier(String customTemplatePath) {
+        this.customTemplatePath = customTemplatePath;
+        this.template = getEmailTemplate();
+    }
 
     protected String buildBody(String template, String body, String subject, String footer) {
         String result = "";
@@ -36,16 +42,18 @@ public abstract class EmailNotifier implements ApplicationListener<EmailNotifica
 
     private String getEmailTemplate() {
         String result = null;
-        try (
-                InputStream resource = new ClassPathResource("email-template.html").getInputStream();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(resource));
-                ) {
-            result =
-                    reader
-                    .lines()
-                    .collect(Collectors.joining("\n"));
+        try {
+            InputStream resource;
+            if (StringUtils.isNotBlank(customTemplatePath)) {
+                resource = new ClassPathResource(customTemplatePath).getInputStream();
+            } else {
+                resource = new ClassPathResource("email-template.html").getInputStream();
+            }
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(resource))) {
+                result = reader.lines().collect(Collectors.joining("\n"));
+            }
         } catch (IOException ioe) {
-            log.warn("Problem reading email-template.html. {}", ioe.getMessage());
+            log.warn("Problem reading email template. {}", ioe.getMessage());
         }
         return result;
     }

@@ -163,3 +163,14 @@ Add an entry in your `config/secrets.json` like
 ```
 
 > All spaces you define in the blacklist are excluded from consideration by policies.
+
+### Overriding the Email notification template
+
+If you are defining policies and you would like to override the default email template with one of your own, first inspect [email-template.html](../src/main/resources/email-template.html).  Any custom template must include the placeholders for `{{header}}`, `{{body}}`, and `{{footer}}`.
+
+To make use of your own custom email template, you could start `cf-butler` with:
+
+```bash
+java -jar target/cf-butler-1.0-SNAPSHOT.jar --email.template.path=path/to/custom-template.html
+```
+> Replace the fully-qualified path to the template in the example above with your own
