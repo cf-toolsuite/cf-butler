@@ -722,7 +722,8 @@ POST /policies
         "to": [ "captainmarvel@theuniverse.io" ],
         "subject": "Endpoint Policy Sample Report",
         "body": "Results are herewith attached for your consideration."
-      }
+      },
+      "apply-json-to-csv-converter": true
     }
   ],
   "query-policies": [

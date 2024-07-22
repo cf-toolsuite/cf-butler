@@ -33,6 +33,7 @@ public class EndpointPolicyReadConverter implements Converter<Row, EndpointPolic
                                 ? "{}"
                                         : source.get("email_notification_template", String.class)))
                 .cronExpression(source.get("cron_expression", String.class))
+                .applyJsonToCsvConverter(source.get("apply_json_to_csv_converter", Boolean.class))
                 .build();
     }
 

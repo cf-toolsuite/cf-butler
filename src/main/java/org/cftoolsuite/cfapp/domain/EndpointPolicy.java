@@ -24,7 +24,7 @@ import lombok.ToString;
 
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({ "id", "git-commit", "description", "endpoints", "email-notification-template", "cron-expression" })
+@JsonPropertyOrder({ "id", "git-commit", "description", "endpoints", "email-notification-template", "cron-expression", "apply-json-to-csv-converter" })
 @Getter
 @ToString
 @Table("endpoint_policy")
@@ -33,6 +33,7 @@ public class EndpointPolicy implements Policy {
     public static EndpointPolicy seed(EndpointPolicy policy) {
         return EndpointPolicy
                 .builder()
+                .applyJsonToCsvConverter(policy.isApplyJsonToCsvConverter())
                 .cronExpression(policy.getCronExpression())
                 .description(policy.getDescription())
                 .endpoints(policy.getEndpoints())
@@ -44,6 +45,7 @@ public class EndpointPolicy implements Policy {
         return EndpointPolicy
                 .builder()
                 .gitCommit(gitCommit)
+                .applyJsonToCsvConverter(policy.isApplyJsonToCsvConverter())
                 .cronExpression(policy.getCronExpression())
                 .description(policy.getDescription())
                 .endpoints(policy.getEndpoints())
@@ -77,6 +79,10 @@ public class EndpointPolicy implements Policy {
     @Column("cron_expression")
     private String cronExpression;
 
+    @JsonProperty("apply-json-to-csv-converter")
+    @Column("apply_json_to_csv_converter")
+    private boolean applyJsonToCsvConverter;
+
     @JsonCreator
     EndpointPolicy(
             @JsonProperty("pk") Long pk,
@@ -85,7 +91,8 @@ public class EndpointPolicy implements Policy {
             @JsonProperty("description") String description,
             @JsonProperty("endpoints") Set<String> endpoints,
             @JsonProperty("email-notification-template") EmailNotificationTemplate emailNotificationTemplate,
-            @JsonProperty("cron-expression") String cronExpression) {
+            @JsonProperty("cron-expression") String cronExpression,
+            @JsonProperty("apply-json-to-csv-converter") boolean applyJsonToCsvConverter) {
         this.pk = pk;
         this.id = id;
         this.gitCommit = gitCommit;
@@ -93,6 +100,7 @@ public class EndpointPolicy implements Policy {
         this.endpoints = endpoints;
         this.emailNotificationTemplate = emailNotificationTemplate;
         this.cronExpression = cronExpression;
+        this.applyJsonToCsvConverter = applyJsonToCsvConverter;
     }
 
     public String getCronExpression() {
