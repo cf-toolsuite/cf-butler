@@ -2,8 +2,8 @@ package org.cftoolsuite.cfapp.task;
 
 import java.time.Duration;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.cftoolsuite.cfapp.config.PasSettings;
 import org.cftoolsuite.cfapp.domain.ResourceNotificationPolicy;
@@ -71,7 +71,7 @@ public class ResourceNotificationPolicyExecutorTask implements PolicyExecutorTas
                 .flatMapMany(policy -> Flux.fromIterable(policy.getResourceNotificationPolicies()));
     }
 
-    private Mono<List<String>> fetchRecipientList(ResourceNotificationPolicy resourceNotificationPolicy, String label, Integer page, Integer perPage){
+    private Mono<Set<String>> fetchRecipientList(ResourceNotificationPolicy resourceNotificationPolicy, String label, Integer page, Integer perPage){
         return
             resourceMetadataService.getResources(resourceNotificationPolicy.getResourceEmailMetadata().getResource(), label, page, perPage)
                 .flatMapMany(resources -> Flux.fromIterable(resources.getResources()))
@@ -79,7 +79,7 @@ public class ResourceNotificationPolicyExecutorTask implements PolicyExecutorTas
                 .filter(resource -> isBlacklisted(resourceNotificationPolicy, resource.getName()))
                 .filter(resource -> isWhitelisted(resourceNotificationPolicy, resource.getName()))
                 .map(resource -> new String(resource.getMetadata().getLabels().get(label) + "@" + resourceNotificationPolicy.getResourceEmailMetadata().getEmailDomain()))
-                .collectList();
+                .collect(Collectors.toSet());
     }
 
     private void notifyOwners(ResourceNotificationPolicy resourceNotificationPolicy, String label) {
@@ -89,12 +89,12 @@ public class ResourceNotificationPolicyExecutorTask implements PolicyExecutorTas
                 for (Integer page=1; page <= resources.getPagination().getTotalPages(); page++) {
                     fetchRecipientList(resourceNotificationPolicy, label, page, null)
                         .doOnNext(
-                                recipient -> {
+                                recipients -> {
                                     publisher.publishEvent(
                                         new EmailNotificationEvent(this)
                                             .domain(settings.getAppsDomain())
                                             .from(resourceNotificationPolicy.getResourceEmailTemplate().getFrom())
-                                            .recipients(recipient)
+                                            .recipients(recipients)
                                             .subject(resourceNotificationPolicy.getResourceEmailTemplate().getSubject())
                                             .body(resourceNotificationPolicy.getResourceEmailTemplate().getBody()));
                                 })

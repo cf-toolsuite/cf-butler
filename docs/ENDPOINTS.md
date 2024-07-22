@@ -720,6 +720,8 @@ POST /policies
       "email-notification-template": {
         "from": "admin@nowhere.me",
         "to": [ "captainmarvel@theuniverse.io" ],
+        "cc": [ "msmarvel@theuniverse.io" ],
+        "bcc": [ "galactus@destroyerofworlds.uni" ],
         "subject": "Endpoint Policy Sample Report",
         "body": "Results are herewith attached for your consideration."
       },
@@ -746,6 +748,9 @@ POST /policies
         "to": [
           "drwho@tardis.io"
         ],
+        "bcc": [
+          "animus@villains.uk"
+        ]
         "subject": "Query Policy Sample Report",
         "body": "Results are herewith attached for your consideration."
       }

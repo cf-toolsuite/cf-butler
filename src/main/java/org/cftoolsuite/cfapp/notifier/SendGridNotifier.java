@@ -1,6 +1,7 @@
 package org.cftoolsuite.cfapp.notifier;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
@@ -16,6 +17,7 @@ import com.sendgrid.helpers.mail.Mail;
 import com.sendgrid.helpers.mail.objects.Attachments;
 import com.sendgrid.helpers.mail.objects.Content;
 import com.sendgrid.helpers.mail.objects.Email;
+import com.sendgrid.helpers.mail.objects.Personalization;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -44,12 +46,21 @@ public class SendGridNotifier extends EmailNotifier {
     }
 
     @Override
-    public void sendMail(String originator, String recipient, String subject, String body, List<EmailAttachment> attachments) {
+    public void sendMail(String originator, String recipient, String[] carbonCopyRecipients, String[] blindCarbonCopyRecipients, String subject, String body, List<EmailAttachment> attachments) {
         try {
             Email from = new Email(originator);
             Email to = new Email(recipient);
             Content content = new Content("text/html", body);
-            Mail mail = new Mail(from, subject, to, content);
+            //Mail mail = new Mail(from, subject, to, content);
+            Mail mail = new Mail();
+            Personalization personalization = new Personalization();
+            personalization.setFrom(from);
+            personalization.addTo(to);
+            personalization.setSubject(subject);
+            if (carbonCopyRecipients != null && carbonCopyRecipients.length > 0) { Arrays.asList(carbonCopyRecipients).forEach(cc -> personalization.addCc(new Email(cc))); }
+            if (blindCarbonCopyRecipients != null && blindCarbonCopyRecipients.length > 0) { Arrays.asList(blindCarbonCopyRecipients).forEach(bcc -> personalization.addBcc(new Email(bcc))); }
+            mail.addContent(content);
+            mail.addPersonalization(personalization);
             addAttachments(mail, attachments);
             Request request = new Request();
             request.setMethod(Method.POST);
@@ -57,6 +68,8 @@ public class SendGridNotifier extends EmailNotifier {
             request.setBody(mail.build());
             Response response = sendGrid.api(request);
             log.info("Email sent to {} with subject: {}", to.getEmail(), subject);
+            if (carbonCopyRecipients != null && carbonCopyRecipients.length > 0) { log.info("Also sent to cc: {}", String.join(", ", carbonCopyRecipients)); }
+            if (blindCarbonCopyRecipients != null && blindCarbonCopyRecipients.length > 0) { log.info("Also sent to bcc: {}", String.join(", ", blindCarbonCopyRecipients)); }
             log.trace(String.format("\n\tStatus: %s\n\t%s", HttpStatus.valueOf(response.getStatusCode()).getReasonPhrase(), response.getBody()));
         } catch (IOException ioe) {
             log.warn("Could not send email!", ioe);

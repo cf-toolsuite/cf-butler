@@ -1,7 +1,8 @@
 package org.cftoolsuite.cfapp.event;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.cftoolsuite.cfapp.domain.EmailAttachment;
 import org.springframework.context.ApplicationEvent;
@@ -11,7 +12,9 @@ public class EmailNotificationEvent extends ApplicationEvent {
     private static final long serialVersionUID = 1L;
 
     private String domain;
-    private List<String> recipients;
+    private Set<String> recipients;
+    private Set<String> carbonCopyRecipients;
+    private Set<String> blindCarbonCopyRecipients;
     private String from;
     private String subject;
     private String body;
@@ -57,8 +60,16 @@ public class EmailNotificationEvent extends ApplicationEvent {
         return from;
     }
 
-    public List<String> getRecipients() {
+    public Set<String> getRecipients() {
         return recipients;
+    }
+
+    public Set<String> getCarbonCopyRecipients() {
+        return carbonCopyRecipients;
+    }
+
+    public Set<String> getBlindCarbonCopyRecipients() {
+        return blindCarbonCopyRecipients;
     }
 
     public String getSubject() {
@@ -67,14 +78,40 @@ public class EmailNotificationEvent extends ApplicationEvent {
 
     public EmailNotificationEvent recipient(String recipient) {
         if (this.recipients == null) {
-            this.recipients = new ArrayList<>();
+            this.recipients = new HashSet<>();
         }
         this.recipients.add(recipient);
         return this;
     }
 
-    public EmailNotificationEvent recipients(List<String> recipients) {
+    public EmailNotificationEvent recipients(Set<String> recipients) {
         this.recipients = recipients;
+        return this;
+    }
+
+    public EmailNotificationEvent carbonCopyRecipient(String carbonCopyRecipient) {
+        if (this.carbonCopyRecipients == null) {
+            this.carbonCopyRecipients = new HashSet<>();
+        }
+        this.recipients.add(carbonCopyRecipient);
+        return this;
+    }
+
+    public EmailNotificationEvent carbonCopyRecipients(Set<String> carbonCopyRecipients) {
+        this.carbonCopyRecipients = carbonCopyRecipients;
+        return this;
+    }
+
+    public EmailNotificationEvent blindCarbonCopyRecipient(String blindCarbonCopyRecipient) {
+        if (this.blindCarbonCopyRecipients == null) {
+            this.blindCarbonCopyRecipients = new HashSet<>();
+        }
+        this.recipients.add(blindCarbonCopyRecipient);
+        return this;
+    }
+
+    public EmailNotificationEvent blindCarbonCopyRecipients(Set<String> blindCarbonCopyRecipients) {
+        this.blindCarbonCopyRecipients = blindCarbonCopyRecipients;
         return this;
     }
 
