@@ -27,7 +27,7 @@ public class EndpointPolicyWriteConverter implements Converter<EndpointPolicy, O
         row.put("endpoints", Parameter.fromOrEmpty(CollectionUtils.isEmpty(source.getEndpoints()) ? null : writeEndpoints(source.getEndpoints()), String.class));
         row.put("email_notification_template", Parameter.fromOrEmpty(source.getEmailNotificationTemplate() != null ? writeEmailNotificationTemplate(source.getEmailNotificationTemplate()) : null, String.class));
         row.put("cron_expression", Parameter.fromOrEmpty(source.getCronExpression(), String.class));
-        row.put("apply_json_to_csv_converter", Parameter.fromOrEmpty(row, Boolean.class));
+        row.put("apply_json_to_csv_converter", Parameter.fromOrEmpty(source.isApplyJsonToCsvConverter(), Boolean.class));
         return row;
     }
 
