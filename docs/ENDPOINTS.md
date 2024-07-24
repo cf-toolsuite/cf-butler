@@ -712,21 +712,28 @@ POST /policies
   ],
   "endpoint-policies": [
     {
-      "description": "Sample endpoint policy that will fetch data from available /snapshot endpoints.",
-      "endpoints": [
-        "/snapshot/summary",
-        "/snapshot/detail"
+      "description":"Sample endpoint policy that will fetch data from available /snapshot endpoints.",
+      "endpoint-requests":[
+          {
+              "endpoint" : "/snapshot/summary"
+          },
+          {
+              "endpoint" : "/snapshot/detail",
+              "json-path-expression": "$.service-instances",
+              "apply-json-to-csv-converter": true
+          },
+          {
+              "endpoint": "/snapshot/detail",
+              "json-path-expression": "$.application-relationships"
+          }
       ],
-      "email-notification-template": {
-        "from": "admin@nowhere.me",
-        "to": [ "captainmarvel@theuniverse.io" ],
-        "cc": [ "msmarvel@theuniverse.io" ],
-        "bcc": [ "galactus@destroyerofworlds.uni" ],
-        "subject": "Endpoint Policy Sample Report",
-        "body": "Results are herewith attached for your consideration."
-      },
-      "apply-json-to-csv-converter": true
-    }
+      "email-notification-template":{
+          "from":"admin@cloudmonk.me",
+          "to":[ "vince@newlander.cc" ],
+          "subject":"Endpoint Policy Sample Report",
+          "body":"Results are herewith attached for your consideration."
+      }
+  }
   ],
   "query-policies": [
     {

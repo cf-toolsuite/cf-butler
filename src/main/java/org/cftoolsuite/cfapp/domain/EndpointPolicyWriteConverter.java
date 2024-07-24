@@ -2,6 +2,7 @@ package org.cftoolsuite.cfapp.domain;
 
 import java.util.Set;
 
+import org.cftoolsuite.cfapp.domain.EndpointRequest;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.convert.WritingConverter;
 import org.springframework.data.r2dbc.mapping.OutboundRow;
@@ -24,10 +25,9 @@ public class EndpointPolicyWriteConverter implements Converter<EndpointPolicy, O
         row.put("id", Parameter.fromOrEmpty(source.getId(), String.class));
         row.put("git_commit", Parameter.fromOrEmpty(source.getGitCommit(), String.class));
         row.put("description", Parameter.fromOrEmpty(source.getDescription(), String.class));
-        row.put("endpoints", Parameter.fromOrEmpty(CollectionUtils.isEmpty(source.getEndpoints()) ? null : writeEndpoints(source.getEndpoints()), String.class));
+        row.put("endpoint_requests", Parameter.fromOrEmpty(CollectionUtils.isEmpty(source.getEndpointRequests()) ? null : writeEndpointRequests(source.getEndpointRequests()), String.class));
         row.put("email_notification_template", Parameter.fromOrEmpty(source.getEmailNotificationTemplate() != null ? writeEmailNotificationTemplate(source.getEmailNotificationTemplate()) : null, String.class));
         row.put("cron_expression", Parameter.fromOrEmpty(source.getCronExpression(), String.class));
-        row.put("apply_json_to_csv_converter", Parameter.fromOrEmpty(source.isApplyJsonToCsvConverter(), Boolean.class));
         return row;
     }
 
@@ -39,11 +39,11 @@ public class EndpointPolicyWriteConverter implements Converter<EndpointPolicy, O
         }
     }
 
-    private String writeEndpoints(Set<String> value) {
+    private String writeEndpointRequests(Set<EndpointRequest> value) {
         try {
             return mapper.writeValueAsString(value);
         } catch (JsonProcessingException jpe) {
-            throw new RuntimeException("Problem writing endpoints", jpe);
+            throw new RuntimeException("Problem writing endpoint requests", jpe);
         }
     }
 }

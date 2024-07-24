@@ -8,6 +8,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.cftoolsuite.cfapp.config.PasSettings;
 import org.cftoolsuite.cfapp.domain.EmailAttachment;
 import org.cftoolsuite.cfapp.domain.EndpointPolicy;
+import org.cftoolsuite.cfapp.domain.EndpointRequest;
 import org.cftoolsuite.cfapp.event.EmailNotificationEvent;
 import org.cftoolsuite.cfapp.service.PoliciesService;
 import org.cftoolsuite.cfapp.util.JsonToCsvConverter;
@@ -21,12 +22,16 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.Configuration;
+import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
+import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
-import reactor.util.function.Tuple3;
 import reactor.util.function.Tuples;
 
 @Slf4j
@@ -68,16 +73,16 @@ public class EndpointPolicyExecutorTask implements PolicyExecutorTask {
             );
     }
 
-    private void handleSuccess(List<Tuple2<EndpointPolicy, List<Tuple3<String, Boolean, ResponseEntity<String>>>>> results, String id) {
+    private void handleSuccess(List<Tuple2<EndpointPolicy, List<Tuple2<EndpointRequest, ResponseEntity<String>>>>> results, String id) {
         results.forEach(result -> {
             EndpointPolicy policy = result.getT1();
-            List<Tuple3<String, Boolean, ResponseEntity<String>>> endpointResults = result.getT2();
+            List<Tuple2<EndpointRequest, ResponseEntity<String>>> endpointResults = result.getT2();
             publisher.publishEvent(buildEmailNotificationEvent(policy, endpointResults));
         });
         log.info("EndpointPolicyExecutorTask with id={} completed", id);
     }
 
-    private EmailNotificationEvent buildEmailNotificationEvent(EndpointPolicy policy, List<Tuple3<String, Boolean, ResponseEntity<String>>> endpointResults) {
+    private EmailNotificationEvent buildEmailNotificationEvent(EndpointPolicy policy, List<Tuple2<EndpointRequest, ResponseEntity<String>>> endpointResults) {
         return new EmailNotificationEvent(this)
             .domain(settings.getAppsDomain())
             .from(policy.getEmailNotificationTemplate().getFrom())
@@ -96,10 +101,14 @@ public class EndpointPolicyExecutorTask implements PolicyExecutorTask {
         return client.get().uri(uri).retrieve().toEntity(String.class);
     }
 
-    protected Flux<Tuple3<String, Boolean, ResponseEntity<String>>> exerciseEndpoints(EndpointPolicy policy) {
-        return Flux.fromIterable(policy.getEndpoints())
-            .concatMap(endpoint -> exerciseEndpoint(endpoint)
-                .map(result -> Tuples.of(formatEndpointName(endpoint), policy.isApplyJsonToCsvConverter(), result)));
+    protected Flux<Tuple2<EndpointRequest, ResponseEntity<String>>> exerciseEndpoints(EndpointPolicy policy) {
+        return
+            Flux
+                .fromIterable(policy.getEndpointRequests())
+                .flatMap(request ->
+                    exerciseEndpoint(request.getEndpoint())
+                        .map(response -> Tuples.of(request, response))
+                );
     }
 
     protected Flux<EndpointPolicy> fetchEndpointPolicy(String id) {
@@ -116,15 +125,33 @@ public class EndpointPolicyExecutorTask implements PolicyExecutorTask {
             .replace("=", "-equal-");
     }
 
-    private List<EmailAttachment> buildAttachments(List<Tuple3<String, Boolean, ResponseEntity<String>>> endpointResults) {
+    private String determineFilename(EndpointRequest request) {
+        String result = "";
+        if (StringUtils.isNotBlank(request.getJsonPathExpression())) {
+            result =
+                request
+                    .getJsonPathExpression()
+                    .replaceAll("\\s+|[\\p{Punct}&&[^._]]|[._]", "-")
+                    .replaceAll("-+", "-")
+                    .replaceAll("^-+", "")
+                    .replaceAll("-+$", "");
+        } else {
+            result = formatEndpointName(request.getEndpoint());
+        }
+        return result;
+    }
+
+    private List<EmailAttachment> buildAttachments(List<Tuple2<EndpointRequest, ResponseEntity<String>>> endpointResults) {
         List<EmailAttachment> attachments = new ArrayList<>();
-        for (Tuple3<String, Boolean, ResponseEntity<String>> result : endpointResults) {
-            String filename = result.getT1();
-            String content = result.getT3().getBody();
-            String mimeType = result.getT3().getHeaders().getFirst(HttpHeaders.CONTENT_TYPE);
+        for (Tuple2<EndpointRequest, ResponseEntity<String>> result : endpointResults) {
+            String filename = determineFilename(result.getT1());
+            String jsonPathExpression = result.getT1().getJsonPathExpression();
+            boolean applyConverter = result.getT1().isApplyJsonToCsvConverter();
+            String content = result.getT2().getBody();
+            String mimeType = result.getT2().getHeaders().getFirst(HttpHeaders.CONTENT_TYPE);
 
             if (StringUtils.isNotBlank(mimeType) && StringUtils.isNotBlank(content)) {
-                attachments.add(createAttachment(filename, content, mimeType, result.getT2()));
+                attachments.add(createAttachment(filename, content, mimeType, jsonPathExpression, applyConverter));
             } else {
                 attachments.add(createDefaultAttachment(filename));
             }
@@ -132,9 +159,29 @@ public class EndpointPolicyExecutorTask implements PolicyExecutorTask {
         return attachments;
     }
 
-    private EmailAttachment createAttachment(String filename, String content, String mimeType, boolean applyConverter) {
+    private EmailAttachment createAttachment(String filename, String data, String mimeType, String jsonPathExpression, boolean applyConverter) {
+        log.info("Attempting to create an email attachment named {} with mimetype {}", filename, mimeType);
+        log.trace("-- containing {}", data);
+        String content = data;
+        if (mimeType.startsWith(MediaType.APPLICATION_JSON_VALUE) && StringUtils.isNotBlank(jsonPathExpression)) {
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                Configuration conf =
+                    Configuration
+                        .builder()
+                        .jsonProvider(new JacksonJsonProvider(mapper))
+                        .mappingProvider(new JacksonMappingProvider())
+                        .build();
+                log.info("Attempting to extract fragment using JsonPath expression {}", jsonPathExpression);
+                Object fragment = JsonPath.using(conf).parse(data).read(jsonPathExpression);
+                content = mapper.writeValueAsString(fragment);
+            } catch (JsonProcessingException iae) {
+                throw new IllegalArgumentException("Could not parse fragment", iae);
+            }
+        }
         try {
             if (mimeType.startsWith(MediaType.APPLICATION_JSON_VALUE) && applyConverter) {
+                log.info("Attempting to convert JSON to CSV.");
                 return EmailAttachment.builder()
                     .filename(filename)
                     .content(converter.convert(content))

@@ -3,6 +3,7 @@ package org.cftoolsuite.cfapp.domain;
 import java.io.IOException;
 import java.util.Set;
 
+import org.cftoolsuite.cfapp.domain.EndpointRequest;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.convert.ReadingConverter;
 import org.springframework.stereotype.Indexed;
@@ -26,14 +27,13 @@ public class EndpointPolicyReadConverter implements Converter<Row, EndpointPolic
                 .pk(source.get("pk", Long.class))
                 .id(source.get("id", String.class))
                 .description(source.get("description", String.class))
-                .endpoints(readEndpoints(source.get("endpoints", String.class) == null ? "[]" : source.get("endpoints", String.class)))
+                .endpointRequests(readEndpointRequests(source.get("endpoint_requests", String.class) == null ? "[]" : source.get("endpoint_requests", String.class)))
                 .emailNotificationTemplate(
                         readEmailNotificationTemplate(
                                 source.get("email_notification_template", String.class) == null
                                 ? "{}"
                                         : source.get("email_notification_template", String.class)))
                 .cronExpression(source.get("cron_expression", String.class))
-                .applyJsonToCsvConverter(source.get("apply_json_to_csv_converter", Boolean.class))
                 .build();
     }
 
@@ -45,11 +45,11 @@ public class EndpointPolicyReadConverter implements Converter<Row, EndpointPolic
         }
     }
 
-    private Set<String> readEndpoints(String value) {
+    private Set<EndpointRequest> readEndpointRequests(String value) {
         try {
-            return mapper.readValue(value, new TypeReference<Set<String>>() {});
+            return mapper.readValue(value, new TypeReference<Set<EndpointRequest>>() {});
         } catch (IOException ioe) {
-            throw new RuntimeException("Problem reading endpoints", ioe);
+            throw new RuntimeException("Problem reading endpoint requests", ioe);
         }
     }
 }

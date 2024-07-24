@@ -10,6 +10,9 @@ import org.cftoolsuite.cfapp.service.StacksCache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.jayway.jsonpath.InvalidPathException;
+import com.jayway.jsonpath.JsonPath;
+
 import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Component
@@ -23,6 +26,7 @@ public class PoliciesValidator {
     private static final String HYGIENE_REJECTED_MESSAGE = "{} was rejected because days-since-last-update must be > 0 or equal to -1";
     private static final String LEGACY_REJECTED_MESSAGE = "{} was rejected because stacks must not be empty and must be a valid/installed stack";
     private static final String ENDPOINT_REJECTED_MESSAGE = "{} was rejected because endpoint must not be empty and must start with a /";
+    private static final String JSONPATH_EXPRESSION_REJECTED_MESSAGE = "{} was rejected because a JSON path expression for endpoint is invalid";
     private static final String QUERY_REJECTED_MESSAGE = "-- {} was rejected because either name or sql was blank or sql did not start with SELECT.";
     private static final String EMAIL_NOTIFICATION_TEMPLATE_REJECTED_MESSAGE = "-- {} was rejected because either the email template did not contain valid email addresses for from/to or the subject/body was blank.";
     private static final String LEGACY_FILTER_REJECTED_MESSAGE = "-- {} was rejected because it must have only one filter. Choose either stacks or service-offerings filter.";
@@ -95,18 +99,27 @@ public class PoliciesValidator {
 
     public boolean validate(EndpointPolicy policy) {
         boolean hasId = Optional.ofNullable(policy.getId()).isPresent();
-        boolean hasEndpoints = Optional.ofNullable(policy.getEndpoints()).isPresent();
+        boolean hasEndpointRequests = Optional.ofNullable(policy.getEndpointRequests()).isPresent();
         boolean hasEmailNotificationTemplate = Optional.ofNullable(policy.getEmailNotificationTemplate()).isPresent();
-        boolean valid = !hasId && hasEndpoints && hasEmailNotificationTemplate;
-        if (hasEndpoints) {
-            if (ObjectUtils.isEmpty(policy.getEndpoints())) {
+        boolean valid = !hasId && hasEndpointRequests && hasEmailNotificationTemplate;
+        if (hasEndpointRequests) {
+            if (ObjectUtils.isEmpty(policy.getEndpointRequests())) {
                 valid = false;
             } else {
-                for (String e: policy.getEndpoints()) {
-                    if (StringUtils.isBlank(e) || !e.startsWith("/")) {
+                for (EndpointRequest er: policy.getEndpointRequests()) {
+                    if (StringUtils.isBlank(er.getEndpoint()) || !er.getEndpoint().startsWith("/")) {
                         valid = false;
                         log.warn(ENDPOINT_REJECTED_MESSAGE, policy.toString());
                         break;
+                    }
+                    if (StringUtils.isNotBlank(er.getJsonPathExpression())) {
+                        try {
+                            JsonPath.compile(er.getJsonPathExpression());
+                        } catch (InvalidPathException e) {
+                            valid = false;
+                            log.warn(JSONPATH_EXPRESSION_REJECTED_MESSAGE, policy.toString());
+                            break;
+                        }
                     }
                 }
             }
