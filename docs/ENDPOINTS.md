@@ -196,7 +196,7 @@ Metadata is comprised of [labels](https://v3-apidocs.cloudfoundry.org/version/3.
 ```
 GET /metadata/{type}/{id}
 ```
-> Return resource with id, created date, last updated date, and associated metadata; where `{type}` is the id field of a [ResourceType](https://github.com/cf-toolsuite/cf-butler/blob/master/src/main/java/io/pivotal/cfapp/domain/ResourceType.java) enum and `{id}` is the guid of a resource.
+> Return resource with id, created date, last updated date, and associated metadata; where `{type}` is the id field of a [ResourceType](../src/main/java/org/cftoolsuite/cfapp/domain/ResourceType.java) enum and `{id}` is the guid of a resource.
 
 ```
 PATCH /metadata/{type}/{id}
@@ -712,28 +712,30 @@ POST /policies
   ],
   "endpoint-policies": [
     {
-      "description":"Sample endpoint policy that will fetch data from available /snapshot endpoints.",
-      "endpoint-requests":[
-          {
-              "endpoint" : "/snapshot/summary"
-          },
-          {
-              "endpoint" : "/snapshot/detail",
-              "json-path-expression": "$.service-instances",
-              "apply-json-to-csv-converter": true
-          },
-          {
-              "endpoint": "/snapshot/detail",
-              "json-path-expression": "$.application-relationships"
-          }
+      "description": "Sample endpoint policy that will fetch data from available /snapshot endpoints.",
+      "endpoint-requests": [
+        {
+          "endpoint": "/snapshot/summary"
+        },
+        {
+          "endpoint": "/snapshot/detail",
+          "json-path-expression": "$.service-instances",
+          "apply-json-to-csv-converter": true
+        },
+        {
+          "endpoint": "/snapshot/detail",
+          "json-path-expression": "$.application-relationships"
+        }
       ],
-      "email-notification-template":{
-          "from":"admin@cloudmonk.me",
-          "to":[ "vince@newlander.cc" ],
-          "subject":"Endpoint Policy Sample Report",
-          "body":"Results are herewith attached for your consideration."
+      "email-notification-template": {
+        "from": "admin@cloudmonk.me",
+        "to": [
+          "vince@newlander.cc"
+        ],
+        "subject": "Endpoint Policy Sample Report",
+        "body": "Results are herewith attached for your consideration."
       }
-  }
+    }
   ],
   "query-policies": [
     {
@@ -757,7 +759,7 @@ POST /policies
         ],
         "bcc": [
           "animus@villains.uk"
-        ]
+        ],
         "subject": "Query Policy Sample Report",
         "body": "Results are herewith attached for your consideration."
       }
@@ -827,34 +829,34 @@ POST /policies
       ]
     },
     {
-    "resource-notification-policies": [
+      "resource-notification-policies": [
         {
-            "resource-email-template": {
-                "from": "admin@pcf.demo.ironleg.me",
-                "subject": "Platform Updates",
-                "body": "Please take a moment to review the platform updates and share it with your Org users"
-            },
-            "resource-email-metadata": {
-                "resource": "organizations",
-                "labels": [
-                            "PrimaryOwner",
-                            "SecondaryOwner"
-                          ],
-                "email-domain": "tanzu.vmware.com"
-            }
-            "resource-whitelist": [
-                "p-config-server"
-            ]
-            "resource-blacklist": [
-                "pivot-sample-org"
-            ]
+          "resource-email-template": {
+            "from": "admin@pcf.demo.ironleg.me",
+            "subject": "Platform Updates",
+            "body": "Please take a moment to review the platform updates and share it with your Org users"
+          },
+          "resource-email-metadata": {
+            "resource": "organizations",
+            "labels": [
+              "PrimaryOwner",
+              "SecondaryOwner"
+            ],
+            "email-domain": "tanzu.vmware.com"
+          },
+          "resource-whitelist": [
+            "p-config-server"
+          ],
+          "resource-blacklist": [
+            "pivot-sample-org"
+          ]
         }
-    ]
-}
+      ]
+    }
   ]
 }
 ```
-> Establish policies to delete and scale applications, delete service instances, and query for anything from schema. This endpoint is only available when `cf.policies.git.uri` is not set.
+> Establish policies to delete and scale applications, delete service instances, report results from endpoint execution, report on hygiene, or query for anything from schema. This endpoint is only available when `cf.policies.git.uri` is not set.
 
 > Consult the [java.time.Duration](https://docs.oracle.com/javase/8/docs/api/java/time/Duration.html#parse-java.lang.CharSequence-) javadoc for other examples of what you can specify when setting values for `from-duration` properties above.
 

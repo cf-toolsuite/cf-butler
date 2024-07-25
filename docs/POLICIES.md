@@ -7,6 +7,7 @@
   * [Resource Notification](#resource-notification-policies)
   * [Endpoint](#endpoint-policies)
   * [Query](#query-policies)
+* [Reporting and notification oriented policies](#reporting-and-notification-oriented-policies)
 
 
 ## Managing policies
@@ -36,8 +37,8 @@ On startup `cf-butler` will read files from the repo and cache in a database.  E
 
 Policy files must adhere to a naming convention where:
 
-* a filename ending with `-AP.json` encapsulates an individual [ApplicationPolicy](src/main/java/io/pivotal/cfapp/domain/ApplicationPolicy.java)
-* a filename ending with `-SIP.json` encapsulates an individual [ServiceInstancePolicy](src/main/java/io/pivotal/cfapp/domain/ServiceInstancePolicy.java)
+* a filename ending with `-AP.json` encapsulates an individual [ApplicationPolicy](../src/main/java/org/cftoolsuite/cfapp/domain/ApplicationPolicy.java)
+* a filename ending with `-SIP.json` encapsulates an individual [ServiceInstancePolicy](../src/main/java/org/cftoolsuite/cfapp/domain/ServiceInstancePolicy.java)
 
 See additional property requirements in this sample Github [repository](https://github.com/cf-toolsuite/cf-butler-sample-config).
 
@@ -49,7 +50,7 @@ Hygiene policies are useful when you want to search for and report on dormant wo
 
 As mentioned previously the policy file must adhere to a naming convention
 
-* a filename ending with `-HP.json` encapsulates an individual [HygienePolicy](src/main/java/io/pivotal/cfapp/domain/HygienePolicy.java)
+* a filename ending with `-HP.json` encapsulates an individual [HygienePolicy](../src/main/java/org/cftoolsuite/cfapp/domain/HygienePolicy.java)
 
 See additional property requirements in this sample Github [repository](https://github.com/cf-toolsuite/cf-butler-sample-config).
 
@@ -59,7 +60,7 @@ Legacy policies are useful when you want to search for and report on application
 
 As mentioned previously the policy file must adhere to a naming convention
 
-* a filename ending with `-LP.json` encapsulates an individual [LegacyPolicy](src/main/java/io/pivotal/cfapp/domain/LegacyPolicy.java)
+* a filename ending with `-LP.json` encapsulates an individual [LegacyPolicy](../src/main/java/org/cftoolsuite/cfapp/domain/LegacyPolicy.java)
 
 See additional property requirements in this sample Github [repository](https://github.com/cf-toolsuite/cf-butler-sample-config).
 
@@ -72,7 +73,7 @@ For example, you might notify primary and/or secondary owners of a collection of
 
 As mentioned previously the policy file must adhere to a naming convention
 
-* a filename ending with `-RNP.json` encapsulates an individual [ResourceNotificationPolicy](src/main/java/io/pivotal/cfapp/domain/ResourceNotificationPolicy.java)
+* a filename ending with `-RNP.json` encapsulates an individual [ResourceNotificationPolicy](../src/main/java/org/cftoolsuite/cfapp/domain/ResourceNotificationPolicy.java)
 
 See additional property requirements in this sample Github [repository](https://github.com/cf-toolsuite/cf-butler-sample-config).
 
@@ -82,22 +83,24 @@ Endpoint policies are useful when you want to exercise any of the available GET 
 
 As mentioned previously the policy file must adhere to a naming convention
 
-* a filename ending with `-EP.json` encapsulates an individual [EndpointPolicy](src/main/java/io/pivotal/cfapp/domain/EndpointPolicy.java)
+* a filename ending with `-EP.json` encapsulates an individual [EndpointPolicy](../src/main/java/org/cftoolsuite/cfapp/domain/EndpointPolicy.java)
 
 See additional property requirements in this sample Github [repository](https://github.com/cf-toolsuite/cf-butler-sample-config).
 
 
 ### Query policies
 
-Query policies are useful when you want to step out side the canned snapshot reporting capabilties and leverage the underlying [schema](https://github.com/cf-toolsuite/cf-butler/tree/master/src/main/resources/db) to author one or more of your own queries and have the results delivered as comma-separated value attachments using a defined email notification [template](https://github.com/cf-toolsuite/cf-butler/blob/master/src/main/java/io/pivotal/cfapp/domain/EmailNotificationTemplate.java).
+Query policies are useful when you want to step out side the canned snapshot reporting capabilities and leverage the underlying [schema](https://github.com/cf-toolsuite/cf-butler/tree/master/src/main/resources/db) to author one or more of your own queries and have the results delivered as comma-separated value attachments.
 
 As mentioned previously the policy file must adhere to a naming convention
 
-* a filename ending with `-QP.json` encapsulates an individual [QueryPolicy](src/main/java/io/pivotal/cfapp/domain/QueryPolicy.java)
+* a filename ending with `-QP.json` encapsulates an individual [QueryPolicy](../src/main/java/org/cftoolsuite/cfapp/domain/QueryPolicy.java)
 
-If you intend to deploy query policies you must also configure the `notification.engine` property.  You can define it in your
+## Reporting and notification oriented policies
 
-application-{env}.yml
+If you intend to deploy `endpoint`, `hygiene`, `legacy`, `query` or `resource notification` policies, you must also configure the `notification.engine` property.  You can define it in your
+
+`application-{env}.yml`
 
 ```
 notification:
@@ -106,7 +109,7 @@ notification:
 
 or
 
-secrets-{env}.json
+`secrets-{env}.json`
 
 ```
   "NOTIFICATION_ENGINE": "<engine>"
@@ -122,3 +125,5 @@ E.g, if you intended to use [sendgrid](https://www.sendgrid.com) as your email n
   "NOTIFICATION_ENGINE": "sendgrid",
   "SENDGRID_API-KEY": "replace_me"
 ```
+
+Each reporting and notification oriented policy requires definition of an [email notification template](../src/main/java/org/cftoolsuite/cfapp/domain/EmailNotificationTemplate.java) as part of its configuration.
