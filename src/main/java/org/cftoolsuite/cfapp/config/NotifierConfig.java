@@ -3,6 +3,7 @@ package org.cftoolsuite.cfapp.config;
 import org.cftoolsuite.cfapp.notifier.EmailNotifier;
 import org.cftoolsuite.cfapp.notifier.JavaMailNotifier;
 import org.cftoolsuite.cfapp.notifier.SendGridNotifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.mail.MailSenderAutoConfiguration;
@@ -22,8 +23,8 @@ public class NotifierConfig {
     static class MailConfig {
 
         @Bean
-        public EmailNotifier javaMailNotifier(JavaMailSender javaMailSender) {
-            return new JavaMailNotifier(javaMailSender);
+        public EmailNotifier javaMailNotifier(@Value("${email.template.path:}") String customTemplatePath, JavaMailSender javaMailSender) {
+            return new JavaMailNotifier(customTemplatePath, javaMailSender);
         }
     }
 
@@ -38,8 +39,8 @@ public class NotifierConfig {
     static class SendGridConfig {
 
         @Bean
-        public EmailNotifier sendGridNotifier(SendGrid sendGrid) {
-            return new SendGridNotifier(sendGrid);
+        public EmailNotifier sendGridNotifier(@Value("${email.template.path:}") String customTemplatePath, SendGrid sendGrid) {
+            return new SendGridNotifier(customTemplatePath, sendGrid);
         }
     }
 }
