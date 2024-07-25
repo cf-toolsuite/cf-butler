@@ -63,6 +63,8 @@ public class QueryPolicyExecutorTask implements PolicyExecutorTask {
                                 .domain(settings.getAppsDomain())
                                 .from(result.getT1().getEmailNotificationTemplate().getFrom())
                                 .recipients(result.getT1().getEmailNotificationTemplate().getTo())
+                                .carbonCopyRecipients(result.getT1().getEmailNotificationTemplate().getCc())
+                                .blindCarbonCopyRecipients(result.getT1().getEmailNotificationTemplate().getBcc())
                                 .subject(result.getT1().getEmailNotificationTemplate().getSubject())
                                 .body(result.getT1().getEmailNotificationTemplate().getBody())
                                 .attachments(buildAttachments(result.getT2()))

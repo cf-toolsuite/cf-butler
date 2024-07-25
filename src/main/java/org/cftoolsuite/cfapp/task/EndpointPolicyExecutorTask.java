@@ -87,6 +87,8 @@ public class EndpointPolicyExecutorTask implements PolicyExecutorTask {
             .domain(settings.getAppsDomain())
             .from(policy.getEmailNotificationTemplate().getFrom())
             .recipients(policy.getEmailNotificationTemplate().getTo())
+            .carbonCopyRecipients(policy.getEmailNotificationTemplate().getCc())
+            .blindCarbonCopyRecipients(policy.getEmailNotificationTemplate().getBcc())
             .subject(policy.getEmailNotificationTemplate().getSubject())
             .body(policy.getEmailNotificationTemplate().getBody())
             .attachments(buildAttachments(endpointResults));
