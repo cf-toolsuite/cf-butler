@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.cftoolsuite.cfapp.client.GitClient;
 import org.cftoolsuite.cfapp.config.GitSettings;
 import org.cftoolsuite.cfapp.domain.ApplicationPolicy;
@@ -131,7 +132,7 @@ public class PoliciesLoader implements ApplicationListener<StacksRetrievedEvent>
                                 fp, List.of(APPLICATION_POLICY_SUFFIX, SERVICE_INSTANCE_POLICY_SUFFIX, QUERY_POLICY_SUFFIX, HYGIENE_POLICY_SUFFIX, RESOURCE_NOTIFICATION_POLICY_SUFFIX, LEGACY_POLICY_SUFFIX));
                     }
                 } catch (IOException e1) {
-                    log.warn("Could not read {} from {} with commit {} ", fp, uri, commit);
+                    log.warn("Could not read {} from {} with commit {}. \n{} ", fp, uri, commit, ExceptionUtils.getMessage(e1));
                 }
             });
             service

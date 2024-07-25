@@ -103,6 +103,8 @@ public class HygienePolicyExecutorTask implements PolicyExecutorTask {
                 .domain(settings.getAppsDomain())
                 .from(tuple.getT1().getOperatorTemplate().getFrom())
                 .recipients(tuple.getT1().getOperatorTemplate().getTo())
+                .carbonCopyRecipients(tuple.getT1().getOperatorTemplate().getCc())
+                .blindCarbonCopyRecipients(tuple.getT1().getOperatorTemplate().getBcc())
                 .subject(tuple.getT1().getOperatorTemplate().getSubject())
                 .body(tuple.getT1().getOperatorTemplate().getBody())
                 .attachments(buildAttachments(tuple))

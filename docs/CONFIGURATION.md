@@ -54,7 +54,7 @@ E.g., if you had a configuration file named `application-pcfone.yml`
 
 > See the [samples](../samples) directory for a few examples of configuration options when deploying to a foundation.
 
-For an exhaustive listing of all overridable configuration properties consult [ButlerCfEnvProcessor.java](https://github.com/cf-toolsuite/cf-butler/blob/master/src/main/java/io/pivotal/cfapp/config/ButlerCfEnvProcessor.java).
+For an exhaustive listing of all overridable configuration properties consult [ButlerCfEnvProcessor.java](../src/main/java/org/cftoolsuite/cfapp/config/ButlerCfEnvProcessor.java).
 
 ### Using an external database
 
@@ -89,7 +89,7 @@ Update the value of the `cron` properties in `application.yml`.  Consult this [a
 
 ### To discriminate user from service accounts
 
-Consult [PasSettings.java](https://github.com/cf-toolsuite/cf-butler/blob/master/src/main/java/io/pivotal/cfapp/config/PasSettings.java#L25) for the default pattern value used to discriminate between user and service accounts.  You may override the default by adding to
+Consult [PasSettings.java](../src/main/java/org/cftoolsuite/cfapp/config/PasSettings.java#L25) for the default pattern value used to discriminate between user and service accounts.  You may override the default by adding to
 
 * application.yml
 
@@ -132,7 +132,7 @@ Add an entry in your `config/secrets.json` like
 
 #### Whitelist
 
-Within each [ApplicationPolicy](https://github.com/cf-toolsuite/cf-butler/blob/master/src/main/java/io/pivotal/cfapp/domain/ApplicationPolicy.java), [ServiceInstancePolicy](https://github.com/cf-toolsuite/cf-butler/blob/master/src/main/java/io/pivotal/cfapp/domain/ServiceInstancePolicy.java), or [HygienePolicy](https://github.com/cf-toolsuite/cf-butler/blob/master/src/main/java/io/pivotal/cfapp/domain/HygienePolicy.java) you may optionally specify a list of organizations that will be whitelisted.  Policy execution will be restricted to just these organizations in the whitelist.
+Within each [ApplicationPolicy](../src/main/java/org/cftoolsuite/cfapp/domain/ApplicationPolicy.java), [ServiceInstancePolicy](../src/main/java/org/cftoolsuite/cfapp/domain/ServiceInstancePolicy.java), or [HygienePolicy](../src/main/java/org/cftoolsuite/cfapp/domain/HygienePolicy.java) you may optionally specify a list of organizations that will be whitelisted.  Policy execution will be restricted to just these organizations in the whitelist.
 
 > If the organization whitelist is not specified in a policy then that policy's execution applies to all organizations on the foundation (except for those in the organization blacklist).
 
@@ -163,3 +163,14 @@ Add an entry in your `config/secrets.json` like
 ```
 
 > All spaces you define in the blacklist are excluded from consideration by policies.
+
+### Overriding the Email notification template
+
+If you are defining policies and you would like to override the default email template with one of your own, first inspect [email-template.html](../src/main/resources/email-template.html).  Any custom template must include the placeholders for `{{header}}`, `{{body}}`, and `{{footer}}`.
+
+To make use of your own custom email template, you could start `cf-butler` with:
+
+```bash
+java -jar target/cf-butler-1.0-SNAPSHOT.jar --email.template.path=path/to/custom-template.html
+```
+> Replace the fully-qualified path to the template in the example above with your own

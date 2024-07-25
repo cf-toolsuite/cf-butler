@@ -24,7 +24,7 @@ import lombok.ToString;
 
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({ "id", "git-commit", "description", "endpoints", "email-notification-template", "cron-expression" })
+@JsonPropertyOrder({ "id", "git-commit", "description", "endpoint-requests", "email-notification-template", "cron-expression" })
 @Getter
 @ToString
 @Table("endpoint_policy")
@@ -35,7 +35,7 @@ public class EndpointPolicy implements Policy {
                 .builder()
                 .cronExpression(policy.getCronExpression())
                 .description(policy.getDescription())
-                .endpoints(policy.getEndpoints())
+                .endpointRequests(policy.getEndpointRequests())
                 .emailNotificationTemplate(policy.getEmailNotificationTemplate())
                 .build();
     }
@@ -46,7 +46,7 @@ public class EndpointPolicy implements Policy {
                 .gitCommit(gitCommit)
                 .cronExpression(policy.getCronExpression())
                 .description(policy.getDescription())
-                .endpoints(policy.getEndpoints())
+                .endpointRequests(policy.getEndpointRequests())
                 .emailNotificationTemplate(policy.getEmailNotificationTemplate())
                 .build();
     }
@@ -67,8 +67,9 @@ public class EndpointPolicy implements Policy {
     private String description;
 
     @Default
-    @JsonProperty("endpoints")
-    private Set<String> endpoints = new HashSet<>();
+    @Column("endpoint_requests")
+    @JsonProperty("endpoint-requests")
+    private Set<EndpointRequest> endpointRequests = new HashSet<>();
 
     @JsonProperty("email-notification-template")
     private EmailNotificationTemplate emailNotificationTemplate;
@@ -83,14 +84,14 @@ public class EndpointPolicy implements Policy {
             @JsonProperty("id") String id,
             @JsonProperty("git-commit") String gitCommit,
             @JsonProperty("description") String description,
-            @JsonProperty("endpoints") Set<String> endpoints,
+            @JsonProperty("endpoint-requests") Set<EndpointRequest> endpointRequests,
             @JsonProperty("email-notification-template") EmailNotificationTemplate emailNotificationTemplate,
             @JsonProperty("cron-expression") String cronExpression) {
         this.pk = pk;
         this.id = id;
         this.gitCommit = gitCommit;
         this.description = description;
-        this.endpoints = endpoints;
+        this.endpointRequests = endpointRequests;
         this.emailNotificationTemplate = emailNotificationTemplate;
         this.cronExpression = cronExpression;
     }
@@ -99,12 +100,13 @@ public class EndpointPolicy implements Policy {
         return StringUtils.isBlank(cronExpression) ? defaultCronExpression(): cronExpression;
     }
 
-    public Set<String> getEndpoints() {
-        return CollectionUtils.isEmpty(endpoints) ? new HashSet<>(): Collections.unmodifiableSet(endpoints);
+    public Set<EndpointRequest> getEndpointRequests() {
+        return CollectionUtils.isEmpty(endpointRequests) ? new HashSet<>(): Collections.unmodifiableSet(endpointRequests);
     }
 
     @JsonIgnore
     public Long getPk() {
         return pk;
     }
+
 }
