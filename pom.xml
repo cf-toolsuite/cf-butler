@@ -174,12 +174,12 @@
     <dependency>
       <groupId>org.cloudfoundry</groupId>
       <artifactId>cloudfoundry-client-reactor</artifactId>
-      <version>5.12.1.RELEASE</version>
+      <version>5.12.2.RELEASE</version>
     </dependency>
     <dependency>
       <groupId>org.cloudfoundry</groupId>
       <artifactId>cloudfoundry-operations</artifactId>
-      <version>5.12.1.RELEASE</version>
+      <version>5.12.2.RELEASE</version>
     </dependency>
     <dependency>
       <groupId>io.micrometer</groupId>
