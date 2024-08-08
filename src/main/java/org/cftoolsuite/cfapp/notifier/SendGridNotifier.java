@@ -46,16 +46,15 @@ public class SendGridNotifier extends EmailNotifier {
     }
 
     @Override
-    public void sendMail(String originator, String recipient, String[] carbonCopyRecipients, String[] blindCarbonCopyRecipients, String subject, String body, List<EmailAttachment> attachments) {
+    public void sendMail(String originator, String[] recipients, String[] carbonCopyRecipients, String[] blindCarbonCopyRecipients, String subject, String body, List<EmailAttachment> attachments) {
         try {
             Email from = new Email(originator);
-            Email to = new Email(recipient);
             Content content = new Content("text/html", body);
             //Mail mail = new Mail(from, subject, to, content);
             Mail mail = new Mail();
             Personalization personalization = new Personalization();
             personalization.setFrom(from);
-            personalization.addTo(to);
+            if (recipients != null && recipients.length > 0) { Arrays.asList(recipients).forEach(to -> personalization.addCc(new Email(to))); }
             personalization.setSubject(subject);
             if (carbonCopyRecipients != null && carbonCopyRecipients.length > 0) { Arrays.asList(carbonCopyRecipients).forEach(cc -> personalization.addCc(new Email(cc))); }
             if (blindCarbonCopyRecipients != null && blindCarbonCopyRecipients.length > 0) { Arrays.asList(blindCarbonCopyRecipients).forEach(bcc -> personalization.addBcc(new Email(bcc))); }
@@ -67,7 +66,7 @@ public class SendGridNotifier extends EmailNotifier {
             request.setEndpoint("mail/send");
             request.setBody(mail.build());
             Response response = sendGrid.api(request);
-            log.info("Email sent to {} with subject: {}", to.getEmail(), subject);
+            log.info("Email sent to {} with subject: {}", recipients, subject);
             if (carbonCopyRecipients != null && carbonCopyRecipients.length > 0) { log.info("Also sent to cc: {}", String.join(", ", carbonCopyRecipients)); }
             if (blindCarbonCopyRecipients != null && blindCarbonCopyRecipients.length > 0) { log.info("Also sent to bcc: {}", String.join(", ", blindCarbonCopyRecipients)); }
             log.trace(String.format("\n\tStatus: %s\n\t%s", HttpStatus.valueOf(response.getStatusCode()).getReasonPhrase(), response.getBody()));

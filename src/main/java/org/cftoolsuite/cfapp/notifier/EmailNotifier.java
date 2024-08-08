@@ -75,7 +75,7 @@ public abstract class EmailNotifier implements ApplicationListener<EmailNotifica
         String footer =
             String.format("This email was sent from %s on %s",
                     event.getDomain(), DateTimeFormatter.ISO_DATE_TIME.format(LocalDateTime.now()));
-        String subject = String.format("%s , Region: %s", event.getSubject(), event.getDomain());
+        String subject = String.format("%s (from %s)", event.getSubject(), event.getDomain());
         final String body = buildBody(template, event.getBody(), subject, footer);
         log.trace("About to send email using ||> From: {}, To: {}, Cc: {}, Bcc: {}, Subject: {}, Body: {}", from, recipients.toString(), String.join(", ", cc), String.join(", ", bcc), subject, body);
         List<EmailAttachment> prunedAttachments = new ArrayList<EmailAttachment>();;
@@ -83,7 +83,6 @@ public abstract class EmailNotifier implements ApplicationListener<EmailNotifica
             prunedAttachments = event.getAttachments().stream().filter(EmailAttachment::hasContent).collect(Collectors.toList());
         }
         List<EmailAttachment> attachments = prunedAttachments;
-
         String[] toRecipients = recipients.toArray(new String[0]);
         sendMail(from, toRecipients, cc, bcc, subject, body, attachments);
     }
@@ -92,6 +91,6 @@ public abstract class EmailNotifier implements ApplicationListener<EmailNotifica
         return (set != null && !set.isEmpty()) ? set.toArray(new String[set.size()]) : new String[0];
     }
 
-    public abstract void sendMail(String from, String to, String[] cc, String[] bcc, String subject, String body, List<EmailAttachment> attachments);
+    public abstract void sendMail(String from, String[] to, String[] cc, String[] bcc, String subject, String body, List<EmailAttachment> attachments);
 
 }
