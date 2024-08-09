@@ -34,19 +34,19 @@ public class JavaMailNotifier extends EmailNotifier {
     }
 
     @Override
-    public void sendMail(String from, String to, String[] cc, String[] bcc, String subject, String body, List<EmailAttachment> attachments) {
+    public void sendMail(String from, String[] to, String[] cc, String[] bcc, String subject, String body, List<EmailAttachment> attachments) {
         try {
             MimeMessage message = javaMailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
             helper.setFrom(from);
             helper.setSubject(subject);
-            helper.setTo(to);
+            if (to != null && to.length > 0) { helper.setTo(to); }
             if (cc != null && cc.length > 0) { helper.setCc(cc); }
             if (bcc != null && bcc.length > 0) { helper.setBcc(bcc); }
             helper.setText(body, true);
             attachments.forEach(ea -> addAttachment(helper, ea));
             javaMailSender.send(message);
-            log.info("Email sent to: {} with subject: {}", to, subject);
+            log.info("Email sent to: {} with subject: {}", String.join(", ", to), subject);
             if (cc != null && cc.length > 0) { log.info("Also sent to cc: {}", String.join(", ", cc)); }
             if (bcc != null && bcc.length > 0) { log.info("Also sent to bcc: {}", String.join(", ", bcc)); }
         } catch (MailException | MessagingException me) {
