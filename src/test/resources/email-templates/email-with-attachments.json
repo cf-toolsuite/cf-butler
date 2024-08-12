@@ -1,0 +1,17 @@
+{
+    "from": "sender@example.com",
+    "recipients": ["recipient1@example.com"],
+    "carbonCopyRecipients": [],
+    "blindCarbonCopyRecipients": [],
+    "subject": "Email with Attachments Test",
+    "body": "This email contains attachments.",
+    "domain": "example.com",
+    "attachments": [
+      {
+        "filename": "test",
+        "extension": ".txt",
+        "mimeType": "text/plain",
+        "content": "VGhpcyBpcyBhIHRlc3QgYXR0YWNobWVudC4="
+      }
+    ]
+  }
