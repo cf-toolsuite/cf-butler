@@ -1,0 +1,10 @@
+{
+    "from": "sender@example.com",
+    "recipients": ["recipient1@example.com", "recipient2@example.com"],
+    "carbonCopyRecipients": ["cc1@example.com"],
+    "blindCarbonCopyRecipients": ["bcc1@example.com"],
+    "subject": "Simple Email Test",
+    "body": "This is a simple test email.",
+    "domain": "example.com",
+    "attachments": []
+  }
