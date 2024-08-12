@@ -119,7 +119,7 @@ public class LegacyWorkloadReportingTask implements PolicyExecutorTask {
             // For each Space in Set<Space>, obtain SpaceUsers#getUsers()
             .concatMap(space -> spaceUsersService.findByOrganizationAndSpace(space.getOrganizationName(), space.getSpaceName()))
             // then pair with matching space(s) that contain applications and service instances
-            .concatMap(spaceUser -> Flux.fromIterable(spaceUser.getUsers()))
+            .concatMap(spaceUser -> Flux.fromIterable(spaceUser.getDevelopers()))
             .distinct()
             // filter out account names that are not email addresses
             .filter(EmailValidator::isValid)
