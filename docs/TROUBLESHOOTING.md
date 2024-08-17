@@ -32,3 +32,12 @@ cf create-service cf-butler-secrets cf create-service credhub default cf-butler-
 cf bind-service cf-butler cf-butler-secrets
 cf restage cf-butler
 ```
+
+### Database schema not up to date after upgrading to new release
+
+cf-butler was intentionally implemented with [R2DBC](https://r2dbc.io/) which works with and depends upon specific non-blocking database drivers.
+When an application instance of cf-butler starts up, it will execute *.ddl found within a src/main/resources/db/{provider} directory. All SQL for creating database objects (like TABLE) is authored with the IF NOT EXISTS conditional.
+This has an unfortunate drawback, because sometimes when you upgrade to a newer release, it may necessitate update(s) to database object(s) (e.g., an addition, removal, or update to (a) table column(s)).
+The aforementioned conditional prevents required updates from executing for persistent providers like MySQL and Postgres, but not for H2.
+
+So, if you have integrated cf-butler with a database instance like MySQL or Postgres, you will need to manually execute ALTER TABLE commands including the affected columns before attempting to start up a new release.

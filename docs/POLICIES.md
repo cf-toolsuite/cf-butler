@@ -56,7 +56,8 @@ See additional property requirements in this sample Github [repository](https://
 
 ### Legacy Policies
 
-Legacy policies are useful when you want to search for and report on applications deployed to a legacy stack (e.g., windows2012R2, cflinuxfs2) or service offering (e.g., using a product slug name like p-config-server, p-service-registry, p-mysql), notifying both the operator and for each application the author and/or his/her space compadres.
+Legacy policies are useful when you want to search for and report on applications deployed to a legacy stack (e.g., windows2012R2, cflinuxfs2) or service offering (e.g., using a product slug name like p-config-server, p-service-registry, p-mysql), notifying both the operator and for each application, users with the [space developer](https://docs.vmware.com/en/VMware-Tanzu-Application-Service/4.0/tas-for-vms/roles.html#user-roles-2) role.
+
 
 As mentioned previously the policy file must adhere to a naming convention
 
