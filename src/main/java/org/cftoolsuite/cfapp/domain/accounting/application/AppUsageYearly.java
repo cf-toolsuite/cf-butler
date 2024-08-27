@@ -4,29 +4,16 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import lombok.Builder;
-import lombok.Builder.Default;
-import lombok.Getter;
-
-@Builder
-@Getter
-@JsonPropertyOrder({"year", "average_app_instances", "maximum_app_instances", "app_instance_hours"})
-public class AppUsageYearly {
-
+public record AppUsageYearly(
     @JsonProperty("year")
-    private Integer year;
-
-    @Default
+    Integer year,
     @JsonProperty("average_app_instances")
-    private Double averageAppInstances = 0.0;
-
-    @Default
+    Double averageAppInstances,
     @JsonProperty("maximum_app_instances")
-    private Integer maximumAppInstances = 0;
-
-    @Default
+    Integer maximumAppInstances,
     @JsonProperty("app_instance_hours")
-    private Double appInstanceHours = 0.0;
+    Double appInstanceHours
+) {
 
     @JsonCreator
     public AppUsageYearly(
@@ -34,10 +21,41 @@ public class AppUsageYearly {
             @JsonProperty("average_app_instances") Double averageAppInstances,
             @JsonProperty("maximum_app_instances") Integer maximumAppInstances,
             @JsonProperty("app_instance_hours") Double appInstanceHours) {
-        this.year = year;
-        this.averageAppInstances = averageAppInstances;
-        this.maximumAppInstances = maximumAppInstances;
-        this.appInstanceHours = appInstanceHours;
+        this(year, averageAppInstances == null ? 0.0 : averageAppInstances, maximumAppInstances == null ? 0 : maximumAppInstances, appInstanceHours == null ? 0.0 : appInstanceHours);
     }
 
+    public static class AppUsageYearlyBuilder {
+        private Integer year;
+        private Double averageAppInstances;
+        private Integer maximumAppInstances;
+        private Double appInstanceHours;
+
+        public AppUsageYearlyBuilder year(Integer year) {
+            this.year = year;
+            return this;
+        }
+
+        public AppUsageYearlyBuilder averageAppInstances(Double averageAppInstances) {
+            this.averageAppInstances = averageAppInstances;
+            return this;
+        }
+
+        public AppUsageYearlyBuilder maximumAppInstances(Integer maximumAppInstances) {
+            this.maximumAppInstances = maximumAppInstances;
+            return this;
+        }
+
+        public AppUsageYearlyBuilder appInstanceHours(Double appInstanceHours) {
+            this.appInstanceHours = appInstanceHours;
+            return this;
+        }
+
+        public AppUsageYearly build() {
+            return new AppUsageYearly(year, averageAppInstances, maximumAppInstances, appInstanceHours);
+        }
+    }
+
+    public static AppUsageYearlyBuilder builder() {
+        return new AppUsageYearlyBuilder();
+    }
 }
