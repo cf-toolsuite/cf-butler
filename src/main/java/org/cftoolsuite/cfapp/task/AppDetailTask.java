@@ -6,7 +6,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -23,16 +22,12 @@ import org.cftoolsuite.cfapp.service.BuildpacksCache;
 import org.cftoolsuite.cfapp.service.EventsService;
 import org.cftoolsuite.cfapp.service.StacksCache;
 import org.cloudfoundry.client.v2.ClientV2Exception;
-import org.cloudfoundry.client.v2.applications.ApplicationStatisticsRequest;
-import org.cloudfoundry.client.v2.applications.ApplicationStatisticsResponse;
-import org.cloudfoundry.client.v2.applications.InstanceStatistics;
-import org.cloudfoundry.client.v2.applications.Statistics;
 import org.cloudfoundry.client.v2.applications.SummaryApplicationRequest;
-import org.cloudfoundry.client.v2.applications.Usage;
 import org.cloudfoundry.client.v3.ClientV3Exception;
 import org.cloudfoundry.client.v3.applications.GetApplicationCurrentDropletRequest;
 import org.cloudfoundry.client.v3.applications.GetApplicationCurrentDropletResponse;
 import org.cloudfoundry.client.v3.applications.GetApplicationProcessStatisticsRequest;
+import org.cloudfoundry.client.v3.processes.ProcessState;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -97,8 +92,7 @@ public class AppDetailTask implements ApplicationListener<AppDetailReadyToBeRetr
             .concatMap(this::listApplications)
             .flatMap(this::getSummaryInfo)
             .flatMap(this::getBuildpackFromApplicationCurrentDroplet)
-            .flatMap(this::getQuotas)
-            .flatMap(this::getStatistics)
+            .flatMap(this::getUsageAndQuotas)
             .flatMap(this::getLastEvent)
             .flatMap(appDetailsService::save)
             .thenMany(appDetailsService.findAll())
@@ -176,36 +170,49 @@ public class AppDetailTask implements ApplicationListener<AppDetailReadyToBeRetr
                 .defaultIfEmpty(fragment);
     }
 
-    protected Mono<AppDetail> getQuotas(AppDetail fragment) {
-        log.trace("Fetching application quotas for org={}, space={}, id={}, name={}", fragment.getOrganization(), fragment.getSpace(), fragment.getAppId(), fragment.getAppName());
+
+    protected Mono<AppDetail> getUsageAndQuotas(AppDetail fragment) {
+        log.trace("Fetching application usage stats and quotas for org={}, space={}, id={}, name={}",
+                fragment.getOrganization(), fragment.getSpace(), fragment.getAppId(), fragment.getAppName());
+
         return buildClient(buildSpace(fragment.getOrganization(), fragment.getSpace()))
                 .getCloudFoundryClient()
                 .applicationsV3()
-                .getProcessStatistics(GetApplicationProcessStatisticsRequest.builder().applicationId(fragment.getAppId()).type("web").build())
-                .map(stats ->
-                    AppDetail
+                .getProcessStatistics(GetApplicationProcessStatisticsRequest.builder()
+                        .applicationId(fragment.getAppId())
+                        .type("web")
+                        .build())
+                .map(stats -> {
+                    Long diskUsage = stats.getResources().stream()
+                            .filter(r -> r.getState().equals(ProcessState.RUNNING))
+                            .findFirst()
+                            .map(r -> nullSafeLong(r.getUsage().getDisk()))
+                            .orElse(0L);
+                    Long memoryUsage = stats.getResources().stream()
+                            .filter(r -> r.getState().equals(ProcessState.RUNNING))
+                            .findFirst()
+                            .map(r -> nullSafeLong(r.getUsage().getMemory()))
+                            .orElse(0L);
+                    Long diskQuota = stats.getResources().stream()
+                            .filter(r -> r.getState().equals(ProcessState.RUNNING))
+                            .findFirst()
+                            .map(r -> nullSafeLong(r.getDiskQuota()))
+                            .orElse(0L);
+                    Long memoryQuota = stats.getResources().stream()
+                            .filter(r -> r.getState().equals(ProcessState.RUNNING))
+                            .findFirst()
+                            .map(r -> nullSafeLong(r.getMemoryQuota()))
+                            .orElse(0L);
+                    return
+                        AppDetail
                         .from(fragment)
-                        .diskQuota(stats.getResources().get(0).getDiskQuota())
-                        .memoryQuota(stats.getResources().get(0).getMemoryQuota())
-                        .build()
-                )
+                        .memoryUsed(memoryUsage)
+                        .diskUsed(diskUsage)
+                        .diskQuota(diskQuota)
+                        .memoryQuota(memoryQuota)
+                        .build();
+                })
                 .onErrorResume(ClientV3Exception.class, e -> Mono.just(fragment));
-    }
-
-    protected Mono<AppDetail> getStatistics(AppDetail fragment) {
-        log.trace("Fetching application statistics for org={}, space={}, id={}, name={}", fragment.getOrganization(), fragment.getSpace(), fragment.getAppId(), fragment.getAppName());
-        return buildClient(buildSpace(fragment.getOrganization(), fragment.getSpace()))
-                .getCloudFoundryClient()
-                .applicationsV2()
-                .statistics(ApplicationStatisticsRequest.builder().applicationId(fragment.getAppId()).build())
-                .map(stats ->
-                    AppDetail
-                        .from(fragment)
-                        .diskUsed(nullSafeDiskUsed(stats))
-                        .memoryUsed(nullSafeMemoryUsed(stats))
-                        .build()
-                )
-                .onErrorResume(ClientV2Exception.class, e -> Mono.just(fragment));
     }
 
     protected Mono<AppDetail> getSummaryInfo(AppDetail fragment) {
@@ -312,52 +319,18 @@ public class AppDetailTask implements ApplicationListener<AppDetailReadyToBeRetr
                 .build();
     }
 
-    private static Long nullSafeDiskUsed(ApplicationStatisticsResponse stats) {
-        Long result = 0L;
-        Map<String, InstanceStatistics> instances = stats.getInstances();
-        if (instances != null) {
-            Statistics innerStats;
-            for (InstanceStatistics is: instances.values()) {
-                innerStats = is.getStatistics();
-                Usage usage;
-                if (innerStats != null) {
-                    usage = innerStats.getUsage();
-                    if (usage != null && usage.getDisk() != null) {
-                        result += usage.getDisk();
-                    }
-                }
-            }
-        }
-        return result;
-    }
-
     private static Integer nullSafeInteger(Integer value) {
         return value != null ? value: 0;
+    }
+
+    private static Long nullSafeLong(Long value) {
+        return value != null ? value: 0L;
     }
 
     private static LocalDateTime nullSafeLocalDateTime(String value) {
         return StringUtils.isNotBlank(value)
                 ? Instant.parse(value).atZone(ZoneId.systemDefault()).toLocalDateTime()
                         : null;
-    }
-
-    private static Long nullSafeMemoryUsed(ApplicationStatisticsResponse stats) {
-        Long result = 0L;
-        Map<String, InstanceStatistics> instances = stats.getInstances();
-        if (instances != null) {
-            Statistics innerStats;
-            for (InstanceStatistics is: instances.values()) {
-                innerStats = is.getStatistics();
-                Usage usage;
-                if (innerStats != null) {
-                    usage = innerStats.getUsage();
-                    if (usage != null && usage.getMemory() != null) {
-                        result += usage.getMemory();
-                    }
-                }
-            }
-        }
-        return result;
     }
 
 }
