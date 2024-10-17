@@ -16,12 +16,13 @@ jobs:
         with:
           distribution: liberica
           java-version: ${{ matrix.java }}
-      - name: Cache Maven packages
+      - name: Cache local Maven repository
         uses: actions/cache@v4
         with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
       - name: Build with Maven targeting H2 backend
         run: ./mvnw --batch-mode --update-snapshots -Plog4j2 clean verify
       - name: Build with Maven targeting MySQL backend
