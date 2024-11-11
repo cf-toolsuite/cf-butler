@@ -109,12 +109,12 @@
     <dependency>
       <groupId>io.pivotal.cfenv</groupId>
       <artifactId>java-cfenv</artifactId>
-      <version>3.2.0</version>
+      <version>3.3.0</version>
     </dependency>
     <dependency>
       <groupId>io.pivotal.cfenv</groupId>
       <artifactId>java-cfenv-boot</artifactId>
-      <version>3.2.0</version>
+      <version>3.3.0</version>
     </dependency>
     <dependency>
       <groupId>com.cedarsoftware</groupId>
@@ -831,7 +831,7 @@
         <dependency>
           <groupId>com.wavefront</groupId>
           <artifactId>wavefront-spring-boot-starter</artifactId>
-          <version>3.2.0</version>
+          <version>3.3.0</version>
         </dependency>
       </dependencies>
     </profile>
