@@ -53,7 +53,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.4.1</version>
+    <version>3.4.2</version>
     <relativePath/>
     <!-- lookup parent from repository -->
   </parent>
@@ -119,7 +119,7 @@
     <dependency>
       <groupId>com.cedarsoftware</groupId>
       <artifactId>json-io</artifactId>
-      <version>4.32.0</version>
+      <version>4.33.0</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -752,7 +752,7 @@
         <dependency>
           <groupId>io.asyncer</groupId>
           <artifactId>r2dbc-mysql</artifactId>
-          <version>1.3.1</version>
+          <version>1.3.2</version>
           <scope>runtime</scope>
         </dependency>
         <dependency>
