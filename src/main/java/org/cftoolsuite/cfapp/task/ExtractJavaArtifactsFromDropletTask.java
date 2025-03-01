@@ -1,10 +1,6 @@
 package org.cftoolsuite.cfapp.task;
 
-import java.io.IOException;
-
-import java.util.List;
-import java.util.stream.Collectors;
-
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.cftoolsuite.cfapp.domain.AppDetail;
 import org.cftoolsuite.cfapp.domain.JavaAppDetail;
@@ -12,7 +8,6 @@ import org.cftoolsuite.cfapp.event.AppDetailRetrievedEvent;
 import org.cftoolsuite.cfapp.service.DropletsService;
 import org.cftoolsuite.cfapp.service.JavaAppDetailService;
 import org.cftoolsuite.cfapp.util.DropletProcessingCondition;
-import org.cftoolsuite.cfapp.util.JarManifestUtil;
 import org.cftoolsuite.cfapp.util.JavaArtifactReader;
 import org.cftoolsuite.cfapp.util.TgzUtil;
 import org.cloudfoundry.client.v3.applications.GetApplicationCurrentDropletRequest;
@@ -27,10 +22,11 @@ import org.springframework.context.annotation.Conditional;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.stereotype.Component;
-
-import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -115,67 +111,55 @@ public class ExtractJavaArtifactsFromDropletTask implements ApplicationListener<
     private Mono<JavaAppDetail> ascertainSpringDependencies(JavaAppDetail detail) {
         Flux<DataBuffer> fdb = dropletsService.downloadDroplet(detail.getDropletId());
 
-        Mono<String> manifestContentMono =
-            TgzUtil
-                .extractFileContent(fdb, "META-INF/MANIFEST.MF")
-                .defaultIfEmpty("");
-
         if (javaArtifactReader.mode().equalsIgnoreCase("list-jars")) {
-            return manifestContentMono.flatMap(manifestContent -> {
-                Integer buildJdkSpec = extractBuildJdkSpec(manifestContent);
+            return TgzUtil.processArchive(fdb, new String[]{".jar", "META-INF/MANIFEST.MF"})
+                    .map(result -> {
+                        String jars = result.getJarFilenamesAsString();
+                        Integer buildJdkSpec = result.buildJdkSpec();
 
-                return TgzUtil.findMatchingFiles(fdb, ".jar")
-                        .map(s -> StringUtils.isNotBlank(s)
-                                ? JavaAppDetail
-                                        .from(detail)
-                                        .jars(s)
-                                        .buildJdkSpec(buildJdkSpec)
-                                        .springDependencies(
-                                                javaArtifactReader.read(s).stream().collect(Collectors.joining("\n")))
-                                        .build()
-                                : detail)
-                        .onErrorResume(e -> {
-                            log.error(String.format("Trouble ascertaining Spring dependencies for %s/%s/%s",
-                                    detail.getOrganization(), detail.getSpace(), detail.getAppName()), e);
-                            return Mono.just(detail);
-                        });
-            });
+                        if (StringUtils.isNotBlank(jars)) {
+                            return JavaAppDetail
+                                    .from(detail)
+                                    .jars(jars)
+                                    .buildJdkSpec(buildJdkSpec)
+                                    .springDependencies(
+                                            javaArtifactReader.read(jars).stream().collect(Collectors.joining("\n")))
+                                    .build();
+                        } else {
+                            return detail;
+                        }
+                    })
+                    .onErrorResume(e -> {
+                        log.error(String.format("Trouble ascertaining Spring dependencies for %s/%s/%s",
+                                detail.getOrganization(), detail.getSpace(), detail.getAppName()), e);
+                        return Mono.just(detail);
+                    });
         } else if (javaArtifactReader.mode().equalsIgnoreCase("unpack-pom-contents-in-droplet")) {
-            return manifestContentMono.flatMap(manifestContent -> {
-                Integer buildJdkSpec = extractBuildJdkSpec(manifestContent);
+            return TgzUtil.processArchive(fdb, new String[]{"pom.xml", "META-INF/MANIFEST.MF"})
+                    .map(result -> {
+                        String pomContents = result.pomContent();
+                        Integer buildJdkSpec = result.buildJdkSpec();
 
-                return TgzUtil.extractFileContent(fdb, "pom.xml")
-                        .map(s -> StringUtils.isNotBlank(s)
-                                ? JavaAppDetail
-                                        .from(detail)
-                                        .pomContents(s)
-                                        .buildJdkSpec(buildJdkSpec)
-                                        .springDependencies(
-                                                javaArtifactReader.read(s).stream().collect(Collectors.joining("\n")))
-                                        .build()
-                                : detail)
-                        .onErrorResume(e -> {
-                            log.error(String.format("Trouble ascertaining Spring dependencies for %s/%s/%s",
-                                    detail.getOrganization(), detail.getSpace(), detail.getAppName()), e);
-                            return Mono.just(detail);
-                        });
-            });
+                        if (StringUtils.isNotBlank(pomContents)) {
+                            return JavaAppDetail
+                                    .from(detail)
+                                    .pomContents(pomContents)
+                                    .buildJdkSpec(buildJdkSpec)
+                                    .springDependencies(
+                                            javaArtifactReader.read(pomContents).stream().collect(Collectors.joining("\n")))
+                                    .build();
+                        } else {
+                            return detail;
+                        }
+                    })
+                    .onErrorResume(e -> {
+                        log.error(String.format("Trouble ascertaining Spring dependencies for %s/%s/%s",
+                                detail.getOrganization(), detail.getSpace(), detail.getAppName()), e);
+                        return Mono.just(detail);
+                    });
         } else {
             log.warn("Not configured to ascertain Spring dependencies");
             return Mono.just(detail);
-        }
-    }
-
-    private Integer extractBuildJdkSpec(String manifestContent) {
-        if (manifestContent.isEmpty()) {
-            return null;
-        }
-        try {
-            String buildJdkSpecStr = JarManifestUtil.obtainAttributeValue(manifestContent, "Build-Jdk-Spec");
-            return buildJdkSpecStr != null ? Integer.valueOf(buildJdkSpecStr) : null;
-        } catch (IOException e) {
-            log.error("Error reading MANIFEST.MF", e);
-            return null;
         }
     }
 
@@ -183,5 +167,4 @@ public class ExtractJavaArtifactsFromDropletTask implements ApplicationListener<
     public void onApplicationEvent(AppDetailRetrievedEvent event) {
         collect(List.copyOf(event.getDetail()));
     }
-
 }
