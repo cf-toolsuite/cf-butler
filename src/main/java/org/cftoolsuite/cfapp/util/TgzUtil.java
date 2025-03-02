@@ -14,16 +14,22 @@ import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.MonoSink;
 import reactor.core.scheduler.Schedulers;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.nio.channels.AsynchronousFileChannel;
+import java.nio.channels.CompletionHandler;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class TgzUtil {
 
@@ -32,53 +38,37 @@ public class TgzUtil {
     private static final int MAX_ENTRY_SIZE = 10 * 1024 * 1024; // 10MB max for text entries
 
     /**
-     * Process archive stream without loading the entire archive into memory
+     * Process archive stream with minimal blocking operations
      */
     public static Mono<ArchiveResult> processArchive(Flux<DataBuffer> incoming, String[] entryPatterns) {
         return DataBufferUtils.join(incoming)
                 .flatMap(dataBuffer -> {
-                    // Use a BufferedInputStream that supports mark/reset operations
-                    // We'll read the entire file, but only keep one copy in memory
-                    // For larger files (>100MB), consider a temporary file-based approach instead
                     byte[] bytes = new byte[dataBuffer.readableByteCount()];
                     dataBuffer.read(bytes);
                     DataBufferUtils.release(dataBuffer);
 
-                    return Mono.fromCallable(() -> {
-                        try (BufferedInputStream bufferedInputStream = new BufferedInputStream(new ByteArrayInputStream(bytes))) {
-                            return processArchiveEntries(bufferedInputStream, entryPatterns);
-                        }
-                    }).subscribeOn(Schedulers.boundedElastic());
+                    return processArchiveEntriesNonBlocking(bytes, entryPatterns);
                 });
-        // Implementation moved to a different approach
     }
 
     /**
-     * Alternative implementation for very large files (>100MB) that uses a temporary file
-     * to avoid keeping the entire file in memory
+     * Process large archives using completely non-blocking operations where possible
+     * This implementation focuses on minimizing blocking calls to avoid thread starvation
      */
     public static Mono<ArchiveResult> processLargeArchive(Flux<DataBuffer> incoming, String[] entryPatterns) {
-        return Mono.using(
-                // Resource creation: Create a temporary file
-                () -> Files.createTempFile("archive-", ".tgz"),
-
-                // Resource usage: Write the incoming data to the file, then process it
-                tempFile -> DataBufferUtils.write(incoming, tempFile, StandardOpenOption.WRITE)
-                        .then(Mono.fromCallable(() -> {
-                            try (InputStream is = new BufferedInputStream(Files.newInputStream(tempFile))) {
-                                return processArchiveEntries(is, entryPatterns);
-                            }
-                        }).subscribeOn(Schedulers.boundedElastic())),
-
-                // Resource cleanup: Delete the temporary file
-                tempFile -> {
-                    try {
-                        Files.deleteIfExists(tempFile);
-                    } catch (IOException e) {
-                        log.warn("Failed to delete temporary file: {}", tempFile, e);
-                    }
-                }
-        );
+        // Create temp file path asynchronously
+        return createTempFileAsync("archive-", ".tgz")
+                .flatMap(tempFile -> {
+                    // Write incoming data to temp file non-blockingly
+                    return DataBufferUtils.write(incoming, tempFile, StandardOpenOption.WRITE)
+                            // Read file content non-blockingly
+                            .then(readFileContentAsync(tempFile))
+                            // Process archive content
+                            .flatMap(content -> processArchiveEntriesNonBlocking(content, entryPatterns))
+                            // Clean up temp file when done
+                            .doFinally(signal -> deleteFileAsync(tempFile)
+                            .subscribe());
+                });
     }
 
     /**
@@ -93,106 +83,88 @@ public class TgzUtil {
     }
 
     /**
-     * Process archive entries with stream-based reading and selective buffering
+     * Process archive data using non-blocking NIO operations
+     * @param data Byte array containing the archive data
+     * @param entryPatterns Patterns to match for archive entries
+     * @return Archive result containing extracted data
      */
-    private static ArchiveResult processArchiveEntries(InputStream is, String[] entryPatterns) {
-        ArchiveResult.Builder resultBuilder = ArchiveResult.builder();
-        CompressorInputStream cis = null;
-        TarArchiveInputStream tarIs = null;
+    private static Mono<ArchiveResult> processArchiveEntriesNonBlocking(byte[] data, String[] entryPatterns) {
+        return Mono.fromCallable(() -> {
+                    // Unfortunately, Commons Compress doesn't offer a non-blocking API
+                    // We need to use its InputStream-based API even with NIO
+                    try (InputStream is = new ByteArrayInputStream(data);
+                         CompressorInputStream cis = new CompressorStreamFactory().createCompressorInputStream(CompressorStreamFactory.GZIP, is);
+                         TarArchiveInputStream tarIs = new ArchiveStreamFactory().createArchiveInputStream("tar", cis)) {
 
-        try {
-            // Directly specify the compression format for tgz files instead of using detection
-            // which requires mark/reset support
-            cis = new CompressorStreamFactory().createCompressorInputStream(CompressorStreamFactory.GZIP, is);
-            tarIs = new ArchiveStreamFactory().createArchiveInputStream("tar", cis);
+                        ArchiveResult.Builder resultBuilder = ArchiveResult.builder();
+                        TarArchiveEntry entry;
 
-            ConcurrentLinkedQueue<String> jarFilenames = new ConcurrentLinkedQueue<>();
-            AtomicReference<String> pomContent = new AtomicReference<>();
-            AtomicReference<String> manifestContent = new AtomicReference<>();
-            AtomicReference<Integer> buildJdkSpec = new AtomicReference<>();
-
-            TarArchiveEntry entry;
-            while ((entry = tarIs.getNextTarEntry()) != null) {
-                if (tarIs.canReadEntryData(entry) && !entry.isDirectory()) {
-                    String entryName = entry.getName();
-                    long entrySize = entry.getSize();
-
-                    // Check if this entry matches any of our patterns
-                    for (String pattern : entryPatterns) {
-                        if (isEntryMatch(entryName, pattern)) {
-                            if (pattern.equals("pom.xml") && entryName.endsWith("pom.xml")) {
-                                // Only read POM if it's not excessively large
-                                if (entrySize > 0 && entrySize < MAX_ENTRY_SIZE) {
-                                    log.trace("Found pom.xml: {}", entryName);
-                                    String content = readEntryContent(tarIs, Math.toIntExact(entrySize));
-                                    pomContent.set(content);
-                                } else {
-                                    log.warn("Skipping oversized pom.xml: {} (size: {})", entryName, entrySize);
-                                    skipEntry(tarIs);
-                                }
-                                break;
-                            } else if (pattern.equals("META-INF/MANIFEST.MF") && entryName.endsWith("META-INF/MANIFEST.MF")) {
-                                // Only read manifest if it's not excessively large
-                                if (entrySize > 0 && entrySize < MAX_ENTRY_SIZE) {
-                                    log.trace("Found MANIFEST.MF: {}", entryName);
-                                    String content = readEntryContent(tarIs, Math.toIntExact(entrySize));
-                                    manifestContent.set(content);
-
-                                    // Extract JDK spec without reloading the manifest
-                                    try {
-                                        String buildJdkSpecStr = JarManifestUtil.obtainAttributeValue(content, "Build-Jdk-Spec");
-                                        if (buildJdkSpecStr != null) {
-                                            buildJdkSpec.set(Integer.valueOf(buildJdkSpecStr));
-                                        }
-                                    } catch (Exception e) {
-                                        log.error("Error extracting Build-Jdk-Spec from MANIFEST.MF", e);
-                                    }
-                                } else {
-                                    log.warn("Skipping oversized MANIFEST.MF: {} (size: {})", entryName, entrySize);
-                                    skipEntry(tarIs);
-                                }
-                                break;
-                            } else if (pattern.startsWith(".") && entryName.endsWith(pattern)) {
-                                // For JAR files, just record the filename without loading content
-                                if (pattern.equals(".jar")) {
-                                    String filename = Paths.get(entryName).getFileName().toString();
-                                    log.trace("Found JAR file: {}", filename);
-                                    jarFilenames.add(filename);
-                                }
-                                skipEntry(tarIs);
-                                break;
+                        while ((entry = tarIs.getNextEntry()) != null) {
+                            if (tarIs.canReadEntryData(entry) && !entry.isDirectory()) {
+                                processEntry(entry, tarIs, resultBuilder, entryPatterns);
                             }
                         }
+
+                        return resultBuilder.build();
                     }
+                })
+                .subscribeOn(Schedulers.boundedElastic());
+    }
+
+    /**
+     * Process a single tar entry
+     */
+    private static void processEntry(TarArchiveEntry entry, TarArchiveInputStream tarIs,
+                                     ArchiveResult.Builder resultBuilder, String[] entryPatterns) throws IOException {
+        String entryName = entry.getName();
+        long entrySize = entry.getSize();
+
+        // Check if this entry matches any of our patterns
+        for (String pattern : entryPatterns) {
+            if (isEntryMatch(entryName, pattern)) {
+                if (pattern.equals("pom.xml") && entryName.endsWith("pom.xml")) {
+                    // Only read POM if it's not excessively large
+                    if (entrySize > 0 && entrySize < MAX_ENTRY_SIZE) {
+                        log.trace("Found pom.xml: {}", entryName);
+                        String content = readEntryContent(tarIs, Math.toIntExact(entrySize));
+                        resultBuilder.pomContent(content);
+                    } else {
+                        log.warn("Skipping oversized pom.xml: {} (size: {})", entryName, entrySize);
+                        skipEntry(tarIs);
+                    }
+                    break;
+                } else if (pattern.equals("META-INF/MANIFEST.MF") && entryName.endsWith("META-INF/MANIFEST.MF")) {
+                    // Only read manifest if it's not excessively large
+                    if (entrySize > 0 && entrySize < MAX_ENTRY_SIZE) {
+                        log.trace("Found MANIFEST.MF: {}", entryName);
+                        String content = readEntryContent(tarIs, Math.toIntExact(entrySize));
+                        resultBuilder.manifestContent(content);
+
+                        // Extract JDK spec without reloading the manifest
+                        try {
+                            String buildJdkSpecStr = JarManifestUtil.obtainAttributeValue(content, "Build-Jdk-Spec");
+                            if (buildJdkSpecStr != null) {
+                                resultBuilder.buildJdkSpec(Integer.valueOf(buildJdkSpecStr));
+                            }
+                        } catch (Exception e) {
+                            log.error("Error extracting Build-Jdk-Spec from MANIFEST.MF", e);
+                        }
+                    } else {
+                        log.warn("Skipping oversized MANIFEST.MF: {} (size: {})", entryName, entrySize);
+                        skipEntry(tarIs);
+                    }
+                    break;
+                } else if (pattern.startsWith(".") && entryName.endsWith(pattern)) {
+                    // For JAR files, just record the filename without loading content
+                    if (pattern.equals(".jar")) {
+                        String filename = Paths.get(entryName).getFileName().toString();
+                        log.trace("Found JAR file: {}", filename);
+                        resultBuilder.addJarFilename(filename);
+                    }
+                    skipEntry(tarIs);
+                    break;
                 }
             }
-
-            // Build result with collected data
-            if (pomContent.get() != null) {
-                resultBuilder.pomContent(pomContent.get());
-            }
-
-            if (manifestContent.get() != null) {
-                resultBuilder.manifestContent(manifestContent.get());
-            }
-
-            if (buildJdkSpec.get() != null) {
-                resultBuilder.buildJdkSpec(buildJdkSpec.get());
-            }
-
-            // Add all JAR filenames
-            jarFilenames.forEach(resultBuilder::addJarFilename);
-
-            return resultBuilder.build();
-
-        } catch (Exception e) {
-            log.error("Error processing archive entries", e);
-            throw new RuntimeException("Error processing archive entries", e);
-        } finally {
-            // Clean up resources in reverse order
-            closeQuietly(tarIs);
-            closeQuietly(cis);
-            closeQuietly(is);
         }
     }
 
@@ -213,6 +185,81 @@ public class TgzUtil {
     }
 
     /**
+     * Read file content asynchronously with minimal blocking
+     */
+    private static Mono<byte[]> readFileContentAsync(Path filePath) {
+        return Mono.using(
+                // Open file channel asynchronously
+                () -> AsynchronousFileChannel.open(filePath, StandardOpenOption.READ),
+
+                // Use the channel
+                channel -> Mono.create(sink -> {
+                    try {
+                        long fileSize = channel.size();
+                        if (fileSize > Integer.MAX_VALUE) {
+                            sink.error(new IllegalArgumentException("File too large to process in memory: " + fileSize + " bytes"));
+                            return;
+                        }
+
+                        ByteBuffer buffer = ByteBuffer.allocate((int)fileSize);
+                        readChannelAsync(channel, buffer, 0, sink);
+                    } catch (IOException e) {
+                        sink.error(e);
+                    }
+                }),
+
+                // Close channel
+                channel -> {
+                    try {
+                        channel.close();
+                    } catch (IOException e) {
+                        log.warn("Error closing channel", e);
+                    }
+                }
+        );
+    }
+
+    /**
+     * Read from channel asynchronously at position into buffer
+     */
+    private static void readChannelAsync(AsynchronousFileChannel channel, ByteBuffer buffer,
+                                         long position, MonoSink<byte[]> sink) {
+        channel.read(buffer, position, null, new CompletionHandler<Integer, Void>() {
+            private long totalBytesRead = 0;
+
+            @Override
+            public void completed(Integer bytesRead, Void attachment) {
+                if (bytesRead == -1) {
+                    // End of file reached
+                    buffer.flip();
+                    byte[] result = new byte[buffer.remaining()];
+                    buffer.get(result);
+                    sink.success(result);
+                    return;
+                }
+
+                totalBytesRead += bytesRead;
+
+                if (buffer.hasRemaining()) {
+                    // Continue reading if buffer has space
+                    channel.read(buffer, position + totalBytesRead, null, this);
+                } else {
+                    // Buffer full, return result
+                    buffer.flip();
+                    byte[] result = new byte[buffer.remaining()];
+                    buffer.get(result);
+                    sink.success(result);
+                }
+            }
+
+            @Override
+            public void failed(Throwable exc, Void attachment) {
+                sink.error(exc);
+            }
+        });
+    }
+
+    /**
      * Skips an entry without reading its contents into memory
      */
     private static void skipEntry(TarArchiveInputStream tarIs) throws IOException {
@@ -226,24 +273,27 @@ public class TgzUtil {
      * Checks if entry name matches the given pattern
      */
     private static boolean isEntryMatch(String entryName, String pattern) {
-        if (pattern.startsWith(".")) {
-            return entryName.endsWith(pattern);
-        } else {
-            return entryName.endsWith(pattern);
-        }
+        return entryName.endsWith(pattern);
     }
 
     /**
-     * Safely closes a resource without throwing exceptions
+     * Creates a temporary file asynchronously
      */
-    private static void closeQuietly(AutoCloseable closeable) {
-        if (closeable != null) {
-            try {
-                closeable.close();
-            } catch (Exception e) {
-                log.warn("Error closing resource", e);
-            }
-        }
+    private static Mono<Path> createTempFileAsync(String prefix, String suffix) {
+        return Mono.fromCallable(() -> Files.createTempFile(prefix, suffix))
+                .subscribeOn(Schedulers.boundedElastic());
+    }
+
+    /**
+     * Deletes a file asynchronously
+     */
+    private static Mono<Void> deleteFileAsync(Path path) {
+        return Mono.fromCallable(() -> {
+                    Files.deleteIfExists(path);
+                    return true;
+                })
+                .subscribeOn(Schedulers.boundedElastic())
+                .then();
     }
 
     public static void main(String[] args) {
@@ -260,8 +310,7 @@ public class TgzUtil {
         PathResource resource = new PathResource(dropletFile.toPath());
         try {
             // Define chunk size for reading
-            int chunkSize = BUFFER_SIZE;
-            Flux<DataBuffer> dataBufferFlux = DataBufferUtils.read(resource, new DefaultDataBufferFactory(), chunkSize);
+            Flux<DataBuffer> dataBufferFlux = DataBufferUtils.read(resource, new DefaultDataBufferFactory(), BUFFER_SIZE);
 
             // Process for POM, manifests and JAR files
             String[] entries = {"pom.xml", "META-INF/MANIFEST.MF", ".jar"};
