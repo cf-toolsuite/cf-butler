@@ -94,7 +94,7 @@ public class StopAppPolicyExecutorTask implements PolicyExecutorTask {
                 .findByApplicationOperation(ApplicationOperation.STOP)
                 .flux()
                 .flatMap(p -> Flux.fromIterable(p.getApplicationPolicies()))
-                .filter(ap -> ap.equals(id))
+                .filter(ap -> ap.getId().equals(id))
                 .flatMap(ap -> Flux.concat(appInfoService.findByApplicationPolicy(ap, false), appInfoService.findByApplicationPolicy(ap, true)))
                 .distinct()
                 .filter(wl -> filter.isWhitelisted(wl.getT2(), wl.getT1().getOrganization()))

@@ -24,11 +24,11 @@ import reactor.core.publisher.Mono;
 @Component
 public class ScaleAppInstancesPolicyExecutorTask implements PolicyExecutorTask {
 
-    private PolicyFilter filter;
-    private DefaultCloudFoundryOperations opsClient;
-    private AppDetailService appInfoService;
-    private PoliciesService policiesService;
-    private HistoricalRecordService historicalRecordService;
+    private final PolicyFilter filter;
+    private final DefaultCloudFoundryOperations opsClient;
+    private final AppDetailService appInfoService;
+    private final PoliciesService policiesService;
+    private final HistoricalRecordService historicalRecordService;
 
     @Autowired
     public ScaleAppInstancesPolicyExecutorTask(

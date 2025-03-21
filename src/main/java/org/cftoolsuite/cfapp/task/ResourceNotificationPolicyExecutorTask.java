@@ -116,7 +116,7 @@ public class ResourceNotificationPolicyExecutorTask implements PolicyExecutorTas
                 CollectionUtils.isEmpty(prunedSet) ?
                         prunedSet: policy.getResourceWhiteList();
         return
-                whitelist.isEmpty() ? true: policy.getResourceWhiteList().contains(resource);
+                whitelist.isEmpty() || policy.getResourceWhiteList().contains(resource);
     }
 
 }

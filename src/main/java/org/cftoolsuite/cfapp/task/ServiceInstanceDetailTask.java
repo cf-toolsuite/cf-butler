@@ -25,9 +25,9 @@ import reactor.core.publisher.Mono;
 @Component
 public class ServiceInstanceDetailTask implements ApplicationListener<SpacesRetrievedEvent> {
 
-    private DefaultCloudFoundryOperations opsClient;
-    private ServiceInstanceDetailService service;
-    private ApplicationEventPublisher publisher;
+    private final DefaultCloudFoundryOperations opsClient;
+    private final ServiceInstanceDetailService service;
+    private final ApplicationEventPublisher publisher;
 
     @Autowired
     public ServiceInstanceDetailTask(

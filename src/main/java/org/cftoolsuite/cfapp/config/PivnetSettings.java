@@ -8,6 +8,5 @@ import lombok.Data;
 @ConfigurationProperties(prefix = "pivnet")
 public class PivnetSettings {
 
-    private String apiToken;
     private boolean enabled;
 }

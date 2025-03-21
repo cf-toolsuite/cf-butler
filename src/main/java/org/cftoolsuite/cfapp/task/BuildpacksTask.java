@@ -35,7 +35,7 @@ public class BuildpacksTask implements ApplicationListener<TkRetrievedEvent> {
         log.info("BuildpacksTask started");
         getBuildpacks()
         .collectList()
-        .map(list -> cache.from(list))
+        .map(cache::from)
         .subscribe(
             result -> {
                 publisher.publishEvent(new BuildpacksRetrievedEvent(this));

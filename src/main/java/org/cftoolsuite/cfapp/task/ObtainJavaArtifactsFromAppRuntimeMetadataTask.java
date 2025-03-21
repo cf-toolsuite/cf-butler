@@ -30,10 +30,10 @@ import reactor.util.function.Tuples;
 @ConditionalOnProperty(prefix = "java.artifacts.fetch", name= "mode", havingValue="obtain-jars-from-runtime-metadata")
 public class ObtainJavaArtifactsFromAppRuntimeMetadataTask implements ApplicationListener<AppDetailRetrievedEvent> {
 
-    private DefaultCloudFoundryOperations opsClient;
-    private JavaArtifactRuntimeMetadataRetrievalService artifactService;
-    private JavaAppDetailService jadService;
-    private JavaArtifactReader javaArtifactReader;
+    private final DefaultCloudFoundryOperations opsClient;
+    private final JavaArtifactRuntimeMetadataRetrievalService artifactService;
+    private final JavaAppDetailService jadService;
+    private final JavaArtifactReader javaArtifactReader;
 
     @Autowired
     public ObtainJavaArtifactsFromAppRuntimeMetadataTask(
@@ -55,8 +55,8 @@ public class ObtainJavaArtifactsFromAppRuntimeMetadataTask implements Applicatio
             .deleteAll()
             .thenMany(Flux.fromIterable(detail))
             .filter(ad -> StringUtils.isNotBlank(ad.getBuildpack()) && ad.getBuildpack().contains("java") && ad.getRequestedState().equalsIgnoreCase("started"))
-            .flatMap(ad -> associateDropletWithApplication(ad))
-            .flatMap(sd -> ascertainSpringDependencies(sd))
+            .flatMap(this::associateDropletWithApplication)
+            .flatMap(this::ascertainSpringDependencies)
             .flatMap(jadService::save)
             .thenMany(jadService.findAll())
             .collectList()

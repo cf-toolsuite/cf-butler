@@ -22,11 +22,11 @@ import reactor.core.publisher.Mono;
 @Component
 public class DeleteServiceInstancePolicyExecutorTask implements PolicyExecutorTask {
 
-    private PolicyFilter filter;
-    private DefaultCloudFoundryOperations opsClient;
-    private ServiceInstanceDetailService serviceInfoService;
-    private PoliciesService policiesService;
-    private HistoricalRecordService historicalRecordService;
+    private final PolicyFilter filter;
+    private final DefaultCloudFoundryOperations opsClient;
+    private final ServiceInstanceDetailService serviceInfoService;
+    private final PoliciesService policiesService;
+    private final HistoricalRecordService historicalRecordService;
 
     @Autowired
     public DeleteServiceInstancePolicyExecutorTask(
@@ -75,7 +75,7 @@ public class DeleteServiceInstancePolicyExecutorTask implements PolicyExecutorTa
             .flux()
             .flatMap(p -> Flux.fromIterable(p.getServiceInstancePolicies()))
             .filter(sp -> sp.getId().equals(id))
-            .flatMap(sp -> serviceInfoService.findByServiceInstancePolicy(sp))
+            .flatMap(serviceInfoService::findByServiceInstancePolicy)
             .filter(wl -> filter.isWhitelisted(wl.getT2(), wl.getT1().getOrganization()))
             .filter(bl -> filter.isBlacklisted(bl.getT1().getOrganization(), bl.getT1().getSpace()))
             .flatMap(ds -> deleteServiceInstance(ds.getT1()))

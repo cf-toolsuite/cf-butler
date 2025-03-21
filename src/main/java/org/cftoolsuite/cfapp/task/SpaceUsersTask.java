@@ -20,8 +20,8 @@ import reactor.core.publisher.Mono;
 @Component
 public class SpaceUsersTask implements ApplicationListener<SpacesRetrievedEvent> {
 
-    private DefaultCloudFoundryOperations opsClient;
-    private SpaceUsersService service;
+    private final DefaultCloudFoundryOperations opsClient;
+    private final SpaceUsersService service;
 
     @Autowired
     public SpaceUsersTask(
