@@ -1,13 +1,6 @@
 package org.cftoolsuite.cfapp.task;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.cftoolsuite.cfapp.config.PasSettings;
 import org.cftoolsuite.cfapp.domain.AppDetail;
@@ -34,10 +27,15 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-
-import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Arrays;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -157,7 +155,7 @@ public class AppDetailTask implements ApplicationListener<AppDetailReadyToBeRetr
     protected Mono<AppDetail> getLastEvent(AppDetail fragment) {
         log.trace("Fetching last event for application id={}, name={} in org={}, space={}", fragment.getAppId(), fragment.getAppName(), fragment.getOrganization(), fragment.getSpace());
         return eventsService.getEvents(fragment.getAppId(), 1)
-                .flatMapMany(envelope -> eventsService.toFlux(envelope))
+                .flatMapMany(eventsService::toFlux)
                 .next()
                 .map(e ->
                     AppDetail
@@ -253,9 +251,9 @@ public class AppDetailTask implements ApplicationListener<AppDetailReadyToBeRetr
 
     private AppDetail refineBuildpackFromApplicationCurrentDroplet(AppDetail fragment, GetApplicationCurrentDropletResponse response) {
         if (fragment.getBuildpack().equals("meta")) {
-            List<String> buildpackNameFragments = Arrays.asList(response.getBuildpacks().get(0).getBuildpackName().split(" "));
+            List<String> buildpackNameFragments = Arrays.asList(response.getBuildpacks().getFirst().getBuildpackName().split(" "));
             if (!CollectionUtils.isEmpty(buildpackNameFragments)) {
-                String buildpack = buildpackNameFragments.stream().filter(bnf -> bnf.contains("buildpack")).collect(Collectors.toList()).get(0);
+                String buildpack = buildpackNameFragments.stream().filter(bnf -> bnf.contains("buildpack")).toList().getFirst();
                 String[] parts = buildpack.split("=");
                 if (parts.length == 2) {
                     return
@@ -270,8 +268,8 @@ public class AppDetailTask implements ApplicationListener<AppDetailReadyToBeRetr
         return
             AppDetail
                 .from(fragment)
-                .buildpack(settings.getBuildpack(response.getBuildpacks().get(0).getBuildpackName()))
-                .buildpackVersion(getCurrentDropletBuildpackVersion(response.getBuildpacks().get(0).getVersion()))
+                .buildpack(settings.getBuildpack(response.getBuildpacks().getFirst().getBuildpackName()))
+                .buildpackVersion(getCurrentDropletBuildpackVersion(response.getBuildpacks().getFirst().getVersion()))
                 .build();
     }
 

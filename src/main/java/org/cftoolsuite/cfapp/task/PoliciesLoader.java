@@ -50,7 +50,7 @@ public class PoliciesLoader implements ApplicationListener<StacksRetrievedEvent>
     private final GitSettings settings;
     private final PoliciesValidator validator;
     private final ObjectMapper mapper;
-    private ApplicationEventPublisher publisher;
+    private final ApplicationEventPublisher publisher;
 
     @Autowired
     public PoliciesLoader(

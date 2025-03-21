@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import io.r2dbc.spi.ReadableMetadata;
 import org.apache.commons.lang3.StringUtils;
 import org.cftoolsuite.cfapp.config.PasSettings;
 import org.cftoolsuite.cfapp.domain.Defaults;
@@ -134,11 +135,10 @@ public class QueryPolicyExecutorTask implements PolicyExecutorTask {
         int i = 0;
         for (Tuple2<Collection<String>, String> tuple: columnNamesAndRows) {
             if (i == 0) {
-                List<String> headerRow = new ArrayList<>();
-                headerRow.addAll(tuple.getT1());
+                List<String> headerRow = new ArrayList<>(tuple.getT1());
                 builder.append(String.join(",", headerRow));
             }
-            builder.append(System.getProperty("line.separator"));
+            builder.append(System.lineSeparator());
             builder.append(tuple.getT2());
             i++;
         }
@@ -146,7 +146,7 @@ public class QueryPolicyExecutorTask implements PolicyExecutorTask {
     }
 
     private static Mono<Tuple2<Collection<String>, String>> toCommaSeparatedValue(Tuple2<Row, RowMetadata> tuple) {
-        Collection<String> columnNames = tuple.getT2().getColumnMetadatas().stream().map(columnName -> columnName.getName()).toList();
+        Collection<String> columnNames = tuple.getT2().getColumnMetadatas().stream().map(ReadableMetadata::getName).toList();
         List<String> rawValueList =
             columnNames
                 .stream()

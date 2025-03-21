@@ -27,9 +27,9 @@ import reactor.core.publisher.Mono;
 @Component
 public class AppRelationshipTask implements ApplicationListener<ServiceInstanceDetailRetrievedEvent> {
 
-    private DefaultCloudFoundryOperations opsClient;
-    private AppRelationshipService service;
-    private ApplicationEventPublisher publisher;
+    private final DefaultCloudFoundryOperations opsClient;
+    private final AppRelationshipService service;
+    private final ApplicationEventPublisher publisher;
 
     @Autowired
     public AppRelationshipTask(
