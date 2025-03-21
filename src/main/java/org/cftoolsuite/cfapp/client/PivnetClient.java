@@ -20,12 +20,10 @@ import reactor.core.publisher.Mono;
 public class PivnetClient {
 
     private static final String BASE_URL = "https://network.tanzu.vmware.com/api";
-    private final PivnetSettings settings;
     private final WebClient client;
 
     @Autowired
-    public PivnetClient(PivnetSettings settings, WebClient client) {
-        this.settings = settings;
+    public PivnetClient(WebClient client) {
         this.client = client;
     }
 
@@ -55,7 +53,6 @@ public class PivnetClient {
         return client
                 .get()
                 .uri(uri)
-                .header(HttpHeaders.AUTHORIZATION, settings.getApiToken())
                 .retrieve()
                 .bodyToMono(Releases.class)
                 .flatMapMany(r -> Flux.fromIterable(r.getReleases()));
@@ -66,7 +63,6 @@ public class PivnetClient {
         return client
                 .get()
                 .uri(uri)
-                .header(HttpHeaders.AUTHORIZATION, settings.getApiToken())
                 .retrieve()
                 .bodyToMono(Products.class);
     }
