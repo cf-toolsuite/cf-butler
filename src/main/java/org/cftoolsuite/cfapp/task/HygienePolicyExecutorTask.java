@@ -84,7 +84,7 @@ public class HygienePolicyExecutorTask implements PolicyExecutorTask {
         final WorkloadsBuilder builder = Workloads.builder();
         return dormantWorkloadsService
                 .getDormantApplications(policy)
-                .map(list -> builder.applications(list))
+                .map(builder::applications)
                 .then(dormantWorkloadsService.getDormantServiceInstances(policy))
                 .map(list -> builder.serviceInstances(list).build());
     }
@@ -123,7 +123,7 @@ public class HygienePolicyExecutorTask implements PolicyExecutorTask {
             .distinct()
             // filter out account names that are not email addresses
             .filter(EmailValidator::isValid)
-            .concatMap(userName -> userSpacesService.getUserSpaces(userName))
+            .concatMap(userSpacesService::getUserSpaces)
             // Create a list where each item is a tuple of user account and filtered workloads
             .concatMap(userSpace -> filterWorkloads(userSpace, tuple.getT2()))
             .delayElements(Duration.ofMillis(250))
@@ -145,7 +145,7 @@ public class HygienePolicyExecutorTask implements PolicyExecutorTask {
     }
 
     private static List<EmailAttachment> buildAttachments(Tuple2<HygienePolicy, Workloads> tuple) {
-        String cr = System.getProperty("line.separator");
+        String cr = System.lineSeparator();
         List<EmailAttachment> result = new ArrayList<>();
         StringBuilder applications = new StringBuilder();
         StringBuilder serviceInstances = new StringBuilder();

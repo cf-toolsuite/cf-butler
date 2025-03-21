@@ -21,7 +21,7 @@ public class OrganizationsTask implements ApplicationListener<TkRetrievedEvent> 
 
     private final DefaultCloudFoundryOperations opsClient;
     private final OrganizationService organizationService;
-    private ApplicationEventPublisher publisher;
+    private final ApplicationEventPublisher publisher;
 
     @Autowired
     public OrganizationsTask(

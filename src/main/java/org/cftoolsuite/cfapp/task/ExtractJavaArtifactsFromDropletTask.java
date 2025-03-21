@@ -26,17 +26,16 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
 @Conditional(DropletProcessingCondition.class)
 public class ExtractJavaArtifactsFromDropletTask implements ApplicationListener<AppDetailRetrievedEvent> {
 
-    private DefaultCloudFoundryOperations opsClient;
-    private DropletsService dropletsService;
-    private JavaAppDetailService jadService;
-    private JavaArtifactReader javaArtifactReader;
+    private final DefaultCloudFoundryOperations opsClient;
+    private final DropletsService dropletsService;
+    private final JavaAppDetailService jadService;
+    private final JavaArtifactReader javaArtifactReader;
 
     @Autowired
     public ExtractJavaArtifactsFromDropletTask(
@@ -57,8 +56,8 @@ public class ExtractJavaArtifactsFromDropletTask implements ApplicationListener<
                 .deleteAll()
                 .thenMany(Flux.fromIterable(detail))
                 .filter(ad -> StringUtils.isNotBlank(ad.getBuildpack()) && ad.getBuildpack().contains("java"))
-                .flatMap(jad -> associateDropletWithApplication(jad))
-                .flatMap(sd -> ascertainSpringDependencies(sd))
+                .flatMap(this::associateDropletWithApplication)
+                .flatMap(this::ascertainSpringDependencies)
                 .flatMap(jadService::save)
                 .thenMany(jadService.findAll())
                 .collectList()
@@ -123,7 +122,7 @@ public class ExtractJavaArtifactsFromDropletTask implements ApplicationListener<
                                     .jars(jars)
                                     .buildJdkSpec(buildJdkSpec)
                                     .springDependencies(
-                                            javaArtifactReader.read(jars).stream().collect(Collectors.joining("\n")))
+                                            String.join("\n", javaArtifactReader.read(jars)))
                                     .build();
                         } else {
                             return detail;
@@ -146,7 +145,7 @@ public class ExtractJavaArtifactsFromDropletTask implements ApplicationListener<
                                     .pomContents(pomContents)
                                     .buildJdkSpec(buildJdkSpec)
                                     .springDependencies(
-                                            javaArtifactReader.read(pomContents).stream().collect(Collectors.joining("\n")))
+                                            String.join("\n", javaArtifactReader.read(pomContents)))
                                     .build();
                         } else {
                             return detail;

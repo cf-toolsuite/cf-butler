@@ -50,7 +50,6 @@ public class TgzUtil {
                         }
                     }).subscribeOn(Schedulers.boundedElastic());
                 });
-        // Implementation moved to a different approach
     }
 
     /**

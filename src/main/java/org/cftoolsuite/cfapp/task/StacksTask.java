@@ -36,7 +36,7 @@ public class StacksTask implements ApplicationListener<TkRetrievedEvent> {
         log.info("StacksTask started");
         getStacks()
         .collectList()
-        .map(list -> cache.from(list))
+        .map(cache::from)
         .subscribe(
             result -> {
                 publisher.publishEvent(new StacksRetrievedEvent(this));
