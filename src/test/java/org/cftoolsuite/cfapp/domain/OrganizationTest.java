@@ -1,11 +1,13 @@
 package org.cftoolsuite.cfapp.domain;
 
+import org.junit.jupiter.api.Test;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class OrganizationTest {
 
@@ -13,8 +15,8 @@ public class OrganizationTest {
     public void assertThatOrganizationsAreEqual() {
         Organization org1 = new Organization("000eaf", "zoo-labs");
         Organization org2 = new Organization("000eaf", "zoo-labs");
-        Assertions.assertTrue(org1.equals(org2));
+        assertTrue(org1.equals(org2));
         Set<Organization> orgs = new HashSet<>(List.of(org1, org2));
-        Assertions.assertTrue(orgs.size() == 1);
+        assertEquals(orgs.size(), 1);
     }
 }

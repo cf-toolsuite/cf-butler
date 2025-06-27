@@ -29,7 +29,7 @@ public class R2dbcTimeKeeperRepository {
         return
                 client
                 .select(TimeKeeper.class)
-                .one()
+                .first()
                 .map(TimeKeeper::getCollectionTime);
     }
 

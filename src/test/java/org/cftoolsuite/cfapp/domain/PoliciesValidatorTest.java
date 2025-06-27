@@ -1,20 +1,17 @@
 package org.cftoolsuite.cfapp.domain;
 
+import org.assertj.core.api.Assertions;
+import org.cftoolsuite.cfapp.ButlerTest;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.assertj.core.api.Assertions;
-import org.cftoolsuite.cfapp.ButlerTest;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-
 @ButlerTest
-@ExtendWith(SpringExtension.class)
 public class PoliciesValidatorTest {
 
     private final PoliciesValidator policiesValidator;
