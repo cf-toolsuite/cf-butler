@@ -53,7 +53,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.4.4</version>
+    <version>3.5.3</version>
     <relativePath/>
     <!-- lookup parent from repository -->
   </parent>
@@ -71,6 +71,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
+    <maven.compiler.proc>full</maven.compiler.proc>
   </properties>
 
   <dependencies>
@@ -119,7 +120,7 @@
     <dependency>
       <groupId>com.cedarsoftware</groupId>
       <artifactId>json-io</artifactId>
-      <version>4.52.0</version>
+      <version>4.56.0</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -145,12 +146,12 @@
     <dependency>
       <groupId>org.eclipse.jgit</groupId>
       <artifactId>org.eclipse.jgit</artifactId>
-      <version>7.2.0.202503040940-r</version>
+      <version>7.3.0.202506031305-r</version>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-csv</artifactId>
-      <version>1.11.0</version>
+      <version>1.14.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
@@ -164,7 +165,7 @@
     <dependency>
       <groupId>com.sanctionco.jmail</groupId>
       <artifactId>jmail</artifactId>
-      <version>1.6.3</version>
+      <version>2.0.1</version>
     </dependency>
     <dependency>
       <groupId>com.sendgrid</groupId>
@@ -179,17 +180,17 @@
     <dependency>
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcprov-jdk18on</artifactId>
-      <version>1.80</version>
+      <version>1.81</version>
     </dependency>
     <dependency>
       <groupId>org.cloudfoundry</groupId>
       <artifactId>cloudfoundry-client-reactor</artifactId>
-      <version>5.12.2.RELEASE</version>
+      <version>5.14.0.RELEASE</version>
     </dependency>
     <dependency>
       <groupId>org.cloudfoundry</groupId>
       <artifactId>cloudfoundry-operations</artifactId>
-      <version>5.12.2.RELEASE</version>
+      <version>5.14.0.RELEASE</version>
     </dependency>
     <dependency>
       <groupId>io.micrometer</groupId>
@@ -228,7 +229,7 @@
     <dependency>
       <groupId>org.pitest</groupId>
       <artifactId>pitest-junit5-plugin</artifactId>
-      <version>1.2.2</version>
+      <version>1.2.3</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -238,60 +239,19 @@
       <dependency>
         <groupId>io.pivotal.spring.cloud</groupId>
         <artifactId>spring-cloud-services-dependencies</artifactId>
-        <version>4.2.0</version>
+        <version>4.3.0</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
       <dependency>
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-dependencies</artifactId>
-        <version>2024.0.1</version>
+        <version>2025.0.0</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
     </dependencies>
   </dependencyManagement>
-
-  <repositories>
-    <repository>
-      <id>spring-release</id>
-      <name>Spring Release</name>
-      <url>https://repo.spring.io/release</url>
-    </repository>
-    <repository>
-      <id>spring-milestone</id>
-      <name>Spring milestone</name>
-      <url>https://repo.spring.io/milestone</url>
-    </repository>
-    <repository>
-      <id>spring-snapshots</id>
-      <name>Spring snapshots</name>
-      <url>https://repo.spring.io/snapshot</url>
-    </repository>
-    <repository>
-      <id>apache-snapshots</id>
-      <name>Apache snapshots</name>
-      <url> https://repository.apache.org/content/repositories/snapshots</url>
-    </repository>
-  </repositories>
-
-  <pluginRepositories>
-    <pluginRepository>
-      <id>spring-release</id>
-      <name>Spring Release</name>
-      <url>https://repo.spring.io/plugins-release</url>
-    </pluginRepository>
-    <pluginRepository>
-      <id>spring-milestone</id>
-      <name>Spring milestone</name>
-      <url>https://repo.spring.io/plugins-milestone</url>
-    </pluginRepository>
-    <pluginRepository>
-      <id>spring-snapshots</id>
-      <name>Spring snapshots</name>
-      <url>https://repo.spring.io/plugins-snapshot</url>
-    </pluginRepository>
-  </pluginRepositories>
 
   <build>
     <pluginManagement>
@@ -386,7 +346,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
-        <version>3.6.0</version>
+        <version>3.6.1</version>
         <executions>
           <execution>
             <id>attach-delomboked-sources-jar</id>
@@ -466,7 +426,7 @@
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <version>0.8.12</version>
+        <version>0.8.13</version>
         <executions>
           <execution>
             <id>before-unit-test-execution</id>
@@ -632,12 +592,12 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-project-info-reports-plugin</artifactId>
-        <version>3.6.2</version>
+        <version>3.9.0</version>
       </plugin>
       <plugin>
         <groupId>com.github.spotbugs</groupId>
         <artifactId>spotbugs-maven-plugin</artifactId>
-        <version>4.9.3.0</version>
+        <version>4.9.3.1</version>
         <configuration>
           <xmlOutput>true</xmlOutput>
         </configuration>
@@ -645,7 +605,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-pmd-plugin</artifactId>
-        <version>3.24.0</version>
+        <version>3.27.0</version>
         <configuration>
           <includeTests>true</includeTests>
           <failOnViolation>false</failOnViolation>
@@ -752,7 +712,7 @@
         <dependency>
           <groupId>io.asyncer</groupId>
           <artifactId>r2dbc-mysql</artifactId>
-          <version>1.4.0</version>
+          <version>1.4.1</version>
           <scope>runtime</scope>
         </dependency>
         <dependency>
@@ -831,7 +791,7 @@
         <dependency>
           <groupId>com.wavefront</groupId>
           <artifactId>wavefront-spring-boot-starter</artifactId>
-          <version>3.3.0</version>
+          <version>3.2.0</version>
         </dependency>
       </dependencies>
     </profile>
@@ -842,7 +802,7 @@
       <plugin>
         <groupId>com.github.spotbugs</groupId>
         <artifactId>spotbugs-maven-plugin</artifactId>
-        <version>4.9.3.0</version>
+        <version>4.9.3.1</version>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
