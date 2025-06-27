@@ -1,22 +1,18 @@
 package org.cftoolsuite.cfapp.service;
 
-import java.io.File;
-import java.io.IOException;
-
-import org.assertj.core.api.Assertions;
-import org.cftoolsuite.cfapp.ButlerTest;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.assertj.core.api.Assertions;
+import org.cftoolsuite.cfapp.ButlerTest;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.io.File;
+import java.io.IOException;
 
 
 @ButlerTest
-@ExtendWith(SpringExtension.class)
 public class ServiceInstanceReporterTest {
 
     private final ServiceInstanceReporter reporter;

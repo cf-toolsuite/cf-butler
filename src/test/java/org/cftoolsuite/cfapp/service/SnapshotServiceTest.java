@@ -1,29 +1,20 @@
 package org.cftoolsuite.cfapp.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.cftoolsuite.cfapp.ButlerTest;
+import org.cftoolsuite.cfapp.domain.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
 
-import org.cftoolsuite.cfapp.ButlerTest;
-import org.cftoolsuite.cfapp.domain.AppDetail;
-import org.cftoolsuite.cfapp.domain.ApplicationCounts;
-import org.cftoolsuite.cfapp.domain.ServiceInstanceCounts;
-import org.cftoolsuite.cfapp.domain.ServiceInstanceDetail;
-import org.cftoolsuite.cfapp.domain.SpaceUsers;
-import org.cftoolsuite.cfapp.domain.UserCounts;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 @ButlerTest
-@ExtendWith(SpringExtension.class)
 public class SnapshotServiceTest {
 
     private final SnapshotService snapService;

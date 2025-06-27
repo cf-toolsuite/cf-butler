@@ -1,27 +1,23 @@
 package org.cftoolsuite.cfapp.repository;
 
+import org.cftoolsuite.cfapp.ButlerTest;
+import org.cftoolsuite.cfapp.domain.ServiceInstanceDetail;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import reactor.test.StepVerifier;
+
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.UUID;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.UUID;
-
-import org.cftoolsuite.cfapp.ButlerTest;
-import org.cftoolsuite.cfapp.domain.ServiceInstanceDetail;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import reactor.test.StepVerifier;
-
 @ButlerTest
-@ExtendWith(SpringExtension.class)
 public class R2dbcServiceInstanceDetailRepositoryTest {
 
     private final R2dbcServiceInstanceDetailRepository detailRepo;
