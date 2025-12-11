@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.cftoolsuite.cfapp.domain.CustomConverters;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.r2dbc.R2dbcProperties;
+import org.springframework.boot.r2dbc.autoconfigure.R2dbcProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;

@@ -9,8 +9,8 @@ import org.springframework.data.r2dbc.mapping.OutboundRow;
 import org.springframework.r2dbc.core.Parameter;
 import org.springframework.stereotype.Indexed;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 @Indexed
 @WritingConverter
@@ -34,7 +34,7 @@ public class ResourceNotificationPolicyWriteConverter implements Converter<Resou
     private String writeEmailNotificationTemplate(EmailNotificationTemplate value) {
         try {
             return mapper.writeValueAsString(value);
-        } catch (JsonProcessingException jpe) {
+        } catch (JacksonException jpe) {
             throw new RuntimeException("Problem writing email notification template", jpe);
         }
     }
@@ -42,7 +42,7 @@ public class ResourceNotificationPolicyWriteConverter implements Converter<Resou
     private String writeResourceEmailMetadata(ResourceEmailMetadata value) {
         try {
             return mapper.writeValueAsString(value);
-        } catch (JsonProcessingException jpe) {
+        } catch (JacksonException jpe) {
             throw new RuntimeException("Problem writing email notification template", jpe);
         }
     }

@@ -28,4 +28,3 @@ public class Releases {
         this.releases = releases;
     }
 }
-

@@ -101,12 +101,13 @@ notification:
   engine: none
 
 spring:
-  codec:
-    max-in-memory-size: 512000000
+  http:
+    codecs:
+      max-in-memory-size: 512000000
   main:
     allow-bean-definition-overriding: true
   r2dbc:
-    url: r2dbc:pool:h2:mem:///cf-butler?options=DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=true
+    url: r2dbc:pool:h2:mem:///cf-butler?options=DB_CLOSE_DELAY=-1;CASE_INSENSITIVE_IDENTIFIERS=TRUE
     name: cf-butler
     username: sa
     password: 

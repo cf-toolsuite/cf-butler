@@ -1,15 +1,16 @@
 package org.cftoolsuite.cfapp.service;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.File;
+import java.io.IOException;
+
 import org.assertj.core.api.Assertions;
 import org.cftoolsuite.cfapp.ButlerTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.File;
-import java.io.IOException;
+import tools.jackson.core.exc.StreamReadException;
+import tools.jackson.databind.DatabindException;
+import tools.jackson.databind.ObjectMapper;
 
 
 @ButlerTest
@@ -28,7 +29,7 @@ public class ServiceInstanceReporterTest {
     }
 
     @Test
-    public void testReportGeneration() throws JsonParseException, JsonMappingException, IOException {
+    public void testReportGeneration() throws StreamReadException, DatabindException, IOException {
         File file = new File(System.getProperty("user.home") + "/service-instance-reporting-config.json");
         if (file.exists()) {
             ReportRequestSpec spec = mapper.readValue(file, ReportRequestSpec.class);

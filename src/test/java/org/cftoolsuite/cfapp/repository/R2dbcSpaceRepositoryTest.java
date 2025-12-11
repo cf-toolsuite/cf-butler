@@ -1,15 +1,16 @@
 package org.cftoolsuite.cfapp.repository;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.util.UUID;
+
 import org.cftoolsuite.cfapp.ButlerTest;
 import org.cftoolsuite.cfapp.domain.Space;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import reactor.test.StepVerifier;
-
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ButlerTest
 public class R2dbcSpaceRepositoryTest {

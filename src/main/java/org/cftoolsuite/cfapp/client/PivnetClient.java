@@ -1,12 +1,10 @@
 package org.cftoolsuite.cfapp.client;
 
-import org.cftoolsuite.cfapp.config.PivnetSettings;
 import org.cftoolsuite.cfapp.domain.product.Products;
 import org.cftoolsuite.cfapp.domain.product.Release;
 import org.cftoolsuite.cfapp.domain.product.Releases;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 

@@ -12,21 +12,20 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.cftoolsuite.cfapp.domain.accounting.service.NormalizedServicePlanMonthlyUsage;
-import org.cftoolsuite.cfapp.domain.accounting.service.ServiceUsageReport;
 import org.cftoolsuite.cfapp.domain.accounting.service.NormalizedServicePlanMonthlyUsage.NormalizedServicePlanMonthlyUsageBuilder;
+import org.cftoolsuite.cfapp.domain.accounting.service.ServiceUsageReport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.MappingIterator;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvParser;
-
 import lombok.extern.slf4j.Slf4j;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.exc.StreamReadException;
+import tools.jackson.databind.DatabindException;
+import tools.jackson.databind.MappingIterator;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.dataformat.csv.CsvMapper;
+import tools.jackson.dataformat.csv.CsvReadFeature;
 
 @Slf4j
 @Service
@@ -42,7 +41,7 @@ public class ServiceInstanceReporter {
 
     public String createReport(ReportRequest[] requests) {
         List<ReportRequest> list = Arrays.asList(requests);
-        try { log.info(mapper.writeValueAsString(list)); } catch (JsonProcessingException jpe) {}
+        try { log.info(mapper.writeValueAsString(list)); } catch (JacksonException jpe) {}
         StringBuilder result = new StringBuilder();
         result.append(REPORT_HEADER);
         for (ReportRequest r: list) {
@@ -78,9 +77,9 @@ public class ServiceInstanceReporter {
             for (NormalizedServicePlanMonthlyUsage u: filtered) {
                 result.append(foundation + "," + environment + "," + period + "," + u.getServiceName() + "," + u.getServiceGuid() + "," + u.getServicePlanName() + "," + u.getServicePlanGuid() + "," + u.getAverageInstances() + "," + u.getMaximumInstances() + "," + u.getDurationInHours() + "\n");
             }
-        } catch (JsonParseException jpe) {
+        } catch (StreamReadException jpe) {
             log.warn(String.format("Could not parse file contents of %s into a ServiceUsageReport!", filename), jpe);
-        } catch (JsonMappingException jme) {
+        } catch (DatabindException jme) {
             log.warn(String.format("Could not map file contents in %s into JSON!", filename), jme);
         } catch (IOException ioe) {
             log.warn(String.format("Trouble creating report from %s!", filename), ioe);
@@ -98,13 +97,14 @@ public class ServiceInstanceReporter {
         return content;
     }
 
-    protected List<NormalizedServicePlanMonthlyUsage> readServiceUsageReport(String filename) throws JsonParseException, JsonMappingException, IOException {
+    protected List<NormalizedServicePlanMonthlyUsage> readServiceUsageReport(String filename) throws StreamReadException, DatabindException, IOException {
         String content = readFile(filename);
         if (filename.endsWith(".json")) {
             return NormalizedServicePlanMonthlyUsage.listOf(mapper.readValue(content, ServiceUsageReport.class));
         } else if (filename.endsWith(".csv")) {
-            CsvMapper csvMapper = new CsvMapper();
-            csvMapper.enable(CsvParser.Feature.WRAP_AS_ARRAY);
+            CsvMapper csvMapper = CsvMapper.builder()
+                .enable(CsvReadFeature.WRAP_AS_ARRAY)
+                .build();
             File csvFile = new File(filename);
             MappingIterator<String[]> it = csvMapper.readerFor(String[].class).readValues(csvFile);
             List<NormalizedServicePlanMonthlyUsage> reports = new ArrayList<>();

@@ -10,11 +10,11 @@ import org.cftoolsuite.cfapp.deser.RelaxedLocalDateDeserializer;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import lombok.Builder;
 import lombok.Builder.Default;
 import lombok.Getter;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 @Builder
 @Getter
