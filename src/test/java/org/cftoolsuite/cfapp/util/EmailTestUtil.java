@@ -13,7 +13,7 @@ import org.cftoolsuite.cfapp.domain.EmailAttachment;
 import org.cftoolsuite.cfapp.domain.EmailAttachment.EmailAttachmentBuilder;
 import org.cftoolsuite.cfapp.event.EmailNotificationEvent;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 public class EmailTestUtil {
 

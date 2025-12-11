@@ -7,6 +7,8 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 
+import jakarta.mail.internet.MimeMessage;
+
 import org.cftoolsuite.cfapp.event.EmailNotificationEvent;
 import org.cftoolsuite.cfapp.util.EmailTestUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,8 +16,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.mail.javamail.JavaMailSender;
-
-import jakarta.mail.internet.MimeMessage;
 
 class JavaMailNotifierTest {
 
@@ -52,4 +52,3 @@ class JavaMailNotifierTest {
         verify(javaMailSender, times(1)).createMimeMessage();
     }
 }
-

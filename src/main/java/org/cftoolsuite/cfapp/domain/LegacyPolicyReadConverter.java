@@ -1,15 +1,14 @@
 package org.cftoolsuite.cfapp.domain;
 
-import java.io.IOException;
 
 import org.cftoolsuite.cfapp.util.CsvUtil;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.convert.ReadingConverter;
 import org.springframework.stereotype.Indexed;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.r2dbc.spi.Row;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 @Indexed
 @ReadingConverter
@@ -37,9 +36,8 @@ public class LegacyPolicyReadConverter implements Converter<Row, LegacyPolicy> {
     private EmailNotificationTemplate readEmailNotificationTemplate(String value) {
         try {
             return mapper.readValue(value, EmailNotificationTemplate.class);
-        } catch (IOException ioe) {
-            throw new RuntimeException("Problem reading email notification template", ioe);
+        } catch (JacksonException je) {
+            throw new RuntimeException("Problem reading email notification template", je);
         }
     }
 }
-

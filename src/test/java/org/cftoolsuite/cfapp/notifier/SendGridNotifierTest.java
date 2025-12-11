@@ -56,4 +56,3 @@ class SendGridNotifierTest {
         verify(sendGrid).api(any(Request.class));
     }
 }
-

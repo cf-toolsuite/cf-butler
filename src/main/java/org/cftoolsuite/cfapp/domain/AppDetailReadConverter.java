@@ -45,4 +45,3 @@ public class AppDetailReadConverter implements Converter<Row, AppDetail> {
                 .build();
     }
 }
-

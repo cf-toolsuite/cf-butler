@@ -1,19 +1,20 @@
 package org.cftoolsuite.cfapp.repository;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 import org.cftoolsuite.cfapp.ButlerTest;
 import org.cftoolsuite.cfapp.domain.AppDetail;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import reactor.util.function.Tuple2;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ButlerTest
 public class R2dbcAppMetricsRepositoryTest {

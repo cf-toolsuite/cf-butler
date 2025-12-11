@@ -7,8 +7,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
-import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
@@ -24,7 +24,7 @@ public class WebClientConfig {
     @ConditionalOnProperty(name = "cf.sslValidationSkipped", havingValue="true")
     public WebClient insecureWebClient(
         WebClient.Builder builder,
-        @Value("${spring.codec.max-in-memory-size}") Integer maxInMemorySize) throws SSLException {
+        @Value("${spring.http.codecs.max-in-memory-size}") Integer maxInMemorySize) throws SSLException {
         SslContext context =
             SslContextBuilder
                 .forClient()
@@ -56,7 +56,7 @@ public class WebClientConfig {
     @ConditionalOnProperty(name = "cf.sslValidationSkipped", havingValue="false", matchIfMissing=true)
     public WebClient secureWebClient(
         WebClient.Builder builder,
-        @Value("${spring.codec.max-in-memory-size}") Integer maxInMemorySize) {
+        @Value("${spring.http.codecs.max-in-memory-size}") Integer maxInMemorySize) {
         HttpClient httpClient =
             HttpClient
                 .create()

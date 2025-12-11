@@ -4,13 +4,12 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import org.cftoolsuite.cfapp.ButlerTest;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import tools.jackson.core.JacksonException;
 
 @ButlerTest
 @ExtendWith(SpringExtension.class)
@@ -23,7 +22,7 @@ public class JsonToCsvConverterTest {
     public void testValidJson() {
         try {
             converter.convert("{ \"foo\": \"bar\" }");
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             fail();
         }
     }
@@ -32,7 +31,7 @@ public class JsonToCsvConverterTest {
     public void testValidJsonArray() {
         try {
             converter.convert("[{ \"foo\": \"bar\" }]");
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             fail();
         }
     }
@@ -46,7 +45,7 @@ public class JsonToCsvConverterTest {
 
     @Test
     public void testInvalidInput() {
-        Assertions.assertThrows(JsonProcessingException.class, () -> {
+        Assertions.assertThrows(JacksonException.class, () -> {
             converter.convert("[{ \"foo\": \"bar\" }");
         });
     }

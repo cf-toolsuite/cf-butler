@@ -12,6 +12,7 @@ import org.cftoolsuite.cfapp.domain.EndpointRequest;
 import org.cftoolsuite.cfapp.event.EmailNotificationEvent;
 import org.cftoolsuite.cfapp.service.PoliciesService;
 import org.cftoolsuite.cfapp.util.JsonToCsvConverter;
+import org.cftoolsuite.cfapp.util.SimpleJsonPathAdapter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.env.Environment;
@@ -21,18 +22,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jayway.jsonpath.Configuration;
-import com.jayway.jsonpath.JsonPath;
-import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
-import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
-
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 @Slf4j
 @Component
@@ -44,6 +40,7 @@ public class EndpointPolicyExecutorTask implements PolicyExecutorTask {
     private final WebClient client;
     private final ApplicationEventPublisher publisher;
     private final Environment env;
+    private final SimpleJsonPathAdapter jsonPathAdapter;
 
     @Autowired
     public EndpointPolicyExecutorTask(
@@ -52,9 +49,11 @@ public class EndpointPolicyExecutorTask implements PolicyExecutorTask {
             JsonToCsvConverter converter,
             WebClient client,
             ApplicationEventPublisher publisher,
-            Environment env) {
+            Environment env,
+            ObjectMapper mapper) {
         this.settings = settings;
         this.policiesService = policiesService;
+        this.jsonPathAdapter = new SimpleJsonPathAdapter(mapper);
         this.converter = converter;
         this.client = client;
         this.publisher = publisher;
@@ -167,18 +166,10 @@ public class EndpointPolicyExecutorTask implements PolicyExecutorTask {
         String content = data;
         if (mimeType.startsWith(MediaType.APPLICATION_JSON_VALUE) && StringUtils.isNotBlank(jsonPathExpression)) {
             try {
-                ObjectMapper mapper = new ObjectMapper();
-                Configuration conf =
-                    Configuration
-                        .builder()
-                        .jsonProvider(new JacksonJsonProvider(mapper))
-                        .mappingProvider(new JacksonMappingProvider())
-                        .build();
                 log.info("Attempting to extract fragment using JsonPath expression {}", jsonPathExpression);
-                Object fragment = JsonPath.using(conf).parse(data).read(jsonPathExpression);
-                content = mapper.writeValueAsString(fragment);
-            } catch (JsonProcessingException iae) {
-                throw new IllegalArgumentException("Could not parse fragment", iae);
+                content = jsonPathAdapter.extractFragment(data, jsonPathExpression);
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Could not extract fragment using expression: " + jsonPathExpression, e);
             }
         }
         try {
@@ -199,7 +190,7 @@ public class EndpointPolicyExecutorTask implements PolicyExecutorTask {
                     .mimeType(mimeType)
                     .build();
             }
-        } catch (IllegalArgumentException | JsonProcessingException e) {
+        } catch (IllegalArgumentException | JacksonException e) {
             return EmailAttachment.builder()
                 .filename(filename)
                 .content("Trouble processing results.\n" + ExceptionUtils.getStackTrace(e))
@@ -218,4 +209,3 @@ public class EndpointPolicyExecutorTask implements PolicyExecutorTask {
             .build();
     }
 }
-

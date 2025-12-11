@@ -1,17 +1,15 @@
 package org.cftoolsuite.cfapp.domain;
 
-import java.io.IOException;
 import java.util.Set;
 
-import org.cftoolsuite.cfapp.domain.EndpointRequest;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.convert.ReadingConverter;
 import org.springframework.stereotype.Indexed;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.r2dbc.spi.Row;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 @Indexed
 @ReadingConverter
@@ -40,17 +38,16 @@ public class EndpointPolicyReadConverter implements Converter<Row, EndpointPolic
     private EmailNotificationTemplate readEmailNotificationTemplate(String value) {
         try {
             return mapper.readValue(value, EmailNotificationTemplate.class);
-        } catch (IOException ioe) {
-            throw new RuntimeException("Problem reading email notification template", ioe);
+        } catch (JacksonException je) {
+            throw new RuntimeException("Problem reading email notification template", je);
         }
     }
 
     private Set<EndpointRequest> readEndpointRequests(String value) {
         try {
             return mapper.readValue(value, new TypeReference<Set<EndpointRequest>>() {});
-        } catch (IOException ioe) {
-            throw new RuntimeException("Problem reading endpoint requests", ioe);
+        } catch (JacksonException je) {
+            throw new RuntimeException("Problem reading endpoint requests", je);
         }
     }
 }
-

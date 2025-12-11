@@ -10,9 +10,6 @@ import org.cftoolsuite.cfapp.service.StacksCache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.jayway.jsonpath.InvalidPathException;
-import com.jayway.jsonpath.JsonPath;
-
 import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Component
@@ -113,11 +110,10 @@ public class PoliciesValidator {
                         break;
                     }
                     if (StringUtils.isNotBlank(er.getJsonPathExpression())) {
-                        try {
-                            JsonPath.compile(er.getJsonPathExpression());
-                        } catch (InvalidPathException e) {
+                        // Validate simple JsonPath expression ($.property or $.parent.child format)
+                        if (!isValidSimpleJsonPath(er.getJsonPathExpression())) {
                             valid = false;
-                            log.warn(JSONPATH_EXPRESSION_REJECTED_MESSAGE, policy.toString());
+                            log.warn(JSONPATH_EXPRESSION_REJECTED_MESSAGE + " (only simple property access like '$.property' or '$.parent.child' is supported)", policy.toString());
                             break;
                         }
                     }
@@ -285,5 +281,33 @@ public class PoliciesValidator {
             log.warn(REQUIRED_PROPERTIES_REJECTED_MESSAGE, policy.toString());
         }
         return valid;
+    }
+
+    /**
+     * Validates that a JsonPath expression uses the supported simple syntax.
+     * Supported: $.property or $.parent.child
+     * Not supported: filters, wildcards, array operations
+     */
+    private boolean isValidSimpleJsonPath(String expression) {
+        if (expression == null || !expression.startsWith("$.")) {
+            return false;
+        }
+
+        String propertyPath = expression.substring(2);
+
+        // Check for unsupported characters
+        // Simple validation: only allow alphanumeric, dots, hyphens, and underscores
+        if (!propertyPath.matches("^[a-zA-Z0-9._-]+$")) {
+            return false;
+        }
+
+        // Reject common JsonPath operators
+        if (expression.contains("[") || expression.contains("]") ||
+            expression.contains("*") || expression.contains("?") ||
+            expression.contains("@") || expression.contains(",")) {
+            return false;
+        }
+
+        return true;
     }
 }

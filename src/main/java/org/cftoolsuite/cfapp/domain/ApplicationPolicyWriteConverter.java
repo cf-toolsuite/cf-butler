@@ -10,8 +10,8 @@ import org.springframework.r2dbc.core.Parameter;
 import org.springframework.stereotype.Indexed;
 import org.springframework.util.CollectionUtils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 @Indexed
 @WritingConverter
@@ -36,7 +36,7 @@ public class ApplicationPolicyWriteConverter implements Converter<ApplicationPol
     private String writeOptions(Object value) {
         try {
             return mapper.writeValueAsString(value);
-        } catch (JsonProcessingException jpe) {
+        } catch (JacksonException jpe) {
             throw new RuntimeException("Problem writing options", jpe);
         }
     }
