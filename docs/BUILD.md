@@ -7,6 +7,9 @@
 ```
 > Defaults to H2 in-memory backend
 
+### Requirements
+Currently Requires Java 25 to be installed
+
 ### Alternatives
 
 The below represent a collection of Maven profiles available in the Maven POM.
