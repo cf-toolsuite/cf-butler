@@ -256,7 +256,7 @@
       <dependency>
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-dependencies</artifactId>
-        <version>2025.1.0</version>
+        <version>2025.1.1</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
