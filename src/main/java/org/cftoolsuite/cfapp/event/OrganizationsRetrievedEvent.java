@@ -1,5 +1,6 @@
 package org.cftoolsuite.cfapp.event;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.cftoolsuite.cfapp.domain.Organization;
@@ -9,14 +10,14 @@ public class OrganizationsRetrievedEvent extends ApplicationEvent {
 
     private static final long serialVersionUID = 1L;
 
-    private List<Organization> organizations;
+    private transient List<Organization> organizations;
 
     public OrganizationsRetrievedEvent(Object source) {
         super(source);
     }
 
     public List<Organization> getOrganizations() {
-        return organizations;
+        return organizations == null ? Collections.emptyList() : Collections.unmodifiableList(organizations);
     }
 
     public OrganizationsRetrievedEvent organizations(List<Organization> organizations) {

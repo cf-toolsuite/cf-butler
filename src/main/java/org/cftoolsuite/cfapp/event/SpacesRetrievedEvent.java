@@ -1,5 +1,6 @@
 package org.cftoolsuite.cfapp.event;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.cftoolsuite.cfapp.domain.Space;
@@ -9,14 +10,14 @@ public class SpacesRetrievedEvent extends ApplicationEvent {
 
     private static final long serialVersionUID = 1L;
 
-    private List<Space> spaces;
+    private transient List<Space> spaces;
 
     public SpacesRetrievedEvent(Object source) {
         super(source);
     }
 
     public List<Space> getSpaces() {
-        return spaces;
+        return spaces == null ? Collections.emptyList() : Collections.unmodifiableList(spaces);
     }
 
     public SpacesRetrievedEvent spaces(List<Space> spaces) {

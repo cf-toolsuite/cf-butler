@@ -7,7 +7,7 @@ public class PoliciesLoadedEvent extends ApplicationEvent {
 
     private static final long serialVersionUID = 1L;
 
-    private Policies policies;
+    private transient Policies policies;
 
     public PoliciesLoadedEvent(Object source) {
         super(source);

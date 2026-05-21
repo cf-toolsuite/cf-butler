@@ -1,5 +1,6 @@
 package org.cftoolsuite.cfapp.service;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +30,7 @@ public class StacksCache {
                     stacksByName.put(s.getName(), stack);
                     stacksById.put(s.getId(), stack);
                 });
-        return stacksByName;
+        return Collections.unmodifiableMap(stacksByName);
     }
 
     public Stack getStackById(String id) {
