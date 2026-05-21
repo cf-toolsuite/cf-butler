@@ -74,7 +74,7 @@ public class Workloads {
     public String toString() {
         return String
                 .format(
-                        "Workloads comprised of... \n\tApplications: [%s],\n\tService Instances [%s],\n\tApplication Relationships [%s]",
+                        "Workloads comprised of... %n\tApplications: [%s],%n\tService Instances [%s],%n\tApplication Relationships [%s]",
                         String.join(",", getApplications().stream().map(AppDetail::getAppName).collect(Collectors.toList())),
                         String.join(",", getServiceInstances().stream().map(ServiceInstanceDetail::getName).collect(Collectors.toList())),
                         String.join(",", getAppRelationships().stream().map(AppRelationship::getAppName).collect(Collectors.toList()))

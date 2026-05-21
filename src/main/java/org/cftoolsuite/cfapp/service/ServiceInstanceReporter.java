@@ -2,6 +2,7 @@ package org.cftoolsuite.cfapp.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -53,7 +54,7 @@ public class ServiceInstanceReporter {
     public void createReport(String outputFilename, ReportRequest[] requests) {
         Path path = Paths.get(outputFilename);
         try {
-            Files.write(path, createReport(requests).getBytes());
+            Files.write(path, createReport(requests).getBytes(StandardCharsets.UTF_8));
         } catch (IOException ioe) {
             log.warn("Could not create report output file!", ioe);
         }
@@ -90,7 +91,7 @@ public class ServiceInstanceReporter {
     protected String readFile(String filename) {
         String content = "";
         try {
-            content = new String(Files.readAllBytes(Paths.get(filename)));
+            content = new String(Files.readAllBytes(Paths.get(filename)), StandardCharsets.UTF_8);
         } catch (IOException ioe) {
             log.warn(String.format("Trouble reading file %s contents", filename), ioe);
         }
