@@ -71,7 +71,7 @@ public class ResourceMetadataService {
                     .queryParam("label_selector", labelSelector)
                     .queryParam("page", "{page}")
                     .queryParam("per_page", "{perPage}")
-                    .buildAndExpand(rt.getId(), page == null ? 1 : page, perPage == null ? 50 : perPage)
+                    .buildAndExpand(rt.getId(), page == null ? Integer.valueOf(1) : page, perPage == null ? Integer.valueOf(50) : perPage)
                     .toUriString();
         return
             RetryableTokenProvider

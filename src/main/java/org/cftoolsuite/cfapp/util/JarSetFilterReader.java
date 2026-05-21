@@ -57,9 +57,9 @@ public class JarSetFilterReader implements JavaArtifactReader {
     }
 
     private String findGroupForJar(String jarName) {
-        for (String key : filters.keySet()) {
-            if (jarName.startsWith(key)) {
-                return filters.get(key);
+        for (Map.Entry<String, String> entry : filters.entrySet()) {
+            if (jarName.startsWith(entry.getKey())) {
+                return entry.getValue();
             }
         }
         return "";

@@ -31,8 +31,9 @@ public class JavaArtifactRuntimeMetadataRetrievalService {
     }
 
     public Mono<JavaAppDetail> obtainRuntimeMetadata(AppDetail detail) {
+        Assert.notNull(detail, "AppDetail must not be null");
         Assert.state(
-            detail != null && !Collections.isEmpty(detail.getUrls()),
+            !Collections.isEmpty(detail.getUrls()),
             String.format("A route must be defined for %s/%s/%s in order to obtain runtime metadata",
                 detail.getOrganization(), detail.getSpace(), detail.getAppName()));
         String route = detail.getUrls().get(0);
