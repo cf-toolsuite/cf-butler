@@ -1,5 +1,6 @@
 package org.cftoolsuite.cfapp.event;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.cftoolsuite.cfapp.domain.UserAccounts;
@@ -9,7 +10,7 @@ public class UserAccountsRetrievedEvent extends ApplicationEvent {
 
     private static final long serialVersionUID = 1L;
 
-    private List<UserAccounts> detail;
+    private transient List<UserAccounts> detail;
 
     public UserAccountsRetrievedEvent(Object source) {
         super(source);
@@ -21,7 +22,7 @@ public class UserAccountsRetrievedEvent extends ApplicationEvent {
     }
 
     public List<UserAccounts> getDetail() {
-        return detail;
+        return detail == null ? Collections.emptyList() : Collections.unmodifiableList(detail);
     }
 
 }

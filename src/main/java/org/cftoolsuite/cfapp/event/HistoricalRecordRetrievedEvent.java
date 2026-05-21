@@ -1,5 +1,6 @@
 package org.cftoolsuite.cfapp.event;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.cftoolsuite.cfapp.domain.HistoricalRecord;
@@ -9,14 +10,14 @@ public class HistoricalRecordRetrievedEvent extends ApplicationEvent {
 
     private static final long serialVersionUID = 1L;
 
-    private List<HistoricalRecord> records;
+    private transient List<HistoricalRecord> records;
 
     public HistoricalRecordRetrievedEvent(Object source) {
         super(source);
     }
 
     public List<HistoricalRecord> getRecords() {
-        return records;
+        return records == null ? Collections.emptyList() : Collections.unmodifiableList(records);
     }
 
     public HistoricalRecordRetrievedEvent records(List<HistoricalRecord> records) {

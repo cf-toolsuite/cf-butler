@@ -1,5 +1,6 @@
 package org.cftoolsuite.cfapp.event;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -18,7 +19,7 @@ public class EmailNotificationEvent extends ApplicationEvent {
     private String from;
     private String subject;
     private String body;
-    private List<EmailAttachment> attachments;
+    private transient List<EmailAttachment> attachments;
 
     public EmailNotificationEvent(Object source) {
         super(source);
@@ -45,7 +46,7 @@ public class EmailNotificationEvent extends ApplicationEvent {
     }
 
     public List<EmailAttachment> getAttachments() {
-        return attachments;
+        return attachments == null ? Collections.emptyList() : Collections.unmodifiableList(attachments);
     }
 
     public String getBody() {
@@ -61,15 +62,15 @@ public class EmailNotificationEvent extends ApplicationEvent {
     }
 
     public Set<String> getRecipients() {
-        return recipients;
+        return recipients == null ? Collections.emptySet() : Collections.unmodifiableSet(recipients);
     }
 
     public Set<String> getCarbonCopyRecipients() {
-        return carbonCopyRecipients;
+        return carbonCopyRecipients == null ? Collections.emptySet() : Collections.unmodifiableSet(carbonCopyRecipients);
     }
 
     public Set<String> getBlindCarbonCopyRecipients() {
-        return blindCarbonCopyRecipients;
+        return blindCarbonCopyRecipients == null ? Collections.emptySet() : Collections.unmodifiableSet(blindCarbonCopyRecipients);
     }
 
     public String getSubject() {

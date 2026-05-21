@@ -1,5 +1,6 @@
 package org.cftoolsuite.cfapp.event;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.cftoolsuite.cfapp.domain.AppDetail;
@@ -9,7 +10,7 @@ public class AppDetailRetrievedEvent extends ApplicationEvent {
 
     private static final long serialVersionUID = 1L;
 
-    private List<AppDetail> detail;
+    private transient List<AppDetail> detail;
 
     public AppDetailRetrievedEvent(Object source) {
         super(source);
@@ -21,7 +22,7 @@ public class AppDetailRetrievedEvent extends ApplicationEvent {
     }
 
     public List<AppDetail> getDetail() {
-        return detail;
+        return detail == null ? Collections.emptyList() : Collections.unmodifiableList(detail);
     }
 
 }

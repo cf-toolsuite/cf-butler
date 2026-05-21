@@ -1,5 +1,6 @@
 package org.cftoolsuite.cfapp.service;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +30,7 @@ public class BuildpacksCache {
                             .build();
                     buildpacksById.put(b.getId(), buildpack);
                 });
-        return buildpacksById;
+        return Collections.unmodifiableMap(buildpacksById);
     }
 
     public Buildpack getBuildpackById(String id) {

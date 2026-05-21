@@ -155,7 +155,12 @@ public class TgzUtil {
                             } else if (pattern.startsWith(".") && entryName.endsWith(pattern)) {
                                 // For JAR files, just record the filename without loading content
                                 if (pattern.equals(".jar")) {
-                                    String filename = Paths.get(entryName).getFileName().toString();
+                                    java.nio.file.Path p = Paths.get(entryName).getFileName();
+                                    if (p == null) {
+                                        skipEntry(tarIs);
+                                        break;
+                                    }
+                                    String filename = p.toString();
                                     log.trace("Found JAR file: {}", filename);
                                     jarFilenames.add(filename);
                                 }
@@ -185,7 +190,7 @@ public class TgzUtil {
 
             return resultBuilder.build();
 
-        } catch (Exception e) {
+        } catch (IOException e) {
             log.error("Error processing archive entries", e);
             throw new RuntimeException("Error processing archive entries", e);
         } finally {
