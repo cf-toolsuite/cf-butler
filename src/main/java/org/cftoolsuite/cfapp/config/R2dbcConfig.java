@@ -81,6 +81,10 @@ public class R2dbcConfig extends AbstractR2dbcConfiguration {
                     CfJdbcEnv cfJdbcEnv = new CfJdbcEnv();
                     service = cfJdbcEnv.findJdbcServiceByName(VCAP_SERVICE);
             }
+            if (service == null) {
+                log.info("Not running on Cloud Foundry.");
+                return this.r2dbcProperties;
+            }
             URI uri = service.getCredentials().getUriInfo().getUri();
             String scheme = uri.getScheme();
             log.info("Attempting to connect to a {} database instance.", scheme);
@@ -114,9 +118,6 @@ public class R2dbcConfig extends AbstractR2dbcConfiguration {
             }
         } catch (IllegalArgumentException iae) {
             log.info("No bound service instance named {} was found. Falling back to embedded database.", VCAP_SERVICE);
-            return this.r2dbcProperties;
-        } catch (NullPointerException npe) {
-            log.info("Not running on Cloud Foundry.");
             return this.r2dbcProperties;
         }
     }

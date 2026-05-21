@@ -115,7 +115,7 @@
     <dependency>
       <groupId>com.cedarsoftware</groupId>
       <artifactId>json-io</artifactId>
-      <version>4.98.0</version>
+      <version>4.102.0</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -188,12 +188,12 @@
     <dependency>
       <groupId>org.cloudfoundry</groupId>
       <artifactId>cloudfoundry-client-reactor</artifactId>
-      <version>5.16.0.RELEASE</version>
+      <version>5.17.0.RELEASE</version>
     </dependency>
     <dependency>
       <groupId>org.cloudfoundry</groupId>
       <artifactId>cloudfoundry-operations</artifactId>
-      <version>5.16.0.RELEASE</version>
+      <version>5.17.0.RELEASE</version>
     </dependency>
     <dependency>
       <groupId>io.micrometer</groupId>
@@ -269,7 +269,7 @@
         <plugin>
           <groupId>org.sonarsource.scanner.maven</groupId>
           <artifactId>sonar-maven-plugin</artifactId>
-          <version>5.5.0.6356</version>
+          <version>5.6.0.6792</version>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -607,9 +607,10 @@
       <plugin>
         <groupId>com.github.spotbugs</groupId>
         <artifactId>spotbugs-maven-plugin</artifactId>
-        <version>4.9.8.2</version>
+        <version>4.9.8.3</version>
         <configuration>
           <xmlOutput>true</xmlOutput>
+          <excludeFilterFile>src/main/resources/spotbugs-exclude.xml</excludeFilterFile>
         </configuration>
       </plugin>
       <plugin>
@@ -658,7 +659,7 @@
       <plugin>
         <groupId>com.diffplug.spotless</groupId>
         <artifactId>spotless-maven-plugin</artifactId>
-        <version>3.3.0</version>
+        <version>3.5.1</version>
         <configuration>
           <java>
             <removeUnusedImports/>
@@ -735,7 +736,7 @@
         <dependency>
           <groupId>io.asyncer</groupId>
           <artifactId>r2dbc-mysql</artifactId>
-          <version>1.4.1</version>
+          <version>1.4.2</version>
           <scope>runtime</scope>
         </dependency>
         <dependency>
@@ -815,7 +816,10 @@
       <plugin>
         <groupId>com.github.spotbugs</groupId>
         <artifactId>spotbugs-maven-plugin</artifactId>
-        <version>4.9.8.2</version>
+        <version>4.9.8.3</version>
+        <configuration>
+          <excludeFilterFile>src/main/resources/spotbugs-exclude.xml</excludeFilterFile>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>

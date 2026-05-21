@@ -1,5 +1,6 @@
 package org.cftoolsuite.cfapp.event;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.cftoolsuite.cfapp.domain.product.Products;
@@ -10,9 +11,9 @@ public class ProductsAndReleasesRetrievedEvent extends ApplicationEvent {
 
     private static final long serialVersionUID = 1L;
 
-    private Products products;
-    private List<Release> allReleases;
-    private List<Release> latestReleases;
+    private transient Products products;
+    private transient List<Release> allReleases;
+    private transient List<Release> latestReleases;
 
     public ProductsAndReleasesRetrievedEvent(Object source) {
         super(source);
@@ -24,11 +25,11 @@ public class ProductsAndReleasesRetrievedEvent extends ApplicationEvent {
     }
 
     public List<Release> getAllReleases() {
-        return allReleases;
+        return allReleases == null ? Collections.emptyList() : Collections.unmodifiableList(allReleases);
     }
 
     public List<Release> getLatestReleases() {
-        return latestReleases;
+        return latestReleases == null ? Collections.emptyList() : Collections.unmodifiableList(latestReleases);
     }
 
     public Products getProducts() {

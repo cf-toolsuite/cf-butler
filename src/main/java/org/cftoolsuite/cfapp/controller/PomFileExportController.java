@@ -2,6 +2,7 @@ package org.cftoolsuite.cfapp.controller;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
@@ -65,7 +66,7 @@ public class PomFileExportController {
                     String dirPath = String.format("%s/%s/%s", appDetail.getOrganization(), appDetail.getSpace(), appDetail.getAppName());
                     Path entryPath = Paths.get(dirPath, "pom.xml");
                     TarArchiveEntry entry = new TarArchiveEntry(entryPath.toString());
-                    byte[] contentBytes = appDetail.getPomContents().getBytes();
+                    byte[] contentBytes = appDetail.getPomContents().getBytes(StandardCharsets.UTF_8);
                     entry.setSize(contentBytes.length);
                     tarOutput.putArchiveEntry(entry);
                     tarOutput.write(contentBytes);

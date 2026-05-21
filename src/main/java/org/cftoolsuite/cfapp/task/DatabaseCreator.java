@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 
 import org.cftoolsuite.cfapp.config.DbmsSettings;
 import org.cftoolsuite.cfapp.event.DatabaseCreatedEvent;
@@ -47,8 +48,8 @@ public class DatabaseCreator implements ApplicationRunner {
             createTablesAndViews(path);
             publisher.publishEvent(new DatabaseCreatedEvent(this));
         } catch (IOException ioe) {
-            log.error(String.format("Failed trying to read %s\n", path), ioe);
-            System.exit(1);
+            log.error(String.format("Failed trying to read %s%n", path), ioe);
+            throw new IllegalStateException("Database schema initialization failed — cannot start application", ioe);
         }
     }
 
@@ -64,7 +65,7 @@ public class DatabaseCreator implements ApplicationRunner {
         log.info("DatabaseCreator started");
         try (
             InputStream is = schema.getInputStream();
-            BufferedReader br = new BufferedReader(new InputStreamReader(is))
+            BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))
             ) {
                 while ((line = br.readLine()) != null) {
                     if (!line.isBlank()) {
