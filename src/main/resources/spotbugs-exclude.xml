@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+
+    <!--
+        EI_EXPOSE_REP2: Spring beans receive dependencies via constructor injection.
+        Storing an injected singleton in a field is the correct pattern — SpotBugs
+        incorrectly treats every injected collaborator as an "externally mutable object"
+        that requires a defensive copy.
+        Also covers domain/product value objects and report helpers where constructor
+        parameters are owned exclusively by the receiving object.
+    -->
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+        <Or>
+            <Package name="~org\.cftoolsuite\.cfapp\.task.*"/>
+            <Package name="~org\.cftoolsuite\.cfapp\.service.*"/>
+            <Package name="~org\.cftoolsuite\.cfapp\.notifier.*"/>
+            <Package name="~org\.cftoolsuite\.cfapp\.config.*"/>
+            <Package name="~org\.cftoolsuite\.cfapp\.util.*"/>
+            <Package name="~org\.cftoolsuite\.cfapp\.client.*"/>
+            <Package name="~org\.cftoolsuite\.cfapp\.event.*"/>
+            <Package name="~org\.cftoolsuite\.cfapp\.controller.*"/>
+            <Package name="~org\.cftoolsuite\.cfapp\.repository.*"/>
+            <Package name="~org\.cftoolsuite\.cfapp\.report.*"/>
+            <Package name="~org\.cftoolsuite\.cfapp\.domain.*"/>
+        </Or>
+    </Match>
+
+    <!--
+        URF_UNREAD_FIELD: EntityMetadata fields are populated via @JsonCreator deserialization
+        from the Cloud Foundry API response. They are intentional JSON-binding targets and
+        not dead code — SpotBugs cannot see Jackson's reflective field access.
+    -->
+    <Match>
+        <Bug pattern="URF_UNREAD_FIELD"/>
+        <Class name="org.cftoolsuite.cfapp.domain.event.EntityMetadata"/>
+    </Match>
+
+</FindBugsFilter>

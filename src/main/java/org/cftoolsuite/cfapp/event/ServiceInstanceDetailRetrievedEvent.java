@@ -1,5 +1,6 @@
 package org.cftoolsuite.cfapp.event;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.cftoolsuite.cfapp.domain.ServiceInstanceDetail;
@@ -9,7 +10,7 @@ public class ServiceInstanceDetailRetrievedEvent extends ApplicationEvent {
 
     private static final long serialVersionUID = 1L;
 
-    private List<ServiceInstanceDetail> detail;
+    private transient List<ServiceInstanceDetail> detail;
 
     public ServiceInstanceDetailRetrievedEvent(Object source) {
         super(source);
@@ -21,8 +22,7 @@ public class ServiceInstanceDetailRetrievedEvent extends ApplicationEvent {
     }
 
     public List<ServiceInstanceDetail> getDetail() {
-        return detail;
+        return detail == null ? Collections.emptyList() : Collections.unmodifiableList(detail);
     }
-
 
 }

@@ -610,6 +610,7 @@
         <version>4.9.8.3</version>
         <configuration>
           <xmlOutput>true</xmlOutput>
+          <excludeFilterFile>src/main/resources/spotbugs-exclude.xml</excludeFilterFile>
         </configuration>
       </plugin>
       <plugin>
@@ -816,6 +817,9 @@
         <groupId>com.github.spotbugs</groupId>
         <artifactId>spotbugs-maven-plugin</artifactId>
         <version>4.9.8.3</version>
+        <configuration>
+          <excludeFilterFile>src/main/resources/spotbugs-exclude.xml</excludeFilterFile>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
