@@ -72,6 +72,7 @@
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
     <maven.compiler.proc>full</maven.compiler.proc>
+    <netty.version>4.2.14.Final</netty.version>
   </properties>
 
   <dependencies>
@@ -259,6 +260,12 @@
         <version>2025.1.1</version>
         <scope>import</scope>
         <type>pom</type>
+      </dependency>
+      <!-- Force wire-runtime to 6.3.0+ to fix SNYK-JAVA-COMSQUAREUPWIRE-16771313 and SNYK-JAVA-COMSQUAREUPWIRE-9459041 -->
+      <dependency>
+        <groupId>com.squareup.wire</groupId>
+        <artifactId>wire-runtime</artifactId>
+        <version>6.3.0</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
