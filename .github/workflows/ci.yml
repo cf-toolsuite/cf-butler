@@ -1,6 +1,8 @@
 name: Java CI
 
-on: [push]
+on:
+  push:
+  pull_request:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
