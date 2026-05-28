@@ -116,7 +116,7 @@
     <dependency>
       <groupId>com.cedarsoftware</groupId>
       <artifactId>json-io</artifactId>
-      <version>4.102.0</version>
+      <version>4.103.0</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
