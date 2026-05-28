@@ -1,3 +1,16 @@
+name: Dependabot Auto Merge
+
+on:
+  workflow_dispatch:
+
+jobs:
+  disabled:
+    name: Auto-merge disabled
+    if: false
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Dependabot auto-merge is disabled."
+
 # name: Dependabot Auto Merge
 # 
 # on:
