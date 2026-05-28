@@ -1,0 +1,134 @@
+# name: Dependabot Auto Merge
+# 
+# on:
+#   pull_request_target:
+#     types:
+#       - opened
+#       - reopened
+#       - synchronize
+#       - ready_for_review
+#   check_suite:
+#     types:
+#       - completed
+# 
+# permissions:
+#   checks: read
+#   contents: write
+#   pull-requests: write
+# 
+# jobs:
+#   enable-auto-merge:
+#     name: Enable auto-merge
+#     outputs:
+#       pr_url: ${{ steps.pr.outputs.url }}
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Resolve eligible Dependabot PR
+#         id: pr
+#         env:
+#           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#         run: |
+#           pr_number=""
+# 
+#           if [ "$GITHUB_EVENT_NAME" = "pull_request_target" ]; then
+#             pr_number=$(jq -r '.pull_request.number // empty' "$GITHUB_EVENT_PATH")
+#           else
+#             pr_number=$(jq -r '.check_suite.pull_requests[0].number // empty' "$GITHUB_EVENT_PATH")
+#             head_sha=$(jq -r '.check_suite.head_sha // empty' "$GITHUB_EVENT_PATH")
+# 
+#             if [ -z "$pr_number" ] && [ -n "$head_sha" ]; then
+#               pr_number=$(gh api "repos/${{ github.repository }}/commits/${head_sha}/pulls" \
+#               -H "Accept: application/vnd.github+json" \
+#               --jq '.[] | select(.state == "open") | .number' | head -n 1)
+#             fi
+#           fi
+# 
+#           if [ -z "$pr_number" ]; then
+#             echo "eligible=false" >> "$GITHUB_OUTPUT"
+#             exit 0
+#           fi
+# 
+#           pr_json=$(gh api "repos/${{ github.repository }}/pulls/${pr_number}")
+#           pr_author=$(printf '%s' "$pr_json" | jq -r '.user.login')
+#           pr_draft=$(printf '%s' "$pr_json" | jq -r '.draft')
+#           pr_url=$(printf '%s' "$pr_json" | jq -r '.html_url')
+# 
+#           if [ "$pr_author" != "dependabot[bot]" ] || [ "$pr_draft" != "false" ]; then
+#             echo "eligible=false" >> "$GITHUB_OUTPUT"
+#             exit 0
+#           fi
+# 
+#           echo "eligible=true" >> "$GITHUB_OUTPUT"
+#           echo "number=$pr_number" >> "$GITHUB_OUTPUT"
+#           echo "url=$pr_url" >> "$GITHUB_OUTPUT"
+# 
+#       - name: Require passing checks before enabling auto-merge
+#         id: checks
+#         if: steps.pr.outputs.eligible == 'true'
+#         env:
+#           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#           GH_REPO: ${{ github.repository }}
+#           PR_NUMBER: ${{ steps.pr.outputs.number }}
+#         run: |
+#           if checks_output="$(gh pr checks "$PR_NUMBER" --required 2>&1)"; then
+#             echo "passed=true" >> "$GITHUB_OUTPUT"
+#           elif echo "$checks_output" | grep -q "no required checks reported"; then
+#             echo "No required checks configured for this PR; treating as pass for automerge gating."
+#             echo "passed=true" >> "$GITHUB_OUTPUT"
+#           else
+#             echo "passed=false" >> "$GITHUB_OUTPUT"
+#           fi
+# 
+#       - name: Detect workflow file changes
+#         id: changed-files
+#         if: steps.pr.outputs.eligible == 'true' && steps.checks.outputs.passed == 'true'
+#         env:
+#           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#           PR_NUMBER: ${{ steps.pr.outputs.number }}
+#         run: |
+#           files=$(gh api "repos/${{ github.repository }}/pulls/${PR_NUMBER}/files" --paginate --jq '.[].filename')
+#           if printf '%s\n' "$files" | grep -q '^.github/workflows/'; then
+#             echo "touches_workflows=true" >> "$GITHUB_OUTPUT"
+#           else
+#             echo "touches_workflows=false" >> "$GITHUB_OUTPUT"
+#           fi
+# 
+#       - name: Debug automerge prerequisites
+#         if: steps.pr.outputs.eligible == 'true'
+#         env:
+#           GH_TOKEN: ${{ secrets.AUTOMERGE_GH_TOKEN != '' && secrets.AUTOMERGE_GH_TOKEN || secrets.GITHUB_TOKEN }}
+#           PR_NUMBER: ${{ steps.pr.outputs.number }}
+#           REPO: ${{ github.repository }}
+#         run: |
+#           echo "actor=${GITHUB_ACTOR}"
+#           echo "event=${GITHUB_EVENT_NAME}"
+#           echo "pr_eligible=${{ steps.pr.outputs.eligible }}"
+#           echo "pr_number=${PR_NUMBER}"
+#           echo "checks_passed=${{ steps.checks.outputs.passed }}"
+#           echo "touches_workflows=${{ steps.changed-files.outputs.touches_workflows || 'unknown' }}"
+#           gh auth status || true
+#           gh pr view "$PR_NUMBER" --repo "$REPO" \
+#             --json number,author,isDraft,mergeStateStatus,maintainerCanModify,state,autoMergeRequest \
+#             --jq '{number, author: .author.login, isDraft, mergeStateStatus, maintainerCanModify, state, autoMerge: .autoMergeRequest != null}'
+# 
+#       - name: Require dedicated token for workflow changes
+#         if: >
+#           steps.pr.outputs.eligible == 'true' &&
+#           steps.checks.outputs.passed == 'true' &&
+#           steps.changed-files.outputs.touches_workflows == 'true'
+#         env:
+#           AUTOMERGE_GH_TOKEN: ${{ secrets.AUTOMERGE_GH_TOKEN }}
+#         run: |
+#           if [ -n "$AUTOMERGE_GH_TOKEN" ]; then
+#             exit 0
+#           fi
+#           echo "Dependabot PR modifies .github/workflows/*, but AUTOMERGE_GH_TOKEN is not configured." >&2
+#           echo "Configure a repo secret named AUTOMERGE_GH_TOKEN with Pull requests: Write, Contents: Write, and Workflows: Write." >&2
+#           exit 1
+# 
+#       - name: Enable squash auto-merge
+#         if: steps.pr.outputs.eligible == 'true' && steps.checks.outputs.passed == 'true'
+#         env:
+#           GH_TOKEN: ${{ secrets.AUTOMERGE_GH_TOKEN != '' && secrets.AUTOMERGE_GH_TOKEN || secrets.GITHUB_TOKEN }}
+#           PR_URL: ${{ steps.pr.outputs.url }}
+#         run: gh pr merge --auto --squash "$PR_URL"
