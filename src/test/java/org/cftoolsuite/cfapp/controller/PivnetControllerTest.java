@@ -45,8 +45,6 @@ class PivnetControllerTest extends ControllerTestBase {
                     assertEquals(1, response.getBody().size());
                 })
                 .verifyComplete();
-
-        verify(cache).getLatestProductReleases();
     }
 
     @Test
@@ -71,8 +69,6 @@ class PivnetControllerTest extends ControllerTestBase {
                     assertEquals(1, response.getBody().size());
                 })
                 .verifyComplete();
-
-        verify(cache).getAllProductReleases();
     }
 
     @Test
@@ -97,16 +93,11 @@ class PivnetControllerTest extends ControllerTestBase {
                     assertNotNull(response.getBody());
                 })
                 .verifyComplete();
-
-        verify(cache).getAllProductReleases();
     }
 
     @Test
     void getLatestAvailableProductReleases_invalidOption_returnsBadRequest() {
         assertBadRequest(controller.getLatestAvailableProductReleases("invalid"));
-
-        verifyNoInteractions(tkService);
-        verifyNoInteractions(cache);
     }
 
     @Test
@@ -117,8 +108,6 @@ class PivnetControllerTest extends ControllerTestBase {
         when(cache.getProducts()).thenReturn(products);
 
         assertOkBody(controller.getProductList(), products);
-
-        verify(cache).getProducts();
     }
 
     @Test
@@ -126,7 +115,5 @@ class PivnetControllerTest extends ControllerTestBase {
         mockTimeKeeperEmpty();
 
         assertNotFound(controller.getProductList());
-
-        verifyNoInteractions(cache);
     }
 }

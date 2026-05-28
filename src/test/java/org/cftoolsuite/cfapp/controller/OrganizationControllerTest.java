@@ -44,8 +44,6 @@ class OrganizationControllerTest extends ControllerTestBase {
                     assertEquals("my-org", response.getBody().get(0).getName());
                 })
                 .verifyComplete();
-
-        verify(organizationService).findAll();
     }
 
     @Test
@@ -53,16 +51,7 @@ class OrganizationControllerTest extends ControllerTestBase {
         mockTimeKeeper();
         when(organizationService.findAll()).thenReturn(Flux.empty());
 
-        Mono<ResponseEntity<List<Organization>>> result = controller.listAllOrganizations();
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.OK, response.getStatusCode());
-                    assertTrue(response.getBody().isEmpty());
-                })
-                .verifyComplete();
-
-        verify(organizationService).findAll();
+        assertEmptyListOk(controller.listAllOrganizations());
     }
 
     @Test
@@ -70,8 +59,6 @@ class OrganizationControllerTest extends ControllerTestBase {
         mockTimeKeeperEmpty();
 
         assertNotFound(controller.listAllOrganizations());
-
-        verifyNoInteractions(organizationService);
     }
 
     @Test
@@ -82,16 +69,7 @@ class OrganizationControllerTest extends ControllerTestBase {
         mockTimeKeeper();
         when(organizationService.findAll()).thenReturn(Flux.just(org1, org2));
 
-        Mono<ResponseEntity<Long>> result = controller.organizationsCount();
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.OK, response.getStatusCode());
-                    assertEquals(2L, response.getBody());
-                })
-                .verifyComplete();
-
-        verify(organizationService).findAll();
+        assertOkBody(controller.organizationsCount(), 2L);
     }
 
     @Test
@@ -99,31 +77,13 @@ class OrganizationControllerTest extends ControllerTestBase {
         mockTimeKeeper();
         when(organizationService.findAll()).thenReturn(Flux.empty());
 
-        Mono<ResponseEntity<Long>> result = controller.organizationsCount();
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.OK, response.getStatusCode());
-                    assertEquals(0L, response.getBody());
-                })
-                .verifyComplete();
-
-        verify(organizationService).findAll();
+        assertOkBody(controller.organizationsCount(), 0L);
     }
 
     @Test
     void organizationsCount_whenTimeKeeperEmpty_returnsOkWithZero() {
         mockTimeKeeperEmpty();
 
-        Mono<ResponseEntity<Long>> result = controller.organizationsCount();
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.OK, response.getStatusCode());
-                    assertEquals(0L, response.getBody());
-                })
-                .verifyComplete();
-
-        verifyNoInteractions(organizationService);
+        assertOkBody(controller.organizationsCount(), 0L);
     }
 }

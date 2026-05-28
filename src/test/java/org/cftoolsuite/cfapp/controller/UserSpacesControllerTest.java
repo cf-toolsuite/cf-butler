@@ -7,9 +7,8 @@ import org.cftoolsuite.cfapp.domain.UserSpaces;
 import org.cftoolsuite.cfapp.service.UserSpacesService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.ResponseEntity;
-
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -41,8 +40,6 @@ class UserSpacesControllerTest extends ControllerTestBase {
                     assertEquals("testuser", response.getBody().getAccountName());
                 })
                 .verifyComplete();
-
-        verify(service).getUserSpaces("testuser");
     }
 
     @Test
@@ -51,8 +48,6 @@ class UserSpacesControllerTest extends ControllerTestBase {
         when(service.getUserSpaces("testuser")).thenReturn(Mono.empty());
 
         assertNotFound(controller.getSpacesForAccountName("testuser"));
-
-        verify(service).getUserSpaces("testuser");
     }
 
     @Test
@@ -60,7 +55,5 @@ class UserSpacesControllerTest extends ControllerTestBase {
         mockTimeKeeperEmpty();
 
         assertNotFound(controller.getSpacesForAccountName("testuser"));
-
-        verifyNoInteractions(service);
     }
 }

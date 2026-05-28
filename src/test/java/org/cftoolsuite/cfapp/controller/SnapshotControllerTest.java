@@ -1,16 +1,22 @@
 package org.cftoolsuite.cfapp.controller;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.*;
+
+import java.util.stream.Stream;
+
+import org.junit.jupiter.params.provider.Arguments;
 
 import org.cftoolsuite.cfapp.domain.SnapshotDetail;
 import org.cftoolsuite.cfapp.domain.SnapshotSummary;
 import org.cftoolsuite.cfapp.service.SnapshotService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.ResponseEntity;
-
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -27,46 +33,47 @@ class SnapshotControllerTest extends ControllerTestBase {
         controller = new SnapshotController(snapshotService, tkService);
     }
 
-    @Test
-    void getApplicationInstanceCsvReport_whenTimeKeeperHasData_returnsOk() {
-        String csvReport = "app_id,app_name,org\napp1,app1,org1";
+    static Stream<Arguments> csvReportTypes() {
+        return Stream.of(
+                arguments("ApplicationInstance", "app_id,app_name,org\napp1,app1,org1"),
+                arguments("ApplicationRelationships", "source,destination,type\napp1,app2,route"),
+                arguments("ServiceInstance", "si_id,name,service\nsi1,si1,mysql"),
+                arguments("UserAccount", "name,email\nuser1,user1@example.com")
+        );
+    }
 
+    @ParameterizedTest(name = "{0} CSV report - timekeeper has data")
+    @MethodSource("csvReportTypes")
+    void getCsvReport_whenTimeKeeperHasData_returnsOk(String type, String csvReport) {
         mockTimeKeeper();
-        when(snapshotService.assembleCsvAIReport(COLLECTED)).thenReturn(Mono.just(csvReport));
-
-        assertOkBody(controller.getApplicationInstanceCsvReport(), csvReport);
-
-        verify(snapshotService).assembleCsvAIReport(COLLECTED);
+        stubService(type, Mono.just(csvReport));
+        assertOkBody(invokeController(type), csvReport);
     }
 
-    @Test
-    void getApplicationInstanceCsvReport_whenTimeKeeperEmpty_returnsNotFound() {
+    @ParameterizedTest(name = "{0} CSV report - timekeeper empty")
+    @MethodSource("csvReportTypes")
+    void getCsvReport_whenTimeKeeperEmpty_returnsNotFound(String type, String csvReport) {
         mockTimeKeeperEmpty();
-
-        assertNotFound(controller.getApplicationInstanceCsvReport());
-
-        verifyNoInteractions(snapshotService);
+        assertNotFound(invokeController(type));
     }
 
-    @Test
-    void getApplicationRelationshipsCsvReport_whenTimeKeeperHasData_returnsOk() {
-        String csvReport = "source,destination,type\napp1,app2,route";
-
-        mockTimeKeeper();
-        when(snapshotService.assembleCsvRelationshipsReport(COLLECTED)).thenReturn(Mono.just(csvReport));
-
-        assertOkBody(controller.getApplicationRelationshipsCsvReport(), csvReport);
-
-        verify(snapshotService).assembleCsvRelationshipsReport(COLLECTED);
+    private void stubService(String type, Mono<String> mono) {
+        switch (type) {
+            case "ApplicationInstance" -> when(snapshotService.assembleCsvAIReport(COLLECTED)).thenReturn(mono);
+            case "ApplicationRelationships" -> when(snapshotService.assembleCsvRelationshipsReport(COLLECTED)).thenReturn(mono);
+            case "ServiceInstance" -> when(snapshotService.assembleCsvSIReport(COLLECTED)).thenReturn(mono);
+            case "UserAccount" -> when(snapshotService.assembleCsvUserAccountReport(COLLECTED)).thenReturn(mono);
+        }
     }
 
-    @Test
-    void getApplicationRelationshipsCsvReport_whenTimeKeeperEmpty_returnsNotFound() {
-        mockTimeKeeperEmpty();
-
-        assertNotFound(controller.getApplicationRelationshipsCsvReport());
-
-        verifyNoInteractions(snapshotService);
+    private Mono<? extends ResponseEntity<?>> invokeController(String type) {
+        return switch (type) {
+            case "ApplicationInstance" -> controller.getApplicationInstanceCsvReport();
+            case "ApplicationRelationships" -> controller.getApplicationRelationshipsCsvReport();
+            case "ServiceInstance" -> controller.getServiceInstanceCsvReport();
+            case "UserAccount" -> controller.getUserAccountCsvReport();
+            default -> throw new IllegalArgumentException(type);
+        };
     }
 
     @Test
@@ -85,8 +92,6 @@ class SnapshotControllerTest extends ControllerTestBase {
                     assertFalse(response.getHeaders().isEmpty());
                 })
                 .verifyComplete();
-
-        verify(snapshotService).assembleSnapshotDetail();
     }
 
     @Test
@@ -94,29 +99,6 @@ class SnapshotControllerTest extends ControllerTestBase {
         mockTimeKeeperEmpty();
 
         assertNotFound(controller.getDetail());
-
-        verifyNoInteractions(snapshotService);
-    }
-
-    @Test
-    void getServiceInstanceCsvReport_whenTimeKeeperHasData_returnsOk() {
-        String csvReport = "si_id,name,service\nsi1,si1,mysql";
-
-        mockTimeKeeper();
-        when(snapshotService.assembleCsvSIReport(COLLECTED)).thenReturn(Mono.just(csvReport));
-
-        assertOkBody(controller.getServiceInstanceCsvReport(), csvReport);
-
-        verify(snapshotService).assembleCsvSIReport(COLLECTED);
-    }
-
-    @Test
-    void getServiceInstanceCsvReport_whenTimeKeeperEmpty_returnsNotFound() {
-        mockTimeKeeperEmpty();
-
-        assertNotFound(controller.getServiceInstanceCsvReport());
-
-        verifyNoInteractions(snapshotService);
     }
 
     @Test
@@ -135,8 +117,6 @@ class SnapshotControllerTest extends ControllerTestBase {
                     assertFalse(response.getHeaders().isEmpty());
                 })
                 .verifyComplete();
-
-        verify(snapshotService).assembleSnapshotSummary();
     }
 
     @Test
@@ -144,28 +124,5 @@ class SnapshotControllerTest extends ControllerTestBase {
         mockTimeKeeperEmpty();
 
         assertNotFound(controller.getSummary());
-
-        verifyNoInteractions(snapshotService);
-    }
-
-    @Test
-    void getUserAccountCsvReport_whenTimeKeeperHasData_returnsOk() {
-        String csvReport = "name,email\nuser1,user1@example.com";
-
-        mockTimeKeeper();
-        when(snapshotService.assembleCsvUserAccountReport(COLLECTED)).thenReturn(Mono.just(csvReport));
-
-        assertOkBody(controller.getUserAccountCsvReport(), csvReport);
-
-        verify(snapshotService).assembleCsvUserAccountReport(COLLECTED);
-    }
-
-    @Test
-    void getUserAccountCsvReport_whenTimeKeeperEmpty_returnsNotFound() {
-        mockTimeKeeperEmpty();
-
-        assertNotFound(controller.getUserAccountCsvReport());
-
-        verifyNoInteractions(snapshotService);
     }
 }

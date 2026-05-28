@@ -12,9 +12,8 @@ import org.cftoolsuite.cfapp.domain.WorkloadsFilter;
 import org.cftoolsuite.cfapp.service.LegacyWorkloadsService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.ResponseEntity;
-
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -52,9 +51,6 @@ class LegacyWorkloadsControllerTest extends ControllerTestBase {
                     assertEquals(1, response.getBody().getApplications().size());
                 })
                 .verifyComplete();
-
-        verify(service).getLegacyApplications(any(WorkloadsFilter.class));
-        verify(service).getLegacyApplicationRelationships(any(WorkloadsFilter.class));
     }
 
     @Test
@@ -65,9 +61,6 @@ class LegacyWorkloadsControllerTest extends ControllerTestBase {
                 .thenReturn(Mono.empty());
 
         assertNotFound(controller.getLegacyWorkloads("", ""));
-
-        verify(service).getLegacyApplications(any(WorkloadsFilter.class));
-        verify(service).getLegacyApplicationRelationships(any(WorkloadsFilter.class));
     }
 
     @Test

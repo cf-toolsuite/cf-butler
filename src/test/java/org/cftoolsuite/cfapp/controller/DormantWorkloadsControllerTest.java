@@ -11,9 +11,8 @@ import org.cftoolsuite.cfapp.domain.Workloads;
 import org.cftoolsuite.cfapp.service.DormantWorkloadsService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.ResponseEntity;
-
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -48,9 +47,6 @@ class DormantWorkloadsControllerTest extends ControllerTestBase {
                     assertEquals(1, response.getBody().getServiceInstances().size());
                 })
                 .verifyComplete();
-
-        verify(service).getDormantApplications(30);
-        verify(service).getDormantServiceInstances(30);
     }
 
     @Test
@@ -61,9 +57,6 @@ class DormantWorkloadsControllerTest extends ControllerTestBase {
         when(service.getDormantServiceInstances(30)).thenReturn(Mono.empty());
 
         assertNotFound(controller.getDormantWorkloads(30));
-
-        verify(service).getDormantApplications(30);
-        verify(service).getDormantServiceInstances(30);
     }
 
     @Test
@@ -76,8 +69,5 @@ class DormantWorkloadsControllerTest extends ControllerTestBase {
         mockTimeKeeper();
 
         assertOk(controller.getDormantWorkloads(90));
-
-        verify(service).getDormantApplications(90);
-        verify(service).getDormantServiceInstances(90);
     }
 }

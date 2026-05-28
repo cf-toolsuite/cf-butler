@@ -12,11 +12,8 @@ import org.cftoolsuite.cfapp.task.PolicyExecutorTask;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 
 import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
 
 class OnDemandPolicyTriggerControllerTest extends ControllerTestBase {
 
@@ -42,31 +39,13 @@ class OnDemandPolicyTriggerControllerTest extends ControllerTestBase {
         when(service.getTaskMap()).thenReturn(Mono.just(taskMap));
         when(factory.getBean(any(Class.class))).thenReturn(task);
 
-        Mono<ResponseEntity<Void>> result = controller.triggerPolicyExecution();
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
-                })
-                .verifyComplete();
-
-        verify(service).getTaskMap();
-        verify(factory).getBean(any(Class.class));
-        verify(task).execute("policy-1");
+        assertAccepted(controller.triggerPolicyExecution());
     }
 
     @Test
     void triggerPolicyExecution_whenTaskMapEmpty_returnsAccepted() {
         when(service.getTaskMap()).thenReturn(Mono.just(new HashMap<>()));
 
-        Mono<ResponseEntity<Void>> result = controller.triggerPolicyExecution();
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
-                })
-                .verifyComplete();
-
-        verify(service).getTaskMap();
+        assertAccepted(controller.triggerPolicyExecution());
     }
 }

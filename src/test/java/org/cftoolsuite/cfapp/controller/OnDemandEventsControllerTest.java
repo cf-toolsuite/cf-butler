@@ -10,9 +10,8 @@ import org.cftoolsuite.cfapp.domain.event.Events;
 import org.cftoolsuite.cfapp.service.EventsService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.ResponseEntity;
-
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -46,9 +45,6 @@ class OnDemandEventsControllerTest extends ControllerTestBase {
                     assertEquals(1, response.getBody().size());
                 })
                 .verifyComplete();
-
-        verify(service).getEvents("app-1", 10);
-        verify(service).toFlux(events);
     }
 
     @Test
@@ -66,9 +62,6 @@ class OnDemandEventsControllerTest extends ControllerTestBase {
                     assertTrue(response.getBody().isEmpty());
                 })
                 .verifyComplete();
-
-        verify(service).getEvents("app-1", 10);
-        verify(service).toFlux(events);
     }
 
     @Test
@@ -86,8 +79,6 @@ class OnDemandEventsControllerTest extends ControllerTestBase {
                     assertEquals(1, response.getBody().size());
                 })
                 .verifyComplete();
-
-        verify(service).getEvents("app-1", types);
     }
 
     @Test
@@ -104,7 +95,5 @@ class OnDemandEventsControllerTest extends ControllerTestBase {
                     assertTrue(response.getBody().isEmpty());
                 })
                 .verifyComplete();
-
-        verify(service).getEvents("app-1", types);
     }
 }

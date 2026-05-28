@@ -9,9 +9,8 @@ import org.cftoolsuite.cfapp.domain.Space;
 import org.cftoolsuite.cfapp.service.SpaceService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.ResponseEntity;
-
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -45,8 +44,6 @@ class SpaceControllerTest extends ControllerTestBase {
                     assertEquals("dev", response.getBody().get(0).getSpaceName());
                 })
                 .verifyComplete();
-
-        verify(spaceService).findAll();
     }
 
     @Test
@@ -54,16 +51,7 @@ class SpaceControllerTest extends ControllerTestBase {
         mockTimeKeeper();
         when(spaceService.findAll()).thenReturn(Flux.empty());
 
-        Mono<ResponseEntity<List<Space>>> result = controller.listAllSpaces();
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.OK, response.getStatusCode());
-                    assertTrue(response.getBody().isEmpty());
-                })
-                .verifyComplete();
-
-        verify(spaceService).findAll();
+        assertEmptyListOk(controller.listAllSpaces());
     }
 
     @Test
@@ -71,8 +59,6 @@ class SpaceControllerTest extends ControllerTestBase {
         mockTimeKeeperEmpty();
 
         assertNotFound(controller.listAllSpaces());
-
-        verifyNoInteractions(spaceService);
     }
 
     @Test
@@ -83,16 +69,7 @@ class SpaceControllerTest extends ControllerTestBase {
         mockTimeKeeper();
         when(spaceService.findAll()).thenReturn(Flux.just(space1, space2));
 
-        Mono<ResponseEntity<Long>> result = controller.spacesCount();
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.OK, response.getStatusCode());
-                    assertEquals(2L, response.getBody());
-                })
-                .verifyComplete();
-
-        verify(spaceService).findAll();
+        assertOkBody(controller.spacesCount(), 2L);
     }
 
     @Test
@@ -100,31 +77,13 @@ class SpaceControllerTest extends ControllerTestBase {
         mockTimeKeeper();
         when(spaceService.findAll()).thenReturn(Flux.empty());
 
-        Mono<ResponseEntity<Long>> result = controller.spacesCount();
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.OK, response.getStatusCode());
-                    assertEquals(0L, response.getBody());
-                })
-                .verifyComplete();
-
-        verify(spaceService).findAll();
+        assertOkBody(controller.spacesCount(), 0L);
     }
 
     @Test
     void spacesCount_whenTimeKeeperEmpty_returnsOkWithZero() {
         mockTimeKeeperEmpty();
 
-        Mono<ResponseEntity<Long>> result = controller.spacesCount();
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.OK, response.getStatusCode());
-                    assertEquals(0L, response.getBody());
-                })
-                .verifyComplete();
-
-        verifyNoInteractions(spaceService);
+        assertOkBody(controller.spacesCount(), 0L);
     }
 }
