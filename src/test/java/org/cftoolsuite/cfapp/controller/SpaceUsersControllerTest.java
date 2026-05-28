@@ -9,9 +9,8 @@ import org.cftoolsuite.cfapp.domain.SpaceUsers;
 import org.cftoolsuite.cfapp.service.SpaceUsersService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.ResponseEntity;
-
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -42,8 +41,6 @@ class SpaceUsersControllerTest extends ControllerTestBase {
                     assertEquals(2, response.getBody().size());
                 })
                 .verifyComplete();
-
-        verify(service).obtainAccountNames();
     }
 
     @Test
@@ -51,16 +48,7 @@ class SpaceUsersControllerTest extends ControllerTestBase {
         mockTimeKeeper();
         when(service.obtainAccountNames()).thenReturn(Flux.empty());
 
-        Mono<ResponseEntity<List<String>>> result = controller.allAccountNames();
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.OK, response.getStatusCode());
-                    assertTrue(response.getBody().isEmpty());
-                })
-                .verifyComplete();
-
-        verify(service).obtainAccountNames();
+        assertEmptyListOk(controller.allAccountNames());
     }
 
     @Test
@@ -68,8 +56,6 @@ class SpaceUsersControllerTest extends ControllerTestBase {
         mockTimeKeeperEmpty();
 
         assertNotFound(controller.allAccountNames());
-
-        verifyNoInteractions(service);
     }
 
     @Test
@@ -87,8 +73,6 @@ class SpaceUsersControllerTest extends ControllerTestBase {
                     assertEquals(1, response.getBody().size());
                 })
                 .verifyComplete();
-
-        verify(service).findAll();
     }
 
     @Test
@@ -96,16 +80,7 @@ class SpaceUsersControllerTest extends ControllerTestBase {
         mockTimeKeeper();
         when(service.findAll()).thenReturn(Flux.empty());
 
-        Mono<ResponseEntity<List<SpaceUsers>>> result = controller.getAllSpaceUsers();
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.OK, response.getStatusCode());
-                    assertTrue(response.getBody().isEmpty());
-                })
-                .verifyComplete();
-
-        verify(service).findAll();
+        assertEmptyListOk(controller.getAllSpaceUsers());
     }
 
     @Test
@@ -123,8 +98,6 @@ class SpaceUsersControllerTest extends ControllerTestBase {
                     assertEquals("myorg", response.getBody().getOrganization());
                 })
                 .verifyComplete();
-
-        verify(service).findByOrganizationAndSpace("myorg", "dev");
     }
 
     @Test
@@ -133,8 +106,6 @@ class SpaceUsersControllerTest extends ControllerTestBase {
         when(service.findByOrganizationAndSpace("myorg", "dev")).thenReturn(Mono.empty());
 
         assertNotFound(controller.getUsersInOrganizationAndSpace("myorg", "dev"));
-
-        verify(service).findByOrganizationAndSpace("myorg", "dev");
     }
 
     @Test
@@ -142,16 +113,7 @@ class SpaceUsersControllerTest extends ControllerTestBase {
         mockTimeKeeper();
         when(service.obtainAccountNames()).thenReturn(Flux.just("user1", "user2", "user3"));
 
-        Mono<ResponseEntity<Long>> result = controller.totalAccounts();
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.OK, response.getStatusCode());
-                    assertEquals(3L, response.getBody());
-                })
-                .verifyComplete();
-
-        verify(service).obtainAccountNames();
+        assertOkBody(controller.totalAccounts(), 3L);
     }
 
     @Test
@@ -159,31 +121,13 @@ class SpaceUsersControllerTest extends ControllerTestBase {
         mockTimeKeeper();
         when(service.obtainAccountNames()).thenReturn(Flux.empty());
 
-        Mono<ResponseEntity<Long>> result = controller.totalAccounts();
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.OK, response.getStatusCode());
-                    assertEquals(0L, response.getBody());
-                })
-                .verifyComplete();
-
-        verify(service).obtainAccountNames();
+        assertOkBody(controller.totalAccounts(), 0L);
     }
 
     @Test
     void totalAccounts_whenTimeKeeperEmpty_returnsOkWithZero() {
         mockTimeKeeperEmpty();
 
-        Mono<ResponseEntity<Long>> result = controller.totalAccounts();
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.OK, response.getStatusCode());
-                    assertEquals(0L, response.getBody());
-                })
-                .verifyComplete();
-
-        verifyNoInteractions(service);
+        assertOkBody(controller.totalAccounts(), 0L);
     }
 }

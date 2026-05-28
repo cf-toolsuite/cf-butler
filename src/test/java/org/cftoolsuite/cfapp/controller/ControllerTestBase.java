@@ -3,7 +3,9 @@ package org.cftoolsuite.cfapp.controller;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+
 
 import org.cftoolsuite.cfapp.service.TimeKeeperService;
 import org.mockito.MockitoAnnotations;
@@ -16,6 +18,8 @@ import reactor.test.StepVerifier;
 abstract class ControllerTestBase {
 
     protected static final LocalDateTime COLLECTED = LocalDateTime.of(2024, 1, 15, 10, 30, 0);
+    protected static final LocalDate TEST_START = LocalDate.of(2024, 1, 1);
+    protected static final LocalDate TEST_END = LocalDate.of(2024, 1, 31);
 
     protected TimeKeeperService tkService;
 
@@ -61,6 +65,25 @@ abstract class ControllerTestBase {
     void assertBadRequest(Mono<?> result) {
         StepVerifier.create(result)
                 .assertNext(r -> assertEquals(HttpStatus.BAD_REQUEST, ((ResponseEntity<?>) r).getStatusCode()))
+                .verifyComplete();
+    }
+
+    @SuppressWarnings("unchecked")
+    void assertAccepted(Mono<?> result) {
+        StepVerifier.create(result)
+                .assertNext(r -> assertEquals(HttpStatus.ACCEPTED, ((ResponseEntity<?>) r).getStatusCode()))
+                .verifyComplete();
+    }
+
+    @SuppressWarnings("unchecked")
+    void assertEmptyListOk(Mono<?> result) {
+        StepVerifier.create(result)
+                .assertNext(r -> {
+                    ResponseEntity<?> resp = (ResponseEntity<?>) r;
+                    assertEquals(HttpStatus.OK, resp.getStatusCode());
+                    Iterable<?> body = (Iterable<?>) resp.getBody();
+                    assertFalse(body.spliterator().tryAdvance(e -> {}));
+                })
                 .verifyComplete();
     }
 }

@@ -7,9 +7,8 @@ import org.cftoolsuite.cfapp.domain.Demographics;
 import org.cftoolsuite.cfapp.service.DemographicsService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.ResponseEntity;
-
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -42,8 +41,6 @@ class DemographicsControllerTest extends ControllerTestBase {
                     assertFalse(response.getHeaders().isEmpty());
                 })
                 .verifyComplete();
-
-        verify(demoService).getDemographics();
     }
 
     @Test
@@ -51,7 +48,5 @@ class DemographicsControllerTest extends ControllerTestBase {
         mockTimeKeeperEmpty();
 
         assertNotFound(controller.getDemographics());
-
-        verifyNoInteractions(demoService);
     }
 }

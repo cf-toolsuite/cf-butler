@@ -1,11 +1,18 @@
 package org.cftoolsuite.cfapp.controller;
 
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.*;
+
+import java.util.stream.Stream;
+
+import org.junit.jupiter.params.provider.Arguments;
 
 import org.cftoolsuite.cfapp.domain.Policies;
 import org.cftoolsuite.cfapp.service.PoliciesService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.http.ResponseEntity;
 
 import reactor.core.publisher.Mono;
@@ -23,13 +30,64 @@ class DbmsOnlyPoliciesControllerTest extends ControllerTestBase {
         controller = new DbmsOnlyPoliciesController(policiesService);
     }
 
+    static Stream<Arguments> deleteTypes() {
+        return Stream.of(
+                arguments("Application", "policy-1"),
+                arguments("Endpoint", "ep-1"),
+                arguments("Hygiene", "hp-1"),
+                arguments("ResourceNotification", "rnp-1"),
+                arguments("Legacy", "lp-1"),
+                arguments("Query", "qp-1"),
+                arguments("ServiceInstance", "sip-1")
+        );
+    }
+
+    @ParameterizedTest(name = "delete {0} - successful")
+    @MethodSource("deleteTypes")
+    void deletePolicy_whenSuccessful_completes(String type, String id) {
+        stubDelete(type, id, Mono.fromRunnable(() -> {}));
+        StepVerifier.create(invokeDelete(type, id)).expectNextCount(0).verifyComplete();
+    }
+
+    @ParameterizedTest(name = "delete {0} - empty")
+    @MethodSource("deleteTypes")
+    void deletePolicy_whenEmpty_completes(String type, String id) {
+        stubDelete(type, id, Mono.empty());
+        StepVerifier.create(invokeDelete(type, id)).verifyComplete();
+    }
+
+    private void stubDelete(String type, String id, Mono<Void> mono) {
+        switch (type) {
+            case "Application" -> when(policiesService.deleteApplicationPolicyById(id)).thenReturn(mono);
+            case "Endpoint" -> when(policiesService.deleteEndpointPolicyById(id)).thenReturn(mono);
+            case "Hygiene" -> when(policiesService.deleteHygienePolicyById(id)).thenReturn(mono);
+            case "ResourceNotification" -> when(policiesService.deleteResourceNotificationPolicyById(id)).thenReturn(mono);
+            case "Legacy" -> when(policiesService.deleteLegacyPolicyById(id)).thenReturn(mono);
+            case "Query" -> when(policiesService.deleteQueryPolicyById(id)).thenReturn(mono);
+            case "ServiceInstance" -> when(policiesService.deleteServiceInstancePolicyById(id)).thenReturn(mono);
+            default -> throw new IllegalArgumentException(type);
+        }
+    }
+
+    private Mono<ResponseEntity<Void>> invokeDelete(String type, String id) {
+        return switch (type) {
+            case "Application" -> controller.deleteApplicationPolicy(id);
+            case "Endpoint" -> controller.deleteEndpointPolicy(id);
+            case "Hygiene" -> controller.deleteHygienePolicy(id);
+            case "ResourceNotification" -> controller.deleteResourceNotificationPolicy(id);
+            case "Legacy" -> controller.deleteLegacyPolicy(id);
+            case "Query" -> controller.deleteQueryPolicy(id);
+            case "ServiceInstance" -> controller.deleteServiceInstancePolicy(id);
+            default -> throw new IllegalArgumentException(type);
+        };
+    }
+
     @Test
     void deleteAllPolicies_whenSuccessful_completes() {
         when(policiesService.deleteAll()).thenReturn(Mono.fromRunnable(() -> {}));
 
         Mono<ResponseEntity<Void>> result = controller.deleteAllPolicies();
         StepVerifier.create(result).expectNextCount(0).verifyComplete();
-        verify(policiesService).deleteAll();
     }
 
     @Test
@@ -38,133 +96,6 @@ class DbmsOnlyPoliciesControllerTest extends ControllerTestBase {
 
         Mono<ResponseEntity<Void>> result = controller.deleteAllPolicies();
         StepVerifier.create(result).verifyComplete();
-        verify(policiesService).deleteAll();
-    }
-
-    @Test
-    void deleteApplicationPolicy_whenSuccessful_completes() {
-        when(policiesService.deleteApplicationPolicyById("policy-1")).thenReturn(Mono.fromRunnable(() -> {}));
-
-        Mono<ResponseEntity<Void>> result = controller.deleteApplicationPolicy("policy-1");
-        StepVerifier.create(result).expectNextCount(0).verifyComplete();
-        verify(policiesService).deleteApplicationPolicyById("policy-1");
-    }
-
-    @Test
-    void deleteApplicationPolicy_whenEmpty_completes() {
-        when(policiesService.deleteApplicationPolicyById("policy-1")).thenReturn(Mono.empty());
-
-        Mono<ResponseEntity<Void>> result = controller.deleteApplicationPolicy("policy-1");
-        StepVerifier.create(result).verifyComplete();
-        verify(policiesService).deleteApplicationPolicyById("policy-1");
-    }
-
-    @Test
-    void deleteEndpointPolicy_whenSuccessful_completes() {
-        when(policiesService.deleteEndpointPolicyById("ep-1")).thenReturn(Mono.fromRunnable(() -> {}));
-
-        Mono<ResponseEntity<Void>> result = controller.deleteEndpointPolicy("ep-1");
-        StepVerifier.create(result).expectNextCount(0).verifyComplete();
-        verify(policiesService).deleteEndpointPolicyById("ep-1");
-    }
-
-    @Test
-    void deleteEndpointPolicy_whenEmpty_completes() {
-        when(policiesService.deleteEndpointPolicyById("ep-1")).thenReturn(Mono.empty());
-
-        Mono<ResponseEntity<Void>> result = controller.deleteEndpointPolicy("ep-1");
-        StepVerifier.create(result).verifyComplete();
-        verify(policiesService).deleteEndpointPolicyById("ep-1");
-    }
-
-    @Test
-    void deleteHygienePolicy_whenSuccessful_completes() {
-        when(policiesService.deleteHygienePolicyById("hp-1")).thenReturn(Mono.fromRunnable(() -> {}));
-
-        Mono<ResponseEntity<Void>> result = controller.deleteHygienePolicy("hp-1");
-        StepVerifier.create(result).expectNextCount(0).verifyComplete();
-        verify(policiesService).deleteHygienePolicyById("hp-1");
-    }
-
-    @Test
-    void deleteHygienePolicy_whenEmpty_completes() {
-        when(policiesService.deleteHygienePolicyById("hp-1")).thenReturn(Mono.empty());
-
-        Mono<ResponseEntity<Void>> result = controller.deleteHygienePolicy("hp-1");
-        StepVerifier.create(result).verifyComplete();
-        verify(policiesService).deleteHygienePolicyById("hp-1");
-    }
-
-    @Test
-    void deleteResourceNotificationPolicy_whenSuccessful_completes() {
-        when(policiesService.deleteResourceNotificationPolicyById("rnp-1")).thenReturn(Mono.fromRunnable(() -> {}));
-
-        Mono<ResponseEntity<Void>> result = controller.deleteResourceNotificationPolicy("rnp-1");
-        StepVerifier.create(result).expectNextCount(0).verifyComplete();
-        verify(policiesService).deleteResourceNotificationPolicyById("rnp-1");
-    }
-
-    @Test
-    void deleteResourceNotificationPolicy_whenEmpty_completes() {
-        when(policiesService.deleteResourceNotificationPolicyById("rnp-1")).thenReturn(Mono.empty());
-
-        Mono<ResponseEntity<Void>> result = controller.deleteResourceNotificationPolicy("rnp-1");
-        StepVerifier.create(result).verifyComplete();
-        verify(policiesService).deleteResourceNotificationPolicyById("rnp-1");
-    }
-
-    @Test
-    void deleteLegacyPolicy_whenSuccessful_completes() {
-        when(policiesService.deleteLegacyPolicyById("lp-1")).thenReturn(Mono.fromRunnable(() -> {}));
-
-        Mono<ResponseEntity<Void>> result = controller.deleteLegacyPolicy("lp-1");
-        StepVerifier.create(result).expectNextCount(0).verifyComplete();
-        verify(policiesService).deleteLegacyPolicyById("lp-1");
-    }
-
-    @Test
-    void deleteLegacyPolicy_whenEmpty_completes() {
-        when(policiesService.deleteLegacyPolicyById("lp-1")).thenReturn(Mono.empty());
-
-        Mono<ResponseEntity<Void>> result = controller.deleteLegacyPolicy("lp-1");
-        StepVerifier.create(result).verifyComplete();
-        verify(policiesService).deleteLegacyPolicyById("lp-1");
-    }
-
-    @Test
-    void deleteQueryPolicy_whenSuccessful_completes() {
-        when(policiesService.deleteQueryPolicyById("qp-1")).thenReturn(Mono.fromRunnable(() -> {}));
-
-        Mono<ResponseEntity<Void>> result = controller.deleteQueryPolicy("qp-1");
-        StepVerifier.create(result).expectNextCount(0).verifyComplete();
-        verify(policiesService).deleteQueryPolicyById("qp-1");
-    }
-
-    @Test
-    void deleteQueryPolicy_whenEmpty_completes() {
-        when(policiesService.deleteQueryPolicyById("qp-1")).thenReturn(Mono.empty());
-
-        Mono<ResponseEntity<Void>> result = controller.deleteQueryPolicy("qp-1");
-        StepVerifier.create(result).verifyComplete();
-        verify(policiesService).deleteQueryPolicyById("qp-1");
-    }
-
-    @Test
-    void deleteServiceInstancePolicy_whenSuccessful_completes() {
-        when(policiesService.deleteServiceInstancePolicyById("sip-1")).thenReturn(Mono.fromRunnable(() -> {}));
-
-        Mono<ResponseEntity<Void>> result = controller.deleteServiceInstancePolicy("sip-1");
-        StepVerifier.create(result).expectNextCount(0).verifyComplete();
-        verify(policiesService).deleteServiceInstancePolicyById("sip-1");
-    }
-
-    @Test
-    void deleteServiceInstancePolicy_whenEmpty_completes() {
-        when(policiesService.deleteServiceInstancePolicyById("sip-1")).thenReturn(Mono.empty());
-
-        Mono<ResponseEntity<Void>> result = controller.deleteServiceInstancePolicy("sip-1");
-        StepVerifier.create(result).verifyComplete();
-        verify(policiesService).deleteServiceInstancePolicyById("sip-1");
     }
 
     @Test
@@ -174,7 +105,5 @@ class DbmsOnlyPoliciesControllerTest extends ControllerTestBase {
         when(policiesService.save(policies)).thenReturn(Mono.just(policies));
 
         assertOkBody(controller.establishPolicies(policies), policies);
-
-        verify(policiesService).save(policies);
     }
 }

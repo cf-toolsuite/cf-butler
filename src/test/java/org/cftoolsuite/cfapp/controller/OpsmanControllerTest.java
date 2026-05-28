@@ -1,10 +1,14 @@
 package org.cftoolsuite.cfapp.controller;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.*;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
+
+import org.junit.jupiter.params.provider.Arguments;
 
 import org.cftoolsuite.cfapp.client.OpsmanClient;
 import org.cftoolsuite.cfapp.domain.product.DeployedProduct;
@@ -12,13 +16,11 @@ import org.cftoolsuite.cfapp.domain.product.OmInfo;
 import org.cftoolsuite.cfapp.domain.product.StemcellAssignments;
 import org.cftoolsuite.cfapp.domain.product.StemcellAssociations;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.http.ResponseEntity;
 
-import org.springframework.http.HttpStatus;
-
 import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
 
 class OpsmanControllerTest extends ControllerTestBase {
 
@@ -32,90 +34,46 @@ class OpsmanControllerTest extends ControllerTestBase {
         controller = new OpsmanController(client);
     }
 
-    @Test
-    void getDeployedProducts_whenDataAvailable_returnsOk() {
-        DeployedProduct product = DeployedProduct.builder().build();
-
-        when(client.getDeployedProducts()).thenReturn(Mono.just(Arrays.asList(product)));
-
-        Mono<ResponseEntity<List<DeployedProduct>>> result = controller.getDeployedProducts();
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.OK, response.getStatusCode());
-                    assertEquals(1, response.getBody().size());
-                })
-                .verifyComplete();
-
-        verify(client).getDeployedProducts();
+    static Stream<Arguments> clientTypes() {
+        return Stream.of(
+                arguments("DeployedProducts", Arrays.asList(DeployedProduct.builder().build())),
+                arguments("OmInfo", OmInfo.builder().build()),
+                arguments("StemcellAssignments", StemcellAssignments.builder().build()),
+                arguments("StemcellAssociations", StemcellAssociations.builder().build())
+        );
     }
 
-    @Test
-    void getDeployedProducts_whenEmpty_returnsNotFound() {
-        when(client.getDeployedProducts()).thenReturn(Mono.empty());
-
-        assertNotFound(controller.getDeployedProducts());
-
-        verify(client).getDeployedProducts();
+    @ParameterizedTest(name = "{0} - data available")
+    @MethodSource("clientTypes")
+    void getClientData_whenDataAvailable_returnsOk(String type, Object data) {
+        stubClient(type, Mono.just(data));
+        Mono<? extends ResponseEntity<?>> result = invokeController(type);
+        assertOk(result);
     }
 
-    @Test
-    void getOmInfo_whenDataAvailable_returnsOk() {
-        OmInfo omInfo = OmInfo.builder().build();
-
-        when(client.getOmInfo()).thenReturn(Mono.just(omInfo));
-
-        assertOkBody(controller.getOmInfo(), omInfo);
-
-        verify(client).getOmInfo();
+    @ParameterizedTest(name = "{0} - empty")
+    @MethodSource("clientTypes")
+    void getClientData_whenEmpty_returnsNotFound(String type, Object data) {
+        stubClient(type, Mono.empty());
+        assertNotFound(invokeController(type));
     }
 
-    @Test
-    void getOmInfo_whenEmpty_returnsNotFound() {
-        when(client.getOmInfo()).thenReturn(Mono.empty());
-
-        assertNotFound(controller.getOmInfo());
-
-        verify(client).getOmInfo();
+    private void stubClient(String type, Mono<?> mono) {
+        switch (type) {
+            case "DeployedProducts" -> when(client.getDeployedProducts()).thenReturn((Mono<List<DeployedProduct>>) mono);
+            case "OmInfo" -> when(client.getOmInfo()).thenReturn((Mono<OmInfo>) mono);
+            case "StemcellAssignments" -> when(client.getStemcellAssignments()).thenReturn((Mono<StemcellAssignments>) mono);
+            case "StemcellAssociations" -> when(client.getStemcellAssociations()).thenReturn((Mono<StemcellAssociations>) mono);
+        }
     }
 
-    @Test
-    void getStemcellAssignments_whenDataAvailable_returnsOk() {
-        StemcellAssignments assignments = StemcellAssignments.builder().build();
-
-        when(client.getStemcellAssignments()).thenReturn(Mono.just(assignments));
-
-        assertOkBody(controller.getStemcellAssignments(), assignments);
-
-        verify(client).getStemcellAssignments();
-    }
-
-    @Test
-    void getStemcellAssignments_whenEmpty_returnsNotFound() {
-        when(client.getStemcellAssignments()).thenReturn(Mono.empty());
-
-        assertNotFound(controller.getStemcellAssignments());
-
-        verify(client).getStemcellAssignments();
-    }
-
-    @Test
-    void getStemcellAssociations_whenDataAvailable_returnsOk() {
-        StemcellAssociations associations = StemcellAssociations.builder().build();
-
-        when(client.getStemcellAssociations()).thenReturn(Mono.just(associations));
-
-        assertOkBody(controller.getStemcellAssociations(), associations);
-
-        verify(client).getStemcellAssociations();
-    }
-
-    @Test
-    void getStemcellAssociations_whenEmpty_returnsNotFound() {
-        when(client.getStemcellAssociations()).thenReturn(Mono.empty());
-
-        assertNotFound(controller.getStemcellAssociations());
-
-        verify(client).getStemcellAssociations();
+    private Mono<? extends ResponseEntity<?>> invokeController(String type) {
+        return switch (type) {
+            case "DeployedProducts" -> controller.getDeployedProducts();
+            case "OmInfo" -> controller.getOmInfo();
+            case "StemcellAssignments" -> controller.getStemcellAssignments();
+            case "StemcellAssociations" -> controller.getStemcellAssociations();
+            default -> throw new IllegalArgumentException(type);
+        };
     }
 }

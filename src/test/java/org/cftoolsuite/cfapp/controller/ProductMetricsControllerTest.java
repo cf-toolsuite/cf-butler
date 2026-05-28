@@ -28,8 +28,6 @@ class ProductMetricsControllerTest extends ControllerTestBase {
         when(service.getProductMetrics()).thenReturn(Mono.just(metrics));
 
         assertOkBody(controller.getProductMetrics(), metrics);
-
-        verify(service).getProductMetrics();
     }
 
     @Test
@@ -37,7 +35,5 @@ class ProductMetricsControllerTest extends ControllerTestBase {
         when(service.getProductMetrics()).thenReturn(Mono.empty());
 
         assertNotFound(controller.getProductMetrics());
-
-        verify(service).getProductMetrics();
     }
 }

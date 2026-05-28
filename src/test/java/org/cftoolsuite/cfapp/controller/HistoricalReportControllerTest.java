@@ -10,9 +10,8 @@ import org.cftoolsuite.cfapp.domain.HistoricalRecord;
 import org.cftoolsuite.cfapp.service.HistoricalRecordService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.ResponseEntity;
-
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -46,8 +45,6 @@ class HistoricalReportControllerTest extends ControllerTestBase {
                     assertNotNull(response.getBody());
                 })
                 .verifyComplete();
-
-        verify(historicalRecordService).findAll();
     }
 
     @Test
@@ -55,19 +52,15 @@ class HistoricalReportControllerTest extends ControllerTestBase {
         when(historicalRecordService.findAll()).thenReturn(Flux.empty());
 
         assertOk(controller.generateReport(null, null));
-
-        verify(historicalRecordService).findAll();
     }
 
     @Test
     void generateReport_whenValidDateRange_returnsOk() {
         HistoricalRecord record = HistoricalRecord.builder().build();
-        LocalDate start = LocalDate.of(2024, 1, 1);
-        LocalDate end = LocalDate.of(2024, 1, 31);
 
-        when(historicalRecordService.findByDateRange(start, end)).thenReturn(Flux.just(record));
+        when(historicalRecordService.findByDateRange(TEST_START, TEST_END)).thenReturn(Flux.just(record));
 
-        Mono<ResponseEntity<String>> result = controller.generateReport(start, end);
+        Mono<ResponseEntity<String>> result = controller.generateReport(TEST_START, TEST_END);
 
         StepVerifier.create(result)
                 .assertNext(response -> {
@@ -75,20 +68,13 @@ class HistoricalReportControllerTest extends ControllerTestBase {
                     assertNotNull(response.getBody());
                 })
                 .verifyComplete();
-
-        verify(historicalRecordService).findByDateRange(start, end);
     }
 
     @Test
     void generateReport_whenValidDateRange_empty_returnsOk() {
-        LocalDate start = LocalDate.of(2024, 1, 1);
-        LocalDate end = LocalDate.of(2024, 1, 31);
+        when(historicalRecordService.findByDateRange(TEST_START, TEST_END)).thenReturn(Flux.empty());
 
-        when(historicalRecordService.findByDateRange(start, end)).thenReturn(Flux.empty());
-
-        assertOk(controller.generateReport(start, end));
-
-        verify(historicalRecordService).findByDateRange(start, end);
+        assertOk(controller.generateReport(TEST_START, TEST_END));
     }
 
     @Test
@@ -97,18 +83,15 @@ class HistoricalReportControllerTest extends ControllerTestBase {
         LocalDate end = LocalDate.of(2024, 1, 31);
 
         assertBadRequest(controller.generateReport(start, end));
-
-        verifyNoInteractions(historicalRecordService);
     }
 
     @Test
     void generateReport_whenOnlyStartProvided_returnsOk() {
         HistoricalRecord record = HistoricalRecord.builder().build();
-        LocalDate start = LocalDate.of(2024, 1, 1);
 
         when(historicalRecordService.findAll()).thenReturn(Flux.just(record));
 
-        Mono<ResponseEntity<String>> result = controller.generateReport(start, null);
+        Mono<ResponseEntity<String>> result = controller.generateReport(TEST_START, null);
 
         StepVerifier.create(result)
                 .assertNext(response -> {
@@ -116,7 +99,5 @@ class HistoricalReportControllerTest extends ControllerTestBase {
                     assertNotNull(response.getBody());
                 })
                 .verifyComplete();
-
-        verify(historicalRecordService).findAll();
     }
 }

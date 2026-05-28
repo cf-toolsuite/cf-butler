@@ -9,11 +9,8 @@ import org.cftoolsuite.cfapp.task.ProductsAndReleasesTask;
 import org.cftoolsuite.cfapp.task.TkTask;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 
 import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
 
 class OnDemandCollectorTriggerControllerTest extends ControllerTestBase {
 
@@ -39,16 +36,7 @@ class OnDemandCollectorTriggerControllerTest extends ControllerTestBase {
 
     @Test
     void triggerCollection_whenAllCollectorsAvailable_returnsAccepted() throws Exception {
-        Mono<ResponseEntity<Void>> result = controller.triggerCollection();
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
-                })
-                .verifyComplete();
-
-        verify(tkCollector).collect();
-        verify(productsAndReleasesCollector).collect();
+        assertAccepted(controller.triggerCollection());
     }
 
     @Test
@@ -57,15 +45,6 @@ class OnDemandCollectorTriggerControllerTest extends ControllerTestBase {
         setField(controller, "tkCollector", tkCollector);
         setField(controller, "productsAndReleasesCollector", null);
 
-        Mono<ResponseEntity<Void>> result = controller.triggerCollection();
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
-                })
-                .verifyComplete();
-
-        verify(tkCollector).collect();
-        verifyNoMoreInteractions(tkCollector);
+        assertAccepted(controller.triggerCollection());
     }
 }

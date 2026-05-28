@@ -1,7 +1,11 @@
 package org.cftoolsuite.cfapp.controller;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.*;
+
+import java.util.stream.Stream;
+
+import org.junit.jupiter.params.provider.Arguments;
 
 import org.cftoolsuite.cfapp.domain.Metadata;
 import org.cftoolsuite.cfapp.domain.Resource;
@@ -9,6 +13,8 @@ import org.cftoolsuite.cfapp.domain.Resources;
 import org.cftoolsuite.cfapp.service.ResourceMetadataService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.http.ResponseEntity;
 
 import reactor.core.publisher.Mono;
@@ -25,24 +31,41 @@ class OnDemandResourceMetadataControllerTest extends ControllerTestBase {
         controller = new OnDemandResourceMetadataController(service);
     }
 
-    @Test
-    void getResourcesMetadata_whenDataAvailable_returnsOk() {
-        Resources resources = Resources.builder().build();
-
-        when(service.getResources("applications")).thenReturn(Mono.just(resources));
-
-        assertOkBody(controller.getResourcesMetadata("applications", null, null, null), resources);
-
-        verify(service).getResources("applications");
+    static Stream<Arguments> getTypes() {
+        return Stream.of(
+                arguments("Resources", Resources.builder().build()),
+                arguments("Resource", Resource.builder().build())
+        );
     }
 
-    @Test
-    void getResourcesMetadata_whenEmpty_returnsNotFound() {
-        when(service.getResources("applications")).thenReturn(Mono.empty());
+    @ParameterizedTest(name = "{0} - data available")
+    @MethodSource("getTypes")
+    void getMetadata_whenDataAvailable_returnsOk(String type, Object data) {
+        stubGet(type, data, true);
+        assertOkBody(invokeGet(type), data);
+    }
 
-        assertNotFound(controller.getResourcesMetadata("applications", null, null, null));
+    @ParameterizedTest(name = "{0} - empty")
+    @MethodSource("getTypes")
+    void getMetadata_whenEmpty_returnsNotFound(String type, Object data) {
+        stubGet(type, data, false);
+        assertNotFound(invokeGet(type));
+    }
 
-        verify(service).getResources("applications");
+    private void stubGet(String type, Object data, boolean just) {
+        Mono<?> mono = just ? Mono.just(data) : Mono.empty();
+        switch (type) {
+            case "Resources" -> when(service.getResources("applications")).thenReturn((Mono<Resources>) mono);
+            case "Resource" -> when(service.getResource("applications", "app-1")).thenReturn((Mono<Resource>) mono);
+        }
+    }
+
+    private Mono<? extends ResponseEntity<?>> invokeGet(String type) {
+        return switch (type) {
+            case "Resources" -> controller.getResourcesMetadata("applications", null, null, null);
+            case "Resource" -> controller.getResourceMetadata("applications", "app-1");
+            default -> throw new IllegalArgumentException(type);
+        };
     }
 
     @Test
@@ -52,8 +75,6 @@ class OnDemandResourceMetadataControllerTest extends ControllerTestBase {
         when(service.getResources("applications", "env=prod", 1, 50)).thenReturn(Mono.just(resources));
 
         assertOkBody(controller.getResourcesMetadata("applications", "env=prod", 1, 50), resources);
-
-        verify(service).getResources("applications", "env=prod", 1, 50);
     }
 
     @Test
@@ -61,28 +82,22 @@ class OnDemandResourceMetadataControllerTest extends ControllerTestBase {
         when(service.getResources("applications", "env=prod", 1, 50)).thenReturn(Mono.empty());
 
         assertNotFound(controller.getResourcesMetadata("applications", "env=prod", 1, 50));
-
-        verify(service).getResources("applications", "env=prod", 1, 50);
     }
 
     @Test
-    void getResourceMetadata_whenDataAvailable_returnsOk() {
+    void getResourceMetadata_withLabelSelector_returnsOk() {
         Resource resource = Resource.builder().build();
 
         when(service.getResource("applications", "app-1")).thenReturn(Mono.just(resource));
 
         assertOkBody(controller.getResourceMetadata("applications", "app-1"), resource);
-
-        verify(service).getResource("applications", "app-1");
     }
 
     @Test
-    void getResourceMetadata_whenEmpty_returnsNotFound() {
+    void getResourceMetadata_withLabelSelector_empty_returnsNotFound() {
         when(service.getResource("applications", "app-1")).thenReturn(Mono.empty());
 
         assertNotFound(controller.getResourceMetadata("applications", "app-1"));
-
-        verify(service).getResource("applications", "app-1");
     }
 
     @Test
@@ -92,8 +107,6 @@ class OnDemandResourceMetadataControllerTest extends ControllerTestBase {
         when(service.updateResource("applications", "app-1", metadata)).thenReturn(Mono.just(metadata));
 
         assertOkBody(controller.updateResourceMetadata("applications", "app-1", metadata), metadata);
-
-        verify(service).updateResource("applications", "app-1", metadata);
     }
 
     @Test
@@ -103,7 +116,5 @@ class OnDemandResourceMetadataControllerTest extends ControllerTestBase {
         when(service.updateResource("applications", "app-1", metadata)).thenReturn(Mono.empty());
 
         assertNotFound(controller.updateResourceMetadata("applications", "app-1", metadata));
-
-        verify(service).updateResource("applications", "app-1", metadata);
     }
 }

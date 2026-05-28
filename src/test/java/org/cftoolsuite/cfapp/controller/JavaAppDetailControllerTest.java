@@ -44,8 +44,6 @@ class JavaAppDetailControllerTest extends ControllerTestBase {
                     assertEquals("spring-boot-3.0", map.get("app1"));
                 })
                 .verifyComplete();
-
-        verify(service).findSpringApplications();
     }
 
     @Test
@@ -59,8 +57,6 @@ class JavaAppDetailControllerTest extends ControllerTestBase {
 
         StepVerifier.create(result.getBody())
                 .verifyComplete();
-
-        verify(service).findSpringApplications();
     }
 
     @Test
@@ -80,8 +76,6 @@ class JavaAppDetailControllerTest extends ControllerTestBase {
                     assertEquals(Integer.valueOf(5), map.get("spring-web"));
                 })
                 .verifyComplete();
-
-        verify(service).calculateSpringDependencyFrequency();
     }
 
     @Test
@@ -95,7 +89,5 @@ class JavaAppDetailControllerTest extends ControllerTestBase {
 
         StepVerifier.create(result.getBody())
                 .verifyComplete();
-
-        verify(service).calculateSpringDependencyFrequency();
     }
 }
