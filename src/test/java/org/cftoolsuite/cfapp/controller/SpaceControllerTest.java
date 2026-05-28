@@ -3,33 +3,29 @@ package org.cftoolsuite.cfapp.controller;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.cftoolsuite.cfapp.domain.Space;
 import org.cftoolsuite.cfapp.service.SpaceService;
-import org.cftoolsuite.cfapp.service.TimeKeeperService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockitoAnnotations;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
+import org.springframework.http.HttpStatus;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-class SpaceControllerTest {
+class SpaceControllerTest extends ControllerTestBase {
 
     private SpaceService spaceService;
-    private TimeKeeperService tkService;
     private SpaceController controller;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
+        initMocks();
         spaceService = mock(SpaceService.class);
-        tkService = mock(TimeKeeperService.class);
         controller = new SpaceController(spaceService, tkService);
     }
 
@@ -37,7 +33,7 @@ class SpaceControllerTest {
     void listAllSpaces_whenDataAvailable_returnsOkWithList() {
         Space space = Space.builder().spaceId("space1").spaceName("dev").build();
 
-        when(tkService.findOne()).thenReturn(Mono.just(LocalDateTime.of(2024, 1, 15, 10, 30)));
+        mockTimeKeeper();
         when(spaceService.findAll()).thenReturn(Flux.just(space));
 
         Mono<ResponseEntity<List<Space>>> result = controller.listAllSpaces();
@@ -50,13 +46,12 @@ class SpaceControllerTest {
                 })
                 .verifyComplete();
 
-        verify(tkService).findOne();
         verify(spaceService).findAll();
     }
 
     @Test
     void listAllSpaces_whenEmpty_returnsOkWithEmptyList() {
-        when(tkService.findOne()).thenReturn(Mono.just(LocalDateTime.of(2024, 1, 15, 10, 30)));
+        mockTimeKeeper();
         when(spaceService.findAll()).thenReturn(Flux.empty());
 
         Mono<ResponseEntity<List<Space>>> result = controller.listAllSpaces();
@@ -68,23 +63,15 @@ class SpaceControllerTest {
                 })
                 .verifyComplete();
 
-        verify(tkService).findOne();
         verify(spaceService).findAll();
     }
 
     @Test
     void listAllSpaces_whenTimeKeeperEmpty_returnsNotFound() {
-        when(tkService.findOne()).thenReturn(Mono.empty());
+        mockTimeKeeperEmpty();
 
-        Mono<ResponseEntity<List<Space>>> result = controller.listAllSpaces();
+        assertNotFound(controller.listAllSpaces());
 
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-                })
-                .verifyComplete();
-
-        verify(tkService).findOne();
         verifyNoInteractions(spaceService);
     }
 
@@ -93,7 +80,7 @@ class SpaceControllerTest {
         Space space1 = Space.builder().spaceId("s1").spaceName("dev").build();
         Space space2 = Space.builder().spaceId("s2").spaceName("prod").build();
 
-        when(tkService.findOne()).thenReturn(Mono.just(LocalDateTime.of(2024, 1, 15, 10, 30)));
+        mockTimeKeeper();
         when(spaceService.findAll()).thenReturn(Flux.just(space1, space2));
 
         Mono<ResponseEntity<Long>> result = controller.spacesCount();
@@ -105,13 +92,12 @@ class SpaceControllerTest {
                 })
                 .verifyComplete();
 
-        verify(tkService).findOne();
         verify(spaceService).findAll();
     }
 
     @Test
     void spacesCount_whenEmpty_returnsOkWithZero() {
-        when(tkService.findOne()).thenReturn(Mono.just(LocalDateTime.of(2024, 1, 15, 10, 30)));
+        mockTimeKeeper();
         when(spaceService.findAll()).thenReturn(Flux.empty());
 
         Mono<ResponseEntity<Long>> result = controller.spacesCount();
@@ -123,13 +109,12 @@ class SpaceControllerTest {
                 })
                 .verifyComplete();
 
-        verify(tkService).findOne();
         verify(spaceService).findAll();
     }
 
     @Test
     void spacesCount_whenTimeKeeperEmpty_returnsOkWithZero() {
-        when(tkService.findOne()).thenReturn(Mono.empty());
+        mockTimeKeeperEmpty();
 
         Mono<ResponseEntity<Long>> result = controller.spacesCount();
 
@@ -140,7 +125,6 @@ class SpaceControllerTest {
                 })
                 .verifyComplete();
 
-        verify(tkService).findOne();
         verifyNoInteractions(spaceService);
     }
 }

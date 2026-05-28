@@ -9,21 +9,20 @@ import java.util.Map;
 import org.cftoolsuite.cfapp.service.JavaAppDetailService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockitoAnnotations;
 import org.springframework.http.ResponseEntity;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-class JavaAppDetailControllerTest {
+class JavaAppDetailControllerTest extends ControllerTestBase {
 
     private JavaAppDetailService service;
     private JavaAppDetailController controller;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
+        initMocks();
         service = mock(JavaAppDetailService.class);
         controller = new JavaAppDetailController(service);
     }

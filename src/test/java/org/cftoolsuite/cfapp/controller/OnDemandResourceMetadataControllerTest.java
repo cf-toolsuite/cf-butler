@@ -9,21 +9,18 @@ import org.cftoolsuite.cfapp.domain.Resources;
 import org.cftoolsuite.cfapp.service.ResourceMetadataService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockitoAnnotations;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
 
-class OnDemandResourceMetadataControllerTest {
+class OnDemandResourceMetadataControllerTest extends ControllerTestBase {
 
     private ResourceMetadataService service;
     private OnDemandResourceMetadataController controller;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
+        initMocks();
         service = mock(ResourceMetadataService.class);
         controller = new OnDemandResourceMetadataController(service);
     }
@@ -34,14 +31,7 @@ class OnDemandResourceMetadataControllerTest {
 
         when(service.getResources("applications")).thenReturn(Mono.just(resources));
 
-        Mono<ResponseEntity<Resources>> result = controller.getResourcesMetadata("applications", null, null, null);
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.OK, response.getStatusCode());
-                    assertEquals(resources, response.getBody());
-                })
-                .verifyComplete();
+        assertOkBody(controller.getResourcesMetadata("applications", null, null, null), resources);
 
         verify(service).getResources("applications");
     }
@@ -50,13 +40,7 @@ class OnDemandResourceMetadataControllerTest {
     void getResourcesMetadata_whenEmpty_returnsNotFound() {
         when(service.getResources("applications")).thenReturn(Mono.empty());
 
-        Mono<ResponseEntity<Resources>> result = controller.getResourcesMetadata("applications", null, null, null);
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-                })
-                .verifyComplete();
+        assertNotFound(controller.getResourcesMetadata("applications", null, null, null));
 
         verify(service).getResources("applications");
     }
@@ -67,14 +51,7 @@ class OnDemandResourceMetadataControllerTest {
 
         when(service.getResources("applications", "env=prod", 1, 50)).thenReturn(Mono.just(resources));
 
-        Mono<ResponseEntity<Resources>> result = controller.getResourcesMetadata("applications", "env=prod", 1, 50);
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.OK, response.getStatusCode());
-                    assertEquals(resources, response.getBody());
-                })
-                .verifyComplete();
+        assertOkBody(controller.getResourcesMetadata("applications", "env=prod", 1, 50), resources);
 
         verify(service).getResources("applications", "env=prod", 1, 50);
     }
@@ -83,13 +60,7 @@ class OnDemandResourceMetadataControllerTest {
     void getResourcesMetadata_withLabelSelector_empty_returnsNotFound() {
         when(service.getResources("applications", "env=prod", 1, 50)).thenReturn(Mono.empty());
 
-        Mono<ResponseEntity<Resources>> result = controller.getResourcesMetadata("applications", "env=prod", 1, 50);
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-                })
-                .verifyComplete();
+        assertNotFound(controller.getResourcesMetadata("applications", "env=prod", 1, 50));
 
         verify(service).getResources("applications", "env=prod", 1, 50);
     }
@@ -100,14 +71,7 @@ class OnDemandResourceMetadataControllerTest {
 
         when(service.getResource("applications", "app-1")).thenReturn(Mono.just(resource));
 
-        Mono<ResponseEntity<Resource>> result = controller.getResourceMetadata("applications", "app-1");
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.OK, response.getStatusCode());
-                    assertEquals(resource, response.getBody());
-                })
-                .verifyComplete();
+        assertOkBody(controller.getResourceMetadata("applications", "app-1"), resource);
 
         verify(service).getResource("applications", "app-1");
     }
@@ -116,13 +80,7 @@ class OnDemandResourceMetadataControllerTest {
     void getResourceMetadata_whenEmpty_returnsNotFound() {
         when(service.getResource("applications", "app-1")).thenReturn(Mono.empty());
 
-        Mono<ResponseEntity<Resource>> result = controller.getResourceMetadata("applications", "app-1");
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-                })
-                .verifyComplete();
+        assertNotFound(controller.getResourceMetadata("applications", "app-1"));
 
         verify(service).getResource("applications", "app-1");
     }
@@ -133,14 +91,7 @@ class OnDemandResourceMetadataControllerTest {
 
         when(service.updateResource("applications", "app-1", metadata)).thenReturn(Mono.just(metadata));
 
-        Mono<ResponseEntity<Metadata>> result = controller.updateResourceMetadata("applications", "app-1", metadata);
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.OK, response.getStatusCode());
-                    assertEquals(metadata, response.getBody());
-                })
-                .verifyComplete();
+        assertOkBody(controller.updateResourceMetadata("applications", "app-1", metadata), metadata);
 
         verify(service).updateResource("applications", "app-1", metadata);
     }
@@ -151,13 +102,7 @@ class OnDemandResourceMetadataControllerTest {
 
         when(service.updateResource("applications", "app-1", metadata)).thenReturn(Mono.empty());
 
-        Mono<ResponseEntity<Metadata>> result = controller.updateResourceMetadata("applications", "app-1", metadata);
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-                })
-                .verifyComplete();
+        assertNotFound(controller.updateResourceMetadata("applications", "app-1", metadata));
 
         verify(service).updateResource("applications", "app-1", metadata);
     }

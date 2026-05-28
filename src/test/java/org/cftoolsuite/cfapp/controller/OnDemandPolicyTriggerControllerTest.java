@@ -11,7 +11,6 @@ import org.cftoolsuite.cfapp.service.PoliciesService;
 import org.cftoolsuite.cfapp.task.PolicyExecutorTask;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +18,7 @@ import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-class OnDemandPolicyTriggerControllerTest {
+class OnDemandPolicyTriggerControllerTest extends ControllerTestBase {
 
     private BeanFactory factory;
     private PoliciesService service;
@@ -27,7 +26,7 @@ class OnDemandPolicyTriggerControllerTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
+        initMocks();
         factory = mock(BeanFactory.class);
         service = mock(PoliciesService.class);
         controller = new OnDemandPolicyTriggerController(factory, service);

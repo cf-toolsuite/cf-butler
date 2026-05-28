@@ -1,27 +1,24 @@
 package org.cftoolsuite.cfapp.controller;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import org.cftoolsuite.cfapp.domain.Policies;
 import org.cftoolsuite.cfapp.service.PoliciesService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockitoAnnotations;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-class DbmsOnlyPoliciesControllerTest {
+class DbmsOnlyPoliciesControllerTest extends ControllerTestBase {
 
     private PoliciesService policiesService;
     private DbmsOnlyPoliciesController controller;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
+        initMocks();
         policiesService = mock(PoliciesService.class);
         controller = new DbmsOnlyPoliciesController(policiesService);
     }
@@ -31,11 +28,7 @@ class DbmsOnlyPoliciesControllerTest {
         when(policiesService.deleteAll()).thenReturn(Mono.fromRunnable(() -> {}));
 
         Mono<ResponseEntity<Void>> result = controller.deleteAllPolicies();
-
-        StepVerifier.create(result)
-                .expectNextCount(0)
-                .verifyComplete();
-
+        StepVerifier.create(result).expectNextCount(0).verifyComplete();
         verify(policiesService).deleteAll();
     }
 
@@ -44,10 +37,7 @@ class DbmsOnlyPoliciesControllerTest {
         when(policiesService.deleteAll()).thenReturn(Mono.empty());
 
         Mono<ResponseEntity<Void>> result = controller.deleteAllPolicies();
-
-        StepVerifier.create(result)
-                .verifyComplete();
-
+        StepVerifier.create(result).verifyComplete();
         verify(policiesService).deleteAll();
     }
 
@@ -56,11 +46,7 @@ class DbmsOnlyPoliciesControllerTest {
         when(policiesService.deleteApplicationPolicyById("policy-1")).thenReturn(Mono.fromRunnable(() -> {}));
 
         Mono<ResponseEntity<Void>> result = controller.deleteApplicationPolicy("policy-1");
-
-        StepVerifier.create(result)
-                .expectNextCount(0)
-                .verifyComplete();
-
+        StepVerifier.create(result).expectNextCount(0).verifyComplete();
         verify(policiesService).deleteApplicationPolicyById("policy-1");
     }
 
@@ -69,10 +55,7 @@ class DbmsOnlyPoliciesControllerTest {
         when(policiesService.deleteApplicationPolicyById("policy-1")).thenReturn(Mono.empty());
 
         Mono<ResponseEntity<Void>> result = controller.deleteApplicationPolicy("policy-1");
-
-        StepVerifier.create(result)
-                .verifyComplete();
-
+        StepVerifier.create(result).verifyComplete();
         verify(policiesService).deleteApplicationPolicyById("policy-1");
     }
 
@@ -81,11 +64,7 @@ class DbmsOnlyPoliciesControllerTest {
         when(policiesService.deleteEndpointPolicyById("ep-1")).thenReturn(Mono.fromRunnable(() -> {}));
 
         Mono<ResponseEntity<Void>> result = controller.deleteEndpointPolicy("ep-1");
-
-        StepVerifier.create(result)
-                .expectNextCount(0)
-                .verifyComplete();
-
+        StepVerifier.create(result).expectNextCount(0).verifyComplete();
         verify(policiesService).deleteEndpointPolicyById("ep-1");
     }
 
@@ -94,10 +73,7 @@ class DbmsOnlyPoliciesControllerTest {
         when(policiesService.deleteEndpointPolicyById("ep-1")).thenReturn(Mono.empty());
 
         Mono<ResponseEntity<Void>> result = controller.deleteEndpointPolicy("ep-1");
-
-        StepVerifier.create(result)
-                .verifyComplete();
-
+        StepVerifier.create(result).verifyComplete();
         verify(policiesService).deleteEndpointPolicyById("ep-1");
     }
 
@@ -106,11 +82,7 @@ class DbmsOnlyPoliciesControllerTest {
         when(policiesService.deleteHygienePolicyById("hp-1")).thenReturn(Mono.fromRunnable(() -> {}));
 
         Mono<ResponseEntity<Void>> result = controller.deleteHygienePolicy("hp-1");
-
-        StepVerifier.create(result)
-                .expectNextCount(0)
-                .verifyComplete();
-
+        StepVerifier.create(result).expectNextCount(0).verifyComplete();
         verify(policiesService).deleteHygienePolicyById("hp-1");
     }
 
@@ -119,10 +91,7 @@ class DbmsOnlyPoliciesControllerTest {
         when(policiesService.deleteHygienePolicyById("hp-1")).thenReturn(Mono.empty());
 
         Mono<ResponseEntity<Void>> result = controller.deleteHygienePolicy("hp-1");
-
-        StepVerifier.create(result)
-                .verifyComplete();
-
+        StepVerifier.create(result).verifyComplete();
         verify(policiesService).deleteHygienePolicyById("hp-1");
     }
 
@@ -131,11 +100,7 @@ class DbmsOnlyPoliciesControllerTest {
         when(policiesService.deleteResourceNotificationPolicyById("rnp-1")).thenReturn(Mono.fromRunnable(() -> {}));
 
         Mono<ResponseEntity<Void>> result = controller.deleteResourceNotificationPolicy("rnp-1");
-
-        StepVerifier.create(result)
-                .expectNextCount(0)
-                .verifyComplete();
-
+        StepVerifier.create(result).expectNextCount(0).verifyComplete();
         verify(policiesService).deleteResourceNotificationPolicyById("rnp-1");
     }
 
@@ -144,10 +109,7 @@ class DbmsOnlyPoliciesControllerTest {
         when(policiesService.deleteResourceNotificationPolicyById("rnp-1")).thenReturn(Mono.empty());
 
         Mono<ResponseEntity<Void>> result = controller.deleteResourceNotificationPolicy("rnp-1");
-
-        StepVerifier.create(result)
-                .verifyComplete();
-
+        StepVerifier.create(result).verifyComplete();
         verify(policiesService).deleteResourceNotificationPolicyById("rnp-1");
     }
 
@@ -156,11 +118,7 @@ class DbmsOnlyPoliciesControllerTest {
         when(policiesService.deleteLegacyPolicyById("lp-1")).thenReturn(Mono.fromRunnable(() -> {}));
 
         Mono<ResponseEntity<Void>> result = controller.deleteLegacyPolicy("lp-1");
-
-        StepVerifier.create(result)
-                .expectNextCount(0)
-                .verifyComplete();
-
+        StepVerifier.create(result).expectNextCount(0).verifyComplete();
         verify(policiesService).deleteLegacyPolicyById("lp-1");
     }
 
@@ -169,10 +127,7 @@ class DbmsOnlyPoliciesControllerTest {
         when(policiesService.deleteLegacyPolicyById("lp-1")).thenReturn(Mono.empty());
 
         Mono<ResponseEntity<Void>> result = controller.deleteLegacyPolicy("lp-1");
-
-        StepVerifier.create(result)
-                .verifyComplete();
-
+        StepVerifier.create(result).verifyComplete();
         verify(policiesService).deleteLegacyPolicyById("lp-1");
     }
 
@@ -181,11 +136,7 @@ class DbmsOnlyPoliciesControllerTest {
         when(policiesService.deleteQueryPolicyById("qp-1")).thenReturn(Mono.fromRunnable(() -> {}));
 
         Mono<ResponseEntity<Void>> result = controller.deleteQueryPolicy("qp-1");
-
-        StepVerifier.create(result)
-                .expectNextCount(0)
-                .verifyComplete();
-
+        StepVerifier.create(result).expectNextCount(0).verifyComplete();
         verify(policiesService).deleteQueryPolicyById("qp-1");
     }
 
@@ -194,10 +145,7 @@ class DbmsOnlyPoliciesControllerTest {
         when(policiesService.deleteQueryPolicyById("qp-1")).thenReturn(Mono.empty());
 
         Mono<ResponseEntity<Void>> result = controller.deleteQueryPolicy("qp-1");
-
-        StepVerifier.create(result)
-                .verifyComplete();
-
+        StepVerifier.create(result).verifyComplete();
         verify(policiesService).deleteQueryPolicyById("qp-1");
     }
 
@@ -206,11 +154,7 @@ class DbmsOnlyPoliciesControllerTest {
         when(policiesService.deleteServiceInstancePolicyById("sip-1")).thenReturn(Mono.fromRunnable(() -> {}));
 
         Mono<ResponseEntity<Void>> result = controller.deleteServiceInstancePolicy("sip-1");
-
-        StepVerifier.create(result)
-                .expectNextCount(0)
-                .verifyComplete();
-
+        StepVerifier.create(result).expectNextCount(0).verifyComplete();
         verify(policiesService).deleteServiceInstancePolicyById("sip-1");
     }
 
@@ -219,10 +163,7 @@ class DbmsOnlyPoliciesControllerTest {
         when(policiesService.deleteServiceInstancePolicyById("sip-1")).thenReturn(Mono.empty());
 
         Mono<ResponseEntity<Void>> result = controller.deleteServiceInstancePolicy("sip-1");
-
-        StepVerifier.create(result)
-                .verifyComplete();
-
+        StepVerifier.create(result).verifyComplete();
         verify(policiesService).deleteServiceInstancePolicyById("sip-1");
     }
 
@@ -232,14 +173,7 @@ class DbmsOnlyPoliciesControllerTest {
 
         when(policiesService.save(policies)).thenReturn(Mono.just(policies));
 
-        Mono<ResponseEntity<Policies>> result = controller.establishPolicies(policies);
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.OK, response.getStatusCode());
-                    assertEquals(policies, response.getBody());
-                })
-                .verifyComplete();
+        assertOkBody(controller.establishPolicies(policies), policies);
 
         verify(policiesService).save(policies);
     }

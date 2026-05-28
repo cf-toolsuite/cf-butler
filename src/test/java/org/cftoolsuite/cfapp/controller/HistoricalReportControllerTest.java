@@ -10,22 +10,22 @@ import org.cftoolsuite.cfapp.domain.HistoricalRecord;
 import org.cftoolsuite.cfapp.service.HistoricalRecordService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockitoAnnotations;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
+import org.springframework.http.HttpStatus;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-class HistoricalReportControllerTest {
+class HistoricalReportControllerTest extends ControllerTestBase {
 
     private HistoricalRecordService historicalRecordService;
     private HistoricalReportController controller;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
+        initMocks();
         historicalRecordService = mock(HistoricalRecordService.class);
         PasSettings settings = mock(PasSettings.class);
         when(settings.getApiHost()).thenReturn("api.example.com");
@@ -54,13 +54,7 @@ class HistoricalReportControllerTest {
     void generateReport_whenNoDateRange_empty_returnsOk() {
         when(historicalRecordService.findAll()).thenReturn(Flux.empty());
 
-        Mono<ResponseEntity<String>> result = controller.generateReport(null, null);
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.OK, response.getStatusCode());
-                })
-                .verifyComplete();
+        assertOk(controller.generateReport(null, null));
 
         verify(historicalRecordService).findAll();
     }
@@ -92,13 +86,7 @@ class HistoricalReportControllerTest {
 
         when(historicalRecordService.findByDateRange(start, end)).thenReturn(Flux.empty());
 
-        Mono<ResponseEntity<String>> result = controller.generateReport(start, end);
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.OK, response.getStatusCode());
-                })
-                .verifyComplete();
+        assertOk(controller.generateReport(start, end));
 
         verify(historicalRecordService).findByDateRange(start, end);
     }
@@ -108,13 +96,7 @@ class HistoricalReportControllerTest {
         LocalDate start = LocalDate.of(2024, 2, 1);
         LocalDate end = LocalDate.of(2024, 1, 31);
 
-        Mono<ResponseEntity<String>> result = controller.generateReport(start, end);
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-                })
-                .verifyComplete();
+        assertBadRequest(controller.generateReport(start, end));
 
         verifyNoInteractions(historicalRecordService);
     }
