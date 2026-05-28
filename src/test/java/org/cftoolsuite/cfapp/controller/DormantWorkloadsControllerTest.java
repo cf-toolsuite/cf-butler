@@ -3,35 +3,30 @@ package org.cftoolsuite.cfapp.controller;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.List;
 
 import org.cftoolsuite.cfapp.domain.AppDetail;
 import org.cftoolsuite.cfapp.domain.ServiceInstanceDetail;
 import org.cftoolsuite.cfapp.domain.Workloads;
 import org.cftoolsuite.cfapp.service.DormantWorkloadsService;
-import org.cftoolsuite.cfapp.service.TimeKeeperService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockitoAnnotations;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
+import org.springframework.http.HttpStatus;
 
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-class DormantWorkloadsControllerTest {
+class DormantWorkloadsControllerTest extends ControllerTestBase {
 
     private DormantWorkloadsService service;
-    private TimeKeeperService tkService;
     private DormantWorkloadsController controller;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
+        initMocks();
         service = mock(DormantWorkloadsService.class);
-        tkService = mock(TimeKeeperService.class);
         controller = new DormantWorkloadsController(service, tkService);
     }
 
@@ -42,7 +37,7 @@ class DormantWorkloadsControllerTest {
 
         when(service.getDormantApplications(30)).thenReturn(Mono.just(Arrays.asList(app)));
         when(service.getDormantServiceInstances(30)).thenReturn(Mono.just(Arrays.asList(si)));
-        when(tkService.findOne()).thenReturn(Mono.just(LocalDateTime.of(2024, 1, 15, 10, 30)));
+        mockTimeKeeper();
 
         Mono<ResponseEntity<Workloads>> result = controller.getDormantWorkloads(30);
 
@@ -56,7 +51,6 @@ class DormantWorkloadsControllerTest {
 
         verify(service).getDormantApplications(30);
         verify(service).getDormantServiceInstances(30);
-        verify(tkService).findOne();
     }
 
     @Test
@@ -66,13 +60,7 @@ class DormantWorkloadsControllerTest {
         when(service.getDormantApplications(30)).thenReturn(Mono.just(Arrays.asList(app)));
         when(service.getDormantServiceInstances(30)).thenReturn(Mono.empty());
 
-        Mono<ResponseEntity<Workloads>> result = controller.getDormantWorkloads(30);
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-                })
-                .verifyComplete();
+        assertNotFound(controller.getDormantWorkloads(30));
 
         verify(service).getDormantApplications(30);
         verify(service).getDormantServiceInstances(30);
@@ -85,15 +73,9 @@ class DormantWorkloadsControllerTest {
 
         when(service.getDormantApplications(90)).thenReturn(Mono.just(Arrays.asList(app)));
         when(service.getDormantServiceInstances(90)).thenReturn(Mono.just(Arrays.asList(si)));
-        when(tkService.findOne()).thenReturn(Mono.just(LocalDateTime.of(2024, 1, 15, 10, 30)));
+        mockTimeKeeper();
 
-        Mono<ResponseEntity<Workloads>> result = controller.getDormantWorkloads(90);
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.OK, response.getStatusCode());
-                })
-                .verifyComplete();
+        assertOk(controller.getDormantWorkloads(90));
 
         verify(service).getDormantApplications(90);
         verify(service).getDormantServiceInstances(90);

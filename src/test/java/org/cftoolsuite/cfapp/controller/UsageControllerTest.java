@@ -12,14 +12,11 @@ import org.cftoolsuite.cfapp.service.UsageCache;
 import org.cftoolsuite.cfapp.service.UsageService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockitoAnnotations;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
 
-class UsageControllerTest {
+class UsageControllerTest extends ControllerTestBase {
 
     private UsageCache cache;
     private UsageService service;
@@ -27,7 +24,7 @@ class UsageControllerTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
+        initMocks();
         cache = mock(UsageCache.class);
         service = mock(UsageService.class);
         controller = new UsageController(cache, service);
@@ -41,14 +38,7 @@ class UsageControllerTest {
 
         when(service.getApplicationUsage("myorg", start, end)).thenReturn(Mono.just(json));
 
-        Mono<ResponseEntity<String>> result = controller.getOrganizationApplicationUsageReport("myorg", start, end);
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.OK, response.getStatusCode());
-                    assertEquals(json, response.getBody());
-                })
-                .verifyComplete();
+        assertOkBody(controller.getOrganizationApplicationUsageReport("myorg", start, end), json);
 
         verify(service).getApplicationUsage("myorg", start, end);
     }
@@ -60,13 +50,7 @@ class UsageControllerTest {
 
         when(service.getApplicationUsage("myorg", start, end)).thenReturn(Mono.empty());
 
-        Mono<ResponseEntity<String>> result = controller.getOrganizationApplicationUsageReport("myorg", start, end);
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-                })
-                .verifyComplete();
+        assertNotFound(controller.getOrganizationApplicationUsageReport("myorg", start, end));
 
         verify(service).getApplicationUsage("myorg", start, end);
     }
@@ -79,14 +63,7 @@ class UsageControllerTest {
 
         when(service.getServiceUsage("myorg", start, end)).thenReturn(Mono.just(json));
 
-        Mono<ResponseEntity<String>> result = controller.getOrganizationServiceUsageReport("myorg", start, end);
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.OK, response.getStatusCode());
-                    assertEquals(json, response.getBody());
-                })
-                .verifyComplete();
+        assertOkBody(controller.getOrganizationServiceUsageReport("myorg", start, end), json);
 
         verify(service).getServiceUsage("myorg", start, end);
     }
@@ -98,13 +75,7 @@ class UsageControllerTest {
 
         when(service.getServiceUsage("myorg", start, end)).thenReturn(Mono.empty());
 
-        Mono<ResponseEntity<String>> result = controller.getOrganizationServiceUsageReport("myorg", start, end);
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-                })
-                .verifyComplete();
+        assertNotFound(controller.getOrganizationServiceUsageReport("myorg", start, end));
 
         verify(service).getServiceUsage("myorg", start, end);
     }
@@ -117,14 +88,7 @@ class UsageControllerTest {
 
         when(service.getTaskUsage("myorg", start, end)).thenReturn(Mono.just(json));
 
-        Mono<ResponseEntity<String>> result = controller.getOrganizationTaskUsageReport("myorg", start, end);
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.OK, response.getStatusCode());
-                    assertEquals(json, response.getBody());
-                })
-                .verifyComplete();
+        assertOkBody(controller.getOrganizationTaskUsageReport("myorg", start, end), json);
 
         verify(service).getTaskUsage("myorg", start, end);
     }
@@ -136,13 +100,7 @@ class UsageControllerTest {
 
         when(service.getTaskUsage("myorg", start, end)).thenReturn(Mono.empty());
 
-        Mono<ResponseEntity<String>> result = controller.getOrganizationTaskUsageReport("myorg", start, end);
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-                })
-                .verifyComplete();
+        assertNotFound(controller.getOrganizationTaskUsageReport("myorg", start, end));
 
         verify(service).getTaskUsage("myorg", start, end);
     }
@@ -153,14 +111,7 @@ class UsageControllerTest {
 
         when(cache.getApplicationReport()).thenReturn(report);
 
-        Mono<ResponseEntity<AppUsageReport>> result = controller.getSystemWideApplicationUsageReport();
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.OK, response.getStatusCode());
-                    assertEquals(report, response.getBody());
-                })
-                .verifyComplete();
+        assertOkBody(controller.getSystemWideApplicationUsageReport(), report);
 
         verify(cache).getApplicationReport();
     }
@@ -169,13 +120,7 @@ class UsageControllerTest {
     void getSystemWideApplicationUsageReport_whenEmpty_returnsNotFound() {
         when(cache.getApplicationReport()).thenReturn(null);
 
-        Mono<ResponseEntity<AppUsageReport>> result = controller.getSystemWideApplicationUsageReport();
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-                })
-                .verifyComplete();
+        assertNotFound(controller.getSystemWideApplicationUsageReport());
 
         verify(cache).getApplicationReport();
     }
@@ -186,14 +131,7 @@ class UsageControllerTest {
 
         when(cache.getServiceReport()).thenReturn(report);
 
-        Mono<ResponseEntity<ServiceUsageReport>> result = controller.getSystemWideServiceUsageReport();
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.OK, response.getStatusCode());
-                    assertEquals(report, response.getBody());
-                })
-                .verifyComplete();
+        assertOkBody(controller.getSystemWideServiceUsageReport(), report);
 
         verify(cache).getServiceReport();
     }
@@ -202,13 +140,7 @@ class UsageControllerTest {
     void getSystemWideServiceUsageReport_whenEmpty_returnsNotFound() {
         when(cache.getServiceReport()).thenReturn(null);
 
-        Mono<ResponseEntity<ServiceUsageReport>> result = controller.getSystemWideServiceUsageReport();
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-                })
-                .verifyComplete();
+        assertNotFound(controller.getSystemWideServiceUsageReport());
 
         verify(cache).getServiceReport();
     }
@@ -219,14 +151,7 @@ class UsageControllerTest {
 
         when(cache.getTaskReport()).thenReturn(report);
 
-        Mono<ResponseEntity<TaskUsageReport>> result = controller.getSystemWideTaskUsageReport();
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.OK, response.getStatusCode());
-                    assertEquals(report, response.getBody());
-                })
-                .verifyComplete();
+        assertOkBody(controller.getSystemWideTaskUsageReport(), report);
 
         verify(cache).getTaskReport();
     }
@@ -235,13 +160,7 @@ class UsageControllerTest {
     void getSystemWideTaskUsageReport_whenEmpty_returnsNotFound() {
         when(cache.getTaskReport()).thenReturn(null);
 
-        Mono<ResponseEntity<TaskUsageReport>> result = controller.getSystemWideTaskUsageReport();
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-                })
-                .verifyComplete();
+        assertNotFound(controller.getSystemWideTaskUsageReport());
 
         verify(cache).getTaskReport();
     }

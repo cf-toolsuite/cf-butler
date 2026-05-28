@@ -8,14 +8,13 @@ import org.cftoolsuite.cfapp.service.PoliciesService;
 import org.cftoolsuite.cfapp.task.PoliciesLoader;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-class PoliciesControllerTest {
+class PoliciesControllerTest extends ControllerTestBase {
 
     private PoliciesService policiesService;
     private PoliciesLoader policiesLoader;
@@ -23,7 +22,7 @@ class PoliciesControllerTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
+        initMocks();
         policiesService = mock(PoliciesService.class);
         policiesLoader = mock(PoliciesLoader.class);
         controller = new PoliciesController(policiesService, policiesLoader);
@@ -35,14 +34,7 @@ class PoliciesControllerTest {
 
         when(policiesService.findAll()).thenReturn(Mono.just(policies));
 
-        Mono<ResponseEntity<Policies>> result = controller.listAllPolicies();
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.OK, response.getStatusCode());
-                    assertEquals(policies, response.getBody());
-                })
-                .verifyComplete();
+        assertOkBody(controller.listAllPolicies(), policies);
 
         verify(policiesService).findAll();
     }
@@ -51,13 +43,7 @@ class PoliciesControllerTest {
     void listAllPolicies_whenEmpty_returnsNotFound() {
         when(policiesService.findAll()).thenReturn(Mono.empty());
 
-        Mono<ResponseEntity<Policies>> result = controller.listAllPolicies();
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-                })
-                .verifyComplete();
+        assertNotFound(controller.listAllPolicies());
 
         verify(policiesService).findAll();
     }
@@ -68,14 +54,7 @@ class PoliciesControllerTest {
 
         when(policiesService.findApplicationPolicyById("policy-1")).thenReturn(Mono.just(policies));
 
-        Mono<ResponseEntity<Policies>> result = controller.obtainApplicationPolicy("policy-1");
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.OK, response.getStatusCode());
-                    assertEquals(policies, response.getBody());
-                })
-                .verifyComplete();
+        assertOkBody(controller.obtainApplicationPolicy("policy-1"), policies);
 
         verify(policiesService).findApplicationPolicyById("policy-1");
     }
@@ -84,13 +63,7 @@ class PoliciesControllerTest {
     void obtainApplicationPolicy_whenEmpty_returnsNotFound() {
         when(policiesService.findApplicationPolicyById("policy-1")).thenReturn(Mono.empty());
 
-        Mono<ResponseEntity<Policies>> result = controller.obtainApplicationPolicy("policy-1");
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-                })
-                .verifyComplete();
+        assertNotFound(controller.obtainApplicationPolicy("policy-1"));
 
         verify(policiesService).findApplicationPolicyById("policy-1");
     }
@@ -101,14 +74,7 @@ class PoliciesControllerTest {
 
         when(policiesService.findEndpointPolicyById("ep-1")).thenReturn(Mono.just(policies));
 
-        Mono<ResponseEntity<Policies>> result = controller.obtainEndpointPolicy("ep-1");
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.OK, response.getStatusCode());
-                    assertEquals(policies, response.getBody());
-                })
-                .verifyComplete();
+        assertOkBody(controller.obtainEndpointPolicy("ep-1"), policies);
 
         verify(policiesService).findEndpointPolicyById("ep-1");
     }
@@ -117,13 +83,7 @@ class PoliciesControllerTest {
     void obtainEndpointPolicy_whenEmpty_returnsNotFound() {
         when(policiesService.findEndpointPolicyById("ep-1")).thenReturn(Mono.empty());
 
-        Mono<ResponseEntity<Policies>> result = controller.obtainEndpointPolicy("ep-1");
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-                })
-                .verifyComplete();
+        assertNotFound(controller.obtainEndpointPolicy("ep-1"));
 
         verify(policiesService).findEndpointPolicyById("ep-1");
     }
@@ -134,14 +94,7 @@ class PoliciesControllerTest {
 
         when(policiesService.findHygienePolicyById("hp-1")).thenReturn(Mono.just(policies));
 
-        Mono<ResponseEntity<Policies>> result = controller.obtainHygienePolicy("hp-1");
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.OK, response.getStatusCode());
-                    assertEquals(policies, response.getBody());
-                })
-                .verifyComplete();
+        assertOkBody(controller.obtainHygienePolicy("hp-1"), policies);
 
         verify(policiesService).findHygienePolicyById("hp-1");
     }
@@ -150,13 +103,7 @@ class PoliciesControllerTest {
     void obtainHygienePolicy_whenEmpty_returnsNotFound() {
         when(policiesService.findHygienePolicyById("hp-1")).thenReturn(Mono.empty());
 
-        Mono<ResponseEntity<Policies>> result = controller.obtainHygienePolicy("hp-1");
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-                })
-                .verifyComplete();
+        assertNotFound(controller.obtainHygienePolicy("hp-1"));
 
         verify(policiesService).findHygienePolicyById("hp-1");
     }
@@ -167,14 +114,7 @@ class PoliciesControllerTest {
 
         when(policiesService.findLegacyPolicyById("lp-1")).thenReturn(Mono.just(policies));
 
-        Mono<ResponseEntity<Policies>> result = controller.obtainLegacyPolicy("lp-1");
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.OK, response.getStatusCode());
-                    assertEquals(policies, response.getBody());
-                })
-                .verifyComplete();
+        assertOkBody(controller.obtainLegacyPolicy("lp-1"), policies);
 
         verify(policiesService).findLegacyPolicyById("lp-1");
     }
@@ -183,13 +123,7 @@ class PoliciesControllerTest {
     void obtainLegacyPolicy_whenEmpty_returnsNotFound() {
         when(policiesService.findLegacyPolicyById("lp-1")).thenReturn(Mono.empty());
 
-        Mono<ResponseEntity<Policies>> result = controller.obtainLegacyPolicy("lp-1");
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-                })
-                .verifyComplete();
+        assertNotFound(controller.obtainLegacyPolicy("lp-1"));
 
         verify(policiesService).findLegacyPolicyById("lp-1");
     }
@@ -200,14 +134,7 @@ class PoliciesControllerTest {
 
         when(policiesService.findQueryPolicyById("qp-1")).thenReturn(Mono.just(policies));
 
-        Mono<ResponseEntity<Policies>> result = controller.obtainQueryPolicy("qp-1");
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.OK, response.getStatusCode());
-                    assertEquals(policies, response.getBody());
-                })
-                .verifyComplete();
+        assertOkBody(controller.obtainQueryPolicy("qp-1"), policies);
 
         verify(policiesService).findQueryPolicyById("qp-1");
     }
@@ -216,13 +143,7 @@ class PoliciesControllerTest {
     void obtainQueryPolicy_whenEmpty_returnsNotFound() {
         when(policiesService.findQueryPolicyById("qp-1")).thenReturn(Mono.empty());
 
-        Mono<ResponseEntity<Policies>> result = controller.obtainQueryPolicy("qp-1");
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-                })
-                .verifyComplete();
+        assertNotFound(controller.obtainQueryPolicy("qp-1"));
 
         verify(policiesService).findQueryPolicyById("qp-1");
     }
@@ -233,14 +154,7 @@ class PoliciesControllerTest {
 
         when(policiesService.findServiceInstancePolicyById("sip-1")).thenReturn(Mono.just(policies));
 
-        Mono<ResponseEntity<Policies>> result = controller.obtainServiceInstancePolicy("sip-1");
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.OK, response.getStatusCode());
-                    assertEquals(policies, response.getBody());
-                })
-                .verifyComplete();
+        assertOkBody(controller.obtainServiceInstancePolicy("sip-1"), policies);
 
         verify(policiesService).findServiceInstancePolicyById("sip-1");
     }
@@ -249,13 +163,7 @@ class PoliciesControllerTest {
     void obtainServiceInstancePolicy_whenEmpty_returnsNotFound() {
         when(policiesService.findServiceInstancePolicyById("sip-1")).thenReturn(Mono.empty());
 
-        Mono<ResponseEntity<Policies>> result = controller.obtainServiceInstancePolicy("sip-1");
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-                })
-                .verifyComplete();
+        assertNotFound(controller.obtainServiceInstancePolicy("sip-1"));
 
         verify(policiesService).findServiceInstancePolicyById("sip-1");
     }
@@ -277,12 +185,6 @@ class PoliciesControllerTest {
     void refreshPolicies_whenLoaderNull_returnsNotFound() {
         controller = new PoliciesController(policiesService, null);
 
-        Mono<ResponseEntity<Void>> result = controller.refreshPolicies();
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-                })
-                .verifyComplete();
+        assertNotFound(controller.refreshPolicies());
     }
 }

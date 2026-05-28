@@ -3,15 +3,12 @@ package org.cftoolsuite.cfapp.controller;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.cftoolsuite.cfapp.domain.Organization;
 import org.cftoolsuite.cfapp.service.OrganizationService;
-import org.cftoolsuite.cfapp.service.TimeKeeperService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -19,17 +16,15 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-class OrganizationControllerTest {
+class OrganizationControllerTest extends ControllerTestBase {
 
     private OrganizationService organizationService;
-    private TimeKeeperService tkService;
     private OrganizationController controller;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
+        initMocks();
         organizationService = mock(OrganizationService.class);
-        tkService = mock(TimeKeeperService.class);
         controller = new OrganizationController(organizationService, tkService);
     }
 
@@ -37,7 +32,7 @@ class OrganizationControllerTest {
     void listAllOrganizations_whenDataAvailable_returnsOkWithList() {
         Organization org = new Organization("org1", "my-org");
 
-        when(tkService.findOne()).thenReturn(Mono.just(LocalDateTime.of(2024, 1, 15, 10, 30)));
+        mockTimeKeeper();
         when(organizationService.findAll()).thenReturn(Flux.just(org));
 
         Mono<ResponseEntity<List<Organization>>> result = controller.listAllOrganizations();
@@ -50,13 +45,12 @@ class OrganizationControllerTest {
                 })
                 .verifyComplete();
 
-        verify(tkService).findOne();
         verify(organizationService).findAll();
     }
 
     @Test
     void listAllOrganizations_whenEmpty_returnsOkWithEmptyList() {
-        when(tkService.findOne()).thenReturn(Mono.just(LocalDateTime.of(2024, 1, 15, 10, 30)));
+        mockTimeKeeper();
         when(organizationService.findAll()).thenReturn(Flux.empty());
 
         Mono<ResponseEntity<List<Organization>>> result = controller.listAllOrganizations();
@@ -68,23 +62,15 @@ class OrganizationControllerTest {
                 })
                 .verifyComplete();
 
-        verify(tkService).findOne();
         verify(organizationService).findAll();
     }
 
     @Test
     void listAllOrganizations_whenTimeKeeperEmpty_returnsNotFound() {
-        when(tkService.findOne()).thenReturn(Mono.empty());
+        mockTimeKeeperEmpty();
 
-        Mono<ResponseEntity<List<Organization>>> result = controller.listAllOrganizations();
+        assertNotFound(controller.listAllOrganizations());
 
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-                })
-                .verifyComplete();
-
-        verify(tkService).findOne();
         verifyNoInteractions(organizationService);
     }
 
@@ -93,7 +79,7 @@ class OrganizationControllerTest {
         Organization org1 = new Organization("org1", "org1");
         Organization org2 = new Organization("org2", "org2");
 
-        when(tkService.findOne()).thenReturn(Mono.just(LocalDateTime.of(2024, 1, 15, 10, 30)));
+        mockTimeKeeper();
         when(organizationService.findAll()).thenReturn(Flux.just(org1, org2));
 
         Mono<ResponseEntity<Long>> result = controller.organizationsCount();
@@ -105,13 +91,12 @@ class OrganizationControllerTest {
                 })
                 .verifyComplete();
 
-        verify(tkService).findOne();
         verify(organizationService).findAll();
     }
 
     @Test
     void organizationsCount_whenEmpty_returnsOkWithZero() {
-        when(tkService.findOne()).thenReturn(Mono.just(LocalDateTime.of(2024, 1, 15, 10, 30)));
+        mockTimeKeeper();
         when(organizationService.findAll()).thenReturn(Flux.empty());
 
         Mono<ResponseEntity<Long>> result = controller.organizationsCount();
@@ -123,13 +108,12 @@ class OrganizationControllerTest {
                 })
                 .verifyComplete();
 
-        verify(tkService).findOne();
         verify(organizationService).findAll();
     }
 
     @Test
     void organizationsCount_whenTimeKeeperEmpty_returnsOkWithZero() {
-        when(tkService.findOne()).thenReturn(Mono.empty());
+        mockTimeKeeperEmpty();
 
         Mono<ResponseEntity<Long>> result = controller.organizationsCount();
 
@@ -140,7 +124,6 @@ class OrganizationControllerTest {
                 })
                 .verifyComplete();
 
-        verify(tkService).findOne();
         verifyNoInteractions(organizationService);
     }
 }

@@ -3,7 +3,6 @@ package org.cftoolsuite.cfapp.controller;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.cftoolsuite.cfapp.domain.Event;
@@ -11,22 +10,22 @@ import org.cftoolsuite.cfapp.domain.event.Events;
 import org.cftoolsuite.cfapp.service.EventsService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockitoAnnotations;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
+import org.springframework.http.HttpStatus;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-class OnDemandEventsControllerTest {
+class OnDemandEventsControllerTest extends ControllerTestBase {
 
     private EventsService service;
     private OnDemandEventsController controller;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
+        initMocks();
         service = mock(EventsService.class);
         controller = new OnDemandEventsController(service);
     }

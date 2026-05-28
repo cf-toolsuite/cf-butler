@@ -9,14 +9,13 @@ import org.cftoolsuite.cfapp.task.ProductsAndReleasesTask;
 import org.cftoolsuite.cfapp.task.TkTask;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-class OnDemandCollectorTriggerControllerTest {
+class OnDemandCollectorTriggerControllerTest extends ControllerTestBase {
 
     private TkTask tkCollector;
     private ProductsAndReleasesTask productsAndReleasesCollector;
@@ -24,7 +23,7 @@ class OnDemandCollectorTriggerControllerTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        MockitoAnnotations.openMocks(this);
+        initMocks();
         tkCollector = mock(TkTask.class);
         productsAndReleasesCollector = mock(ProductsAndReleasesTask.class);
         controller = new OnDemandCollectorTriggerController();

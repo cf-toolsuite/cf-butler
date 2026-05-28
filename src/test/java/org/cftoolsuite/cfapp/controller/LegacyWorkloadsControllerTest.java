@@ -3,36 +3,31 @@ package org.cftoolsuite.cfapp.controller;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.List;
 
 import org.cftoolsuite.cfapp.domain.AppDetail;
 import org.cftoolsuite.cfapp.domain.AppRelationship;
 import org.cftoolsuite.cfapp.domain.Workloads;
 import org.cftoolsuite.cfapp.domain.WorkloadsFilter;
 import org.cftoolsuite.cfapp.service.LegacyWorkloadsService;
-import org.cftoolsuite.cfapp.service.TimeKeeperService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockitoAnnotations;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
+import org.springframework.http.HttpStatus;
 
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-class LegacyWorkloadsControllerTest {
+class LegacyWorkloadsControllerTest extends ControllerTestBase {
 
     private LegacyWorkloadsService service;
-    private TimeKeeperService tkService;
     private LegacyWorkloadsController controller;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
+        initMocks();
         service = mock(LegacyWorkloadsService.class);
-        tkService = mock(TimeKeeperService.class);
         controller = new LegacyWorkloadsController(service, tkService);
     }
 
@@ -47,7 +42,7 @@ class LegacyWorkloadsControllerTest {
                 .thenReturn(Mono.just(Arrays.asList(app)));
         when(service.getLegacyApplicationRelationships(any(WorkloadsFilter.class)))
                 .thenReturn(Mono.just(Arrays.asList(rel)));
-        when(tkService.findOne()).thenReturn(Mono.just(LocalDateTime.of(2024, 1, 15, 10, 30)));
+        mockTimeKeeper();
 
         Mono<ResponseEntity<Workloads>> result = controller.getLegacyWorkloads("", "");
 
@@ -60,7 +55,6 @@ class LegacyWorkloadsControllerTest {
 
         verify(service).getLegacyApplications(any(WorkloadsFilter.class));
         verify(service).getLegacyApplicationRelationships(any(WorkloadsFilter.class));
-        verify(tkService).findOne();
     }
 
     @Test
@@ -70,13 +64,7 @@ class LegacyWorkloadsControllerTest {
         when(service.getLegacyApplicationRelationships(any(WorkloadsFilter.class)))
                 .thenReturn(Mono.empty());
 
-        Mono<ResponseEntity<Workloads>> result = controller.getLegacyWorkloads("", "");
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-                })
-                .verifyComplete();
+        assertNotFound(controller.getLegacyWorkloads("", ""));
 
         verify(service).getLegacyApplications(any(WorkloadsFilter.class));
         verify(service).getLegacyApplicationRelationships(any(WorkloadsFilter.class));
@@ -91,15 +79,9 @@ class LegacyWorkloadsControllerTest {
                 .thenReturn(Mono.just(Arrays.asList(app)));
         when(service.getLegacyApplicationRelationships(any(WorkloadsFilter.class)))
                 .thenReturn(Mono.just(Arrays.asList(rel)));
-        when(tkService.findOne()).thenReturn(Mono.just(LocalDateTime.of(2024, 1, 15, 10, 30)));
+        mockTimeKeeper();
 
-        Mono<ResponseEntity<Workloads>> result = controller.getLegacyWorkloads("cflinuxfs2", "");
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.OK, response.getStatusCode());
-                })
-                .verifyComplete();
+        assertOk(controller.getLegacyWorkloads("cflinuxfs2", ""));
     }
 
     @Test
@@ -111,14 +93,8 @@ class LegacyWorkloadsControllerTest {
                 .thenReturn(Mono.just(Arrays.asList(app)));
         when(service.getLegacyApplicationRelationships(any(WorkloadsFilter.class)))
                 .thenReturn(Mono.just(Arrays.asList(rel)));
-        when(tkService.findOne()).thenReturn(Mono.just(LocalDateTime.of(2024, 1, 15, 10, 30)));
+        mockTimeKeeper();
 
-        Mono<ResponseEntity<Workloads>> result = controller.getLegacyWorkloads("", "mysql,redis");
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.OK, response.getStatusCode());
-                })
-                .verifyComplete();
+        assertOk(controller.getLegacyWorkloads("", "mysql,redis"));
     }
 }

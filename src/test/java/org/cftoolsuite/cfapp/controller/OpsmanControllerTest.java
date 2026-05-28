@@ -13,21 +13,21 @@ import org.cftoolsuite.cfapp.domain.product.StemcellAssignments;
 import org.cftoolsuite.cfapp.domain.product.StemcellAssociations;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockitoAnnotations;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
+import org.springframework.http.HttpStatus;
 
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-class OpsmanControllerTest {
+class OpsmanControllerTest extends ControllerTestBase {
 
     private OpsmanClient client;
     private OpsmanController controller;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
+        initMocks();
         client = mock(OpsmanClient.class);
         controller = new OpsmanController(client);
     }
@@ -54,13 +54,7 @@ class OpsmanControllerTest {
     void getDeployedProducts_whenEmpty_returnsNotFound() {
         when(client.getDeployedProducts()).thenReturn(Mono.empty());
 
-        Mono<ResponseEntity<List<DeployedProduct>>> result = controller.getDeployedProducts();
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-                })
-                .verifyComplete();
+        assertNotFound(controller.getDeployedProducts());
 
         verify(client).getDeployedProducts();
     }
@@ -71,14 +65,7 @@ class OpsmanControllerTest {
 
         when(client.getOmInfo()).thenReturn(Mono.just(omInfo));
 
-        Mono<ResponseEntity<OmInfo>> result = controller.getOmInfo();
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.OK, response.getStatusCode());
-                    assertEquals(omInfo, response.getBody());
-                })
-                .verifyComplete();
+        assertOkBody(controller.getOmInfo(), omInfo);
 
         verify(client).getOmInfo();
     }
@@ -87,13 +74,7 @@ class OpsmanControllerTest {
     void getOmInfo_whenEmpty_returnsNotFound() {
         when(client.getOmInfo()).thenReturn(Mono.empty());
 
-        Mono<ResponseEntity<OmInfo>> result = controller.getOmInfo();
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-                })
-                .verifyComplete();
+        assertNotFound(controller.getOmInfo());
 
         verify(client).getOmInfo();
     }
@@ -104,14 +85,7 @@ class OpsmanControllerTest {
 
         when(client.getStemcellAssignments()).thenReturn(Mono.just(assignments));
 
-        Mono<ResponseEntity<StemcellAssignments>> result = controller.getStemcellAssignments();
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.OK, response.getStatusCode());
-                    assertEquals(assignments, response.getBody());
-                })
-                .verifyComplete();
+        assertOkBody(controller.getStemcellAssignments(), assignments);
 
         verify(client).getStemcellAssignments();
     }
@@ -120,13 +94,7 @@ class OpsmanControllerTest {
     void getStemcellAssignments_whenEmpty_returnsNotFound() {
         when(client.getStemcellAssignments()).thenReturn(Mono.empty());
 
-        Mono<ResponseEntity<StemcellAssignments>> result = controller.getStemcellAssignments();
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-                })
-                .verifyComplete();
+        assertNotFound(controller.getStemcellAssignments());
 
         verify(client).getStemcellAssignments();
     }
@@ -137,14 +105,7 @@ class OpsmanControllerTest {
 
         when(client.getStemcellAssociations()).thenReturn(Mono.just(associations));
 
-        Mono<ResponseEntity<StemcellAssociations>> result = controller.getStemcellAssociations();
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.OK, response.getStatusCode());
-                    assertEquals(associations, response.getBody());
-                })
-                .verifyComplete();
+        assertOkBody(controller.getStemcellAssociations(), associations);
 
         verify(client).getStemcellAssociations();
     }
@@ -153,13 +114,7 @@ class OpsmanControllerTest {
     void getStemcellAssociations_whenEmpty_returnsNotFound() {
         when(client.getStemcellAssociations()).thenReturn(Mono.empty());
 
-        Mono<ResponseEntity<StemcellAssociations>> result = controller.getStemcellAssociations();
-
-        StepVerifier.create(result)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-                })
-                .verifyComplete();
+        assertNotFound(controller.getStemcellAssociations());
 
         verify(client).getStemcellAssociations();
     }
