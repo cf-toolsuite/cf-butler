@@ -55,7 +55,7 @@ jobs:
       uses: actions/setup-java@v5
       with:
         distribution: liberica
-        java-version: 25
+        java-version: 21
 
     - name: Cache local Maven repository
       uses: actions/cache@v5
