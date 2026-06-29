@@ -39,7 +39,7 @@ public class AppDetailReadyToBeCollectedDecider {
     }
 
     public void setSpaces(List<Space> spaces) {
-        this.spaces = spaces;
+        this.spaces = new ArrayList<>(spaces);
     }
 
 }
