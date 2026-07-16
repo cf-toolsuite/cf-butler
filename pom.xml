@@ -189,6 +189,17 @@
       <groupId>org.cloudfoundry</groupId>
       <artifactId>cloudfoundry-client-reactor</artifactId>
       <version>5.17.0.RELEASE</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.squareup.wire</groupId>
+          <artifactId>wire-runtime-jvm</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>com.squareup.wire</groupId>
+      <artifactId>wire-runtime</artifactId>
+      <version>6.4.5</version>
     </dependency>
     <dependency>
       <groupId>org.cloudfoundry</groupId>
@@ -265,6 +276,11 @@
         <groupId>com.squareup.wire</groupId>
         <artifactId>wire-runtime</artifactId>
         <version>6.4.5</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>2.21.5</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
