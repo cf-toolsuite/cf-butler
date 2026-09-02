@@ -34,3 +34,11 @@ jobs:
         run: ./mvnw --batch-mode --update-snapshots -Drdbms=mysql -Plog4j2 clean verify
       - name: Build with Maven targeting Postgresql backend
         run: ./mvnw --batch-mode --update-snapshots -Drdbms=postgres -Plog4j2 clean verify
+  merge-ready:
+    name: Merge Ready
+    runs-on: ubuntu-latest
+    needs: [build]
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Confirm required CI jobs passed
+        run: echo "Required CI jobs passed."
