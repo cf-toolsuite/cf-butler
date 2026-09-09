@@ -114,16 +114,21 @@ jobs:
           HAS_DEDICATED_TOKEN: ${{ secrets.AUTOMERGE_GH_TOKEN != '' }}
           REPO: ${{ github.repository }}
         run: |
-          mapfile -t prs < <(gh pr list --repo "$REPO" --author "app/dependabot" \
-            --json number,isDraft,mergeStateStatus \
-            --jq '.[] | select(.isDraft == false and .mergeStateStatus == "CLEAN") | .number')
+          # List every open PR and let the shared gate script decide eligibility.
+          # Capture both stdout and exit status so a listing failure is visible
+          # (a failed `gh pr list` inside a pipeline is otherwise silently swallowed).
+          pr_list="$(gh pr list --repo "$REPO" --state open \
+            --json number --jq '.[].number' 2>&1)" || {
+              echo "Failed to list open PRs: $pr_list" >&2
+              exit 1
+            }
 
-          if [ "${#prs[@]}" -eq 0 ]; then
-            echo "No mergeable open Dependabot PRs to sweep."
+          if [ -z "$pr_list" ]; then
+            echo "No open PRs to sweep."
             exit 0
           fi
 
-          for pr in "${prs[@]}"; do
+          for pr in $pr_list; do
             result=$(bash .github/scripts/dependabot-automerge-check.sh "$REPO" "$pr")
             echo "PR #$pr gate=$result"
 
