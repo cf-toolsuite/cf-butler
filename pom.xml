@@ -204,7 +204,7 @@
     <dependency>
       <groupId>org.cloudfoundry</groupId>
       <artifactId>cloudfoundry-operations</artifactId>
-      <version>5.17.0.RELEASE</version>
+      <version>5.18.0.RELEASE</version>
     </dependency>
     <dependency>
       <groupId>io.micrometer</groupId>
