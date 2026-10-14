@@ -188,7 +188,7 @@
     <dependency>
       <groupId>org.cloudfoundry</groupId>
       <artifactId>cloudfoundry-client-reactor</artifactId>
-      <version>5.17.0.RELEASE</version>
+      <version>5.18.0.RELEASE</version>
       <exclusions>
         <exclusion>
           <groupId>com.squareup.wire</groupId>
